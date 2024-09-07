@@ -3,12 +3,12 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 interface LoginFormData {
-  usernmae: string;
+  username: string;
   password: string;
 }
 
 const Login: React.FC = () => {
-  const [formData, setFormData] = useState<LoginFormData>({ usernmae: '', password: '' });
+  const [formData, setFormData] = useState<LoginFormData>({ username: '', password: '' });
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
 
@@ -29,7 +29,7 @@ const Login: React.FC = () => {
 
       localStorage.setItem('token', token);
 
-      navigate('/');
+      navigate('/home');
     } catch (error) {
       setErrorMessage('Invalid email or password');
     }
@@ -51,12 +51,12 @@ const Login: React.FC = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700">Username:</label>
+            <label htmlFor="username" className="block text-gray-700">Username:</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.usernmae}
+              type="username"
+              id="username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
               required
