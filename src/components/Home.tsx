@@ -12,8 +12,8 @@ import {
   Legend,
 } from 'chart.js';
 import { useNavigate } from 'react-router-dom';
+import { ShoppingBagIcon, ChartBarIcon, UserGroupIcon, ShoppingCartIcon } from '@heroicons/react/24/solid';
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -34,12 +34,11 @@ const Home: React.FC = () => {
     totalOrders: 0,
     totalSales: 0,
     totalCustomers: 0,
-    salesTrends: [], // Monthly aggregated sales data
+    salesTrends: [],
     pendingOrders: 0,
     totalRevenue: 0
   });
 
-  // Fetch user information
   const fetchUserInfo = async () => {
     const token = localStorage.getItem('token');
     console.log(token, "storage");
@@ -86,21 +85,20 @@ const Home: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      // Redirect to login if not authenticated
       navigate('/login');
     } else {
-      fetchData(); // Fetch the dashboard data
+      fetchData();
       fetchUserInfo();
     }
   }, [navigate]);
 
   // Data for the sales trends line chart (monthly sales data)
   const salesTrendsData = {
-    labels: data.salesTrends.map((item: any) => item.month), // Month names on the x-axis
+    labels: data.salesTrends.map((item: any) => item.month),
     datasets: [
       {
         label: 'Monthly Sales',
-        data: data.salesTrends.map((item: any) => item.value), // Total sales for each month
+        data: data.salesTrends.map((item: any) => item.value),
         borderColor: 'rgba(75, 192, 192, 1)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         fill: true,
@@ -141,35 +139,46 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-bold">Total Products</h2>
-          <p className="text-2xl">{data.totalProducts}</p>
+        <div className="bg-white p-4 rounded-lg shadow flex items-center">
+          <ShoppingBagIcon className="h-6 w-6 text-blue-600 mr-3" />
+          <div>
+            <h2 className="text-lg font-bold">Total Products</h2>
+            <p className="text-2xl">{data.totalProducts}</p>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-bold">Total Orders</h2>
-          <p className="text-2xl">{data.totalOrders}</p>
+
+        <div className="bg-white p-4 rounded-lg shadow flex items-center">
+          <ShoppingCartIcon className="h-6 w-6 text-green-600 mr-3" />
+          <div>
+            <h2 className="text-lg font-bold">Total Orders</h2>
+            <p className="text-2xl">{data.totalOrders}</p>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-bold">Total Sales</h2>
-          <p className="text-2xl">{data.totalSales}</p>
+
+        <div className="bg-white p-4 rounded-lg shadow flex items-center">
+          <ChartBarIcon className="h-6 w-6 text-red-600 mr-3" />
+          <div>
+            <h2 className="text-lg font-bold">Total Sales</h2>
+            <p className="text-2xl">{data.totalSales}</p>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-lg font-bold">Total Customers</h2>
-          <p className="text-2xl">{data.totalCustomers}</p>
+
+        <div className="bg-white p-4 rounded-lg shadow flex items-center">
+          <UserGroupIcon className="h-6 w-6 text-purple-600 mr-3" />
+          <div>
+            <h2 className="text-lg font-bold">Total Customers</h2>
+            <p className="text-2xl">{data.totalCustomers}</p>
+          </div>
         </div>
       </div>
 
-      {/* Charts and Metrics */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Sales Trends Line Chart (Aggregated Monthly Sales) */}
         <div className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-lg font-bold mb-4">Monthly Sales Trends (Aggregated)</h2>
           <Line data={salesTrendsData} />
         </div>
 
-        {/* Pending Orders and Revenue */}
         <div className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-lg font-bold mb-4">Pending Orders & Total Revenue</h2>
           <p>Pending Orders: {data.pendingOrders}</p>

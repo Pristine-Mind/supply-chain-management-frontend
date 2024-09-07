@@ -30,7 +30,6 @@ const Login: React.FC = () => {
       localStorage.setItem('token', token);
 
       navigate('/home');
-      console.log("hhhhhh")
     } catch (error) {
       setErrorMessage('Invalid email or password');
     }
