@@ -4,6 +4,7 @@ module.exports = {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}', // Include all necessary file extensions
   ],
+  darkMode: 'class',
   theme: {
     extend: {},
   },

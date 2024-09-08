@@ -114,19 +114,19 @@ const Home: React.FC = () => {
         <nav>
           <ul>
             <li className="mb-4">
-              <Link to="/add-producers" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
+              <Link to="/producers" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
                 <BuildingStorefrontIcon className="h-5 w-5 mr-3" />
                 Producer Management
               </Link>
             </li>
             <li className="mb-4">
-              <a href="#add-products" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
+            <Link to="/products" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
                 <ShoppingBagIcon className="h-5 w-5 mr-3" />
                 Product Management
-              </a>
+              </Link>
             </li>
             <li className="mb-4">
-              <a href="#add-customers" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
+              <a href="/customers" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
                 <UserGroupIcon className="h-5 w-5 mr-3" />
                 Add Customers
               </a>
