@@ -128,19 +128,19 @@ const Home: React.FC = () => {
             <li className="mb-4">
               <a href="/customers" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
                 <UserGroupIcon className="h-5 w-5 mr-3" />
-                Add Customers
+                Customer Management
               </a>
             </li>
             <li className="mb-4">
-              <a href="#add-orders" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
+              <a href="/orders" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
                 <ShoppingCartIcon className="h-5 w-5 mr-3" />
-                Add Orders
+                Order Management
               </a>
             </li>
             <li className="mb-4">
-              <a href="#add-sales" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
+              <a href="/sales" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
                 <ChartBarIcon className="h-5 w-5 mr-3" />
-                Add Sales
+                Sales Management
               </a>
             </li>
           </ul>
