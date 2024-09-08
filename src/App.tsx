@@ -4,6 +4,8 @@ import Home from './components/Home';
 import AddProducer from './components/AddProducer';
 import Products from './components/Products';
 import CustomerList from './components/CustomerList';
+import OrderList from './components/Orderlist';
+import SaleList from './components/SalesList';
 
 const App: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -18,6 +20,8 @@ const App: React.FC = () => {
         <Route path="/producers" element={<AddProducer />} />
         <Route path='/products' element={<Products />}></Route>
         <Route path='/customers' element={<CustomerList />}></Route>
+        <Route path='/orders' element={<OrderList />}></Route>
+        <Route path='/sales' element={<SaleList />}></Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
