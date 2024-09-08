@@ -199,6 +199,12 @@ const CustomerList: React.FC = () => {
           placeholder="Search by name..."
           className="px-4 py-2 border rounded-lg w-1/3"
         />
+        <button
+            onClick={() => setFormVisible(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          >
+            Add Customer
+        </button>
       </div>
 
       {/* Customer Table */}
