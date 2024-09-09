@@ -6,6 +6,7 @@ import Products from './components/Products';
 import CustomerList from './components/CustomerList';
 import OrderList from './components/Orderlist';
 import SaleList from './components/SalesList';
+import Stocks from './components/Stocks';
 
 const App: React.FC = () => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -22,6 +23,7 @@ const App: React.FC = () => {
         <Route path='/customers' element={<CustomerList />}></Route>
         <Route path='/orders' element={<OrderList />}></Route>
         <Route path='/sales' element={<SaleList />}></Route>
+        <Route path='/stocks' element={<Stocks />}></Route>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
