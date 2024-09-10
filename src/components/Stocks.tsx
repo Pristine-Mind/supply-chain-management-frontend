@@ -24,10 +24,10 @@ interface StockListItem {
 
 const Stocks: React.FC = () => {
   const [stockItems, setStockItems] = useState<StockListItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
-  const itemsPerPage = 5; // Define how many items per page
+  const [currentPage, setCurrentPage] = useState(1); 
+  const [pushedProducts, setPushedProducts] = useState<number[]>([]);
+  const itemsPerPage = 5;
 
-  // Fetch stock items from the server
   const fetchStockItems = async () => {
     try {
       const response = await axios.get('http://localhost:8000/api/v1/stocklist/');
@@ -38,21 +38,25 @@ const Stocks: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchStockItems(); // Fetch stock items on load
+    fetchStockItems();
   }, []);
 
-  // Calculate the displayed items based on the current page
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = stockItems.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Calculate the total number of pages
   const totalPages = Math.ceil(stockItems.length / itemsPerPage);
 
-  // Handler for "Push to Marketplace" button
-  const handlePushToMarketplace = (productId: number) => {
-    console.log(`Product ${productId} pushed to marketplace.`);
-    // Add logic to push product to marketplace (e.g., API call)
+  const handlePushToMarketplace = async (productId: number) => {
+    try {
+      const response = await axios.post(`http://localhost:8000/api/v1/stocklist/${productId}/push-to-marketplace/`);
+      if (response.status === 200 || response.status === 201) {
+        alert(`Product ${productId} pushed to marketplace successfully.`);
+        setPushedProducts((prevState) => [...prevState, productId]);
+      }
+    } catch (error) {
+      console.error(`Error pushing product ${productId} to marketplace:`, error);
+      alert(`Failed to push product ${productId} to marketplace.`);
+    }
   };
 
   // Handlers for pagination
@@ -89,11 +93,12 @@ const Stocks: React.FC = () => {
                 <td className="py-3 px-6 text-left">{new Date(item.moved_date).toLocaleDateString()}</td>
                 <td className="py-3 px-6 text-left">{item.product_details.stock}</td>
                 <td className="py-3 px-6 text-left">
-                  <button
+                <button
                     onClick={() => handlePushToMarketplace(item.product_details.id)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                    disabled={pushedProducts.includes(item.product_details.id)}
+                    className={`bg-blue-500 text-white px-4 py-2 rounded-lg ${pushedProducts.includes(item.product_details.id) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
                   >
-                    Push to Marketplace
+                    {pushedProducts.includes(item.product_details.id) ? 'Pushed to Marketplace' : 'Push to Marketplace'}
                   </button>
                 </td>
               </tr>
