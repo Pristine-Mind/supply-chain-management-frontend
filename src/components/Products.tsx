@@ -8,25 +8,35 @@ interface Product {
   description: string;
   sku: string;
   price: number;
+  cost_price: number;
   stock: number;
+  reorder_level: number;
   is_active: boolean;
+}
+
+interface Producer {
+  id: number;
+  name: string;
 }
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [formVisible, setFormVisible] = useState(false); // To toggle modal visibility
+  const [producers, setProducers] = useState<Producer[]>([]);
+  const [formVisible, setFormVisible] = useState(false);
   const [formData, setFormData] = useState({
+    producer: '',
     name: '',
     description: '',
     sku: '',
     price: '',
+    cost_price: '',
     stock: '',
+    reorder_level: '10',
     is_active: true,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Fetch products from the server
   const fetchProducts = async () => {
     try {
       const response = await axios.get('http://localhost:8000/api/v1/products/');
@@ -36,19 +46,29 @@ const Products: React.FC = () => {
     }
   };
 
+  // Fetch producers from the server
+  const fetchProducers = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/v1/producers/');
+      setProducers(response.data.results);
+    } catch (error) {
+      console.error('Error fetching producers', error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchProducers();
   }, []);
 
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: type === 'checkbox' ? checked : value,
     });
   };
 
-  // Handle form submission to add product
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -56,19 +76,22 @@ const Products: React.FC = () => {
       setSuccess('Product added successfully!');
       setError('');
       setFormData({
+        producer: '',
         name: '',
         description: '',
         sku: '',
         price: '',
+        cost_price: '',
         stock: '',
+        reorder_level: '10',
         is_active: true,
       });
-      setFormVisible(false); // Hide modal after adding product
-      fetchProducts(); // Refresh product list
-      setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
+      setFormVisible(false);
+      fetchProducts();
+      setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError('Failed to add product');
-      setTimeout(() => setError(''), 3000); // Clear error message after 3 seconds
+      setTimeout(() => setError(''), 3000);
     }
   };
 
@@ -77,21 +100,19 @@ const Products: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Product List</h2>
         <button
-          onClick={() => setFormVisible(true)} // Open modal when button is clicked
+          onClick={() => setFormVisible(true)}
           className="bg-blue-500 text-white px-4 py-2 rounded-lg"
         >
           Add New Product
         </button>
       </div>
 
-      {/* Product Card View */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
-      {/* Modal for Adding Product */}
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
@@ -103,6 +124,25 @@ const Products: React.FC = () => {
               <form onSubmit={handleSubmit}>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
                 {success && <p className="text-green-500 mb-4">{success}</p>}
+
+                <div className="mb-4">
+                  <label htmlFor="producer" className="block text-gray-700">Producer</label>
+                  <select
+                    id="producer"
+                    name="producer"
+                    value={formData.producer}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    required
+                  >
+                    <option value="">Select a Producer</option>
+                    {producers.map((producer) => (
+                      <option key={producer.id} value={producer.id}>
+                        {producer.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div className="mb-4">
                   <label htmlFor="name" className="block text-gray-700">Product Name</label>
@@ -146,9 +186,24 @@ const Products: React.FC = () => {
                   <label htmlFor="price" className="block text-gray-700">Price</label>
                   <input
                     type="number"
+                    step="0.01"
                     id="price"
                     name="price"
                     value={formData.price}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="cost_price" className="block text-gray-700">Cost Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="cost_price"
+                    name="cost_price"
+                    value={formData.cost_price}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg"
                     required
@@ -168,28 +223,54 @@ const Products: React.FC = () => {
                   />
                 </div>
 
-                <div className="flex justify-end space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => setFormVisible(false)} // Close modal on cancel
-                    className="bg-gray-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Add Product
-                  </button>
+                <div className="mb-4">
+                  <label htmlFor="reorder_level" className="block text-gray-700">Reorder Level</label>
+                  <input
+                    type="number"
+                    id="reorder_level"
+                    name="reorder_level"
+                    value={formData.reorder_level}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  />
                 </div>
-              </form>
+
+                <div className="mb-4">
+                  <label htmlFor="is_active" className="block text-gray-700">Active</label>
+                  <input
+                    type="checkbox"
+                    id="is_active"
+                    name="is_active"
+                    checked={formData.is_active}
+                    onChange={handleChange}
+                    className="mr-2 leading-tight"
+                    />
+                    <span className="text-gray-700">Is Active</span>
+                  </div>
+  
+                  <div className="flex justify-end space-x-4">
+                    <button
+                      type="button"
+                      onClick={() => setFormVisible(false)} // Close modal on cancel
+                      className="bg-gray-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Add Product
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Products;
+        )}
+      </div>
+    );
+  };
+  
+  export default Products;
+  

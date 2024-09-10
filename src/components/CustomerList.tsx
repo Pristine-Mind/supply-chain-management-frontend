@@ -35,7 +35,7 @@ const CustomerList: React.FC = () => {
   const [topOrdersCustomers, setTopOrdersCustomers] = useState<CustomerOrders[]>([]);
   const [formVisible, setFormVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [limit] = useState(10); 
+  const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [formData, setFormData] = useState({
@@ -45,8 +45,8 @@ const CustomerList: React.FC = () => {
     billing_address: '',
     shipping_address: '',
     customer_type: 'Retailer',
-    credit_limit: 0.00,
-    current_balance: 0.00,
+    credit_limit: 0.0,
+    current_balance: 0.0,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -93,6 +93,7 @@ const CustomerList: React.FC = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setOffset(0);
   };
 
   const handleNextPage = () => {
@@ -127,50 +128,46 @@ const CustomerList: React.FC = () => {
         billing_address: '',
         shipping_address: '',
         customer_type: 'Retailer',
-        credit_limit: 0.00,
-        current_balance: 0.00,
+        credit_limit: 0.0,
+        current_balance: 0.0,
       });
-      setFormVisible(false); // Hide modal after adding customer
-      fetchCustomers(); // Refresh customer list
-      setTimeout(() => setSuccess(''), 3000); // Clear success message after 3 seconds
+      setFormVisible(false);
+      fetchCustomers();
+      setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError('Failed to add customer');
-      setTimeout(() => setError(''), 3000); // Clear error message after 3 seconds
+      setTimeout(() => setError(''), 3000);
     }
   };
 
-  const filteredCustomers = customers.filter((customer) =>
-    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const salesChartData = {
-    labels: topSalesCustomers.map(customer => customer.name),
+    labels: topSalesCustomers.map((customer) => customer.name),
     datasets: [
       {
         label: 'Top Sales',
-        data: topSalesCustomers.map(customer => customer.total_sales),
+        data: topSalesCustomers.map((customer) => customer.total_sales),
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
         hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-      }
-    ]
+      },
+    ],
   };
 
   const ordersChartData = {
-    labels: topOrdersCustomers.map(customer => customer.name),
+    labels: topOrdersCustomers.map((customer) => customer.name),
     datasets: [
       {
         label: 'Top Orders',
-        data: topOrdersCustomers.map(customer => customer.total_orders),
+        data: topOrdersCustomers.map((customer) => customer.total_orders),
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
         hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-      }
-    ]
+      },
+    ],
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="flex justify-between mb-6">
-      <div className="w-1/2 p-4">
+        <div className="w-1/2 p-4">
           <div className="bg-white shadow-md rounded-lg p-6">
             <h3 className="text-xl font-bold mb-2">Top Customers by Sales</h3>
             <div className="w-full h-80">
@@ -189,7 +186,6 @@ const CustomerList: React.FC = () => {
         </div>
       </div>
 
-      <div className="min-h-screen bg-gray-100 p-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Customer List</h2>
         <input
@@ -200,14 +196,13 @@ const CustomerList: React.FC = () => {
           className="px-4 py-2 border rounded-lg w-1/3"
         />
         <button
-            onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-          >
-            Add Customer
+          onClick={() => setFormVisible(true)}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+        >
+          Add Customer
         </button>
       </div>
 
-      {/* Customer Table */}
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -228,7 +223,8 @@ const CustomerList: React.FC = () => {
                 <tr key={customer.id}>
                   <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{customer.name}</td>
                   <td className="py-4 px-6">{customer.email}</td>
-                  <td className="py-4 px-6">{customer.contact}</td>
+                  <td className="py-4 px-6">{                    customer.contact}
+                  </td>
                   <td className="py-4 px-6">{customer.billing_address}</td>
                   <td className="py-4 px-6">{customer.shipping_address}</td>
                   <td className="py-4 px-6">{customer.customer_type}</td>
@@ -268,7 +264,6 @@ const CustomerList: React.FC = () => {
           Next
         </button>
       </div>
-    </div>
 
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">

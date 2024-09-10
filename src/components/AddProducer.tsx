@@ -12,7 +12,6 @@ interface Producer {
 
 const AddProducer: React.FC = () => {
   const [producers, setProducers] = useState<Producer[]>([]);
-  const [filteredProducers, setFilteredProducers] = useState<Producer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     name: '',
@@ -30,12 +29,17 @@ const AddProducer: React.FC = () => {
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Fetch producers with limit-offset pagination
-  const fetchProducers = async (limit: number, offset: number) => {
+  // Fetch producers with limit-offset pagination and search query
+  const fetchProducers = async (limit: number, offset: number, searchQuery: string = '') => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/producers/?limit=${limit}&offset=${offset}`);
+      const response = await axios.get(`http://localhost:8000/api/v1/producers/`, {
+        params: {
+          limit,
+          offset,
+          search: searchQuery, // Sending search query to the server
+        },
+      });
       setProducers(response.data.results);
-      setFilteredProducers(response.data.results); 
       setTotalCount(response.data.count);
     } catch (error) {
       console.error('Error fetching producers', error);
@@ -43,16 +47,13 @@ const AddProducer: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchProducers(limit, offset);
-  }, [offset]);
+    fetchProducers(limit, offset, searchQuery);
+  }, [offset, searchQuery]);
 
   // Handle search input
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    const filtered = producers.filter((producer) =>
-      producer.name.toLowerCase().includes(e.target.value.toLowerCase())
-    );
-    setFilteredProducers(filtered);
+    setOffset(0); // Reset to first page on new search
   };
 
   // Handle form input changes
@@ -78,8 +79,8 @@ const AddProducer: React.FC = () => {
         registration_number: ''
       });
       setFormVisible(false); 
-      fetchProducers(limit, offset);
-  
+      fetchProducers(limit, offset, searchQuery);
+
       setTimeout(() => {
         setSuccess('');
       }, 1000);
@@ -93,7 +94,6 @@ const AddProducer: React.FC = () => {
       }, 1000);
     }
   };
-  
 
   // Handle page change for pagination
   const handlePageChange = (newOffset: number) => {
@@ -133,8 +133,8 @@ const AddProducer: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredProducers.length > 0 ? (
-              filteredProducers.map((producer) => (
+            {producers.length > 0 ? (
+              producers.map((producer) => (
                 <tr key={producer.id}>
                   <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{producer.name}</td>
                   <td className="py-4 px-6">{producer.contact}</td>
