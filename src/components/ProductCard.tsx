@@ -1,5 +1,11 @@
 import React from 'react';
 
+interface ProductImage {
+  id: number;
+  image: string; // URL of the image
+  alt_text: string | null; // Optional alternative text for the image
+}
+
 interface Product {
   id: number;
   name: string;
@@ -8,6 +14,7 @@ interface Product {
   price: number;
   stock: number;
   is_active: boolean;
+  images: ProductImage[]; // Array of images associated with the product
 }
 
 interface ProductCardProps {
@@ -29,6 +36,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       >
         {product.is_active ? 'Active' : 'Inactive'}
       </span>
+
+      {/* Display Product Images */}
+      <div className="mt-4">
+        {product.images.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4">
+            {product.images.map((image) => (
+              <img
+                key={image.id}
+                src={image.image}
+                alt={image.alt_text || 'Product Image'}
+                className="w-full h-32 object-cover rounded-lg"
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500">No images available</p>
+        )}
+      </div>
     </div>
   );
 };
