@@ -24,27 +24,31 @@ interface StockListItem {
 
 const Stocks: React.FC = () => {
   const [stockItems, setStockItems] = useState<StockListItem[]>([]);
-  const [currentPage, setCurrentPage] = useState(1); 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [pushedProducts, setPushedProducts] = useState<number[]>([]);
   const itemsPerPage = 5;
 
-  const fetchStockItems = async () => {
+  const fetchStockItems = async (page: number) => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/stocklist/');
+      const offset = (page - 1) * itemsPerPage; // Calculate offset based on the current page
+      const response = await axios.get('http://localhost:8000/api/v1/stocklist/', {
+        params: {
+          limit: itemsPerPage,
+          offset: offset
+        }
+      });
+
       setStockItems(response.data.results);
+      setTotalPages(Math.ceil(response.data.count / itemsPerPage)); // Assuming `count` is provided by the API
     } catch (error) {
       console.error('Error fetching stock items', error);
     }
   };
 
   useEffect(() => {
-    fetchStockItems();
-  }, []);
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = stockItems.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(stockItems.length / itemsPerPage);
+    fetchStockItems(currentPage);
+  }, [currentPage]);
 
   const handlePushToMarketplace = async (productId: number) => {
     try {
@@ -87,13 +91,13 @@ const Stocks: React.FC = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm font-light">
-            {currentItems.map((item) => (
+            {stockItems.map((item) => (
               <tr key={item.product} className="border-b border-gray-200 hover:bg-gray-100">
                 <td className="py-3 px-6 text-left whitespace-nowrap">{item.product_details.name}</td>
                 <td className="py-3 px-6 text-left">{new Date(item.moved_date).toLocaleDateString()}</td>
                 <td className="py-3 px-6 text-left">{item.product_details.stock}</td>
                 <td className="py-3 px-6 text-left">
-                <button
+                  <button
                     onClick={() => handlePushToMarketplace(item.product_details.id)}
                     disabled={pushedProducts.includes(item.product_details.id)}
                     className={`bg-blue-500 text-white px-4 py-2 rounded-lg ${pushedProducts.includes(item.product_details.id) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}

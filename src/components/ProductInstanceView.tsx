@@ -17,18 +17,19 @@ interface MarketplaceProduct {
 
 interface Bid {
   bid_amount: string;
+  max_bid_amount: string;
   bid_date: string;
 }
 
 interface SenderDetails {
-    username: string,
-    id: number;
+  username: string;
+  id: number;
 }
 
 interface Message {
   message: string;
   sender: string;
-  sender_details: SenderDetails;  
+  sender_details: SenderDetails;
   timestamp: string;
 }
 
@@ -36,10 +37,12 @@ const ProductInstanceView: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const [product, setProduct] = useState<MarketplaceProduct | null>(null);
   const [bids, setBids] = useState<Bid[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [maxBidAmount, setMaxBidAmount] = useState('');  // New state for max_bid_amount
   const [bidAmount, setBidAmount] = useState('');
-  const [userBids, setUserBids] = useState<number>(0);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState('');
+  const [bidError, setBidError] = useState<any>(null); // State for bid submission error, capture full error object
+  const [messageError, setMessageError] = useState<any>(null); // State for message submission error
 
   const fetchData = async () => {
     await fetchProduct();
@@ -73,7 +76,10 @@ const ProductInstanceView: React.FC = () => {
         }
       });
       setBids(response.data.results);
-      setUserBids(response.data.filter((bid: Bid) => bid).length);
+
+      // Calculate max bid amount based on the highest bid retrieved
+      const highestBid = response.data.results.length > 0 ? Math.max(...response.data.results.map((bid: Bid) => parseFloat(bid.bid_amount))) : '';
+      setMaxBidAmount(highestBid.toString());
     } catch (error) {
       console.error('Error fetching user bids', error);
     }
@@ -86,7 +92,7 @@ const ProductInstanceView: React.FC = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/chats/?product=${productId}`,  { 
+      const response = await axios.get(`http://localhost:8000/api/v1/chats/?product=${productId}`, {
         headers: {
           Authorization: `Token ${token}`
         }
@@ -119,10 +125,15 @@ const ProductInstanceView: React.FC = () => {
       );
       alert('Bid placed successfully');
       setBidAmount('');
+      setBidError(null);
       fetchData();
     } catch (error) {
       console.error('Error placing bid', error);
-      alert('Failed to place bid');
+      if (error.response && error.response.data) {
+        setBidError(error.response.data);
+      } else {
+        setBidError({ detail: 'Failed to place bid' });
+      }
     }
   };
 
@@ -148,10 +159,15 @@ const ProductInstanceView: React.FC = () => {
       );
       alert('Message sent successfully');
       setMessage('');
+      setMessageError(null);
       fetchMessages();
     } catch (error) {
       console.error('Error sending message', error);
-      alert('Failed to send message');
+      if (error.response && error.response.data) {
+        setMessageError(error.response.data);
+      } else {
+        setMessageError({ detail: 'Failed to send message' });
+      }
     }
   };
 
@@ -163,10 +179,11 @@ const ProductInstanceView: React.FC = () => {
           <p className="text-gray-600 mb-4">{product.product.description}</p>
           <p className="text-gray-900 font-bold mb-4">Price: ${product.listed_price}</p>
 
+          <p className="text-gray-900 font-bold mb-4">Current Maximum Bid: ${maxBidAmount || 'No bids yet'}</p>
+
           <div className="flex flex-col md:flex-row gap-6">
             <div className="bg-white p-4 rounded-lg shadow-md w-full md:w-1/2">
               <h3 className="text-xl font-bold mb-2">Place a Bid</h3>
-              <p className="text-gray-600 mb-2">You can bid up to 3 times. Current bids: {userBids}/3</p>
               <input
                 type="number"
                 value={bidAmount}
@@ -174,10 +191,16 @@ const ProductInstanceView: React.FC = () => {
                 placeholder="Enter bid amount"
                 className="border rounded-lg px-4 py-2 mb-4 w-full"
               />
+              {bidError && (
+                <div className="text-red-500 mb-4">
+                  {bidError.non_field_errors && <p>{bidError.non_field_errors.join(', ')}</p>}
+                  {bidError.bid_amount && <p>{bidError.bid_amount.join(', ')}</p>}
+                  {bidError.detail && <p>{bidError.detail}</p>}
+                </div>
+              )}
               <button
                 onClick={handleBidSubmit}
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                disabled={userBids >= 3}
               >
                 Place Bid
               </button>
@@ -207,6 +230,13 @@ const ProductInstanceView: React.FC = () => {
                 placeholder="Ask a question about the product..."
                 className="border rounded-lg px-4 py-2 mb-4 w-full"
               />
+              {messageError && (
+                <div className="text-red-500 mb-4">
+                  {messageError.non_field_errors && <p>{messageError.non_field_errors.join(', ')}</p>}
+                  {messageError.message && <p>{messageError.message.join(', ')}</p>}
+                  {messageError.detail && <p>{messageError.detail}</p>}
+                </div>
+              )}
               <button
                 onClick={handleMessageSubmit}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
@@ -221,7 +251,9 @@ const ProductInstanceView: React.FC = () => {
                     {messages.map((msg, index) => (
                       <li key={index} className="mb-2">
                         <span className="font-semibold">{msg.sender_details.username}:</span> {msg.message}
-                        <span className="ml-4 text-sm text-gray-500">({new Date(msg.timestamp).toLocaleString()})</span>
+                        <span className="ml-4 text-sm text-gray-500">
+                          ({new Date(msg.timestamp).toLocaleString()})
+                        </span>
                       </li>
                     ))}
                   </ul>
