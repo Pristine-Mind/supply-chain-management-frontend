@@ -1,52 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-interface Customer {
-  id: number;
-  name: string;
-}
+// Define payment status options
+const paymentStatusOptions = [
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+];
 
-interface Product {
+interface Order {
   id: number;
-  name: string;
-}
-
-interface CustomerDetails {
-    name: string,
-    contact: string;
+  order_number: string;
 }
 
 interface Sale {
   id: number;
-  customer: Customer;
-  product: Product;
-  quantity: number;
-  sale_price: number;
-  sale_date: string;
-  customer_name: string;
-  customer_contact: string;
-  customer_details: CustomerDetails;
-  product_details: Product;
+  quantity: number | null;
+  sale_price: number | null;
+  payment_status: string | null;
+  payment_status_display: string | null;
+  payment_due_date: string | null;
+  order: number | null;
 }
 
 const SaleList: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [formVisible, setFormVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterCustomer, setFilterCustomer] = useState<number | 'all'>('all');
-  const [filterProduct, setFilterProduct] = useState<number | 'all'>('all');
   const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [formData, setFormData] = useState({
-    customer: '',
-    product: '',
-    quantity: 1,
-    sale_price: 0,
-    customer_name: '',
-    customer_contact: '',
+    quantity: null,
+    sale_price: null,
+    payment_status: "pending", // Default to pending
+    payment_due_date: '',
+    order: null,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -54,15 +45,13 @@ const SaleList: React.FC = () => {
   // Fetch sales with filters and pagination
   const fetchSales = async () => {
     try {
-      const params: any = {
+      const params = {
         limit,
         offset,
       };
-      if (searchQuery) params.search = searchQuery;
-      if (filterCustomer !== 'all') params.customer = filterCustomer;
-      if (filterProduct !== 'all') params.product = filterProduct;
-      console.log(params)
-      const response = await axios.get('http://localhost:8000/api/v1/sales/', { params: params,});
+      const response = await axios.get('http://localhost:8000/api/v1/sales/', {
+        params: params,
+      });
       setSales(response.data.results);
       setTotalCount(response.data.count);
     } catch (error) {
@@ -70,58 +59,20 @@ const SaleList: React.FC = () => {
     }
   };
 
-  // Fetch customers for filters and add sale form
-  const fetchCustomers = async () => {
+  // Fetch orders for the dropdown
+  const fetchOrders = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/customers/');
-      setCustomers(response.data.results);
+      const response = await axios.get('http://localhost:8000/api/v1/orders/');
+      setOrders(response.data.results);
     } catch (error) {
-      console.error('Error fetching customers', error);
-    }
-  };
-
-  // Fetch products for filters and add sale form
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get('http://localhost:8000/api/v1/products/');
-      setProducts(response.data.results);
-    } catch (error) {
-      console.error('Error fetching products', error);
+      console.error('Error fetching orders', error);
     }
   };
 
   useEffect(() => {
     fetchSales();
-    fetchCustomers();
-    fetchProducts();
-  }, [offset, searchQuery, filterCustomer, filterProduct]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setOffset(0);
-  };
-
-  const handleFilterCustomer = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilterCustomer(e.target.value === 'all' ? 'all' : parseInt(e.target.value));
-    setOffset(0);
-  };
-
-  const handleFilterProduct = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilterProduct(e.target.value === 'all' ? 'all' : parseInt(e.target.value));
-    setOffset(0);
-  };
-
-  const handleNextPage = () => {
-    if (offset + limit < totalCount) {
-      setOffset(offset + limit);
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (offset > 0) {
-      setOffset(offset - limit);
-    }
-  };
+    fetchOrders(); 
+  }, [offset]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -137,12 +88,11 @@ const SaleList: React.FC = () => {
       setSuccess('Sale added successfully!');
       setError('');
       setFormData({
-        customer: '',
-        product: '',
-        quantity: 1,
-        sale_price: 0,
-        customer_name: '',
-        customer_contact: '',
+        quantity: null,
+        sale_price: null,
+        payment_status: 'pending',
+        payment_due_date: '',
+        order: null,
       });
       setFormVisible(false);
       fetchSales();
@@ -165,60 +115,27 @@ const SaleList: React.FC = () => {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-4">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleSearch}
-          placeholder="Search by product or end-user name..."
-          className="px-4 py-2 border rounded-lg w-1/4"
-        />
-
-        <select
-          value={filterCustomer}
-          onChange={handleFilterCustomer}
-          className="px-4 py-2 border rounded-lg w-1/4"
-        >
-          <option value="all">All Customers</option>
-          {customers.map(customer => (
-            <option key={customer.id} value={customer.id}>{customer.name}</option>
-          ))}
-        </select>
-
-        <select
-          value={filterProduct}
-          onChange={handleFilterProduct}
-          className="px-4 py-2 border rounded-lg w-1/4"
-        >
-          <option value="all">All Products</option>
-          {products.map(product => (
-            <option key={product.id} value={product.id}>{product.name}</option>
-          ))}
-        </select>
-      </div>
-
       {/* Sales Table */}
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th className="py-3 px-6">Customer</th>
-              <th className="py-3 px-6">Product</th>
+              <th className="py-3 px-6">Order</th>
               <th className="py-3 px-6">Quantity</th>
               <th className="py-3 px-6">Sale Price</th>
-              <th className="py-3 px-6">Sale Date</th>
+              <th className="py-3 px-6">Payment Status</th>
+              <th className="py-3 px-6">Payment Due Date</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {sales.length > 0 ? (
               sales.map((sale) => (
                 <tr key={sale.id}>
-                  <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{sale.customer_details.name}</td>
-                  <td className="py-4 px-6">{sale.product_details.name}</td>
+                  <td className="py-4 px-6">{sale.order}</td>
                   <td className="py-4 px-6">{sale.quantity}</td>
                   <td className="py-4 px-6">${sale.sale_price}</td>
-                  <td className="py-4 px-6">{new Date(sale.sale_date).toLocaleDateString()}</td>
+                  <td className="py-4 px-6">{sale.payment_status_display}</td>
+                  <td className="py-4 px-6">{sale.payment_due_date}</td>
                 </tr>
               ))
             ) : (
@@ -235,7 +152,7 @@ const SaleList: React.FC = () => {
       {/* Pagination */}
       <div className="flex justify-between items-center">
         <button
-          onClick={handlePreviousPage}
+          onClick={() => setOffset(offset - limit)}
           disabled={offset === 0}
           className={`px-4 py-2 rounded-lg ${offset === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
         >
@@ -247,9 +164,9 @@ const SaleList: React.FC = () => {
         </p>
 
         <button
-          onClick={handleNextPage}
+          onClick={() => setOffset(offset + limit)}
           disabled={offset + limit >= totalCount}
-          className={`px-4 py-2 rounded-lg          ${offset + limit >= totalCount ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
         >
           Next
         </button>
@@ -269,35 +186,20 @@ const SaleList: React.FC = () => {
                 {success && <p className="text-green-500 mb-4">{success}</p>}
 
                 <div className="mb-4">
-                  <label htmlFor="customer" className="block text-gray-700">Customer</label>
+                  <label htmlFor="order" className="block text-gray-700">Order</label>
                   <select
-                    id="customer"
-                    name="customer"
-                    value={formData.customer}
+                    id="order"
+                    name="order"
+                    value={formData.order || ''}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg"
                     required
                   >
-                    <option value="">Select Customer</option>
-                    {customers.map(customer => (
-                      <option key={customer.id} value={customer.id}>{customer.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="product" className="block text-gray-700">Product</label>
-                  <select
-                    id="product"
-                    name="product"
-                    value={formData.product}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
-                    required
-                  >
-                    <option value="">Select Product</option>
-                    {products.map(product => (
-                      <option key={product.id} value={product.id}>{product.name}</option>
+                    <option value="">Select Order</option>
+                    {orders.map(order => (
+                      <option key={order.id} value={order.id}>
+                        {order.order_number}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -308,11 +210,10 @@ const SaleList: React.FC = () => {
                     type="number"
                     id="quantity"
                     name="quantity"
-                    value={formData.quantity}
+                    value={formData.quantity || ''}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg"
                     required
-                    min="1"
                   />
                 </div>
 
@@ -322,7 +223,7 @@ const SaleList: React.FC = () => {
                     type="number"
                     id="sale_price"
                     name="sale_price"
-                    value={formData.sale_price}
+                    value={formData.sale_price || ''}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg"
                     required
@@ -332,26 +233,33 @@ const SaleList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="customer_name" className="block text-gray-700">End-User Name (Optional)</label>
-                  <input
-                    type="text"
-                    id="customer_name"
-                    name="customer_name"
-                    value={formData.customer_name}
+                  <label htmlFor="payment_status" className="block text-gray-700">Payment Status</label>
+                  <select
+                    id="payment_status"
+                    name="payment_status"
+                    value={formData.payment_status}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
-                  />
+                    className="w-full px-4 py-2 border rounded                   -lg"
+                    required
+                  >
+                    {paymentStatusOptions.map(status => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="customer_contact" className="block text-gray-700">End-User Contact (Optional)</label>
+                  <label htmlFor="payment_due_date" className="block text-gray-700">Payment Due Date</label>
                   <input
-                    type="text"
-                    id="customer_contact"
-                    name="customer_contact"
-                    value={formData.customer_contact}
+                    type="date"
+                    id="payment_due_date"
+                    name="payment_due_date"
+                    value={formData.payment_due_date}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg"
+                    required
                   />
                 </div>
 
