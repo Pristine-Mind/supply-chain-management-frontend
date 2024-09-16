@@ -15,14 +15,13 @@ interface Product {
 interface Order {
   id: number;
   order_number: string;
-  customer: Customer;
-  product: Product;
+  customer_details: Customer;
+  product_details: Product;
   quantity: number;
   total_price: number;
   status: string;
   order_date: string;
   delivery_date?: string;
-  payment_status: string;
   payment_due_date?: string;
   notes?: string;
 }
@@ -44,13 +43,11 @@ const OrderList: React.FC = () => {
     product: '',
     quantity: 1,
     status: 'pending',
-    payment_status: 'pending',
     notes: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Fetch orders with filters and pagination
   const fetchOrders = async () => {
     try {
       const params: any = {
@@ -70,7 +67,6 @@ const OrderList: React.FC = () => {
     }
   };
 
-  // Fetch customers for filters and add order form
   const fetchCustomers = async () => {
     try {
       const response = await axios.get('http://localhost:8000/api/v1/customers/');
@@ -80,7 +76,6 @@ const OrderList: React.FC = () => {
     }
   };
 
-  // Fetch products for filters and add order form
   const fetchProducts = async () => {
     try {
       const response = await axios.get('http://localhost:8000/api/v1/products/');
@@ -146,7 +141,6 @@ const OrderList: React.FC = () => {
         product: '',
         quantity: 1,
         status: 'pending',
-        payment_status: 'pending',
         notes: '',
       });
       setFormVisible(false);
@@ -216,7 +210,6 @@ const OrderList: React.FC = () => {
         </select>
       </div>
 
-      {/* Orders Table */}
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -229,7 +222,6 @@ const OrderList: React.FC = () => {
               <th className="py-3 px-6">Status</th>
               <th className="py-3 px-6">Order Date</th>
               <th className="py-3 px-6">Delivery Date</th>
-              <th className="py-3 px-6">Payment Status</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -237,8 +229,8 @@ const OrderList: React.FC = () => {
               orders.map((order) => (
                 <tr key={order.id}>
                   <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{order.order_number}</td>
-                  <td className="py-4 px-6">{order.customer.name}</td>
-                  <td className="py-4 px-6">{order.product.name}</td>
+                  <td className="py-4 px-6">{order.customer_details.name}</td>
+                  <td className="py-4 px-6">{order.product_details.name}</td>
                   <td className="py-4 px-6">{order.quantity}</td>
                   <td className="py-4 px-6">${order.total_price}</td>
                   <td className="py-4 px-6">
@@ -255,14 +247,6 @@ const OrderList: React.FC = () => {
                   </td>
                   <td className="py-4 px-6">{new Date(order.order_date).toLocaleDateString()}</td>
                   <td className="py-4 px-6">{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'N/A'}</td>
-                  <td className="py-4 px-6">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.payment_status === 'paid'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
-                    </span>
-                  </td>
                 </tr>
               ))
             ) : (
@@ -276,7 +260,6 @@ const OrderList: React.FC = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center">
         <button
           onClick={handlePreviousPage}
@@ -299,7 +282,6 @@ const OrderList: React.FC = () => {
         </button>
       </div>
 
-      {/* Add Order Modal */}
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
@@ -375,21 +357,6 @@ const OrderList: React.FC = () => {
                     <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="payment_status" className="block text-gray-700">Payment Status</label>
-                  <select
-                    id="payment_status"
-                    name="payment_status"
-                    value={formData.payment_status}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
-                    required
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
                   </select>
                 </div>
 
