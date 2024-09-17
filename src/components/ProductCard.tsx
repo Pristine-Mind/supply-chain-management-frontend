@@ -2,8 +2,8 @@ import React from 'react';
 
 interface ProductImage {
   id: number;
-  image: string; // URL of the image
-  alt_text: string | null; // Optional alternative text for the image
+  image: string;
+  alt_text: string | null;
 }
 
 interface Product {
@@ -14,7 +14,9 @@ interface Product {
   price: number;
   stock: number;
   is_active: boolean;
-  images: ProductImage[]; // Array of images associated with the product
+  category: string;
+  images: ProductImage[];
+  category_details: string;
 }
 
 interface ProductCardProps {
@@ -25,6 +27,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-lg font-bold mb-2">{product.name}</h3>
+      <p className="text-gray-500 mb-2">
+        <span className="font-semibold">Category:</span> {product.category_details}
+      </p>
       <p className="text-gray-700 mb-2">{product.description}</p>
       <p className="text-gray-500 mb-2">SKU: {product.sku}</p>
       <p className="text-gray-500 mb-2">Price: ${product.price}</p>

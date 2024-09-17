@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import ProductCard from './ProductCard';
+
+interface ProductImage {
+  id: number;
+  image: string;
+  alt_text: string | null;
+}
 
 interface Product {
   id: number;
@@ -12,7 +18,8 @@ interface Product {
   stock: number;
   reorder_level: number;
   is_active: boolean;
-  images: { id: number, image: string }[]; // Images associated with the product
+  category: string;
+  images: ProductImage[];
 }
 
 interface Producer {
@@ -20,9 +27,15 @@ interface Producer {
   name: string;
 }
 
+interface Category {
+  value: string;
+  label: string;
+}
+
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [producers, setProducers] = useState<Producer[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [formVisible, setFormVisible] = useState(false);
   const [formData, setFormData] = useState({
     producer: '',
@@ -34,15 +47,22 @@ const Products: React.FC = () => {
     stock: '',
     reorder_level: '10',
     is_active: true,
+    category: '',
   });
-  const [images, setImages] = useState<FileList | null>(null); // State to hold uploaded images
-  const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [images, setImages] = useState<FileList | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const [producerSearchTerm, setProducerSearchTerm] = useState('');
+  const [showProducerList, setShowProducerList] = useState(false);
+  const producerSearchRef = useRef<HTMLDivElement>(null);
+
   const fetchProducts = async (query = '') => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}`
+      );
       setProducts(response.data.results);
     } catch (error) {
       console.error('Error fetching products', error);
@@ -51,23 +71,49 @@ const Products: React.FC = () => {
 
   const fetchProducers = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`
+      );
       setProducers(response.data.results);
     } catch (error) {
       console.error('Error fetching producers', error);
     }
   };
 
+  // TODO: Fetch from server
+  const categoryOptions: Category[] = [
+    { value: 'EL', label: 'Electronics' },
+    { value: 'FA', label: 'Fashion & Clothing' },
+    { value: 'HB', label: 'Health & Beauty' },
+    { value: 'HK', label: 'Home & Kitchen' },
+    { value: 'GR', label: 'Groceries & Gourmet Food' },
+    { value: 'SO', label: 'Sports & Outdoors' },
+    { value: 'TK', label: 'Toys, Kids & Baby Products' },
+    { value: 'BM', label: 'Books, Music & Movies' },
+    { value: 'AI', label: 'Automotive & Industrial' },
+    { value: 'PS', label: 'Pet Supplies' },
+    { value: 'OS', label: 'Office & Stationery' },
+    { value: 'HF', label: 'Health & Fitness' },
+    { value: 'JA', label: 'Jewelry & Accessories' },
+    { value: 'GF', label: 'Gifts & Flowers' },
+  ];
+
   useEffect(() => {
     fetchProducts(searchQuery);
     fetchProducers();
+    setCategories(categoryOptions);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value); // Update search query when user types
+    setSearchQuery(e.target.value);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
@@ -76,8 +122,43 @@ const Products: React.FC = () => {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setImages(e.target.files); // Update image files state
+    setImages(e.target.files);
   };
+
+  const handleProducerSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setProducerSearchTerm(e.target.value);
+    setShowProducerList(true);
+  };
+
+  const handleProducerSelect = (producer: Producer) => {
+    setFormData({
+      ...formData,
+      producer: producer.id.toString(),
+    });
+    setProducerSearchTerm(producer.name);
+    setShowProducerList(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        producerSearchRef.current &&
+        !producerSearchRef.current.contains(event.target as Node)
+      ) {
+        setShowProducerList(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const filteredProducers = producers.filter((producer) =>
+    producer.name.toLowerCase().includes(producerSearchTerm.toLowerCase())
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +173,7 @@ const Products: React.FC = () => {
     formDataToSend.append('stock', formData.stock);
     formDataToSend.append('reorder_level', formData.reorder_level);
     formDataToSend.append('is_active', String(formData.is_active));
+    formDataToSend.append('category', formData.category);
 
     if (images) {
       for (let i = 0; i < images.length; i++) {
@@ -100,11 +182,15 @@ const Products: React.FC = () => {
     }
 
     try {
-      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`, formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`,
+        formDataToSend,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       setSuccess('Product added successfully!');
       setError('');
       setFormData({
@@ -117,10 +203,12 @@ const Products: React.FC = () => {
         stock: '',
         reorder_level: '10',
         is_active: true,
+        category: '',
       });
       setImages(null);
+      setProducerSearchTerm('');
       setFormVisible(false);
-      fetchProducts(); // Re-fetch products after adding a new one
+      fetchProducts();
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError('Failed to add product');
@@ -130,7 +218,6 @@ const Products: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      {/* Search Bar */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Product List</h2>
         <input
@@ -148,49 +235,89 @@ const Products: React.FC = () => {
         </button>
       </div>
 
-      {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
-      {/* Add Product Form */}
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">Add New Product</h3>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
+                Add New Product
+              </h3>
               <form onSubmit={handleSubmit} encType="multipart/form-data">
                 {error && <p className="text-red-500 mb-4">{error}</p>}
                 {success && <p className="text-green-500 mb-4">{success}</p>}
 
-                {/* Producer Field */}
-                <div className="mb-4">
-                  <label htmlFor="producer" className="block text-gray-700">Producer</label>
-                  <select
+                <div className="mb-4 relative" ref={producerSearchRef}>
+                  <label htmlFor="producer" className="block text-gray-700">
+                    Producer
+                  </label>
+                  <input
+                    type="text"
                     id="producer"
                     name="producer"
-                    value={formData.producer}
+                    value={producerSearchTerm}
+                    onChange={handleProducerSearchChange}
+                    onFocus={() => setShowProducerList(true)}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Search for a producer..."
+                    required
+                  />
+                  {showProducerList && filteredProducers.length > 0 && (
+                    <ul className="absolute z-10 bg-white border rounded-lg w-full max-h-48 overflow-y-auto mt-1">
+                      {filteredProducers.map((producer) => (
+                        <li
+                          key={producer.id}
+                          onClick={() => handleProducerSelect(producer)}
+                          className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                        >
+                          {producer.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {showProducerList && filteredProducers.length === 0 && (
+                    <p className="absolute z-10 bg-white border rounded-lg w-full px-4 py-2 mt-1">
+                      No producers found.
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="category" className="block text-gray-700">
+                    Category
+                  </label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border rounded-lg"
                     required
                   >
-                    <option value="">Select a Producer</option>
-                    {producers.map((producer) => (
-                      <option key={producer.id} value={producer.id}>
-                        {producer.name}
+                    <option value="">Select a Category</option>
+                    {categories.map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
                       </option>
                     ))}
                   </select>
                 </div>
 
-                {/* Other Form Fields */}
                 <div className="mb-4">
-                  <label htmlFor="name" className="block text-gray-700">Product Name</label>
+                  <label htmlFor="name" className="block text-gray-700">
+                    Product Name
+                  </label>
                   <input
                     type="text"
                     id="name"
@@ -203,7 +330,9 @@ const Products: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="description" className="block text-gray-700">Description</label>
+                  <label htmlFor="description" className="block text-gray-700">
+                    Description
+                  </label>
                   <textarea
                     id="description"
                     name="description"
@@ -215,7 +344,9 @@ const Products: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="sku" className="block text-gray-700">SKU</label>
+                  <label htmlFor="sku" className="block text-gray-700">
+                    SKU
+                  </label>
                   <input
                     type="text"
                     id="sku"
@@ -228,7 +359,9 @@ const Products: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="price" className="block text-gray-700">Price</label>
+                  <label htmlFor="price" className="block text-gray-700">
+                    Price
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -242,7 +375,9 @@ const Products: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="cost_price" className="block text-gray-700">Cost Price</label>
+                  <label htmlFor="cost_price" className="block text-gray-700">
+                    Cost Price
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -256,7 +391,9 @@ const Products: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="stock" className="block text-gray-700">Stock Quantity</label>
+                  <label htmlFor="stock" className="block text-gray-700">
+                    Stock Quantity
+                  </label>
                   <input
                     type="number"
                     id="stock"
@@ -269,7 +406,9 @@ const Products: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="reorder_level" className="block text-gray-700">Reorder Level</label>
+                  <label htmlFor="reorder_level" className="block text-gray-700">
+                    Reorder Level
+                  </label>
                   <input
                     type="number"
                     id="reorder_level"
@@ -281,7 +420,9 @@ const Products: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="is_active" className="block text-gray-700">Active Status</label>
+                  <label htmlFor="is_active" className="block text-gray-700">
+                    Active Status
+                  </label>
                   <input
                     type="checkbox"
                     id="is_active"
@@ -293,9 +434,10 @@ const Products: React.FC = () => {
                   <span className="text-gray-700">Is Active</span>
                 </div>
 
-                {/* Image Upload Field */}
                 <div className="mb-4">
-                  <label htmlFor="images" className="block text-gray-700">Upload Images</label>
+                  <label htmlFor="images" className="block text-gray-700">
+                    Upload Images
+                  </label>
                   <input
                     type="file"
                     id="images"
@@ -331,4 +473,3 @@ const Products: React.FC = () => {
 };
 
 export default Products;
-
