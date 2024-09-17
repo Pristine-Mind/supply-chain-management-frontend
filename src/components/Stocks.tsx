@@ -27,11 +27,11 @@ const Stocks: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [pushedProducts, setPushedProducts] = useState<number[]>([]);
-  const itemsPerPage = 5;
+  const itemsPerPage = 20;
 
   const fetchStockItems = async (page: number) => {
     try {
-      const offset = (page - 1) * itemsPerPage; // Calculate offset based on the current page
+      const offset = (page - 1) * itemsPerPage;
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/`, {
         params: {
           limit: itemsPerPage,
@@ -40,7 +40,7 @@ const Stocks: React.FC = () => {
       });
 
       setStockItems(response.data.results);
-      setTotalPages(Math.ceil(response.data.count / itemsPerPage)); // Assuming `count` is provided by the API
+      setTotalPages(Math.ceil(response.data.count / itemsPerPage));
     } catch (error) {
       console.error('Error fetching stock items', error);
     }
@@ -78,7 +78,6 @@ const Stocks: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      {/* Stock List Table */}
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Stock List</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto bg-white border border-gray-300 shadow-md rounded-lg">
@@ -111,7 +110,6 @@ const Stocks: React.FC = () => {
         </table>
       </div>
 
-      {/* Pagination Controls */}
       <div className="flex justify-between items-center mt-4">
         <button
           onClick={handlePreviousPage}
