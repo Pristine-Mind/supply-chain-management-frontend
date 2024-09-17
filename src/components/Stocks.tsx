@@ -32,7 +32,7 @@ const Stocks: React.FC = () => {
   const fetchStockItems = async (page: number) => {
     try {
       const offset = (page - 1) * itemsPerPage; // Calculate offset based on the current page
-      const response = await axios.get('http://localhost:8000/api/v1/stocklist/', {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/`, {
         params: {
           limit: itemsPerPage,
           offset: offset
@@ -52,7 +52,7 @@ const Stocks: React.FC = () => {
 
   const handlePushToMarketplace = async (productId: number) => {
     try {
-      const response = await axios.post(`http://localhost:8000/api/v1/stocklist/${productId}/push-to-marketplace/`);
+      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/${productId}/push-to-marketplace/`);
       if (response.status === 200 || response.status === 201) {
         alert(`Product ${productId} pushed to marketplace successfully.`);
         setPushedProducts((prevState) => [...prevState, productId]);

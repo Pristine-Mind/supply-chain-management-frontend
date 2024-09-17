@@ -24,7 +24,7 @@ const Login: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post<{ token: string }>('http://localhost:8000/login/', formData);
+      const response = await axios.post<{ token: string }>(`${import.meta.env.VITE_REACT_APP_API_URL}/login/`, formData);
       const { token } = response.data;
 
       localStorage.setItem('token', token);

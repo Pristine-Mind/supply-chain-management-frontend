@@ -30,7 +30,7 @@ const Marketplace: React.FC = () => {
 
   const fetchMarketplaceProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/marketplace/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`);
       setMarketplaceProducts(response.data.results);
     } catch (error) {
       console.error('Error fetching marketplace products', error);

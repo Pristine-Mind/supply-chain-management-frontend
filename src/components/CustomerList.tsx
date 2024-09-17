@@ -53,7 +53,7 @@ const CustomerList: React.FC = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/customers/', {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`, {
         params: {
           limit: limit,
           offset: offset,
@@ -69,7 +69,7 @@ const CustomerList: React.FC = () => {
 
   const fetchTopSalesCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/customer/top-sales/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-sales/`);
       setTopSalesCustomers(response.data);
     } catch (error) {
       console.error('Error fetching top sales customers', error);
@@ -78,7 +78,7 @@ const CustomerList: React.FC = () => {
 
   const fetchTopOrdersCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/customer/top-orders/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-orders/`);
       setTopOrdersCustomers(response.data);
     } catch (error) {
       console.error('Error fetching top orders customers', error);
@@ -118,7 +118,7 @@ const CustomerList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/v1/customers/', formData);
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`, formData);
       setSuccess('Customer added successfully!');
       setError('');
       setFormData({
