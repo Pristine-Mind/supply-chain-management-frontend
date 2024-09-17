@@ -56,7 +56,7 @@ const ProductInstanceView: React.FC = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/marketplace/${productId}/`);
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`);
       setProduct(response.data);
     } catch (error) {
       console.error('Error fetching product details', error);
@@ -70,7 +70,7 @@ const ProductInstanceView: React.FC = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/bids/?product=${productId}`, { 
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/bids/?product=${productId}`, { 
         headers: {
           Authorization: `Token ${token}`
         }
@@ -92,7 +92,7 @@ const ProductInstanceView: React.FC = () => {
       return;
     }
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/chats/?product=${productId}`, {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/chats/?product=${productId}`, {
         headers: {
           Authorization: `Token ${token}`
         }
@@ -112,7 +112,7 @@ const ProductInstanceView: React.FC = () => {
 
     try {
       await axios.post(
-        'http://localhost:8000/api/v1/bids/',
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/bids/`,
         {
           product_id: productId,
           bid_amount: bidAmount,
@@ -146,7 +146,7 @@ const ProductInstanceView: React.FC = () => {
 
     try {
       await axios.post(
-        'http://localhost:8000/api/v1/chats/',
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/chats/`,
         {
           product_id: productId,
           message: message,

@@ -59,7 +59,7 @@ const OrderList: React.FC = () => {
       if (filterProduct !== 'all') params.product = filterProduct;
       if (filterStatus !== 'all') params.status = filterStatus;
 
-      const response = await axios.get('http://localhost:8000/api/v1/orders/', { params });
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`, { params });
       setOrders(response.data.results);
       setTotalCount(response.data.count);
     } catch (error) {
@@ -69,7 +69,7 @@ const OrderList: React.FC = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/customers/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`);
       setCustomers(response.data.results);
     } catch (error) {
       console.error('Error fetching customers', error);
@@ -78,7 +78,7 @@ const OrderList: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/products/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`);
       setProducts(response.data.results);
     } catch (error) {
       console.error('Error fetching products', error);
@@ -133,7 +133,7 @@ const OrderList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/v1/orders/', formData);
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`, formData);
       setSuccess('Order added successfully!');
       setError('');
       setFormData({

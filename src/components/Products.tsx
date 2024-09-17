@@ -42,7 +42,7 @@ const Products: React.FC = () => {
 
   const fetchProducts = async (query = '') => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/products/?search=${query}`);
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}`);
       setProducts(response.data.results);
     } catch (error) {
       console.error('Error fetching products', error);
@@ -51,7 +51,7 @@ const Products: React.FC = () => {
 
   const fetchProducers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/producers/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`);
       setProducers(response.data.results);
     } catch (error) {
       console.error('Error fetching producers', error);
@@ -100,7 +100,7 @@ const Products: React.FC = () => {
     }
 
     try {
-      await axios.post('http://localhost:8000/api/v1/products/', formDataToSend, {
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

@@ -49,7 +49,7 @@ const SaleList: React.FC = () => {
         limit,
         offset,
       };
-      const response = await axios.get('http://localhost:8000/api/v1/sales/', {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/sales/`, {
         params: params,
       });
       setSales(response.data.results);
@@ -62,7 +62,7 @@ const SaleList: React.FC = () => {
   // Fetch orders for the dropdown
   const fetchOrders = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/v1/orders/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`);
       setOrders(response.data.results);
     } catch (error) {
       console.error('Error fetching orders', error);
@@ -84,7 +84,7 @@ const SaleList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/v1/sales/', formData);
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/sales/`, formData);
       setSuccess('Sale added successfully!');
       setError('');
       setFormData({

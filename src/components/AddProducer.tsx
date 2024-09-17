@@ -32,7 +32,7 @@ const AddProducer: React.FC = () => {
   // Fetch producers with limit-offset pagination and search query
   const fetchProducers = async (limit: number, offset: number, searchQuery: string = '') => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/v1/producers/`, {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, {
         params: {
           limit,
           offset,
@@ -68,7 +68,7 @@ const AddProducer: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/v1/producers/', formData);
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, formData);
       setSuccess('Producer added successfully!');
       setError('');
       setFormData({

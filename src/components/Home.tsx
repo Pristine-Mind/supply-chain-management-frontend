@@ -50,7 +50,7 @@ const Home: React.FC = () => {
     }
 
     try {
-        const response = await axios.get('http://localhost:8000/api/v1/user-info/', {
+        const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-info/`, {
             headers: { Authorization: `Token ${token}` }
         });
         setUser({ ...user, username: response.data.username });
@@ -75,7 +75,7 @@ const Home: React.FC = () => {
   const fetchData = async () => {
     try {
       // Replace this with your API endpoint
-      const response = await axios.get('http://localhost:8000/api/v1/dashboard/');
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/dashboard/`);
       setData(response.data);
     } catch (error) {
       console.error('Error fetching data', error);
