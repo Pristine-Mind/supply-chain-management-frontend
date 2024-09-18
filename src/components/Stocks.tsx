@@ -32,12 +32,15 @@ const Stocks: React.FC = () => {
   const fetchStockItems = async (page: number) => {
     try {
       const offset = (page - 1) * itemsPerPage;
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/`, {
-        params: {
-          limit: itemsPerPage,
-          offset: offset
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/`,
+        {
+          params: {
+            limit: itemsPerPage,
+            offset: offset,
+          },
         }
-      });
+      );
 
       setStockItems(response.data.results);
       setTotalPages(Math.ceil(response.data.count / itemsPerPage));
@@ -52,7 +55,9 @@ const Stocks: React.FC = () => {
 
   const handlePushToMarketplace = async (productId: number) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/${productId}/push-to-marketplace/`);
+      const response = await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/${productId}/push-to-marketplace/`
+      );
       if (response.status === 200 || response.status === 201) {
         alert(`Product ${productId} pushed to marketplace successfully.`);
         setPushedProducts((prevState) => [...prevState, productId]);
@@ -77,31 +82,57 @@ const Stocks: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Stock List</h2>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800">Stock List</h2>
       <div className="overflow-x-auto">
-        <table className="min-w-full table-auto bg-white border border-gray-300 shadow-md rounded-lg">
+        <table className="min-w-full table-auto bg-white shadow-md rounded-lg">
           <thead>
-            <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+            <tr className="bg-blue-600 text-white uppercase text-sm leading-normal">
               <th className="py-3 px-6 text-left">Product Name</th>
               <th className="py-3 px-6 text-left">Moved Date</th>
               <th className="py-3 px-6 text-left">Stock Quantity</th>
-              <th className="py-3 px-6 text-left">Actions</th>
+              <th className="py-3 px-6 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm font-light">
             {stockItems.map((item) => (
-              <tr key={item.product} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-6 text-left whitespace-nowrap">{item.product_details.name}</td>
-                <td className="py-3 px-6 text-left">{new Date(item.moved_date).toLocaleDateString()}</td>
-                <td className="py-3 px-6 text-left">{item.product_details.stock}</td>
+              <tr
+                key={item.product}
+                className="border-b border-gray-200 hover:bg-gray-100"
+              >
+                <td className="py-3 px-6 text-left whitespace-nowrap">
+                  <div className="flex items-center">
+                    <div className="mr-2">
+                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                        {item.product_details.name.charAt(0)}
+                      </div>
+                    </div>
+                    <span>{item.product_details.name}</span>
+                  </div>
+                </td>
                 <td className="py-3 px-6 text-left">
+                  {new Date(item.moved_date).toLocaleDateString()}
+                </td>
+                <td className="py-3 px-6 text-left">
+                  {item.product_details.stock}
+                </td>
+                <td className="py-3 px-6 text-center">
                   <button
-                    onClick={() => handlePushToMarketplace(item.product_details.id)}
-                    disabled={pushedProducts.includes(item.product_details.id)}
-                    className={`bg-blue-500 text-white px-4 py-2 rounded-lg ${pushedProducts.includes(item.product_details.id) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+                    onClick={() =>
+                      handlePushToMarketplace(item.product_details.id)
+                    }
+                    disabled={pushedProducts.includes(
+                      item.product_details.id
+                    )}
+                    className={`${
+                      pushedProducts.includes(item.product_details.id)
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-green-500 hover:bg-green-600'
+                    } text-white px-4 py-2 rounded-full transition-colors duration-300`}
                   >
-                    {pushedProducts.includes(item.product_details.id) ? 'Pushed to Marketplace' : 'Push to Marketplace'}
+                    {pushedProducts.includes(item.product_details.id)
+                      ? 'Pushed'
+                      : 'Push to Marketplace'}
                   </button>
                 </td>
               </tr>
@@ -110,23 +141,31 @@ const Stocks: React.FC = () => {
         </table>
       </div>
 
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex justify-between items-center mt-6">
         <button
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
-          className={`bg-gray-500 text-white px-4 py-2 rounded-lg ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'}`}
+          className={`${
+            currentPage === 1
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-blue-500 hover:bg-blue-600'
+          } text-white px-4 py-2 rounded-full transition-colors duration-300`}
         >
           Previous
         </button>
 
-        <span className="text-gray-700">
+        <span className="text-gray-700 font-semibold">
           Page {currentPage} of {totalPages}
         </span>
 
         <button
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
-          className={`bg-gray-500 text-white px-4 py-2 rounded-lg ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'}`}
+          className={`${
+            currentPage === totalPages
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-blue-500 hover:bg-blue-600'
+          } text-white px-4 py-2 rounded-full transition-colors duration-300`}
         >
           Next
         </button>
