@@ -8,7 +8,7 @@ import OrderList from './components/Orderlist';
 import SaleList from './components/SalesList';
 import Stocks from './components/Stocks';
 import ProductInstanceView from './components/ProductInstanceView';  
-
+import StatsDashboard from './components/StatsDashboard';
 // import Marketplace from './components/Marketplace';
 
 const App: React.FC = () => {
@@ -28,7 +28,7 @@ const App: React.FC = () => {
         <Route path='/sales' element={<SaleList />}></Route>
         <Route path='/stocks' element={<Stocks />}></Route>
         {/* <Route path='/marketplace' element={<Marketplace />}></Route> */}
-        
+        <Route path='/stats' element={<StatsDashboard />}></Route>
         <Route path='/marketplace/:productId' element={<ProductInstanceView />} />
 
         <Route path="*" element={<Navigate to="/" />} />

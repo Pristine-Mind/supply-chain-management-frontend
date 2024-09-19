@@ -144,17 +144,17 @@ const Home: React.FC = () => {
               </a>
             </li>
             <li className="mb-4">
+              <a href="/stats" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
+                <ChartBarIcon className="h-5 w-5 mr-3" />
+                Stats and Analytics
+              </a>
+            </li>
+            <li className="mb-4">
               <a href="/stocks" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
                 <ChartBarIcon className="h-5 w-5 mr-3" />
                 Stock Management
               </a>
             </li>
-            {/* <li className="mb-4">
-              <a href="/marketplace" className="flex items-center px-2 py-2 text-sm font-medium rounded hover:bg-gray-700">
-                <ChartBarIcon className="h-5 w-5 mr-3" />
-                Marketplace
-              </a>
-            </li> */}
           </ul>
         </nav>
       </aside>
