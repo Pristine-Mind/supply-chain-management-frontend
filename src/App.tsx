@@ -16,25 +16,28 @@ const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        
         <Route path="/login" element={<Login />} />
         <Route
           path="/home"
           element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
         />
         <Route path="/producers" element={<AddProducer />} />
-        <Route path='/products' element={<Products />}></Route>
-        <Route path='/customers' element={<CustomerList />}></Route>
-        <Route path='/orders' element={<OrderList />}></Route>
-        <Route path='/sales' element={<SaleList />}></Route>
-        <Route path='/stocks' element={<Stocks />}></Route>
-        {/* <Route path='/marketplace' element={<Marketplace />}></Route> */}
-        <Route path='/stats' element={<StatsDashboard />}></Route>
-        <Route path='/marketplace/:productId' element={<ProductInstanceView />} />
-
+        <Route path="/products" element={<Products />} />
+        <Route path="/customers" element={<CustomerList />} />
+        <Route path="/orders" element={<OrderList />} />
+        <Route path="/sales" element={<SaleList />} />
+        <Route path="/stocks" element={<Stocks />} />
+        <Route path="/stats" element={<StatsDashboard />} />
+        <Route path="/marketplace/:productId" element={<ProductInstanceView />} />
+        
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );
 };
+
+
 
 export default App;
