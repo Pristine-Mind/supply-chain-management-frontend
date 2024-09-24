@@ -12,7 +12,7 @@ import StatsDashboard from './components/StatsDashboard';
 // import Marketplace from './components/Marketplace';
 
 const App: React.FC = () => {
-  const isAuthenticated = !!localStorage.getItem('token');
+  // const isAuthenticated = !!localStorage.getItem('token');
   return (
     <Router>
       <Routes>
@@ -21,7 +21,7 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route
           path="/home"
-          element={isAuthenticated ? <Home /> : <Navigate to="/login" />}
+          element={<Home /> }
         />
         <Route path="/producers" element={<AddProducer />} />
         <Route path="/products" element={<Products />} />
