@@ -50,7 +50,7 @@ const OrderList: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const params: any = {
+      const params: Record<string, string | number> = {
         limit,
         offset,
       };
@@ -146,7 +146,7 @@ const OrderList: React.FC = () => {
       setFormVisible(false);
       fetchOrders();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
+    } catch (err) {
       setError('Failed to add order');
       setTimeout(() => setError(''), 3000);
     }
@@ -251,7 +251,7 @@ const OrderList: React.FC = () => {
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="text-center py-4">
+                <td colSpan={8} className="text-center py-4">
                   No orders found.
                 </td>
               </tr>
@@ -295,7 +295,9 @@ const OrderList: React.FC = () => {
                 {success && <p className="text-green-500 mb-4">{success}</p>}
 
                 <div className="mb-4">
-                  <label htmlFor="customer" className="block text-gray-700">Customer</label>
+                  <label htmlFor="customer" className="block text-gray-700">
+                    Customer <span className="text-red-500">*</span>
+                  </label>
                   <select
                     id="customer"
                     name="customer"
@@ -312,7 +314,9 @@ const OrderList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="product" className="block text-gray-700">Product</label>
+                  <label htmlFor="product" className="block text-gray-700">
+                    Product <span className="text-red-500">*</span>
+                  </label>
                   <select
                     id="product"
                     name="product"
@@ -329,7 +333,9 @@ const OrderList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="quantity" className="block text-gray-700">Quantity</label>
+                  <label htmlFor="quantity" className="block text-gray-700">
+                    Quantity <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="number"
                     id="quantity"
@@ -343,7 +349,9 @@ const OrderList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="status" className="block text-gray-700">Status</label>
+                  <label htmlFor="status" className="block text-gray-700">
+                    Status <span className="text-red-500">*</span>
+                  </label>
                   <select
                     id="status"
                     name="status"
@@ -396,4 +404,3 @@ const OrderList: React.FC = () => {
 };
 
 export default OrderList;
-

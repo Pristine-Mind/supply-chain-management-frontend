@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
 interface Producer {
@@ -8,6 +8,14 @@ interface Producer {
   email: string;
   address: string;
   registration_number: string;
+}
+
+interface ErrorMessages {
+  name?: string[];
+  contact?: string[];
+  email?: string[];
+  address?: string[];
+  registration_number?: string[];
 }
 
 const AddProducer: React.FC = () => {
@@ -21,22 +29,21 @@ const AddProducer: React.FC = () => {
     registration_number: ''
   });
   const [formVisible, setFormVisible] = useState(false);
-  const [error, setError] = useState('');
+  const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
   const [success, setSuccess] = useState('');
+  const [editingProducerId, setEditingProducerId] = useState<number | null>(null);
 
-  // Pagination States
-  const [limit] = useState(10); 
+  const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Fetch producers with limit-offset pagination and search query
   const fetchProducers = async (limit: number, offset: number, searchQuery: string = '') => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, {
         params: {
           limit,
           offset,
-          search: searchQuery, // Sending search query to the server
+          search: searchQuery,
         },
       });
       setProducers(response.data.results);
@@ -50,27 +57,31 @@ const AddProducer: React.FC = () => {
     fetchProducers(limit, offset, searchQuery);
   }, [offset, searchQuery]);
 
-  // Handle search input
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setOffset(0); // Reset to first page on new search
+    setOffset(0);
   };
 
-  // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setErrorMessages({ ...errorMessages, [e.target.name]: undefined });
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, formData);
-      setSuccess('Producer added successfully!');
-      setError('');
+      if (editingProducerId) {
+        await axios.patch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/${editingProducerId}/`, formData);
+        setSuccess('Producer updated successfully!');
+        setEditingProducerId(null);
+      } else {
+        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, formData);
+        setSuccess('Producer added successfully!');
+      }
+      setErrorMessages({});
       setFormData({
         name: '',
         contact: '',
@@ -78,29 +89,38 @@ const AddProducer: React.FC = () => {
         address: '',
         registration_number: ''
       });
-      setFormVisible(false); 
+      setFormVisible(false);
       fetchProducers(limit, offset, searchQuery);
 
       setTimeout(() => {
         setSuccess('');
       }, 1000);
-  
     } catch (error) {
-      setError('Failed to add producer');
-      setSuccess('');
-  
-      setTimeout(() => {
-        setError('');
-      }, 1000);
+      if (error.response && error.response.data) {
+        setErrorMessages(error.response.data);
+      } else {
+        setErrorMessages({ general: ['Failed to add/update producer. Please try again later.'] });
+      }
     }
   };
 
-  // Handle page change for pagination
   const handlePageChange = (newOffset: number) => {
     setOffset(newOffset);
   };
 
-  const totalPages = Math.ceil(totalCount / limit);
+  const totalPages = useMemo(() => Math.ceil(totalCount / limit), [totalCount, limit]);
+
+  const handleEditClick = (producer: Producer) => {
+    setFormVisible(true);
+    setFormData({
+      name: producer.name,
+      contact: producer.contact,
+      email: producer.email,
+      address: producer.address,
+      registration_number: producer.registration_number,
+    });
+    setEditingProducerId(producer.id);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -114,7 +134,11 @@ const AddProducer: React.FC = () => {
           className="px-4 py-2 border rounded-lg w-1/3"
         />
         <button
-          onClick={() => setFormVisible(true)}
+          onClick={() => {
+            setFormVisible(true);
+            setFormData({ name: '', contact: '', email: '', address: '', registration_number: '' });
+            setEditingProducerId(null);
+          }}
           className="bg-blue-500 text-white px-4 py-2 rounded-lg"
         >
           Add New Producer
@@ -130,6 +154,7 @@ const AddProducer: React.FC = () => {
               <th scope="col" className="py-3 px-6">Email</th>
               <th scope="col" className="py-3 px-6">Address</th>
               <th scope="col" className="py-3 px-6">Registration Number</th>
+              <th scope="col" className="py-3 px-6">Actions</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -141,11 +166,19 @@ const AddProducer: React.FC = () => {
                   <td className="py-4 px-6">{producer.email}</td>
                   <td className="py-4 px-6">{producer.address}</td>
                   <td className="py-4 px-6">{producer.registration_number}</td>
+                  <td className="py-4 px-6">
+                    <button
+                      onClick={() => handleEditClick(producer)}
+                      className="bg-emerald-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td className="py-4 px-6 text-center" colSpan={5}>No producers available.</td>
+                <td className="py-4 px-6 text-center" colSpan={6}>No producers available.</td>
               </tr>
             )}
           </tbody>
@@ -177,79 +210,98 @@ const AddProducer: React.FC = () => {
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">Add New Producer</h3>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
+                {editingProducerId ? 'Edit Producer' : 'Add New Producer'}
+              </h3>
               <form onSubmit={handleSubmit}>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                {success && <p className="text-green-500 mb-4">{success}</p>}
+                {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
 
                 <div className="mb-4">
-                  <label htmlFor="name" className="block text-gray-700">Producer Name</label>
+                  <label htmlFor="name" className="block text-gray-700">
+                    Producer Name <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''}`}
                     required
                   />
+                  {errorMessages.name && <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>}
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="contact" className="block text-gray-700">Contact Information</label>
+                  <label htmlFor="contact" className="block text-gray-700">
+                    Contact Information <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     id="contact"
                     name="contact"
                     value={formData.contact}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.contact ? 'border-red-500' : ''}`}
                     required
                   />
+                  {errorMessages.contact && <p className="text-red-500 text-sm">{errorMessages.contact[0]}</p>}
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="email" className="block text-gray-700">Email Address</label>
+                  <label htmlFor="email" className="block text-gray-700">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="email"
                     id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.email ? 'border-red-500' : ''}`}
                     required
                   />
+                  {errorMessages.email && <p className="text-red-500 text-sm">{errorMessages.email[0]}</p>}
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="address" className="block text-gray-700">Physical Address</label>
+                  <label htmlFor="address" className="block text-gray-700">
+                    Physical Address <span className="text-red-500">*</span>
+                  </label>
                   <textarea
                     id="address"
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.address ? 'border-red-500' : ''}`}
                     required
                   ></textarea>
+                  {errorMessages.address && <p className="text-red-500 text-sm">{errorMessages.address[0]}</p>}
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="registration_number" className="block text-gray-700">Registration Number</label>
+                  <label htmlFor="registration_number" className="block text-gray-700">
+                    Registration Number <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
                     id="registration_number"
                     name="registration_number"
                     value={formData.registration_number}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.registration_number ? 'border-red-500' : ''}`}
                     required
                   />
+                  {errorMessages.registration_number && <p className="text-red-500 text-sm">{errorMessages.registration_number[0]}</p>}
                 </div>
 
                 <div className="flex justify-end space-x-4">
                   <button
                     type="button"
-                    onClick={() => setFormVisible(false)}
+                    onClick={() => {
+                      setFormVisible(false);
+                      setEditingProducerId(null);
+                    }}
                     className="bg-gray-500 text-white px-4 py-2 rounded-lg"
                   >
                     Cancel
@@ -258,7 +310,7 @@ const AddProducer: React.FC = () => {
                     type="submit"
                     className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                   >
-                    Add Producer
+                    {editingProducerId ? 'Update Producer' : 'Add Producer'}
                   </button>
                 </div>
               </form>
