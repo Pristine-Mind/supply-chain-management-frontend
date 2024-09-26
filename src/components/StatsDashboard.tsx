@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Line, Pie } from 'react-chartjs-2';
-import 'chart.js/auto'; // Required for chart.js 3.x
+import 'chart.js/auto';
 
-// Type Definitions
 interface TopCustomer {
   order__customer__name: string;
   order__customer__city: string;
@@ -56,7 +55,6 @@ const StatsDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [noData, setNoData] = useState<boolean>(false);
 
-  // Filters
   const [location, setLocation] = useState<string>('');
   const [category, setCategory] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');

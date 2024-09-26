@@ -35,14 +35,13 @@ const SaleList: React.FC = () => {
   const [formData, setFormData] = useState({
     quantity: null,
     sale_price: null,
-    payment_status: "pending", // Default to pending
+    payment_status: "pending",
     payment_due_date: '',
     order: null,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Fetch sales with filters and pagination
   const fetchSales = async () => {
     try {
       const params = {
@@ -59,7 +58,6 @@ const SaleList: React.FC = () => {
     }
   };
 
-  // Fetch orders for the dropdown
   const fetchOrders = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`);
@@ -97,7 +95,7 @@ const SaleList: React.FC = () => {
       setFormVisible(false);
       fetchSales();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
+    } catch (err) {
       setError('Failed to add sale');
       setTimeout(() => setError(''), 3000);
     }
@@ -115,7 +113,6 @@ const SaleList: React.FC = () => {
         </button>
       </div>
 
-      {/* Sales Table */}
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
@@ -149,7 +146,6 @@ const SaleList: React.FC = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center">
         <button
           onClick={() => setOffset(offset - limit)}
@@ -172,7 +168,6 @@ const SaleList: React.FC = () => {
         </button>
       </div>
 
-      {/* Add Sale Modal */}
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
@@ -186,7 +181,9 @@ const SaleList: React.FC = () => {
                 {success && <p className="text-green-500 mb-4">{success}</p>}
 
                 <div className="mb-4">
-                  <label htmlFor="order" className="block text-gray-700">Order</label>
+                  <label htmlFor="order" className="block text-gray-700">
+                    Order <span className="text-red-500">*</span>
+                  </label>
                   <select
                     id="order"
                     name="order"
@@ -205,7 +202,9 @@ const SaleList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="quantity" className="block text-gray-700">Quantity</label>
+                  <label htmlFor="quantity" className="block text-gray-700">
+                    Quantity <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="number"
                     id="quantity"
@@ -218,7 +217,9 @@ const SaleList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="sale_price" className="block text-gray-700">Sale Price</label>
+                  <label htmlFor="sale_price" className="block text-gray-700">
+                    Sale Price <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="number"
                     id="sale_price"
@@ -233,13 +234,15 @@ const SaleList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="payment_status" className="block text-gray-700">Payment Status</label>
+                  <label htmlFor="payment_status" className="block text-gray-700">
+                    Payment Status <span className="text-red-500">*</span>
+                  </label>
                   <select
                     id="payment_status"
                     name="payment_status"
                     value={formData.payment_status}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded                   -lg"
+                    className="w-full px-4 py-2 border rounded-lg"
                     required
                   >
                     {paymentStatusOptions.map(status => (
@@ -251,7 +254,9 @@ const SaleList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="payment_due_date" className="block text-gray-700">Payment Due Date</label>
+                  <label htmlFor="payment_due_date" className="block text-gray-700">
+                    Payment Due Date <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="date"
                     id="payment_due_date"
@@ -288,4 +293,3 @@ const SaleList: React.FC = () => {
 };
 
 export default SaleList;
-

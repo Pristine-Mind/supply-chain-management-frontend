@@ -68,7 +68,6 @@ const Stocks: React.FC = () => {
     }
   };
 
-  // Handlers for pagination
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
