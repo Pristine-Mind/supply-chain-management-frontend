@@ -255,31 +255,31 @@ const Products: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Product List</h2>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h2 className="text-xl sm:text-2xl font-bold">Product List</h2>
         <input
           type="text"
           placeholder="Search products..."
           value={searchQuery}
           onChange={handleSearch}
-          className="px-4 py-2 border rounded-lg"
+          className="mt-2 sm:mt-0 px-4 py-2 border rounded-lg w-full sm:w-auto"
         />
         <button
           onClick={() => {
             resetForm();
             setFormVisible(true);
           }}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+          className="mt-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
         >
           Add New Product
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map((product) => (
           <div key={product.id} className="relative">
-            <ProductCard product={product} />
+                        <ProductCard product={product} />
             <div className="absolute top-2 right-2">
               <button
                 onClick={() => handleEdit(product)}
@@ -294,288 +294,303 @@ const Products: React.FC = () => {
 
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen">
+          <div className="flex items-center justify-center min-h-screen p-4 sm:p-8">
             <div
-              className="fixed inset-0 transition-opacity"
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               aria-hidden="true"
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
-                {editingProductId ? 'Edit Product' : 'Add New Product'}
-              </h3>
-              <form onSubmit={handleSubmit} encType="multipart/form-data">
-                {errorMessages.general && (
-                  <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>
-                )}
-                {success && <p className="text-green-500 mb-4">{success}</p>}
+            ></div>
 
-                <div className="mb-4 relative" ref={producerSearchRef}>
-                  <label htmlFor="producer" className="block text-gray-700">
-                    Producer <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="producer"
-                    name="producer"
-                    value={producerSearchTerm}
-                    onChange={handleProducerSearchChange}
-                    onFocus={() => setShowProducerList(true)}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.producer ? 'border-red-500' : ''
-                    }`}
-                    placeholder="Search for a producer..."
-                    required
-                  />
-                  {showProducerList && filteredProducers.length > 0 && (
-                    <ul className="absolute z-10 bg-white border rounded-lg w-full max-h-48 overflow-y-auto mt-1">
-                      {filteredProducers.map((producer) => (
-                        <li
-                          key={producer.id}
-                          onClick={() => handleProducerSelect(producer)}
-                          className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                        >
-                          {producer.name}
-                        </li>
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden transform transition-all sm:max-w-lg w-full z-20">
+              <div className="bg-gray-50 px-4 py-5 sm:px-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  {editingProductId ? 'Edit Product' : 'Add New Product'}
+                </h3>
+              </div>
+              <div className="px-4 py-5 sm:p-6">
+                <form onSubmit={handleSubmit} encType="multipart/form-data">
+                  {errorMessages.general && (
+                    <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>
+                  )}
+                  {success && <p className="text-green-500 mb-4">{success}</p>}
+
+                  {/* Producer Search Input */}
+                  <div className="mb-4 relative" ref={producerSearchRef}>
+                    <label htmlFor="producer" className="block text-gray-700">
+                      Producer <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="producer"
+                      name="producer"
+                      value={producerSearchTerm}
+                      onChange={handleProducerSearchChange}
+                      onFocus={() => setShowProducerList(true)}
+                      className={`w-full px-4 py-2 border rounded-lg ${
+                        errorMessages.producer ? 'border-red-500' : ''
+                      }`}
+                      placeholder="Search for a producer..."
+                      required
+                    />
+                    {showProducerList && filteredProducers.length > 0 && (
+                      <ul className="absolute z-10 bg-white border rounded-lg w-full max-h-48 overflow-y-auto mt-1">
+                        {filteredProducers.map((producer) => (
+                          <li
+                            key={producer.id}
+                            onClick={() => handleProducerSelect(producer)}
+                            className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                          >
+                            {producer.name}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {showProducerList && filteredProducers.length === 0 && (
+                      <p className="absolute z-10 bg-white border rounded-lg w-full px-4 py-2 mt-1">
+                        No producers found.
+                      </p>
+                    )}
+                    {errorMessages.producer && (
+                      <p className="text-red-500 text-sm">
+                        {errorMessages.producer[0]}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Category Select Input */}
+                  <div className="mb-4">
+                    <label htmlFor="category" className="block text-gray-700">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-2 border rounded-lg ${
+                        errorMessages.category ? 'border-red-500' : ''
+                      }`}
+                      required
+                    >
+                      <option value="">Select a Category</option>
+                      {categories.map((category) => (
+                        <option key={category.value} value={category.value}>
+                          {category.label}
+                        </option>
                       ))}
-                    </ul>
-                  )}
-                  {showProducerList && filteredProducers.length === 0 && (
-                    <p className="absolute z-10 bg-white border rounded-lg w-full px-4 py-2 mt-1">
-                      No producers found.
-                    </p>
-                  )}
-                  {errorMessages.producer && (
-                    <p className="text-red-500 text-sm">
-                      {errorMessages.producer[0]}
-                    </p>
-                  )}
-                </div>
+                    </select>
+                    {errorMessages.category && (
+                      <p className="text-red-500 text-sm">
+                        {errorMessages.category[0]}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="mb-4">
-                  <label htmlFor="category" className="block text-gray-700">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.category ? 'border-red-500' : ''
-                    }`}
-                    required
-                  >
-                    <option value="">Select a Category</option>
-                    {categories.map((category) => (
-                      <option key={category.value} value={category.value}>
-                        {category.label}
-                      </option>
-                    ))}
-                  </select>
-                  {errorMessages.category && (
-                    <p className="text-red-500 text-sm">
-                      {errorMessages.category[0]}
-                    </p>
-                  )}
-                </div>
+                  {/* Name Input */}
+                  <div className="mb-4">
+                    <label htmlFor="name" className="block text-gray-700">
+                      Product Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-2 border rounded-lg ${
+                        errorMessages.name ? 'border-red-500' : ''
+                      }`}
+                      required
+                    />
+                    {errorMessages.name && (
+                      <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>
+                    )}
+                  </div>
 
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-gray-700">
-                    Product Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.name ? 'border-red-500' : ''
-                    }`}
-                    required
-                  />
-                  {errorMessages.name && (
-                    <p className="text-red-500 text-sm">
-                      {errorMessages.name[0]}
-                    </p>
-                  )}
-                </div>
+                  {/* Description Input */}
+                  <div className="mb-4">
+                    <label htmlFor="description" className="block text-gray-700">
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-2 border rounded-lg ${
+                        errorMessages.description ? 'border-red-500' : ''
+                      }`}
+                      required
+                    ></textarea>
+                    {errorMessages.description && (
+                      <p className="text-red-500 text-sm">
+                        {errorMessages.description[0]}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="mb-4">
-                  <label htmlFor="description" className="block text-gray-700">
-                    Description <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.description ? 'border-red-500' : ''
-                    }`}
-                    required
-                  ></textarea>
-                  {errorMessages.description && (
-                    <p className="text-red-500 text-sm">
-                      {errorMessages.description[0]}
-                    </p>
-                  )}
-                </div>
+                  {/* SKU Input */}
+                  <div className="mb-4">
+                    <label htmlFor="sku" className="block text-gray-700">
+                      SKU
+                    </label>
+                    <input
+                      type="text"
+                      id="sku"
+                      name="sku"
+                      value={formData.sku}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-2 border rounded-lg ${
+                        errorMessages.sku ? 'border-red-500' : ''
+                      }`}
+                    />
+                    {errorMessages.sku && (
+                      <p className="text-red-500 text-sm">{errorMessages.sku[0]}</p>
+                    )}
+                  </div>
 
-                <div className="mb-4">
-                  <label htmlFor="sku" className="block text-gray-700">
-                    SKU
-                  </label>
-                  <input
-                    type="text"
-                    id="sku"
-                    name="sku"
-                    value={formData.sku}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.sku ? 'border-red-500' : ''
-                    }`}
-                  />
-                  {errorMessages.sku && (
-                    <p className="text-red-500 text-sm">{errorMessages.sku[0]}</p>
-                  )}
-                </div>
+                  {/* Price and Cost Price Inputs */}
+                  <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="price" className="block text-gray-700">
+                        Price <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="price"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-2 border rounded-lg ${
+                          errorMessages.price ? 'border-red-500' : ''
+                        }`}
+                        required
+                      />
+                      {errorMessages.price && (
+                        <p className="text-red-500 text-sm">{errorMessages.price[0]}</p>
+                      )}
+                    </div>
 
-                <div className="mb-4">
-                  <label htmlFor="price" className="block text-gray-700">
-                    Price <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    id="price"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.price ? 'border-red-500' : ''
-                    }`}
-                    required
-                  />
-                  {errorMessages.price && (
-                    <p className="text-red-500 text-sm">{errorMessages.price[0]}</p>
-                  )}
-                </div>
+                    <div>
+                      <label htmlFor="cost_price" className="block text-gray-700">
+                        Cost Price <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        id="cost_price"
+                        name="cost_price"
+                        value={formData.cost_price}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-2 border rounded-lg ${
+                          errorMessages.cost_price ? 'border-red-500' : ''
+                        }`}
+                        required
+                      />
+                      {errorMessages.cost_price && (
+                        <p className="text-red-500 text-sm">{errorMessages.cost_price[0]}</p>
+                      )}
+                    </div>
+                  </div>
 
-                <div className="mb-4">
-                  <label htmlFor="cost_price" className="block text-gray-700">
-                    Cost Price <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    id="cost_price"
-                    name="cost_price"
-                    value={formData.cost_price}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.cost_price ? 'border-red-500' : ''
-                    }`}
-                    required
-                  />
-                  {errorMessages.cost_price && (
-                    <p className="text-red-500 text-sm">
-                      {errorMessages.cost_price[0]}
-                    </p>
-                  )}
-                </div>
+                  {/* Stock and Reorder Level Inputs */}
+                  <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="stock" className="block text-gray-700">
+                        Stock Quantity <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        id="stock"
+                        name="stock"
+                        value={formData.stock}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-2 border rounded-lg ${
+                          errorMessages.stock ? 'border-red-500' : ''
+                        }`}
+                        required
+                      />
+                      {errorMessages.stock && (
+                        <p className="text-red-500 text-sm">{errorMessages.stock[0]}</p>
+                      )}
+                    </div>
 
-                <div className="mb-4">
-                  <label htmlFor="stock" className="block text-gray-700">
-                    Stock Quantity <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    id="stock"
-                    name="stock"
-                    value={formData.stock}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.stock ? 'border-red-500' : ''
-                    }`}
-                    required
-                  />
-                  {errorMessages.stock && (
-                    <p className="text-red-500 text-sm">{errorMessages.stock[0]}</p>
-                  )}
-                </div>
+                    <div>
+                      <label htmlFor="reorder_level" className="block text-gray-700">
+                        Reorder Level
+                      </label>
+                      <input
+                        type="number"
+                        id="reorder_level"
+                        name="reorder_level"
+                        value={formData.reorder_level}
+                        onChange={handleChange}
+                        className={`w-full px-4 py-2 border rounded-lg ${
+                          errorMessages.reorder_level ? 'border-red-500' : ''
+                        }`}
+                      />
+                      {errorMessages.reorder_level && (
+                        <p className="text-red-500 text-sm">
+                          {errorMessages.reorder_level[0]}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-                <div className="mb-4">
-                  <label htmlFor="reorder_level" className="block text-gray-700">
-                    Reorder Level 
-                  </label>
-                  <input
-                    type="number"
-                    id="reorder_level"
-                    name="reorder_level"
-                    value={formData.reorder_level}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.reorder_level ? 'border-red-500' : ''
-                    }`}
-                  />
-                  {errorMessages.reorder_level && (
-                    <p className="text-red-500 text-sm">
-                      {errorMessages.reorder_level[0]}
-                    </p>
-                  )}
-                </div>
-
-                <div className="mb-4">
+                  {/* Active Status Input */}
+                  <div className="mb-4">
                   <label htmlFor="is_active" className="block text-gray-700">
-                    Active Status
-                  </label>
-                  <input
-                    type="checkbox"
-                    id="is_active"
-                    name="is_active"
-                    checked={formData.is_active}
-                    onChange={handleChange}
-                    className="mr-2 leading-tight"
-                  />
-                  <span className="text-gray-700">Is Active</span>
-                </div>
+                      Active Status
+                    </label>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="is_active"
+                        name="is_active"
+                        checked={formData.is_active}
+                        onChange={handleChange}
+                        className="mr-2 leading-tight"
+                      />
+                      <span className="text-gray-700">Is Active</span>
+                    </div>
+                  </div>
 
-                <div className="mb-4">
-                  <label htmlFor="images" className="block text-gray-700">
-                    Upload Images
-                  </label>
-                  <input
-                    type="file"
-                    id="images"
-                    name="images"
-                    multiple
-                    onChange={handleImageChange}
-                    className="w-full px-4 py-2 border rounded-lg"
-                  />
-                </div>
+                  {/* Image Upload */}
+                  <div className="mb-4">
+                    <label htmlFor="images" className="block text-gray-700">
+                      Upload Images
+                    </label>
+                    <input
+                      type="file"
+                      id="images"
+                      name="images"
+                      multiple
+                      onChange={handleImageChange}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    />
+                  </div>
 
-                <div className="flex justify-end space-x-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormVisible(false);
-                      resetForm();
-                    }}
-                    className="bg-gray-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                  >
-                    {editingProductId ? 'Update Product' : 'Add Product'}
-                  </button>
-                </div>
-              </form>
+                  {/* Form Actions */}
+                  <div className="flex justify-end space-x-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormVisible(false);
+                        resetForm();
+                      }}
+                      className="bg-gray-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      {editingProductId ? 'Update Product' : 'Add Product'}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -585,4 +600,5 @@ const Products: React.FC = () => {
 };
 
 export default Products;
-        
+
+

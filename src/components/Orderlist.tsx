@@ -153,12 +153,12 @@ const OrderList: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Order List</h2>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Order List</h2>
         <button
           onClick={() => setFormVisible(true)}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg"
+          className="px-4 py-2 bg-green-500 text-white rounded-lg w-full sm:w-auto"
         >
           Add Order
         </button>
@@ -171,13 +171,13 @@ const OrderList: React.FC = () => {
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search by order number..."
-          className="px-4 py-2 border rounded-lg w-1/4"
+          className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         />
 
         <select
           value={filterCustomer}
           onChange={handleFilterCustomer}
-          className="px-4 py-2 border rounded-lg w-1/4"
+          className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         >
           <option value="all">All Customers</option>
           {customers.map(customer => (
@@ -188,7 +188,7 @@ const OrderList: React.FC = () => {
         <select
           value={filterProduct}
           onChange={handleFilterProduct}
-          className="px-4 py-2 border rounded-lg w-1/4"
+          className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         >
           <option value="all">All Products</option>
           {products.map(product => (
@@ -199,7 +199,7 @@ const OrderList: React.FC = () => {
         <select
           value={filterStatus}
           onChange={handleFilterStatus}
-          className="px-4 py-2 border rounded-lg w-1/4"
+          className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         >
           <option value="all">All Statuses</option>
           <option value="pending">Pending</option>
@@ -228,25 +228,36 @@ const OrderList: React.FC = () => {
             {orders.length > 0 ? (
               orders.map((order) => (
                 <tr key={order.id}>
-                  <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{order.order_number}</td>
+                  <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">
+                    {order.order_number}
+                  </td>
                   <td className="py-4 px-6">{order.customer_details.name}</td>
                   <td className="py-4 px-6">{order.product_details.name}</td>
                   <td className="py-4 px-6">{order.quantity}</td>
                   <td className="py-4 px-6">${order.total_price}</td>
                   <td className="py-4 px-6">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'delivered'
-                      ? 'bg-green-100 text-green-800'
-                      : order.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : order.status === 'cancelled'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        order.status === 'delivered'
+                          ? 'bg-green-100 text-green-800'
+                          : order.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : order.status === 'cancelled'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>
                   </td>
-                  <td className="py-4 px-6">{new Date(order.order_date).toLocaleDateString()}</td>
-                  <td className="py-4 px-6">{order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'N/A'}</td>
+                  <td className="py-4 px-6">
+                    {new Date(order.order_date).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-6">
+                    {order.delivery_date
+                      ? new Date(order.delivery_date).toLocaleDateString()
+                      : 'N/A'}
+                  </td>
                 </tr>
               ))
             ) : (
@@ -260,28 +271,39 @@ const OrderList: React.FC = () => {
         </table>
       </div>
 
+      {/* Pagination */}
       <div className="flex justify-between items-center">
         <button
           onClick={handlePreviousPage}
           disabled={offset === 0}
-          className={`px-4 py-2 rounded-lg ${offset === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          className={`px-4 py-2 rounded-lg ${
+            offset === 0
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-blue-500 text-white'
+          }`}
         >
           Previous
         </button>
 
         <p>
-          Showing {offset + 1} to {Math.min(offset + limit, totalCount)} of {totalCount} orders
+          Showing {offset + 1} to {Math.min(offset + limit, totalCount)} of{' '}
+          {totalCount} orders
         </p>
 
         <button
           onClick={handleNextPage}
           disabled={offset + limit >= totalCount}
-          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
+          className={`px-4 py-2 rounded-lg ${
+            offset + limit >= totalCount
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-blue-500 text-white'
+          }`}
         >
           Next
         </button>
       </div>
 
+      {/* Add Order Form Modal */}
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
@@ -289,7 +311,9 @@ const OrderList: React.FC = () => {
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">Add New Order</h3>
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
+                Add New Order
+              </h3>
               <form onSubmit={handleSubmit}>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
                 {success && <p className="text-green-500 mb-4">{success}</p>}
@@ -307,8 +331,10 @@ const OrderList: React.FC = () => {
                     required
                   >
                     <option value="">Select Customer</option>
-                    {customers.map(customer => (
-                      <option key={customer.id} value={customer.id}>{customer.name}</option>
+                    {customers.map((customer) => (
+                      <option key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -326,8 +352,10 @@ const OrderList: React.FC = () => {
                     required
                   >
                     <option value="">Select Product</option>
-                    {products.map(product => (
-                      <option key={product.id} value={product.id}>{product.name}</option>
+                    {products.map((product) => (
+                      <option key={product.id} value={product.id}>
+                        {product.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -369,7 +397,9 @@ const OrderList: React.FC = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="notes" className="block text-gray-700">Notes</label>
+                  <label htmlFor="notes" className="block text-gray-700">
+                    Notes
+                  </label>
                   <textarea
                     id="notes"
                     name="notes"
@@ -404,3 +434,4 @@ const OrderList: React.FC = () => {
 };
 
 export default OrderList;
+
