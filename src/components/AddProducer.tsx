@@ -123,15 +123,15 @@ const AddProducer: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Producers List</h2>
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Producers List</h2>
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search by name..."
-          className="px-4 py-2 border rounded-lg w-1/3"
+          className="px-4 py-2 border rounded-lg w-full sm:w-1/3 mb-4 sm:mb-0"
         />
         <button
           onClick={() => {
@@ -139,7 +139,7 @@ const AddProducer: React.FC = () => {
             setFormData({ name: '', contact: '', email: '', address: '', registration_number: '' });
             setEditingProducerId(null);
           }}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
         >
           Add New Producer
         </button>
@@ -216,7 +216,7 @@ const AddProducer: React.FC = () => {
               <form onSubmit={handleSubmit}>
                 {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
 
-                <div className="mb-4">
+                <div class                className="mb-4">
                   <label htmlFor="name" className="block text-gray-700">
                     Producer Name <span className="text-red-500">*</span>
                   </label>
@@ -226,10 +226,14 @@ const AddProducer: React.FC = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-2 border rounded-lg ${
+                      errorMessages.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required
                   />
-                  {errorMessages.name && <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>}
+                  {errorMessages.name && (
+                    <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -242,10 +246,14 @@ const AddProducer: React.FC = () => {
                     name="contact"
                     value={formData.contact}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.contact ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-2 border rounded-lg ${
+                      errorMessages.contact ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required
                   />
-                  {errorMessages.contact && <p className="text-red-500 text-sm">{errorMessages.contact[0]}</p>}
+                  {errorMessages.contact && (
+                    <p className="text-red-500 text-sm">{errorMessages.contact[0]}</p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -258,10 +266,14 @@ const AddProducer: React.FC = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.email ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-2 border rounded-lg ${
+                      errorMessages.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required
                   />
-                  {errorMessages.email && <p className="text-red-500 text-sm">{errorMessages.email[0]}</p>}
+                  {errorMessages.email && (
+                    <p className="text-red-500 text-sm">{errorMessages.email[0]}</p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -273,10 +285,14 @@ const AddProducer: React.FC = () => {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.address ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-2 border rounded-lg ${
+                      errorMessages.address ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required
                   ></textarea>
-                  {errorMessages.address && <p className="text-red-500 text-sm">{errorMessages.address[0]}</p>}
+                  {errorMessages.address && (
+                    <p className="text-red-500 text-sm">{errorMessages.address[0]}</p>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -289,10 +305,18 @@ const AddProducer: React.FC = () => {
                     name="registration_number"
                     value={formData.registration_number}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.registration_number ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-2 border rounded-lg ${
+                      errorMessages.registration_number
+                        ? 'border-red-500'
+                        : 'border-gray-300'
+                    }`}
                     required
                   />
-                  {errorMessages.registration_number && <p className="text-red-500 text-sm">{errorMessages.registration_number[0]}</p>}
+                  {errorMessages.registration_number && (
+                    <p className="text-red-500 text-sm">
+                      {errorMessages.registration_number[0]}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex justify-end space-x-4">
