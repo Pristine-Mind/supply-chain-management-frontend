@@ -216,7 +216,7 @@ const AddProducer: React.FC = () => {
               <form onSubmit={handleSubmit}>
                 {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
 
-                <div class                className="mb-4">
+                <div className="mb-4">
                   <label htmlFor="name" className="block text-gray-700">
                     Producer Name <span className="text-red-500">*</span>
                   </label>

@@ -18,7 +18,10 @@ import {
   ChartBarIcon,
   UserGroupIcon,
   ShoppingCartIcon,
-  BackspaceIcon,
+  OfficeBuildingIcon,
+  CurrencyDollarIcon,
+  ChartSquareBarIcon,
+  ScaleIcon
 } from '@heroicons/react/solid';
 
 ChartJS.register(
@@ -192,7 +195,7 @@ const Home: React.FC = () => {
                 to="/producers"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
-                <BackspaceIcon className="h-5 w-5 mr-3" />
+                <OfficeBuildingIcon className="h-5 w-5 mr-3" />
                 Producer Management
               </Link>
             </li>
@@ -228,7 +231,7 @@ const Home: React.FC = () => {
                 to="/sales"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
-                <ChartBarIcon className="h-5 w-5 mr-3" />
+                <CurrencyDollarIcon className="h-5 w-5 mr-3" />
                 Sales Management
               </Link>
             </li>
@@ -237,7 +240,7 @@ const Home: React.FC = () => {
                 to="/stats"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
-                <ChartBarIcon className="h-5 w-5 mr-3" />
+                <ChartSquareBarIcon className="h-5 w-5 mr-3" />
                 Stats and Analytics
               </Link>
             </li>
@@ -246,7 +249,7 @@ const Home: React.FC = () => {
                 to="/stocks"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
-                <ChartBarIcon className="h-5 w-5 mr-3" />
+                <ScaleIcon className="h-5 w-5 mr-3" />
                 Stock Management
               </Link>
             </li>
