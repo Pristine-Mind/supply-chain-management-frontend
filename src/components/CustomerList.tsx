@@ -548,6 +548,7 @@ const CustomerList: React.FC = () => {
                 )}
               </div>
 
+              {/* Credit Limit */}
               <div className="mb-4">
                 <label htmlFor="credit_limit" className="block text-gray-700">
                   Credit Limit <span className="text-red-500">*</span>
@@ -618,5 +619,3 @@ const CustomerList: React.FC = () => {
 };
 
 export default CustomerList;
-
-
