@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import MapboxComponent from './MapboxComponent';
 
 interface Producer {
   id: number;
@@ -8,6 +9,10 @@ interface Producer {
   email: string;
   address: string;
   registration_number: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 interface ErrorMessages {
@@ -16,6 +21,7 @@ interface ErrorMessages {
   email?: string[];
   address?: string[];
   registration_number?: string[];
+  general?: string[];
 }
 
 const AddProducer: React.FC = () => {
@@ -26,7 +32,8 @@ const AddProducer: React.FC = () => {
     contact: '',
     email: '',
     address: '',
-    registration_number: ''
+    registration_number: '',
+    location: { latitude: 0, longitude: 0 },
   });
   const [formVisible, setFormVisible] = useState(false);
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
@@ -70,6 +77,13 @@ const AddProducer: React.FC = () => {
     setErrorMessages({ ...errorMessages, [e.target.name]: undefined });
   };
 
+  const handleLocationSelect = (location: { latitude: number; longitude: number }) => {
+    setFormData({
+      ...formData,
+      location,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -87,7 +101,8 @@ const AddProducer: React.FC = () => {
         contact: '',
         email: '',
         address: '',
-        registration_number: ''
+        registration_number: '',
+        location: { latitude: 0, longitude: 0 },
       });
       setFormVisible(false);
       fetchProducers(limit, offset, searchQuery);
@@ -108,8 +123,6 @@ const AddProducer: React.FC = () => {
     setOffset(newOffset);
   };
 
-  const totalPages = useMemo(() => Math.ceil(totalCount / limit), [totalCount, limit]);
-
   const handleEditClick = (producer: Producer) => {
     setFormVisible(true);
     setFormData({
@@ -118,91 +131,16 @@ const AddProducer: React.FC = () => {
       email: producer.email,
       address: producer.address,
       registration_number: producer.registration_number,
+      location: producer.location || { latitude: 0, longitude: 0 },
     });
     setEditingProducerId(producer.id);
   };
 
+  const totalPages = useMemo(() => Math.ceil(totalCount / limit), [totalCount, limit]);
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Producers List</h2>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={handleSearch}
-          placeholder="Search by name..."
-          className="px-4 py-2 border rounded-lg w-full sm:w-1/3 mb-4 sm:mb-0"
-        />
-        <button
-          onClick={() => {
-            setFormVisible(true);
-            setFormData({ name: '', contact: '', email: '', address: '', registration_number: '' });
-            setEditingProducerId(null);
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
-        >
-          Add New Producer
-        </button>
-      </div>
-
-      <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-            <tr>
-              <th scope="col" className="py-3 px-6">Producer Name</th>
-              <th scope="col" className="py-3 px-6">Contact</th>
-              <th scope="col" className="py-3 px-6">Email</th>
-              <th scope="col" className="py-3 px-6">Address</th>
-              <th scope="col" className="py-3 px-6">Registration Number</th>
-              <th scope="col" className="py-3 px-6">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {producers.length > 0 ? (
-              producers.map((producer) => (
-                <tr key={producer.id}>
-                  <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{producer.name}</td>
-                  <td className="py-4 px-6">{producer.contact}</td>
-                  <td className="py-4 px-6">{producer.email}</td>
-                  <td className="py-4 px-6">{producer.address}</td>
-                  <td className="py-4 px-6">{producer.registration_number}</td>
-                  <td className="py-4 px-6">
-                    <button
-                      onClick={() => handleEditClick(producer)}
-                      className="bg-emerald-500 text-white px-4 py-2 rounded-lg"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td className="py-4 px-6 text-center" colSpan={6}>No producers available.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-between items-center">
-        <button
-          disabled={offset === 0}
-          onClick={() => handlePageChange(offset - limit)}
-          className={`px-4 py-2 text-white ${offset === 0 ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg`}
-        >
-          Previous
-        </button>
-        <span>Page {Math.floor(offset / limit) + 1} of {totalPages}</span>
-        <button
-          disabled={offset + limit >= totalCount}
-          onClick={() => handlePageChange(offset + limit)}
-          className={`px-4 py-2 text-white ${offset + limit >= totalCount ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg`}
-        >
-          Next
-        </button>
-      </div>
-
+      {/* Add Producer Form */}
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
@@ -216,6 +154,7 @@ const AddProducer: React.FC = () => {
               <form onSubmit={handleSubmit}>
                 {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
 
+                {/* Name Field */}
                 <div className="mb-4">
                   <label htmlFor="name" className="block text-gray-700">
                     Producer Name <span className="text-red-500">*</span>
@@ -236,6 +175,7 @@ const AddProducer: React.FC = () => {
                   )}
                 </div>
 
+                {/* Contact Field */}
                 <div className="mb-4">
                   <label htmlFor="contact" className="block text-gray-700">
                     Contact Information <span className="text-red-500">*</span>
@@ -256,6 +196,7 @@ const AddProducer: React.FC = () => {
                   )}
                 </div>
 
+                {/* Email Field */}
                 <div className="mb-4">
                   <label htmlFor="email" className="block text-gray-700">
                     Email Address <span className="text-red-500">*</span>
@@ -276,6 +217,7 @@ const AddProducer: React.FC = () => {
                   )}
                 </div>
 
+                {/* Address Field */}
                 <div className="mb-4">
                   <label htmlFor="address" className="block text-gray-700">
                     Physical Address <span className="text-red-500">*</span>
@@ -295,6 +237,7 @@ const AddProducer: React.FC = () => {
                   )}
                 </div>
 
+                {/* Registration Number Field */}
                 <div className="mb-4">
                   <label htmlFor="registration_number" className="block text-gray-700">
                     Registration Number <span className="text-red-500">*</span>
@@ -315,9 +258,15 @@ const AddProducer: React.FC = () => {
                   {errorMessages.registration_number && (
                     <p className="text-red-500 text-sm">
                       {errorMessages.registration_number[0]}
-                    </p>
+                      </p>
                   )}
                 </div>
+
+                <div className="mb-4">
+                  <label className="block text-gray-700">Select Location</label>
+                  <MapboxComponent onLocationSelect={handleLocationSelect} />
+                </div>
+
 
                 <div className="flex justify-end space-x-4">
                   <button
@@ -342,6 +291,99 @@ const AddProducer: React.FC = () => {
           </div>
         </div>
       )}
+
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Producers List</h2>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearch}
+          placeholder="Search by name..."
+          className="px-4 py-2 border rounded-lg w-full sm:w-1/3 mb-4 sm:mb-0"
+        />
+        <button
+          onClick={() => {
+            setFormVisible(true);
+            setFormData({
+              name: '',
+              contact: '',
+              email: '',
+              address: '',
+              registration_number: '',
+              location: { latitude: 0, longitude: 0 },
+            });
+            setEditingProducerId(null);
+          }}
+          className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
+        >
+          Add New Producer
+        </button>
+      </div>
+
+      <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
+        <table className="w-full text-sm text-left text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+            <tr>
+              <th scope="col" className="py-3 px-6">Producer Name</th>
+              <th scope="col" className="py-3 px-6">Contact</th>
+              <th scope="col" className="py-3 px-6 hidden sm:table-cell">Email</th>
+              <th scope="col" className="py-3 px-6 hidden sm:table-cell">Address</th>
+              <th scope="col" className="py-3 px-6 hidden sm:table-cell">Registration Number</th>
+              {/* <th scope="col" className="py-3 px-6 hidden sm:table-cell">Location</th> */}
+              <th scope="col" className="py-3 px-6">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {producers.length > 0 ? (
+              producers.map((producer) => (
+                <tr key={producer.id}>
+                  <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{producer.name}</td>
+                  <td className="py-4 px-6">{producer.contact}</td>
+                  <td className="py-4 px-6 hidden sm:table-cell">{producer.email}</td>
+                  <td className="py-4 px-6 hidden sm:table-cell">{producer.address}</td>
+                  <td className="py-4 px-6 hidden sm:table-cell">{producer.registration_number}</td>
+                  {/* <td className="py-4 px-6 hidden sm:table-cell">
+                    {producer.location?.latitude && producer.location?.longitude
+                      ? `Lat: ${producer.location.latitude}, Lng: ${producer.location.longitude}`
+                      : 'No Location'}
+                  </td> */}
+                  <td className="py-4 px-6">
+                    <button
+                      onClick={() => handleEditClick(producer)}
+                      className="bg-emerald-500 text-white px-4 py-2 rounded-lg"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="py-4 px-6 text-center" colSpan={7}>No producers available.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center">
+        <button
+          disabled={offset === 0}
+          onClick={() => handlePageChange(offset - limit)}
+          className={`px-4 py-2 text-white ${offset === 0 ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg`}
+        >
+          Previous
+        </button>
+        <span>Page {Math.floor(offset / limit) + 1} of {totalPages}</span>
+        <button
+          disabled={offset + limit >= totalCount}
+          onClick={() => handlePageChange(offset + limit)}
+          className={`px-4 py-2 text-white ${offset + limit >= totalCount ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg`}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
