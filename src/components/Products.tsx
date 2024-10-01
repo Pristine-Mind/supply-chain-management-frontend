@@ -64,6 +64,7 @@ const Products: React.FC = () => {
   });
   const [images, setImages] = useState<FileList | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
   const [success, setSuccess] = useState('');
 
@@ -71,11 +72,13 @@ const Products: React.FC = () => {
   const [showProducerList, setShowProducerList] = useState(false);
   const producerSearchRef = useRef<HTMLDivElement>(null);
 
-  const fetchProducts = async (query = '') => {
+  const fetchProducts = async (query = '', category = '') => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}`
-      );
+      let url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}`;
+      if (category) {
+        url += `&category=${category}`;
+      }
+      const response = await axios.get(url);
       setProducts(response.data.results);
     } catch (error) {
       console.error('Error fetching products', error);
@@ -94,19 +97,31 @@ const Products: React.FC = () => {
   };
 
   const categoryOptions: Category[] = [
-    { value: 'EL', label: 'Electronics' },
-    { value: 'FA', label: 'Fashion & Clothing' },
-    // Add other categories
-  ];
+    { value: 'FR', label: 'Fruits' },
+    { value: 'VG', label: 'Vegetables' },
+    { value: 'GR', label: 'Grains & Cereals' },
+    { value: 'PL', label: 'Pulses & Legumes' },
+    { value: 'SP', label: 'Spices & Herbs' },
+    { value: 'NT', label: 'Nuts & Seeds' },
+    { value: 'DF', label: 'Dairy & Animal Products' },
+    { value: 'FM', label: 'Fodder & Forage' },
+    { value: 'FL', label: 'Flowers & Ornamental Plants' },
+    { value: 'HR', label: 'Herbs & Medicinal Plants' },
+    { value: 'OT', label: 'Other' },
+];
 
   useEffect(() => {
-    fetchProducts(searchQuery);
+    fetchProducts(searchQuery, categoryFilter);
     fetchProducers();
     setCategories(categoryOptions);
-  }, [searchQuery]);
+  }, [searchQuery, categoryFilter]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+  };
+
+  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategoryFilter(e.target.value);
   };
 
   const handleChange = (
@@ -257,7 +272,7 @@ const Products: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h2 className="text-xl sm:text-2xl font-bold">Product List</h2>
+        <h2 className="text-xl sm:text-2xl font-bold">Products List</h2>
         <input
           type="text"
           placeholder="Search products..."
@@ -265,6 +280,20 @@ const Products: React.FC = () => {
           onChange={handleSearch}
           className="mt-2 sm:mt-0 px-4 py-2 border rounded-lg w-full sm:w-auto"
         />
+        {/* Category Filter Dropdown */}
+        <select
+            value={categoryFilter}
+            onChange={handleCategoryFilterChange}
+            className="px-4 py-2 border rounded-lg w-full sm:w-auto"
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
+          </select>
+
         <button
           onClick={() => {
             resetForm();
@@ -316,7 +345,7 @@ const Products: React.FC = () => {
                   {/* Producer Search Input */}
                   <div className="mb-4 relative" ref={producerSearchRef}>
                     <label htmlFor="producer" className="block text-gray-700">
-                      Producer <span className="text-red-500">*</span>
+                      Farmer <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -328,7 +357,7 @@ const Products: React.FC = () => {
                       className={`w-full px-4 py-2 border rounded-lg ${
                         errorMessages.producer ? 'border-red-500' : ''
                       }`}
-                      placeholder="Search for a producer..."
+                      placeholder="Search for a farmer..."
                       required
                     />
                     {showProducerList && filteredProducers.length > 0 && (
@@ -555,7 +584,6 @@ const Products: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Image Upload */}
                   <div className="mb-4">
                     <label htmlFor="images" className="block text-gray-700">
                       Upload Images
@@ -570,7 +598,6 @@ const Products: React.FC = () => {
                     />
                   </div>
 
-                  {/* Form Actions */}
                   <div className="flex justify-end space-x-4">
                     <button
                       type="button"
