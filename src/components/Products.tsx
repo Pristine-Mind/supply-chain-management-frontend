@@ -19,6 +19,7 @@ interface Product {
   reorder_level: number;
   is_active: boolean;
   category: string;
+  producer: string;
   images: ProductImage[];
 }
 
@@ -42,6 +43,7 @@ interface ErrorMessages {
   stock?: string[];
   reorder_level?: string[];
   category?: string[];
+  general?: string[];
 }
 
 const Products: React.FC = () => {
@@ -63,6 +65,8 @@ const Products: React.FC = () => {
     category: '',
   });
   const [images, setImages] = useState<FileList | null>(null);
+  const [existingImages, setExistingImages] = useState<ProductImage[]>([]); // State for existing images
+  const [deletedImages, setDeletedImages] = useState<number[]>([]); // Track deleted images
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
@@ -71,6 +75,27 @@ const Products: React.FC = () => {
   const [producerSearchTerm, setProducerSearchTerm] = useState('');
   const [showProducerList, setShowProducerList] = useState(false);
   const producerSearchRef = useRef<HTMLDivElement>(null);
+
+  const categoryOptions: Category[] = [
+    { value: 'FR', label: 'Fruits' },
+    { value: 'VG', label: 'Vegetables' },
+    { value: 'GR', label: 'Grains & Cereals' },
+    { value: 'PL', label: 'Pulses & Legumes' },
+    { value: 'SP', label: 'Spices & Herbs' },
+    { value: 'NT', label: 'Nuts & Seeds' },
+    { value: 'DF', label: 'Dairy & Animal Products' },
+    { value: 'FM', label: 'Fodder & Forage' },
+    { value: 'FL', label: 'Flowers & Ornamental Plants' },
+    { value: 'HR', label: 'Herbs & Medicinal Plants' },
+    { value: 'OT', label: 'Other' },
+  ];
+
+  // Fetch Products and Producers
+  useEffect(() => {
+    fetchProducts(searchQuery, categoryFilter);
+    fetchProducers();
+    setCategories(categoryOptions);
+  }, [searchQuery, categoryFilter]);
 
   const fetchProducts = async (query = '', category = '') => {
     try {
@@ -96,102 +121,13 @@ const Products: React.FC = () => {
     }
   };
 
-  const categoryOptions: Category[] = [
-    { value: 'FR', label: 'Fruits' },
-    { value: 'VG', label: 'Vegetables' },
-    { value: 'GR', label: 'Grains & Cereals' },
-    { value: 'PL', label: 'Pulses & Legumes' },
-    { value: 'SP', label: 'Spices & Herbs' },
-    { value: 'NT', label: 'Nuts & Seeds' },
-    { value: 'DF', label: 'Dairy & Animal Products' },
-    { value: 'FM', label: 'Fodder & Forage' },
-    { value: 'FL', label: 'Flowers & Ornamental Plants' },
-    { value: 'HR', label: 'Herbs & Medicinal Plants' },
-    { value: 'OT', label: 'Other' },
-];
-
-  useEffect(() => {
-    fetchProducts(searchQuery, categoryFilter);
-    fetchProducers();
-    setCategories(categoryOptions);
-  }, [searchQuery, categoryFilter]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  const handleCategoryFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategoryFilter(e.target.value);
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
-    setErrorMessages({ ...errorMessages, [name]: undefined });
-  };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setImages(e.target.files);
   };
 
-  const handleProducerSearchChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setProducerSearchTerm(e.target.value);
-    setShowProducerList(true);
-  };
-
-  const handleProducerSelect = (producer: Producer) => {
-    setFormData({
-      ...formData,
-      producer: producer.id.toString(),
-    });
-    setProducerSearchTerm(producer.name);
-    setShowProducerList(false);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        producerSearchRef.current &&
-        !producerSearchRef.current.contains(event.target as Node)
-      ) {
-        setShowProducerList(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  const filteredProducers = producers.filter((producer) =>
-    producer.name.toLowerCase().includes(producerSearchTerm.toLowerCase())
-  );
-
-  const resetForm = () => {
-    setFormData({
-      producer: '',
-      name: '',
-      description: '',
-      sku: '',
-      price: '',
-      cost_price: '',
-      stock: '',
-      reorder_level: '10',
-      is_active: true,
-      category: '',
-    });
-    setImages(null);
-    setProducerSearchTerm('');
-    setEditingProductId(null);
+  const handleDeleteExistingImage = (imageId: number) => {
+    setDeletedImages([...deletedImages, imageId]);
+    setExistingImages(existingImages.filter((image) => image.id !== imageId));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -213,6 +149,10 @@ const Products: React.FC = () => {
       for (let i = 0; i < images.length; i++) {
         formDataToSend.append('uploaded_images', images[i]);
       }
+    }
+
+    if (deletedImages.length > 0) {
+      deletedImages.forEach((id) => formDataToSend.append('deleted_images', id.toString()));
     }
 
     try {
@@ -266,7 +206,29 @@ const Products: React.FC = () => {
       is_active: product.is_active,
       category: product.category,
     });
+    setExistingImages(product.images);
+    setDeletedImages([]);
     setFormVisible(true);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      producer: '',
+      name: '',
+      description: '',
+      sku: '',
+      price: '',
+      cost_price: '',
+      stock: '',
+      reorder_level: '10',
+      is_active: true,
+      category: '',
+    });
+    setImages(null);
+    setProducerSearchTerm('');
+    setEditingProductId(null);
+    setExistingImages([]);
+    setDeletedImages([]);
   };
 
   return (
@@ -277,23 +239,21 @@ const Products: React.FC = () => {
           type="text"
           placeholder="Search products..."
           value={searchQuery}
-          onChange={handleSearch}
+          onChange={(e) => setSearchQuery(e.target.value)}
           className="mt-2 sm:mt-0 px-4 py-2 border rounded-lg w-full sm:w-auto"
         />
-        {/* Category Filter Dropdown */}
         <select
-            value={categoryFilter}
-            onChange={handleCategoryFilterChange}
-            className="px-4 py-2 border rounded-lg w-full sm:w-auto"
-          >
-            <option value="">All Categories</option>
-            {categories.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
-
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="px-4 py-2 border rounded-lg w-full sm:w-auto"
+        >
+          <option value="">All Categories</option>
+          {categories.map((category) => (
+            <option key={category.value} value={category.value}>
+              {category.label}
+            </option>
+          ))}
+        </select>
         <button
           onClick={() => {
             resetForm();
@@ -308,7 +268,7 @@ const Products: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map((product) => (
           <div key={product.id} className="relative">
-                        <ProductCard product={product} />
+            <ProductCard product={product} />
             <div className="absolute top-2 right-2">
               <button
                 onClick={() => handleEdit(product)}
@@ -342,7 +302,6 @@ const Products: React.FC = () => {
                   )}
                   {success && <p className="text-green-500 mb-4">{success}</p>}
 
-                  {/* Producer Search Input */}
                   <div className="mb-4 relative" ref={producerSearchRef}>
                     <label htmlFor="producer" className="block text-gray-700">
                       Farmer <span className="text-red-500">*</span>
@@ -352,7 +311,10 @@ const Products: React.FC = () => {
                       id="producer"
                       name="producer"
                       value={producerSearchTerm}
-                      onChange={handleProducerSearchChange}
+                      onChange={(e) => {
+                        setProducerSearchTerm(e.target.value);
+                        setShowProducerList(true);
+                      }}
                       onFocus={() => setShowProducerList(true)}
                       className={`w-full px-4 py-2 border rounded-lg ${
                         errorMessages.producer ? 'border-red-500' : ''
@@ -360,23 +322,38 @@ const Products: React.FC = () => {
                       placeholder="Search for a farmer..."
                       required
                     />
-                    {showProducerList && filteredProducers.length > 0 && (
+                    {showProducerList && (
                       <ul className="absolute z-10 bg-white border rounded-lg w-full max-h-48 overflow-y-auto mt-1">
-                        {filteredProducers.map((producer) => (
-                          <li
-                            key={producer.id}
-                            onClick={() => handleProducerSelect(producer)}
-                            className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
-                          >
-                            {producer.name}
-                          </li>
-                        ))}
+                        {producers
+                          .filter((producer) =>
+                            producer.name
+                              .toLowerCase()
+                              .includes(producerSearchTerm.toLowerCase())
+                          )
+                          .map((producer) => (
+                            <li
+                              key={producer.id}
+                              onClick={() => {
+                                setFormData({
+                                  ...formData,
+                                  producer: producer.id.toString(),
+                                });
+                                setProducerSearchTerm(producer.name);
+                                setShowProducerList(false);
+                              }}
+                              className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                            >
+                              {producer.name}
+                            </li>
+                          ))}
+                        {producers.filter((producer) =>
+                          producer.name
+                            .toLowerCase()
+                            .includes(producerSearchTerm.toLowerCase())
+                        ).length === 0 && (
+                          <li className="px-4 py-2">No producers found.</li>
+                        )}
                       </ul>
-                    )}
-                    {showProducerList && filteredProducers.length === 0 && (
-                      <p className="absolute z-10 bg-white border rounded-lg w-full px-4 py-2 mt-1">
-                        No producers found.
-                      </p>
                     )}
                     {errorMessages.producer && (
                       <p className="text-red-500 text-sm">
@@ -385,7 +362,6 @@ const Products: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Category Select Input */}
                   <div className="mb-4">
                     <label htmlFor="category" className="block text-gray-700">
                       Category <span className="text-red-500">*</span>
@@ -394,7 +370,9 @@ const Products: React.FC = () => {
                       id="category"
                       name="category"
                       value={formData.category}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
                       className={`w-full px-4 py-2 border rounded-lg ${
                         errorMessages.category ? 'border-red-500' : ''
                       }`}
@@ -414,7 +392,6 @@ const Products: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Name Input */}
                   <div className="mb-4">
                     <label htmlFor="name" className="block text-gray-700">
                       Product Name <span className="text-red-500">*</span>
@@ -424,7 +401,9 @@ const Products: React.FC = () => {
                       id="name"
                       name="name"
                       value={formData.name}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       className={`w-full px-4 py-2 border rounded-lg ${
                         errorMessages.name ? 'border-red-500' : ''
                       }`}
@@ -435,7 +414,6 @@ const Products: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Description Input */}
                   <div className="mb-4">
                     <label htmlFor="description" className="block text-gray-700">
                       Description <span className="text-red-500">*</span>
@@ -444,7 +422,9 @@ const Products: React.FC = () => {
                       id="description"
                       name="description"
                       value={formData.description}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        setFormData({ ...formData, description: e.target.value })
+                      }
                       className={`w-full px-4 py-2 border rounded-lg ${
                         errorMessages.description ? 'border-red-500' : ''
                       }`}
@@ -457,7 +437,6 @@ const Products: React.FC = () => {
                     )}
                   </div>
 
-                  {/* SKU Input */}
                   <div className="mb-4">
                     <label htmlFor="sku" className="block text-gray-700">
                       SKU
@@ -467,7 +446,9 @@ const Products: React.FC = () => {
                       id="sku"
                       name="sku"
                       value={formData.sku}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sku: e.target.value })
+                      }
                       className={`w-full px-4 py-2 border rounded-lg ${
                         errorMessages.sku ? 'border-red-500' : ''
                       }`}
@@ -477,7 +458,6 @@ const Products: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Price and Cost Price Inputs */}
                   <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="price" className="block text-gray-700">
@@ -489,7 +469,9 @@ const Products: React.FC = () => {
                         id="price"
                         name="price"
                         value={formData.price}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData({ ...formData, price: e.target.value })
+                        }
                         className={`w-full px-4 py-2 border rounded-lg ${
                           errorMessages.price ? 'border-red-500' : ''
                         }`}
@@ -510,19 +492,22 @@ const Products: React.FC = () => {
                         id="cost_price"
                         name="cost_price"
                         value={formData.cost_price}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData({ ...formData, cost_price: e.target.value })
+                        }
                         className={`w-full px-4 py-2 border rounded-lg ${
                           errorMessages.cost_price ? 'border-red-500' : ''
                         }`}
                         required
                       />
                       {errorMessages.cost_price && (
-                        <p className="text-red-500 text-sm">{errorMessages.cost_price[0]}</p>
+                        <p className="text-red-500 text-sm">
+                          {errorMessages.cost_price[0]}
+                        </p>
                       )}
                     </div>
                   </div>
 
-                  {/* Stock and Reorder Level Inputs */}
                   <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="stock" className="block text-gray-700">
@@ -530,10 +515,12 @@ const Products: React.FC = () => {
                       </label>
                       <input
                         type="number"
-                        id="stock"
+                        id="                        stock"
                         name="stock"
                         value={formData.stock}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData({ ...formData, stock: e.target.value })
+                        }
                         className={`w-full px-4 py-2 border rounded-lg ${
                           errorMessages.stock ? 'border-red-500' : ''
                         }`}
@@ -553,7 +540,9 @@ const Products: React.FC = () => {
                         id="reorder_level"
                         name="reorder_level"
                         value={formData.reorder_level}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData({ ...formData, reorder_level: e.target.value })
+                        }
                         className={`w-full px-4 py-2 border rounded-lg ${
                           errorMessages.reorder_level ? 'border-red-500' : ''
                         }`}
@@ -566,9 +555,8 @@ const Products: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Active Status Input */}
                   <div className="mb-4">
-                  <label htmlFor="is_active" className="block text-gray-700">
+                    <label htmlFor="is_active" className="block text-gray-700">
                       Active Status
                     </label>
                     <div className="flex items-center">
@@ -577,16 +565,42 @@ const Products: React.FC = () => {
                         id="is_active"
                         name="is_active"
                         checked={formData.is_active}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData({ ...formData, is_active: e.target.checked })
+                        }
                         className="mr-2 leading-tight"
                       />
                       <span className="text-gray-700">Is Active</span>
                     </div>
                   </div>
 
+                  {existingImages.length > 0 && (
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Existing Images:</label>
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        {existingImages.map((image) => (
+                          <div key={image.id} className="relative">
+                            <img
+                              src={image.image}
+                              alt={image.alt_text || 'Product Image'}
+                              className="w-full h-20 object-cover rounded"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteExistingImage(image.id)}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                            >
+                              X
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="mb-4">
                     <label htmlFor="images" className="block text-gray-700">
-                      Upload Images
+                      Upload New Images
                     </label>
                     <input
                       type="file"
@@ -627,5 +641,4 @@ const Products: React.FC = () => {
 };
 
 export default Products;
-
 
