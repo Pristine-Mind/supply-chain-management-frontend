@@ -52,6 +52,7 @@ const Products: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [formVisible, setFormVisible] = useState(false);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [viewingProductId, setViewingProductId] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
     producer: '',
     name: '',
@@ -211,6 +212,10 @@ const Products: React.FC = () => {
     setFormVisible(true);
   };
 
+  const handleView = (product: Product) => {
+    setViewingProductId(product);
+  };
+
   const resetForm = () => {
     setFormData({
       producer: '',
@@ -269,7 +274,13 @@ const Products: React.FC = () => {
         {products.map((product) => (
           <div key={product.id} className="relative">
             <ProductCard product={product} />
-            <div className="absolute top-2 right-2">
+            <div className="absolute top-2 right-2 flex space-x-2">
+              <button
+                onClick={() => handleView(product)}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+              >
+                View
+              </button>
               <button
                 onClick={() => handleEdit(product)}
                 className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full"
@@ -280,6 +291,90 @@ const Products: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* View Product Details Modal */}
+      {viewingProductId && (
+        <div className="fixed z-20 inset-0 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen p-4 sm:p-8">
+            <div
+              className="fixed inset-0 bg-gray-800 bg-opacity-75 transition-opacity duration-500 ease-in-out opacity-0 animate-fade-in-overlay"
+              aria-hidden="true"
+            ></div>
+            
+            <div className="bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all sm:max-w-lg w-full z-30 scale-90 opacity-0 animate-fade-and-scale">
+              <div className="bg-gray-50 px-6 py-5 sm:px-8 flex justify-between items-center">
+                <h3 className="text-lg leading-6 font-semibold text-gray-900">
+                  {viewingProductId.name}
+                </h3>
+                <button
+                  onClick={() => setViewingProductId(null)}
+                  className="text-gray-500 hover:text-gray-800 transition duration-300 ease-in-out"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="px-6 py-5 sm:p-8">
+                <div className="space-y-4">
+                  <p><strong>Producer:</strong> {viewingProductId.producer}</p>
+                  <p><strong>Category:</strong> {viewingProductId.category}</p>
+                  <p><strong>Description:</strong> {viewingProductId.description}</p>
+                  <p><strong>SKU:</strong> {viewingProductId.sku}</p>
+                  <p><strong>Price:</strong> <span className="text-green-600 font-semibold">${viewingProductId.price.toFixed(2)}</span></p>
+                  <p><strong>Cost Price:</strong> <span className="text-red-500">${viewingProductId.cost_price.toFixed(2)}</span></p>
+                  <p><strong>Stock Quantity:</strong> {viewingProductId.stock}</p>
+                  <p><strong>Reorder Level:</strong> {viewingProductId.reorder_level}</p>
+                  <p><strong>Active Status:</strong> 
+                    <span className={`ml-2 px-2 py-1 rounded-md text-sm ${viewingProductId.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {viewingProductId.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </p>
+                </div>
+                
+                {viewingProductId.images && viewingProductId.images.length > 0 && (
+                  <div className="mt-6">
+                    <h4 className="text-md font-bold mb-2">Product Images</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      {viewingProductId.images.map((image) => (
+                        <div key={image.id} className="overflow-hidden rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+                          <img
+                            src={image.image}
+                            alt={image.alt_text || 'Product Image'}
+                            className="w-full h-24 object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-end px-6 py-4 bg-gray-50 sm:px-8">
+                <button
+                  type="button"
+                  onClick={() => setViewingProductId(null)}
+                  className="bg-blue-600 hover:bg-blue-800 text-white px-5 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
