@@ -118,7 +118,7 @@ const Stocks: React.FC = () => {
                 <td className="py-3 px-6 text-center">
                   <button
                     onClick={() =>
-                      handlePushToMarketplace(item.product_details.id)
+                      handlePushToMarketplace(item.id)
                     }
                     disabled={pushedProducts.includes(
                       item.product_details.id
