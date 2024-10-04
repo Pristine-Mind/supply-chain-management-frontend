@@ -21,6 +21,7 @@ interface Product {
   category: string;
   producer: string;
   images: ProductImage[];
+  category_details: string;
 }
 
 interface Producer {
@@ -330,7 +331,7 @@ const Products: React.FC = () => {
               <div className="px-6 py-5 sm:p-8">
                 <div className="space-y-4">
                   <p><strong>Producer:</strong> {viewingProductId.producer}</p>
-                  <p><strong>Category:</strong> {viewingProductId.category}</p>
+                  <p><strong>Category:</strong> {viewingProductId.category_details}</p>
                   <p><strong>Description:</strong> {viewingProductId.description}</p>
                   <p><strong>SKU:</strong> {viewingProductId.sku}</p>
                   <p><strong>Price:</strong> <span className="text-green-600 font-semibold">NPR {viewingProductId.price.toFixed(2)}</span></p>
