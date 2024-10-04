@@ -234,7 +234,7 @@ const OrderList: React.FC = () => {
                   <td className="py-4 px-6">{order.customer_details.name}</td>
                   <td className="py-4 px-6">{order.product_details.name}</td>
                   <td className="py-4 px-6">{order.quantity}</td>
-                  <td className="py-4 px-6">${order.total_price}</td>
+                  <td className="py-4 px-6">NPR {order.total_price}</td>
                   <td className="py-4 px-6">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${

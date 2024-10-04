@@ -130,7 +130,7 @@ const SaleList: React.FC = () => {
                 <tr key={sale.id}>
                   <td className="py-4 px-6">{sale.order}</td>
                   <td className="py-4 px-6">{sale.quantity}</td>
-                  <td className="py-4 px-6">${sale.sale_price}</td>
+                  <td className="py-4 px-6">NPR {sale.sale_price}</td>
                   <td className="py-4 px-6">{sale.payment_status_display}</td>
                   <td className="py-4 px-6">{sale.payment_due_date}</td>
                 </tr>

@@ -333,8 +333,8 @@ const Products: React.FC = () => {
                   <p><strong>Category:</strong> {viewingProductId.category}</p>
                   <p><strong>Description:</strong> {viewingProductId.description}</p>
                   <p><strong>SKU:</strong> {viewingProductId.sku}</p>
-                  <p><strong>Price:</strong> <span className="text-green-600 font-semibold">${viewingProductId.price.toFixed(2)}</span></p>
-                  <p><strong>Cost Price:</strong> <span className="text-red-500">${viewingProductId.cost_price.toFixed(2)}</span></p>
+                  <p><strong>Price:</strong> <span className="text-green-600 font-semibold">NPR {viewingProductId.price.toFixed(2)}</span></p>
+                  <p><strong>Cost Price:</strong> <span className="text-red-500">NPR {viewingProductId.cost_price.toFixed(2)}</span></p>
                   <p><strong>Stock Quantity:</strong> {viewingProductId.stock}</p>
                   <p><strong>Reorder Level:</strong> {viewingProductId.reorder_level}</p>
                   <p><strong>Active Status:</strong> 

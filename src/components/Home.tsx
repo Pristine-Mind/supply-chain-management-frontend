@@ -372,7 +372,7 @@ const Home: React.FC = () => {
                 <p>
                   Total Revenue:{' '}
                   <span className="text-2xl font-semibold">
-                    ${data.totalRevenue}
+                    NPR {data.totalRevenue}
                   </span>
                 </p>
               </div>

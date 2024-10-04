@@ -34,20 +34,17 @@ interface StatsResponse {
 }
 
 const categoryOptions: Category[] = [
-  { value: 'EL', label: 'Electronics' },
-  { value: 'FA', label: 'Fashion & Clothing' },
-  { value: 'HB', label: 'Health & Beauty' },
-  { value: 'HK', label: 'Home & Kitchen' },
-  { value: 'GR', label: 'Groceries & Gourmet Food' },
-  { value: 'SO', label: 'Sports & Outdoors' },
-  { value: 'TK', label: 'Toys, Kids & Baby Products' },
-  { value: 'BM', label: 'Books, Music & Movies' },
-  { value: 'AI', label: 'Automotive & Industrial' },
-  { value: 'PS', label: 'Pet Supplies' },
-  { value: 'OS', label: 'Office & Stationery' },
-  { value: 'HF', label: 'Health & Fitness' },
-  { value: 'JA', label: 'Jewelry & Accessories' },
-  { value: 'GF', label: 'Gifts & Flowers' },
+  { value: 'FR', label: 'Fruits' },
+  { value: 'VG', label: 'Vegetables' },
+  { value: 'GR', label: 'Grains & Cereals' },
+  { value: 'PL', label: 'Pulses & Legumes' },
+  { value: 'SP', label: 'Spices & Herbs' },
+  { value: 'NT', label: 'Nuts & Seeds' },
+  { value: 'DF', label: 'Dairy & Animal Products' },
+  { value: 'FM', label: 'Fodder & Forage' },
+  { value: 'FL', label: 'Flowers & Ornamental Plants' },
+  { value: 'HR', label: 'Herbs & Medicinal Plants' },
+  { value: 'OT', label: 'Other' },
 ];
 
 const StatsDashboard: React.FC = () => {
