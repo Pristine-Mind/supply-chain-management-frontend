@@ -43,7 +43,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </span>
 
       {/* Display Product Images */}
-      <div className="mt-4">
+      {/* <div className="mt-4">
         {product.images.length > 0 ? (
           <div className="grid grid-cols-2 gap-4">
             {product.images.map((image) => (
@@ -58,7 +58,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         ) : (
           <p className="text-gray-500">No images available</p>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -125,7 +125,7 @@ const AddProducer: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Producers List</h2>
+        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Farmers List</h2>
         <input
           type="text"
           value={searchQuery}
@@ -141,7 +141,7 @@ const AddProducer: React.FC = () => {
           }}
           className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
         >
-          Add New Producer
+          Add Farmer
         </button>
       </div>
 
@@ -153,7 +153,7 @@ const AddProducer: React.FC = () => {
               <th scope="col" className="py-3 px-6">Contact</th>
               <th scope="col" className="py-3 px-6">Email</th>
               <th scope="col" className="py-3 px-6">Address</th>
-              <th scope="col" className="py-3 px-6">Registration Number</th>
+              <th scope="col" className="py-3 px-6">Citizenship / PAN Number</th>
               <th scope="col" className="py-3 px-6">Actions</th>
             </tr>
           </thead>
@@ -211,7 +211,7 @@ const AddProducer: React.FC = () => {
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
-                {editingProducerId ? 'Edit Producer' : 'Add New Producer'}
+                {editingProducerId ? 'Edit Farmer' : 'Add Farmer'}
               </h3>
               <form onSubmit={handleSubmit}>
                 {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
@@ -258,7 +258,7 @@ const AddProducer: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="email" className="block text-gray-700">
-                    Email Address <span className="text-red-500">*</span>
+                    Email Address
                   </label>
                   <input
                     type="email"
@@ -297,7 +297,7 @@ const AddProducer: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="registration_number" className="block text-gray-700">
-                    Registration Number <span className="text-red-500">*</span>
+                    Citizenship/PAN Number <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
