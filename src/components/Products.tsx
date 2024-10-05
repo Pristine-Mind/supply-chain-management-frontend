@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import ProductCard from './ProductCard';
+import { FaEdit, FaPlus } from "react-icons/fa";
 
 interface ProductImage {
   id: number;
@@ -185,11 +186,11 @@ const Products: React.FC = () => {
       setFormVisible(false);
       fetchProducts();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
-      if (error.response && error.response.data) {
-        setErrorMessages(error.response.data);
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        setErrorMessages(error.response?.data ?? { general: ['An error occurred. Please try again.'] });
       } else {
-        setErrorMessages({ general: ['Failed to save product. Please try again.'] });
+        setErrorMessages({ general: ['Failed to add/update product. Please try again later.'] });
       }
     }
   };
@@ -265,10 +266,12 @@ const Products: React.FC = () => {
             resetForm();
             setFormVisible(true);
           }}
-          className="mt-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
+          className="flex items-center justify-center mt-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
         >
+          <FaPlus className="mr-2" />
           Add New Product
         </button>
+
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -284,10 +287,12 @@ const Products: React.FC = () => {
               </button>
               <button
                 onClick={() => handleEdit(product)}
-                className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full"
+                className="flex items-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full"
               >
+                <FaEdit className="mr-2" />
                 Edit
               </button>
+
             </div>
           </div>
         ))}
@@ -301,12 +306,13 @@ const Products: React.FC = () => {
               className="fixed inset-0 bg-gray-800 bg-opacity-75 transition-opacity duration-500 ease-in-out opacity-0 animate-fade-in-overlay"
               aria-hidden="true"
             ></div>
-            
+
             <div className="bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all sm:max-w-lg w-full z-30 scale-90 opacity-0 animate-fade-and-scale">
               <div className="bg-gray-50 px-6 py-5 sm:px-8 flex justify-between items-center">
                 <h3 className="text-lg leading-6 font-semibold text-gray-900">
                   {viewingProductId.name}
                 </h3>
+
                 <button
                   onClick={() => setViewingProductId(null)}
                   className="text-gray-500 hover:text-gray-800 transition duration-300 ease-in-out"
@@ -327,7 +333,7 @@ const Products: React.FC = () => {
                   </svg>
                 </button>
               </div>
-              
+
               <div className="px-6 py-5 sm:p-8">
                 <div className="space-y-4">
                   <p><strong>Producer:</strong> {viewingProductId.producer}</p>
@@ -338,13 +344,13 @@ const Products: React.FC = () => {
                   <p><strong>Cost Price:</strong> <span className="text-red-500">NPR {viewingProductId.cost_price.toFixed(2)}</span></p>
                   <p><strong>Stock Quantity:</strong> {viewingProductId.stock}</p>
                   <p><strong>Reorder Level:</strong> {viewingProductId.reorder_level}</p>
-                  <p><strong>Active Status:</strong> 
+                  <p><strong>Active Status:</strong>
                     <span className={`ml-2 px-2 py-1 rounded-md text-sm ${viewingProductId.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {viewingProductId.is_active ? 'Active' : 'Inactive'}
                     </span>
                   </p>
                 </div>
-                
+
                 {viewingProductId.images && viewingProductId.images.length > 0 && (
                   <div className="mt-6">
                     <h4 className="text-md font-bold mb-2">Product Images</h4>
@@ -362,7 +368,7 @@ const Products: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex justify-end px-6 py-4 bg-gray-50 sm:px-8">
                 <button
                   type="button"
@@ -386,11 +392,12 @@ const Products: React.FC = () => {
             ></div>
 
             <div className="bg-white rounded-lg shadow-xl overflow-hidden transform transition-all sm:max-w-lg w-full z-20">
-              <div className="bg-gray-50 px-4 py-5 sm:px-6">
+              <div className="bg-gray-100 px-4 py-5 sm:px-6 rounded-lg shadow-md">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
                   {editingProductId ? 'Edit Product' : 'Add New Product'}
                 </h3>
               </div>
+
               <div className="px-4 py-5 sm:p-6">
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                   {errorMessages.general && (
@@ -412,9 +419,8 @@ const Products: React.FC = () => {
                         setShowProducerList(true);
                       }}
                       onFocus={() => setShowProducerList(true)}
-                      className={`w-full px-4 py-2 border rounded-lg ${
-                        errorMessages.producer ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.producer ? 'border-red-500' : ''
+                        }`}
                       placeholder="Search for a farmer..."
                       required
                     />
@@ -447,8 +453,8 @@ const Products: React.FC = () => {
                             .toLowerCase()
                             .includes(producerSearchTerm.toLowerCase())
                         ).length === 0 && (
-                          <li className="px-4 py-2">No producers found.</li>
-                        )}
+                            <li className="px-4 py-2">No producers found.</li>
+                          )}
                       </ul>
                     )}
                     {errorMessages.producer && (
@@ -469,9 +475,8 @@ const Products: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, category: e.target.value })
                       }
-                      className={`w-full px-4 py-2 border rounded-lg ${
-                        errorMessages.category ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.category ? 'border-red-500' : ''
+                        }`}
                       required
                     >
                       <option value="">Select a Category</option>
@@ -500,9 +505,8 @@ const Products: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className={`w-full px-4 py-2 border rounded-lg ${
-                        errorMessages.name ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''
+                        }`}
                       required
                     />
                     {errorMessages.name && (
@@ -521,9 +525,8 @@ const Products: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, description: e.target.value })
                       }
-                      className={`w-full px-4 py-2 border rounded-lg ${
-                        errorMessages.description ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.description ? 'border-red-500' : ''
+                        }`}
                       required
                     ></textarea>
                     {errorMessages.description && (
@@ -545,9 +548,8 @@ const Products: React.FC = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, sku: e.target.value })
                       }
-                      className={`w-full px-4 py-2 border rounded-lg ${
-                        errorMessages.sku ? 'border-red-500' : ''
-                      }`}
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.sku ? 'border-red-500' : ''
+                        }`}
                     />
                     {errorMessages.sku && (
                       <p className="text-red-500 text-sm">{errorMessages.sku[0]}</p>
@@ -568,9 +570,8 @@ const Products: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, price: e.target.value })
                         }
-                        className={`w-full px-4 py-2 border rounded-lg ${
-                          errorMessages.price ? 'border-red-500' : ''
-                        }`}
+                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.price ? 'border-red-500' : ''
+                          }`}
                         required
                       />
                       {errorMessages.price && (
@@ -591,9 +592,8 @@ const Products: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, cost_price: e.target.value })
                         }
-                        className={`w-full px-4 py-2 border rounded-lg ${
-                          errorMessages.cost_price ? 'border-red-500' : ''
-                        }`}
+                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.cost_price ? 'border-red-500' : ''
+                          }`}
                         required
                       />
                       {errorMessages.cost_price && (
@@ -617,9 +617,8 @@ const Products: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, stock: e.target.value })
                         }
-                        className={`w-full px-4 py-2 border rounded-lg ${
-                          errorMessages.stock ? 'border-red-500' : ''
-                        }`}
+                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.stock ? 'border-red-500' : ''
+                          }`}
                         required
                       />
                       {errorMessages.stock && (
@@ -639,9 +638,8 @@ const Products: React.FC = () => {
                         onChange={(e) =>
                           setFormData({ ...formData, reorder_level: e.target.value })
                         }
-                        className={`w-full px-4 py-2 border rounded-lg ${
-                          errorMessages.reorder_level ? 'border-red-500' : ''
-                        }`}
+                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.reorder_level ? 'border-red-500' : ''
+                          }`}
                       />
                       {errorMessages.reorder_level && (
                         <p className="text-red-500 text-sm">

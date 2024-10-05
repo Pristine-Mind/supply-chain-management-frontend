@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { FaPlus } from "react-icons/fa";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -156,7 +157,7 @@ const CustomerList: React.FC = () => {
       setFormVisible(false);
       fetchCustomers();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
+    } catch (error:any) {
       if (error.response && error.response.data) {
         setErrorMessages(error.response.data);
       } else {
@@ -262,10 +263,12 @@ const CustomerList: React.FC = () => {
               });
               setEditingCustomerId(null);
             }}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
+            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
           >
+            <FaPlus className="mr-2" />  {/* Add margin to the right of the icon */}
             Add Customer
           </button>
+
         </div>
       </div>
 
@@ -334,11 +337,10 @@ const CustomerList: React.FC = () => {
         <button
           onClick={handlePreviousPage}
           disabled={offset === 0}
-          className={`px-4 py-2 rounded-lg ${
-            offset === 0
+          className={`px-4 py-2 rounded-lg ${offset === 0
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'
-          }`}
+            }`}
         >
           Previous
         </button>
@@ -350,11 +352,10 @@ const CustomerList: React.FC = () => {
         <button
           onClick={handleNextPage}
           disabled={offset + limit >= totalCount}
-          className={`px-4 py-2 rounded-lg ${
-            offset + limit >= totalCount
+          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'
-          }`}
+            }`}
         >
           Next
         </button>
@@ -412,9 +413,10 @@ const CustomerList: React.FC = () => {
         <div className="fixed z-10 inset-0 overflow-y-auto flex items-center justify-center">
           <div className="fixed inset-0 bg-gray-800 opacity-50" onClick={() => setFormVisible(false)}></div>
           <div className="bg-white rounded-lg shadow-lg p-8 relative z-20 w-full max-w-lg">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-6 bg-gray-200 px-4 py-2 rounded-lg">
               {editingCustomerId ? 'Edit Customer' : 'Add New Customer'}
             </h3>
+
             <form onSubmit={handleSubmit}>
               {errorMessages.general && (
                 <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>
@@ -432,9 +434,8 @@ const CustomerList: React.FC = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.name ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.name ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                 />
                 {errorMessages.name && (
@@ -453,9 +454,8 @@ const CustomerList: React.FC = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.email ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.email ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                 />
                 {errorMessages.email && (
@@ -474,9 +474,8 @@ const CustomerList: React.FC = () => {
                   name="contact"
                   value={formData.contact}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.contact ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.contact ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                 />
                 {errorMessages.contact && (
@@ -494,9 +493,8 @@ const CustomerList: React.FC = () => {
                   name="billing_address"
                   value={formData.billing_address}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.billing_address ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.billing_address ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                 ></textarea>
                 {errorMessages.billing_address && (
@@ -514,9 +512,8 @@ const CustomerList: React.FC = () => {
                   name="shipping_address"
                   value={formData.shipping_address}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.shipping_address ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.shipping_address ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                 ></textarea>
                 {errorMessages.shipping_address && (
@@ -534,9 +531,8 @@ const CustomerList: React.FC = () => {
                   name="customer_type"
                   value={formData.customer_type}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.customer_type ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.customer_type ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                 >
                   <option value="Retailer">Retailer</option>
@@ -558,9 +554,8 @@ const CustomerList: React.FC = () => {
                   name="credit_limit"
                   value={formData.credit_limit}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.credit_limit ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.credit_limit ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                   min="0"
                   step="0.01"
@@ -581,9 +576,8 @@ const CustomerList: React.FC = () => {
                   name="current_balance"
                   value={formData.current_balance}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${
-                    errorMessages.current_balance ? 'border-red-500' : 'border-gray-300'
-                  } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.current_balance ? 'border-red-500' : 'border-gray-300'
+                    } rounded-lg`}
                   required
                   min="0"
                   step="0.01"

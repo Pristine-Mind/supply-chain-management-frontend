@@ -175,9 +175,8 @@ const Home: React.FC = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-900 text-white w-64 z-50`}
+        className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-900 text-white w-64 z-50`}
       >
         <div className="p-4 flex items-center justify-between md:justify-center">
           <h2 className="text-2xl font-bold">Menu</h2>
@@ -277,32 +276,33 @@ const Home: React.FC = () => {
               placeholder="Search..."
               className="px-4 py-2 border rounded-lg"
             />
-            <div className="ml-4 inline-block relative">
-              <button
-                onClick={toggleDropdown}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg focus:outline-none"
-              >
-                {user.username}
-                <svg
-                  className="w-4 h-4 ml-1"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
-                </svg>
-              </button>
+         <div className="ml-4 inline-block relative">
+  <button
+    onClick={toggleDropdown}
+    className="flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
+  >
+    {user.username}
+    <svg
+      className="w-4 h-4 ml-1"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
+    </svg>
+  </button>
 
-              {user.isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+  {user.isDropdownOpen && (
+    <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
+      <button
+        onClick={handleLogout}
+        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+      >
+        Logout
+      </button>
+    </div>
+  )}
+</div>
+
           </div>
         </div>
 

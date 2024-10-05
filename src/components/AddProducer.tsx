@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
+import { FaPlus } from 'react-icons/fa';
 
 interface Producer {
   id: number;
@@ -16,7 +17,9 @@ interface ErrorMessages {
   email?: string[];
   address?: string[];
   registration_number?: string[];
+  general?: string[]; // Added general field for non-field-specific errors
 }
+
 
 const AddProducer: React.FC = () => {
   const [producers, setProducers] = useState<Producer[]>([]);
@@ -95,9 +98,9 @@ const AddProducer: React.FC = () => {
       setTimeout(() => {
         setSuccess('');
       }, 1000);
-    } catch (error) {
-      if (error.response && error.response.data) {
-        setErrorMessages(error.response.data);
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        setErrorMessages(error.response?.data ?? { general: ['An error occurred. Please try again.'] });
       } else {
         setErrorMessages({ general: ['Failed to add/update producer. Please try again later.'] });
       }
@@ -139,10 +142,12 @@ const AddProducer: React.FC = () => {
             setFormData({ name: '', contact: '', email: '', address: '', registration_number: '' });
             setEditingProducerId(null);
           }}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto"
+          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
         >
+          <FaPlus className="mr-2" />  {/* Add the plus icon with margin for spacing */}
           Add Farmer
         </button>
+
       </div>
 
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
@@ -210,9 +215,10 @@ const AddProducer: React.FC = () => {
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6 bg-gray-200 px-4 py-2 rounded-lg">
                 {editingProducerId ? 'Edit Farmer' : 'Add Farmer'}
               </h3>
+
               <form onSubmit={handleSubmit}>
                 {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
 
@@ -226,9 +232,8 @@ const AddProducer: React.FC = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     required
                   />
                   {errorMessages.name && (
@@ -246,9 +251,8 @@ const AddProducer: React.FC = () => {
                     name="contact"
                     value={formData.contact}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.contact ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.contact ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     required
                   />
                   {errorMessages.contact && (
@@ -266,9 +270,8 @@ const AddProducer: React.FC = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.email ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     required
                   />
                   {errorMessages.email && (
@@ -285,9 +288,8 @@ const AddProducer: React.FC = () => {
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.address ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.address ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     required
                   ></textarea>
                   {errorMessages.address && (
@@ -305,11 +307,10 @@ const AddProducer: React.FC = () => {
                     name="registration_number"
                     value={formData.registration_number}
                     onChange={handleChange}
-                    className={`w-full px-4 py-2 border rounded-lg ${
-                      errorMessages.registration_number
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.registration_number
                         ? 'border-red-500'
                         : 'border-gray-300'
-                    }`}
+                      }`}
                     required
                   />
                   {errorMessages.registration_number && (
