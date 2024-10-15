@@ -61,6 +61,7 @@ const Stocks: React.FC = () => {
       if (response.status === 200 || response.status === 201) {
         alert(`Product ${productId} pushed to marketplace successfully.`);
         setPushedProducts((prevState) => [...prevState, productId]);
+        fetchStockItems(currentPage);
       }
     } catch (error) {
       console.error(`Error pushing product ${productId} to marketplace:`, error);
