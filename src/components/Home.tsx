@@ -23,6 +23,7 @@ import {
   ChartSquareBarIcon,
   ScaleIcon
 } from '@heroicons/react/solid';
+import { useTranslation } from 'react-i18next'; // Import useTranslation hook
 
 ChartJS.register(
   CategoryScale,
@@ -50,6 +51,7 @@ interface DashboardData {
 }
 
 const Home: React.FC = () => {
+  const { t, i18n } = useTranslation(); // Use translation hook
   const navigate = useNavigate();
   const [user, setUser] = useState({ username: '', isDropdownOpen: false });
   const [data, setData] = useState<DashboardData>({
@@ -124,7 +126,7 @@ const Home: React.FC = () => {
     labels: data.salesTrends.map((item) => item.month),
     datasets: [
       {
-        label: 'Monthly Sales',
+        label: t('monthly_sales_trends'),
         data: data.salesTrends.map((item) => item.value),
         borderColor: 'rgba(75, 192, 192, 1)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -171,6 +173,7 @@ const Home: React.FC = () => {
             </div>
           )}
         </div>
+        
       </header>
 
       {/* Sidebar */}
@@ -179,7 +182,7 @@ const Home: React.FC = () => {
           } md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-900 text-white w-64 z-50`}
       >
         <div className="p-4 flex items-center justify-between md:justify-center">
-          <h2 className="text-2xl font-bold">Menu</h2>
+          <h2 className="text-2xl font-bold">{t('menu')}</h2>
           <button
             onClick={() => setSidebarOpen(false)}
             className="md:hidden focus:outline-none"
@@ -195,7 +198,7 @@ const Home: React.FC = () => {
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
                 <OfficeBuildingIcon className="h-5 w-5 mr-3" />
-                Producer Management
+                {t('producer_management')}
               </Link>
             </li>
             <li className="mb-4">
@@ -204,8 +207,7 @@ const Home: React.FC = () => {
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
                 <ShoppingBagIcon className="h-5 w-5 mr-3" />
-                Product Management
-              </Link>
+                {t('product_management')}</Link>
             </li>
             <li className="mb-4">
               <Link
@@ -213,7 +215,7 @@ const Home: React.FC = () => {
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
                 <UserGroupIcon className="h-5 w-5 mr-3" />
-                Customer Management
+                {t('customer_management')}
               </Link>
             </li>
             <li className="mb-4">
@@ -222,7 +224,7 @@ const Home: React.FC = () => {
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
                 <ShoppingCartIcon className="h-5 w-5 mr-3" />
-                Order Management
+                {t('order_management')}
               </Link>
             </li>
             <li className="mb-4">
@@ -231,7 +233,7 @@ const Home: React.FC = () => {
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
                 <CurrencyDollarIcon className="h-5 w-5 mr-3" />
-                Sales Management
+                {t('sales_management')}
               </Link>
             </li>
             <li className="mb-4">
@@ -240,7 +242,7 @@ const Home: React.FC = () => {
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
                 <ChartSquareBarIcon className="h-5 w-5 mr-3" />
-                Stats and Analytics
+                {t('stats_and_analytics')}
               </Link>
             </li>
             <li className="mb-4">
@@ -249,7 +251,7 @@ const Home: React.FC = () => {
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
                 <ScaleIcon className="h-5 w-5 mr-3" />
-                Stock Management
+                {t('stock_management')}
               </Link>
             </li>
           </ul>
@@ -263,54 +265,67 @@ const Home: React.FC = () => {
         ></div>
       )}
 
-      {/* Main Content */}
-      <div className="flex-1 p-4 md:p-8">
-        {/* Desktop Header */}
-        <div className="hidden md:flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-600">
-            Supply Chain Dashboard
-          </h1>
-          <div className="relative flex items-center">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="px-4 py-2 border rounded-lg"
-            />
-         <div className="ml-4 inline-block relative">
-  <button
-    onClick={toggleDropdown}
-    className="flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
-  >
-    {user.username}
-    <svg
-      className="w-4 h-4 ml-1"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-    >
-      <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
-    </svg>
-  </button>
+<div className="flex-1 p-4 md:p-8">
+  {/* Desktop Header */}
+  <div className="hidden md:flex justify-between items-center mb-8">
+    <h1 className="text-3xl font-bold text-blue-600">
+      {t('supply_chain_dashboard')}
+    </h1>
+    
+    {/* Right side: Search bar, User dropdown, and Language switcher */}
+    <div className="flex items-center space-x-4">
+      {/* Search Input */}
+      <input
+        type="text"
+        placeholder={t('search_placeholder')}
+        className="px-4 py-2 border rounded-lg w-64"  // Adjusted width for better appearance
+      />
 
-  {user.isDropdownOpen && (
-    <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
-      <button
-        onClick={handleLogout}
-        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-      >
-        Logout
-      </button>
-    </div>
-  )}
-</div>
+      {/* User dropdown */}
+      <div className="relative">
+        <button
+          onClick={() => setUser({ ...user, isDropdownOpen: !user.isDropdownOpen })}
+          className="flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
+        >
+          {user.username}
+          <svg className="w-4 h-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
+          </svg>
+        </button>
 
+        {/* Dropdown menu */}
+        {user.isDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
+            <button
+              onClick={() => {
+                setUser({ ...user, isDropdownOpen: false });
+                navigate('/login');
+              }}
+              className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+            >
+              {t('logout')}
+            </button>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Language Switcher */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
+          className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
+        >
+          {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
+        </button>
+      </div>
+    </div>
+  </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-lg shadow flex items-center">
             <ShoppingBagIcon className="h-6 w-6 text-blue-600 mr-3" />
             <div>
-              <h2 className="text-lg font-bold">Total Products</h2>
+              <h2 className="text-lg font-bold">{t('products')}</h2>
               <p className="text-2xl">{data.totalProducts}</p>
             </div>
           </div>
@@ -318,7 +333,7 @@ const Home: React.FC = () => {
           <div className="bg-white p-4 rounded-lg shadow flex items-center">
             <ShoppingCartIcon className="h-6 w-6 text-green-600 mr-3" />
             <div>
-              <h2 className="text-lg font-bold">Total Orders</h2>
+              <h2 className="text-lg font-bold">{t('orders')}</h2>
               <p className="text-2xl">{data.totalOrders}</p>
             </div>
           </div>
@@ -326,7 +341,7 @@ const Home: React.FC = () => {
           <div className="bg-white p-4 rounded-lg shadow flex items-center">
             <ChartBarIcon className="h-6 w-6 text-red-600 mr-3" />
             <div>
-              <h2 className="text-lg font-bold">Total Sales</h2>
+              <h2 className="text-lg font-bold">{t('sales')}</h2>
               <p className="text-2xl">{data.totalSales}</p>
             </div>
           </div>
@@ -334,7 +349,7 @@ const Home: React.FC = () => {
           <div className="bg-white p-4 rounded-lg shadow flex items-center">
             <UserGroupIcon className="h-6 w-6 text-purple-600 mr-3" />
             <div>
-              <h2 className="text-lg font-bold">Total Customers</h2>
+              <h2 className="text-lg font-bold">{t('customers')}</h2>
               <p className="text-2xl">{data.totalCustomers}</p>
             </div>
           </div>
@@ -344,9 +359,7 @@ const Home: React.FC = () => {
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Sales Trends Line Chart */}
           <div className="bg-white p-4 rounded-lg shadow h-80">
-            <h2 className="text-lg font-bold mb-4">
-              Monthly Sales Trends (Aggregated)
-            </h2>
+            <h2 className="text-lg font-bold mb-4">{t('monthly_sales_trends')}</h2>
             <div className="w-full h-64">
               <Line data={salesTrendsData} options={chartOptions} />
             </div>
@@ -355,25 +368,19 @@ const Home: React.FC = () => {
           {/* Pending Orders and Revenue */}
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-lg font-bold mb-4">
-              Pending Orders & Total Revenue
+              {t('pending_orders')} & {t('total_revenue')}
             </h2>
             <div className="flex flex-col space-y-4">
               <div className="flex items-center">
                 <ShoppingCartIcon className="h-6 w-6 text-yellow-600 mr-3" />
                 <p>
-                  Pending Orders:{' '}
-                  <span className="text-2xl font-semibold">
-                    {data.pendingOrders}
-                  </span>
+                  {t('pending_orders')}: <span className="text-2xl font-semibold">{data.pendingOrders}</span>
                 </p>
               </div>
               <div className="flex items-center">
                 <ChartBarIcon className="h-6 w-6 text-green-600 mr-3" />
                 <p>
-                  Total Revenue:{' '}
-                  <span className="text-2xl font-semibold">
-                    NPR {data.totalRevenue}
-                  </span>
+                  {t('total_revenue')}: <span className="text-2xl font-semibold">NPR {data.totalRevenue}</span>
                 </p>
               </div>
             </div>
