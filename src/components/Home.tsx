@@ -23,7 +23,7 @@ import {
   ChartSquareBarIcon,
   ScaleIcon
 } from '@heroicons/react/solid';
-import { useTranslation } from 'react-i18next'; // Import useTranslation hook
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(
   CategoryScale,
@@ -51,7 +51,7 @@ interface DashboardData {
 }
 
 const Home: React.FC = () => {
-  const { t, i18n } = useTranslation(); // Use translation hook
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState({ username: '', isDropdownOpen: false });
   const [data, setData] = useState<DashboardData>({

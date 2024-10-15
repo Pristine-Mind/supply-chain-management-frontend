@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios, { isAxiosError } from 'axios';
 import { FaPlus } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 interface Producer {
   id: number;
@@ -17,11 +18,12 @@ interface ErrorMessages {
   email?: string[];
   address?: string[];
   registration_number?: string[];
-  general?: string[]; // Added general field for non-field-specific errors
+  general?: string[]; // General errors
 }
 
-
 const AddProducer: React.FC = () => {
+  const { t } = useTranslation();
+
   const [producers, setProducers] = useState<Producer[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
@@ -52,7 +54,7 @@ const AddProducer: React.FC = () => {
       setProducers(response.data.results);
       setTotalCount(response.data.count);
     } catch (error) {
-      console.error('Error fetching producers', error);
+      console.error(t('error_fetching_producers'), error);
     }
   };
 
@@ -78,11 +80,11 @@ const AddProducer: React.FC = () => {
     try {
       if (editingProducerId) {
         await axios.patch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/${editingProducerId}/`, formData);
-        setSuccess('Producer updated successfully!');
+        setSuccess(t('producer_updated_successfully'));
         setEditingProducerId(null);
       } else {
         await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, formData);
-        setSuccess('Producer added successfully!');
+        setSuccess(t('producer_added_successfully'));
       }
       setErrorMessages({});
       setFormData({
@@ -100,9 +102,9 @@ const AddProducer: React.FC = () => {
       }, 1000);
     } catch (error: unknown) {
       if (isAxiosError(error)) {
-        setErrorMessages(error.response?.data ?? { general: ['An error occurred. Please try again.'] });
+        setErrorMessages(error.response?.data ?? { general: [t('error_general')] });
       } else {
-        setErrorMessages({ general: ['Failed to add/update producer. Please try again later.'] });
+        setErrorMessages({ general: [t('error_failed_add_update_producer')] });
       }
     }
   };
@@ -128,12 +130,12 @@ const AddProducer: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Farmers List</h2>
+        <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('farmers_list')}</h2>
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearch}
-          placeholder="Search by name..."
+          placeholder={t('search_by_name')}
           className="px-4 py-2 border rounded-lg w-full sm:w-1/3 mb-4 sm:mb-0"
         />
         <button
@@ -144,22 +146,20 @@ const AddProducer: React.FC = () => {
           }}
           className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
         >
-          <FaPlus className="mr-2" />  {/* Add the plus icon with margin for spacing */}
-          Add Farmer
+          <FaPlus className="mr-2" /> {t('add_farmer')}
         </button>
-
       </div>
 
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th scope="col" className="py-3 px-6">Producer Name</th>
-              <th scope="col" className="py-3 px-6">Contact</th>
-              <th scope="col" className="py-3 px-6">Email</th>
-              <th scope="col" className="py-3 px-6">Address</th>
-              <th scope="col" className="py-3 px-6">Citizenship / PAN Number</th>
-              <th scope="col" className="py-3 px-6">Actions</th>
+              <th scope="col" className="py-3 px-6">{t('producer_name')}</th>
+              <th scope="col" className="py-3 px-6">{t('contact')}</th>
+              <th scope="col" className="py-3 px-6">{t('email')}</th>
+              <th scope="col" className="py-3 px-6">{t('address')}</th>
+              <th scope="col" className="py-3 px-6">{t('registration_number')}</th>
+              <th scope="col" className="py-3 px-6">{t('actions')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -176,14 +176,14 @@ const AddProducer: React.FC = () => {
                       onClick={() => handleEditClick(producer)}
                       className="bg-emerald-500 text-white px-4 py-2 rounded-lg"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td className="py-4 px-6 text-center" colSpan={6}>No producers available.</td>
+                <td className="py-4 px-6 text-center" colSpan={6}>{t('no_producers_available')}</td>
               </tr>
             )}
           </tbody>
@@ -196,15 +196,15 @@ const AddProducer: React.FC = () => {
           onClick={() => handlePageChange(offset - limit)}
           className={`px-4 py-2 text-white ${offset === 0 ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg`}
         >
-          Previous
+          {t('previous')}
         </button>
-        <span>Page {Math.floor(offset / limit) + 1} of {totalPages}</span>
+        <span>{t('page')} {Math.floor(offset / limit) + 1} {t('of')} {totalPages}</span>
         <button
           disabled={offset + limit >= totalCount}
           onClick={() => handlePageChange(offset + limit)}
           className={`px-4 py-2 text-white ${offset + limit >= totalCount ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg`}
         >
-          Next
+          {t('next')}
         </button>
       </div>
 
@@ -216,7 +216,7 @@ const AddProducer: React.FC = () => {
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6 bg-gray-200 px-4 py-2 rounded-lg">
-                {editingProducerId ? 'Edit Farmer' : 'Add Farmer'}
+                {editingProducerId ? t('edit_farmer') : t('add_farmer')}
               </h3>
 
               <form onSubmit={handleSubmit}>
@@ -224,7 +224,7 @@ const AddProducer: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="name" className="block text-gray-700">
-                    Producer Name <span className="text-red-500">*</span>
+                    {t('producer_name')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -243,7 +243,7 @@ const AddProducer: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="contact" className="block text-gray-700">
-                    Contact Information <span className="text-red-500">*</span>
+                    {t('contact_information')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -262,7 +262,7 @@ const AddProducer: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="email" className="block text-gray-700">
-                    Email Address
+                    {t('email_address')}
                   </label>
                   <input
                     type="email"
@@ -272,7 +272,6 @@ const AddProducer: React.FC = () => {
                     onChange={handleChange}
                     className={`w-full px-4 py-2 border rounded-lg ${errorMessages.email ? 'border-red-500' : 'border-gray-300'
                       }`}
-                    required
                   />
                   {errorMessages.email && (
                     <p className="text-red-500 text-sm">{errorMessages.email[0]}</p>
@@ -281,7 +280,7 @@ const AddProducer: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="address" className="block text-gray-700">
-                    Physical Address <span className="text-red-500">*</span>
+                    {t('physical_address')} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     id="address"
@@ -299,7 +298,7 @@ const AddProducer: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="registration_number" className="block text-gray-700">
-                    Citizenship/PAN Number <span className="text-red-500">*</span>
+                    {t('citizenship_pan_number')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -329,13 +328,13 @@ const AddProducer: React.FC = () => {
                     }}
                     className="bg-gray-500 text-white px-4 py-2 rounded-lg"
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                     type="submit"
                     className="bg-blue-500 text-white px-4 py-2 rounded-lg"
                   >
-                    {editingProducerId ? 'Update Producer' : 'Add Producer'}
+                    {editingProducerId ? t('update_producer') : t('add_producer')}
                   </button>
                 </div>
               </form>
