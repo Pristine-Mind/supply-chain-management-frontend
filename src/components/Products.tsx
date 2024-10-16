@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios, { isAxiosError } from 'axios';
 import ProductCard from './ProductCard';
 import { FaEdit, FaPlus } from "react-icons/fa";
+import { useTranslation } from 'react-i18next';
 
 interface ProductImage {
   id: number;
@@ -49,6 +50,8 @@ interface ErrorMessages {
 }
 
 const Products: React.FC = () => {
+  const { t } = useTranslation();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [producers, setProducers] = useState<Producer[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -68,8 +71,8 @@ const Products: React.FC = () => {
     category: '',
   });
   const [images, setImages] = useState<FileList | null>(null);
-  const [existingImages, setExistingImages] = useState<ProductImage[]>([]); // State for existing images
-  const [deletedImages, setDeletedImages] = useState<number[]>([]); // Track deleted images
+  const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
+  const [deletedImages, setDeletedImages] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
@@ -80,17 +83,17 @@ const Products: React.FC = () => {
   const producerSearchRef = useRef<HTMLDivElement>(null);
 
   const categoryOptions: Category[] = [
-    { value: 'FR', label: 'Fruits' },
-    { value: 'VG', label: 'Vegetables' },
-    { value: 'GR', label: 'Grains & Cereals' },
-    { value: 'PL', label: 'Pulses & Legumes' },
-    { value: 'SP', label: 'Spices & Herbs' },
-    { value: 'NT', label: 'Nuts & Seeds' },
-    { value: 'DF', label: 'Dairy & Animal Products' },
-    { value: 'FM', label: 'Fodder & Forage' },
-    { value: 'FL', label: 'Flowers & Ornamental Plants' },
-    { value: 'HR', label: 'Herbs & Medicinal Plants' },
-    { value: 'OT', label: 'Other' },
+    { value: 'FR', label: t('fruits') },
+    { value: 'VG', label: t('vegetables') },
+    { value: 'GR', label: t('grains_cereals') },
+    { value: 'PL', label: t('pulses_legumes') },
+    { value: 'SP', label: t('spices_herbs') },
+    { value: 'NT', label: t('nuts_seeds') },
+    { value: 'DF', label: t('dairy_animal_products') },
+    { value: 'FM', label: t('fodder_forage') },
+    { value: 'FL', label: t('flowers_ornamental_plants') },
+    { value: 'HR', label: t('herbs_medicinal_plants') },
+    { value: 'OT', label: t('other') },
   ];
 
   // Fetch Products and Producers
@@ -109,7 +112,7 @@ const Products: React.FC = () => {
       const response = await axios.get(url);
       setProducts(response.data.results);
     } catch (error) {
-      console.error('Error fetching products', error);
+      console.error(t('error_fetching_products'), error);
     }
   };
 
@@ -120,7 +123,7 @@ const Products: React.FC = () => {
       );
       setProducers(response.data.results);
     } catch (error) {
-      console.error('Error fetching producers', error);
+      console.error(t('error_fetching_producers'), error);
     }
   };
 
@@ -169,7 +172,7 @@ const Products: React.FC = () => {
             },
           }
         );
-        setSuccess('Product updated successfully!');
+        setSuccess(t('product_updated_successfully'));
       } else {
         await axios.post(
           `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`,
@@ -180,7 +183,7 @@ const Products: React.FC = () => {
             },
           }
         );
-        setSuccess('Product added successfully!');
+        setSuccess(t('product_added_successfully'));
       }
       resetForm();
       setFormVisible(false);
@@ -188,9 +191,9 @@ const Products: React.FC = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (error: unknown) {
       if (isAxiosError(error)) {
-        setErrorMessages(error.response?.data ?? { general: ['An error occurred. Please try again.'] });
+        setErrorMessages(error.response?.data ?? { general: [t('error_occurred_try_again')] });
       } else {
-        setErrorMessages({ general: ['Failed to add/update product. Please try again later.'] });
+        setErrorMessages({ general: [t('failed_add_update_product')] });
       }
     }
   };
@@ -241,10 +244,10 @@ const Products: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h2 className="text-xl sm:text-2xl font-bold">Products List</h2>
+        <h2 className="text-xl sm:text-2xl font-bold">{t('products_list')}</h2>
         <input
           type="text"
-          placeholder="Search products..."
+          placeholder={t('search_products')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="mt-2 sm:mt-0 px-4 py-2 border rounded-lg w-full sm:w-auto"
@@ -254,7 +257,7 @@ const Products: React.FC = () => {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-4 py-2 border rounded-lg w-full sm:w-auto"
         >
-          <option value="">All Categories</option>
+          <option value="">{t('all_categories')}</option>
           {categories.map((category) => (
             <option key={category.value} value={category.value}>
               {category.label}
@@ -269,9 +272,8 @@ const Products: React.FC = () => {
           className="flex items-center justify-center mt-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
         >
           <FaPlus className="mr-2" />
-          Add New Product
+          {t('add_new_product')}
         </button>
-
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -283,16 +285,15 @@ const Products: React.FC = () => {
                 onClick={() => handleView(product)}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
               >
-                View
+                {t('view')}
               </button>
               <button
                 onClick={() => handleEdit(product)}
                 className="flex items-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full"
               >
                 <FaEdit className="mr-2" />
-                Edit
+                {t('edit')}
               </button>
-
             </div>
           </div>
         ))}
@@ -336,27 +337,58 @@ const Products: React.FC = () => {
 
               <div className="px-6 py-5 sm:p-8">
                 <div className="space-y-4">
-                  <p><strong>Producer:</strong> {viewingProductId.producer}</p>
-                  <p><strong>Category:</strong> {viewingProductId.category_details}</p>
-                  <p><strong>Description:</strong> {viewingProductId.description}</p>
-                  <p><strong>SKU:</strong> {viewingProductId.sku}</p>
-                  <p><strong>Price:</strong> <span className="text-green-600 font-semibold">NPR {viewingProductId.price.toFixed(2)}</span></p>
-                  <p><strong>Cost Price:</strong> <span className="text-red-500">NPR {viewingProductId.cost_price.toFixed(2)}</span></p>
-                  <p><strong>Stock Quantity:</strong> {viewingProductId.stock}</p>
-                  <p><strong>Reorder Level:</strong> {viewingProductId.reorder_level}</p>
-                  <p><strong>Active Status:</strong>
-                    <span className={`ml-2 px-2 py-1 rounded-md text-sm ${viewingProductId.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {viewingProductId.is_active ? 'Active' : 'Inactive'}
+                  <p>
+                    <strong>{t('producer')}:</strong> {viewingProductId.producer}
+                  </p>
+                  <p>
+                    <strong>{t('category')}:</strong> {viewingProductId.category_details}
+                  </p>
+                  <p>
+                    <strong>{t('description')}:</strong> {viewingProductId.description}
+                  </p>
+                  <p>
+                    <strong>{t('sku')}:</strong> {viewingProductId.sku}
+                  </p>
+                  <p>
+                    <strong>{t('price')}:</strong>{' '}
+                    <span className="text-green-600 font-semibold">
+                      NPR {viewingProductId.price.toFixed(2)}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>{t('cost_price')}:</strong>{' '}
+                    <span className="text-red-500">
+                      NPR {viewingProductId.cost_price.toFixed(2)}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>{t('stock_quantity')}:</strong> {viewingProductId.stock}
+                  </p>
+                  <p>
+                    <strong>{t('reorder_level')}:</strong> {viewingProductId.reorder_level}
+                  </p>
+                  <p>
+                    <strong>{t('active_status')}:</strong>
+                    <span
+                      className={`ml-2 px-2 py-1 rounded-md text-sm ${viewingProductId.is_active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                        }`}
+                    >
+                      {viewingProductId.is_active ? t('active') : t('inactive')}
                     </span>
                   </p>
                 </div>
 
                 {viewingProductId.images && viewingProductId.images.length > 0 && (
                   <div className="mt-6">
-                    <h4 className="text-md font-bold mb-2">Product Images</h4>
+                    <h4 className="text-md font-bold mb-2">{t('product_images')}</h4>
                     <div className="grid grid-cols-3 gap-3">
                       {viewingProductId.images.map((image) => (
-                        <div key={image.id} className="overflow-hidden rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+                        <div
+                          key={image.id}
+                          className="overflow-hidden rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out"
+                        >
                           <img
                             src={image.image}
                             alt={image.alt_text || 'Product Image'}
@@ -375,7 +407,7 @@ const Products: React.FC = () => {
                   onClick={() => setViewingProductId(null)}
                   className="bg-blue-600 hover:bg-blue-800 text-white px-5 py-2 rounded-lg shadow-md transition-all duration-300 ease-in-out"
                 >
-                  Close
+                  {t('close')}
                 </button>
               </div>
             </div>
@@ -394,7 +426,7 @@ const Products: React.FC = () => {
             <div className="bg-white rounded-lg shadow-xl overflow-hidden transform transition-all sm:max-w-lg w-full z-20">
               <div className="bg-gray-100 px-4 py-5 sm:px-6 rounded-lg shadow-md">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  {editingProductId ? 'Edit Product' : 'Add New Product'}
+                  {editingProductId ? t('edit_product') : t('add_new_product')}
                 </h3>
               </div>
 
@@ -407,7 +439,7 @@ const Products: React.FC = () => {
 
                   <div className="mb-4 relative" ref={producerSearchRef}>
                     <label htmlFor="producer" className="block text-gray-700">
-                      Farmer <span className="text-red-500">*</span>
+                      {t('producer')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -421,7 +453,7 @@ const Products: React.FC = () => {
                       onFocus={() => setShowProducerList(true)}
                       className={`w-full px-4 py-2 border rounded-lg ${errorMessages.producer ? 'border-red-500' : ''
                         }`}
-                      placeholder="Search for a farmer..."
+                      placeholder={t('search_farmer')}
                       required
                     />
                     {showProducerList && (
@@ -453,286 +485,285 @@ const Products: React.FC = () => {
                             .toLowerCase()
                             .includes(producerSearchTerm.toLowerCase())
                         ).length === 0 && (
-                            <li className="px-4 py-2">No producers found.</li>
-                          )}
-                      </ul>
-                    )}
-                    {errorMessages.producer && (
-                      <p className="text-red-500 text-sm">
-                        {errorMessages.producer[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label htmlFor="category" className="block text-gray-700">
-                      Category <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="category"
-                      name="category"
-                      value={formData.category}
-                      onChange={(e) =>
-                        setFormData({ ...formData, category: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.category ? 'border-red-500' : ''
-                        }`}
-                      required
-                    >
-                      <option value="">Select a Category</option>
-                      {categories.map((category) => (
-                        <option key={category.value} value={category.value}>
-                          {category.label}
-                        </option>
-                      ))}
-                    </select>
-                    {errorMessages.category && (
-                      <p className="text-red-500 text-sm">
-                        {errorMessages.category[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label htmlFor="name" className="block text-gray-700">
-                      Product Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''
-                        }`}
-                      required
-                    />
-                    {errorMessages.name && (
-                      <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label htmlFor="description" className="block text-gray-700">
-                      Description <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData({ ...formData, description: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.description ? 'border-red-500' : ''
-                        }`}
-                      required
-                    ></textarea>
-                    {errorMessages.description && (
-                      <p className="text-red-500 text-sm">
-                        {errorMessages.description[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-4">
-                    <label htmlFor="sku" className="block text-gray-700">
-                      SKU
-                    </label>
-                    <input
-                      type="text"
-                      id="sku"
-                      name="sku"
-                      value={formData.sku}
-                      onChange={(e) =>
-                        setFormData({ ...formData, sku: e.target.value })
-                      }
-                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.sku ? 'border-red-500' : ''
-                        }`}
-                    />
-                    {errorMessages.sku && (
-                      <p className="text-red-500 text-sm">{errorMessages.sku[0]}</p>
-                    )}
-                  </div>
-
-                  <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="price" className="block text-gray-700">
-                        Price <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        id="price"
-                        name="price"
-                        value={formData.price}
-                        onChange={(e) =>
-                          setFormData({ ...formData, price: e.target.value })
-                        }
-                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.price ? 'border-red-500' : ''
-                          }`}
-                        required
-                      />
-                      {errorMessages.price && (
-                        <p className="text-red-500 text-sm">{errorMessages.price[0]}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="cost_price" className="block text-gray-700">
-                        Cost Price <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        id="cost_price"
-                        name="cost_price"
-                        value={formData.cost_price}
-                        onChange={(e) =>
-                          setFormData({ ...formData, cost_price: e.target.value })
-                        }
-                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.cost_price ? 'border-red-500' : ''
-                          }`}
-                        required
-                      />
-                      {errorMessages.cost_price && (
-                        <p className="text-red-500 text-sm">
-                          {errorMessages.cost_price[0]}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="stock" className="block text-gray-700">
-                        Stock Quantity <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="number"
-                        id="                        stock"
-                        name="stock"
-                        value={formData.stock}
-                        onChange={(e) =>
-                          setFormData({ ...formData, stock: e.target.value })
-                        }
-                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.stock ? 'border-red-500' : ''
-                          }`}
-                        required
-                      />
-                      {errorMessages.stock && (
-                        <p className="text-red-500 text-sm">{errorMessages.stock[0]}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label htmlFor="reorder_level" className="block text-gray-700">
-                        Reorder Level
-                      </label>
-                      <input
-                        type="number"
-                        id="reorder_level"
-                        name="reorder_level"
-                        value={formData.reorder_level}
-                        onChange={(e) =>
-                          setFormData({ ...formData, reorder_level: e.target.value })
-                        }
-                        className={`w-full px-4 py-2 border rounded-lg ${errorMessages.reorder_level ? 'border-red-500' : ''
-                          }`}
-                      />
-                      {errorMessages.reorder_level && (
-                        <p className="text-red-500 text-sm">
-                          {errorMessages.reorder_level[0]}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mb-4">
-                    <label htmlFor="is_active" className="block text-gray-700">
-                      Active Status
-                    </label>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="is_active"
-                        name="is_active"
-                        checked={formData.is_active}
-                        onChange={(e) =>
-                          setFormData({ ...formData, is_active: e.target.checked })
-                        }
-                        className="mr-2 leading-tight"
-                      />
-                      <span className="text-gray-700">Is Active</span>
-                    </div>
-                  </div>
-
-                  {existingImages.length > 0 && (
-                    <div className="mb-4">
-                      <label className="block text-gray-700">Existing Images:</label>
-                      <div className="grid grid-cols-3 gap-2 mt-2">
-                        {existingImages.map((image) => (
-                          <div key={image.id} className="relative">
-                            <img
-                              src={image.image}
-                              alt={image.alt_text || 'Product Image'}
-                              className="w-full h-20 object-cover rounded"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteExistingImage(image.id)}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
-                            >
-                              X
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                          <li className="px-4 py-2">{t('no_producers_found')}</li>
+                        )}
+                    </ul>
                   )}
+                  {errorMessages.producer && (
+                    <p className="text-red-500 text-sm">
+                      {errorMessages.producer[0]}
+                    </p>
+                  )}
+                </div>
 
-                  <div className="mb-4">
-                    <label htmlFor="images" className="block text-gray-700">
-                      Upload New Images
+                <div className="mb-4">
+                  <label htmlFor="category" className="block text-gray-700">
+                    {t('category')} <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.category ? 'border-red-500' : ''
+                      }`}
+                    required
+                  >
+                    <option value="">{t('select_category')}</option>
+                    {categories.map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errorMessages.category && (
+                    <p className="text-red-500 text-sm">
+                      {errorMessages.category[0]}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="name" className="block text-gray-700">
+                    {t('product_name')} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''
+                      }`}
+                    required
+                  />
+                  {errorMessages.name && (
+                    <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="description" className="block text-gray-700">
+                    {t('description')} <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.description ? 'border-red-500' : ''
+                      }`}
+                    required
+                  ></textarea>
+                  {errorMessages.description && (
+                    <p className="text-red-500 text-sm">
+                      {errorMessages.description[0]}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="sku" className="block text-gray-700">
+                    {t('sku')}
+                  </label>
+                  <input
+                    type="text"
+                    id="sku"
+                    name="sku"
+                    value={formData.sku}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sku: e.target.value })
+                    }
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.sku ? 'border-red-500' : ''
+                      }`}
+                  />
+                  {errorMessages.sku && (
+                    <p className="text-red-500 text-sm">{errorMessages.sku[0]}</p>
+                  )}
+                </div>
+
+                <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="price" className="block text-gray-700">
+                      {t('price')} <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="file"
-                      id="images"
-                      name="images"
-                      multiple
-                      onChange={handleImageChange}
-                      className="w-full px-4 py-2 border rounded-lg"
+                      type="number"
+                      step="0.01"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, price: e.target.value })
+                      }
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.price ? 'border-red-500' : ''
+                        }`}
+                      required
                     />
+                    {errorMessages.price && (
+                      <p className="text-red-500 text-sm">{errorMessages.price[0]}</p>
+                    )}
                   </div>
 
-                  <div className="flex justify-end space-x-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFormVisible(false);
-                        resetForm();
-                      }}
-                      className="bg-gray-500 text-white px-4 py-2 rounded-lg"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg"
-                    >
-                      {editingProductId ? 'Update Product' : 'Add Product'}
-                    </button>
+                  <div>
+                    <label htmlFor="cost_price" className="block text-gray-700">
+                      {t('cost_price')} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      id="cost_price"
+                      name="cost_price"
+                      value={formData.cost_price}
+                      onChange={(e) =>
+                        setFormData({ ...formData, cost_price: e.target.value })
+                      }
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.cost_price ? 'border-red-500' : ''
+                        }`}
+                      required
+                    />
+                    {errorMessages.cost_price && (
+                      <p className="text-red-500 text-sm">
+                        {errorMessages.cost_price[0]}
+                      </p>
+                    )}
                   </div>
-                </form>
-              </div>
+                </div>
+
+                <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="stock" className="block text-gray-700">
+                      {t('stock_quantity')} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      id="stock"
+                      name="stock"
+                      value={formData.stock}
+                      onChange={(e) =>
+                        setFormData({ ...formData, stock: e.target.value })
+                      }
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.stock ? 'border-red-500' : ''
+                        }`}
+                      required
+                    />
+                    {errorMessages.stock && (
+                      <p className="text-red-500 text-sm">{errorMessages.stock[0]}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="reorder_level" className="block text-gray-700">
+                      {t('reorder_level')}
+                    </label>
+                    <input
+                      type="number"
+                      id="reorder_level"
+                      name="reorder_level"
+                      value={formData.reorder_level}
+                      onChange={(e) =>
+                        setFormData({ ...formData, reorder_level: e.target.value })
+                      }
+                      className={`w-full px-4 py-2 border rounded-lg ${errorMessages.reorder_level ? 'border-red-500' : ''
+                        }`}
+                    />
+                    {errorMessages.reorder_level && (
+                      <p className="text-red-500 text-sm">
+                        {errorMessages.reorder_level[0]}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="is_active" className="block text-gray-700">
+                    {t('active_status')}
+                  </label>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="is_active"
+                      name="is_active"
+                      checked={formData.is_active}
+                      onChange={(e) =>
+                        setFormData({ ...formData, is_active: e.target.checked })
+                      }
+                      className="mr-2 leading-tight"
+                    />
+                    <span className="text-gray-700">{t('is_active')}</span>
+                  </div>
+                </div>
+
+                {existingImages.length > 0 && (
+                  <div className="mb-4">
+                    <label className="block text-gray-700">{t('existing_images')}</label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {existingImages.map((image) => (
+                        <div key={image.id} className="relative">
+                          <img
+                            src={image.image}
+                            alt={image.alt_text || 'Product Image'}
+                            className="w-full h-20 object-cover rounded"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteExistingImage(image.id)}
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          >
+                            X
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mb-4">
+                  <label htmlFor="images" className="block text-gray-700">
+                    {t('upload_new_images')}
+                  </label>
+                  <input
+                    type="file"
+                    id="images"
+                    name="images"
+                    multiple
+                    onChange={handleImageChange}
+                    className="w-full px-4 py-2 border rounded-lg"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormVisible(false);
+                      resetForm();
+                    }}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    {t('cancel')}
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg"
+                    >
+                    {editingProductId ? t('update_product') : t('add_product')}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 };
 
 export default Products;
-

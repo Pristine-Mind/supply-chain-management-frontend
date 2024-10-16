@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { useTranslation } from 'react-i18next';
 
 interface LoginFormData {
   username: string;
@@ -9,7 +9,7 @@ interface LoginFormData {
 }
 
 const Login: React.FC = () => {
-  const { t } = useTranslation(); // Use translation hook
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<LoginFormData>({ username: '', password: '' });
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
