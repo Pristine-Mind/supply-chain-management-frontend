@@ -4,8 +4,8 @@ import axios from 'axios';
 
 interface ProductImage {
   id: number;
-  image: string; // URL of the image
-  alt_text: string | null; // Optional alternative text for the image
+  image: string;
+  alt_text: string | null;
 }
 
 interface Product {

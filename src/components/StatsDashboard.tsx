@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Line, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
+import { useTranslation } from 'react-i18next';
 
 interface TopCustomer {
   order__customer__name: string;
@@ -33,7 +34,7 @@ interface StatsResponse {
   monthly_sales: MonthlySale[];
 }
 
-const categoryOptions: Category[] = [
+const categoryOptions = [
   { value: 'FR', label: 'Fruits' },
   { value: 'VG', label: 'Vegetables' },
   { value: 'GR', label: 'Grains & Cereals' },
@@ -48,6 +49,7 @@ const categoryOptions: Category[] = [
 ];
 
 const StatsDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [noData, setNoData] = useState<boolean>(false);
@@ -89,7 +91,7 @@ const StatsDashboard: React.FC = () => {
         setLoading(false);
       })
       .catch((error) => {
-        console.error('Error fetching the stats:', error);
+        console.error(t('error_fetching_stats'), error);
         setLoading(false);
       });
   };
@@ -103,11 +105,11 @@ const StatsDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8">{t('loading')}</div>;
   }
 
   if (noData || !stats) {
-    return <div className="text-center py-8">No data available.</div>;
+    return <div className="text-center py-8">{t('no_data_available')}</div>;
   }
 
   const { total_products_sold, total_revenue, top_customers, top_products, top_categories, monthly_sales } = stats;
@@ -118,7 +120,7 @@ const StatsDashboard: React.FC = () => {
     ),
     datasets: [
       {
-        label: 'Products Sold',
+        label: t('products_sold'),
         data: monthly_sales.map((sale) => sale.total_sold),
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         borderColor: 'rgba(75, 192, 192, 1)',
@@ -160,38 +162,38 @@ const StatsDashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Sales Statistics Dashboard</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">{t('sales_statistics_dashboard')}</h1>
 
       <div className="p-4 mb-6 bg-gray-100 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">Filters</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('filters')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block font-bold mb-1">Location</label>
+            <label className="block font-bold mb-1">{t('location')}</label>
             <input
               type="text"
               className="w-full p-2 border rounded-lg"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Enter location"
+              placeholder={t('enter_location')}
             />
           </div>
           <div>
-            <label className="block font-bold mb-1">Category</label>
+            <label className="block font-bold mb-1">{t('category')}</label>
             <select
               className="w-full p-2 border rounded-lg"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="">All Categories</option>
+              <option value="">{t('all_categories')}</option>
               {categoryOptions.map((categoryOption) => (
                 <option key={categoryOption.value} value={categoryOption.value}>
-                  {categoryOption.label}
+                  {t(categoryOption.label.toLowerCase())}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block font-bold mb-1">Start Date</label>
+            <label className="block font-bold mb-1">{t('start_date')}</label>
             <input
               type="date"
               className="w-full p-2 border rounded-lg"
@@ -200,7 +202,7 @@ const StatsDashboard: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block font-bold mb-1">End Date</label>
+            <label className="block font-bold mb-1">{t('end_date')}</label>
             <input
               type="date"
               className="w-full p-2 border rounded-lg"
@@ -214,65 +216,64 @@ const StatsDashboard: React.FC = () => {
             onClick={handleApplyFilters}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600"
           >
-            Apply Filters
+            {t('apply_filters')}
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         <div className="p-4 bg-blue-100 rounded-lg text-center shadow-md">
-          <h3 className="text-xl font-bold">Total Products Sold</h3>
+          <h3 className="text-xl font-bold">{t('total_products_sold')}</h3>
           <p className="text-3xl font-bold">
-            {total_products_sold !== null ? total_products_sold.toLocaleString() : 'N/A'}
+            {total_products_sold !== null ? total_products_sold.toLocaleString() : t('na')}
           </p>
         </div>
         <div className="p-4 bg-green-100 rounded-lg text-center shadow-md">
-          <h3 className="text-xl font-bold">Total Revenue</h3>
+          <h3 className="text-xl font-bold">{t('total_revenue')}</h3>
           <p className="text-3xl font-bold">
-            {total_revenue !== null ? `$${total_revenue.toFixed(2)}` : 'N/A'}
+            {total_revenue !== null ? `$${total_revenue              .toFixed(2)}` : t('na')}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         <div className="p-4 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4 text-center">Top Products</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">{t('top_products')}</h2>
           {top_products.length > 0 ? (
             <Pie data={topProductsPieData} />
           ) : (
-            <p className="text-center text-gray-500">No data available for Top Products</p>
+            <p className="text-center text-gray-500">{t('no_data_available_for_top_products')}</p>
           )}
         </div>
         <div className="p-4 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4 text-center">Top Customers</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">{t('top_customers')}</h2>
           {top_customers.length > 0 ? (
             <Pie data={topCustomersPieData} />
           ) : (
-            <p className="text-center text-gray-500">No data available for Top Customers</p>
+            <p className="text-center text-gray-500">{t('no_data_available_for_top_customers')}</p>
           )}
         </div>
       </div>
 
       <div className="p-2 bg-white rounded-lg shadow-md mt-8 max-w-sm mx-auto">
-        <h2 className="text-xl font-bold mb-2 text-center">Top Categories</h2>
+        <h2 className="text-xl font-bold mb-2 text-center">{t('top_categories')}</h2>
         {top_categories.length > 0 ? (
-            <div className="w-100">
+          <div className="w-100">
             <Pie data={topCategoriesPieData} options={{ maintainAspectRatio: true }} />
-            </div>
+          </div>
         ) : (
-            <p className="text-center text-gray-500 text-sm">No data available for Top Categories</p>
+          <p className="text-center text-gray-500 text-sm">{t('no_data_available_for_top_categories')}</p>
         )}
-        </div>
-
+      </div>
 
       <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Monthly Sales</h2>
+        <h2 className="text-2xl font-bold mb-4">{t('monthly_sales')}</h2>
         {monthly_sales.length > 0 ? (
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Line data={monthlySalesData} />
           </div>
         ) : (
-          <p className="text-center text-gray-500">No data available for Monthly Sales</p>
+          <p className="text-center text-gray-500">{t('no_data_available_for_monthly_sales')}</p>
         )}
       </div>
     </div>

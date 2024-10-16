@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 interface Customer {
   id: number;
@@ -27,6 +28,7 @@ interface Order {
 }
 
 const OrderList: React.FC = () => {
+  const { t } = useTranslation(); // Initialize translation hook
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -63,7 +65,7 @@ const OrderList: React.FC = () => {
       setOrders(response.data.results);
       setTotalCount(response.data.count);
     } catch (error) {
-      console.error('Error fetching orders', error);
+      console.error(t('error_fetching_orders'), error);
     }
   };
 
@@ -72,7 +74,7 @@ const OrderList: React.FC = () => {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`);
       setCustomers(response.data.results);
     } catch (error) {
-      console.error('Error fetching customers', error);
+      console.error(t('error_fetching_customers'), error);
     }
   };
 
@@ -81,7 +83,7 @@ const OrderList: React.FC = () => {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`);
       setProducts(response.data.results);
     } catch (error) {
-      console.error('Error fetching products', error);
+      console.error(t('error_fetching_products'), error);
     }
   };
 
@@ -134,7 +136,7 @@ const OrderList: React.FC = () => {
     e.preventDefault();
     try {
       await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`, formData);
-      setSuccess('Order added successfully!');
+      setSuccess(t('order_added_successfully'));
       setError('');
       setFormData({
         customer: '',
@@ -147,7 +149,7 @@ const OrderList: React.FC = () => {
       fetchOrders();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError('Failed to add order');
+      setError(t('failed_add_order'));
       setTimeout(() => setError(''), 3000);
     }
   };
@@ -155,22 +157,21 @@ const OrderList: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold mb-4 sm:mb-0">Order List</h2>
+        <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('order_list')}</h2>
         <button
           onClick={() => setFormVisible(true)}
           className="px-4 py-2 bg-green-500 text-white rounded-lg w-full sm:w-auto"
         >
-          Add Order
+          {t('add_order')}
         </button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-4">
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearch}
-          placeholder="Search by order number..."
+          placeholder={t('search_by_order_number')}
           className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         />
 
@@ -179,7 +180,7 @@ const OrderList: React.FC = () => {
           onChange={handleFilterCustomer}
           className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         >
-          <option value="all">All Customers</option>
+          <option value="all">{t('all_customers')}</option>
           {customers.map(customer => (
             <option key={customer.id} value={customer.id}>{customer.name}</option>
           ))}
@@ -190,7 +191,7 @@ const OrderList: React.FC = () => {
           onChange={handleFilterProduct}
           className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         >
-          <option value="all">All Products</option>
+          <option value="all">{t('all_products')}</option>
           {products.map(product => (
             <option key={product.id} value={product.id}>{product.name}</option>
           ))}
@@ -201,12 +202,12 @@ const OrderList: React.FC = () => {
           onChange={handleFilterStatus}
           className="px-4 py-2 border rounded-lg w-full sm:w-1/4"
         >
-          <option value="all">All Statuses</option>
-          <option value="pending">Pending</option>
-          <option value="approved">Approved</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
+          <option value="all">{t('all_statuses')}</option>
+          <option value="pending">{t('pending')}</option>
+          <option value="approved">{t('approved')}</option>
+          <option value="shipped">{t('shipped')}</option>
+          <option value="delivered">{t('delivered')}</option>
+          <option value="cancelled">{t('cancelled')}</option>
         </select>
       </div>
 
@@ -214,14 +215,14 @@ const OrderList: React.FC = () => {
         <table className="w-full text-sm text-left text-gray-500">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th className="py-3 px-6">Order Number</th>
-              <th className="py-3 px-6">Customer</th>
-              <th className="py-3 px-6">Product</th>
-              <th className="py-3 px-6">Quantity</th>
-              <th className="py-3 px-6">Total Price</th>
-              <th className="py-3 px-6">Status</th>
-              <th className="py-3 px-6">Order Date</th>
-              <th className="py-3 px-6">Delivery Date</th>
+              <th className="py-3 px-6">{t('order_number')}</th>
+              <th className="py-3 px-6">{t('customer')}</th>
+              <th className="py-3 px-6">{t('product')}</th>
+              <th className="py-3 px-6">{t('quantity')}</th>
+              <th className="py-3 px-6">{t('total_price')}</th>
+              <th className="py-3 px-6">{t('status')}</th>
+              <th className="py-3 px-6">{t('order_date')}</th>
+              <th className="py-3 px-6">{t('delivery_date')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -233,7 +234,8 @@ const OrderList: React.FC = () => {
                   </td>
                   <td className="py-4 px-6">{order.customer_details.name}</td>
                   <td className="py-4 px-6">{order.product_details.name}</td>
-                  <td className="py-4 px-6">{order.quantity}</td>
+                  <td className="py-4 px-6">{                    order.quantity}
+                  </td>
                   <td className="py-4 px-6">NPR {order.total_price}</td>
                   <td className="py-4 px-6">
                     <span
@@ -247,7 +249,7 @@ const OrderList: React.FC = () => {
                           : 'bg-blue-100 text-blue-800'
                       }`}
                     >
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      {t(order.status)}
                     </span>
                   </td>
                   <td className="py-4 px-6">
@@ -256,14 +258,14 @@ const OrderList: React.FC = () => {
                   <td className="py-4 px-6">
                     {order.delivery_date
                       ? new Date(order.delivery_date).toLocaleDateString()
-                      : 'N/A'}
+                      : t('not_applicable')}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td colSpan={8} className="text-center py-4">
-                  No orders found.
+                  {t('no_orders_found')}
                 </td>
               </tr>
             )}
@@ -271,7 +273,6 @@ const OrderList: React.FC = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-between items-center">
         <button
           onClick={handlePreviousPage}
@@ -282,12 +283,11 @@ const OrderList: React.FC = () => {
               : 'bg-blue-500 text-white'
           }`}
         >
-          Previous
+          {t('previous')}
         </button>
 
         <p>
-          Showing {offset + 1} to {Math.min(offset + limit, totalCount)} of{' '}
-          {totalCount} orders
+          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('orders')}
         </p>
 
         <button
@@ -299,11 +299,10 @@ const OrderList: React.FC = () => {
               : 'bg-blue-500 text-white'
           }`}
         >
-          Next
+          {t('next')}
         </button>
       </div>
 
-      {/* Add Order Form Modal */}
       {formVisible && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen">
@@ -312,7 +311,7 @@ const OrderList: React.FC = () => {
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
-                Add New Order
+                {t('add_new_order')}
               </h3>
               <form onSubmit={handleSubmit}>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -320,7 +319,7 @@ const OrderList: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="customer" className="block text-gray-700">
-                    Customer <span className="text-red-500">*</span>
+                    {t('customer')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="customer"
@@ -330,7 +329,7 @@ const OrderList: React.FC = () => {
                     className="w-full px-4 py-2 border rounded-lg"
                     required
                   >
-                    <option value="">Select Customer</option>
+                    <option value="">{t('select_customer')}</option>
                     {customers.map((customer) => (
                       <option key={customer.id} value={customer.id}>
                         {customer.name}
@@ -341,7 +340,7 @@ const OrderList: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="product" className="block text-gray-700">
-                    Product <span className="text-red-500">*</span>
+                    {t('product')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="product"
@@ -351,7 +350,7 @@ const OrderList: React.FC = () => {
                     className="w-full px-4 py-2 border rounded-lg"
                     required
                   >
-                    <option value="">Select Product</option>
+                    <option value="">{t('select_product')}</option>
                     {products.map((product) => (
                       <option key={product.id} value={product.id}>
                         {product.name}
@@ -362,7 +361,7 @@ const OrderList: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="quantity" className="block text-gray-700">
-                    Quantity <span className="text-red-500">*</span>
+                    {t('quantity')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -378,7 +377,7 @@ const OrderList: React.FC = () => {
 
                 <div className="mb-4">
                   <label htmlFor="status" className="block text-gray-700">
-                    Status <span className="text-red-500">*</span>
+                    {t('status')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     id="status"
@@ -388,17 +387,17 @@ const OrderList: React.FC = () => {
                     className="w-full px-4 py-2 border rounded-lg"
                     required
                   >
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="pending">{t('pending')}</option>
+                    <option value="approved">{t('approved')}</option>
+                    <option value="shipped">{t('shipped')}</option>
+                    <option value="delivered">{t('delivered')}</option>
+                    <option value="cancelled">{t('cancelled')}</option>
                   </select>
                 </div>
 
                 <div className="mb-4">
                   <label htmlFor="notes" className="block text-gray-700">
-                    Notes
+                    {t('notes')}
                   </label>
                   <textarea
                     id="notes"
@@ -415,13 +414,13 @@ const OrderList: React.FC = () => {
                     className="mr-4 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
                     onClick={() => setFormVisible(false)}
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
                   <button
                     type="submit"
                     className="px-4 py-2 bg-green-500 text-white rounded-lg"
                   >
-                    Add Order
+                    {t('add_order')}
                   </button>
                 </div>
               </form>
@@ -434,4 +433,3 @@ const OrderList: React.FC = () => {
 };
 
 export default OrderList;
-
