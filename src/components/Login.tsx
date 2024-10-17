@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface LoginFormData {
   username: string;
@@ -8,6 +9,7 @@ interface LoginFormData {
 }
 
 const Login: React.FC = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<LoginFormData>({ username: '', password: '' });
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
@@ -28,32 +30,34 @@ const Login: React.FC = () => {
       const { token } = response.data;
 
       localStorage.setItem('token', token);
-
       navigate('/home');
     } catch (error) {
-      setErrorMessage('Invalid email or password');
+      setErrorMessage(t('invalid_credentials')); // Use translation for error message
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
       <h1 className="text-4xl font-bold text-blue-600 mb-8">
-        Supply Chain Management
+        {t('supply_chain_management')} {/* Translated text */}
       </h1>
 
       <div className="bg-white shadow-md rounded-lg px-8 py-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-4">Login</h2>
+        <h2 className="text-2xl font-bold text-center mb-4">
+          {t('login')} {/* Translated text */}
+        </h2>
 
         {errorMessage && (
           <p className="text-red-500 text-center mb-4">{errorMessage}</p>
         )}
 
-
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700">Username:</label>
+            <label htmlFor="username" className="block text-gray-700">
+              {t('username')} {/* Translated label */}
+            </label>
             <input
-              type="username"
+              type="text"
               id="username"
               name="username"
               value={formData.username}
@@ -64,7 +68,9 @@ const Login: React.FC = () => {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700">Password:</label>
+            <label htmlFor="password" className="block text-gray-700">
+              {t('password')} {/* Translated label */}
+            </label>
             <input
               type="password"
               id="password"
@@ -80,7 +86,7 @@ const Login: React.FC = () => {
             type="submit"
             className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
           >
-            Login
+            {t('login')} {/* Translated button */}
           </button>
         </form>
       </div>

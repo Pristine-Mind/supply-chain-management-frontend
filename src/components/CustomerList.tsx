@@ -3,46 +3,13 @@ import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { FaPlus } from "react-icons/fa";
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-  contact: string;
-  billing_address: string;
-  shipping_address: string;
-  customer_type: string;
-  credit_limit: number;
-  current_balance: number;
-}
-
-interface CustomerSales {
-  id: number;
-  name: string;
-  total_sales: number;
-}
-
-interface CustomerOrders {
-  id: number;
-  name: string;
-  total_orders: number;
-}
-
-interface ErrorMessages {
-  name?: string[];
-  email?: string[];
-  contact?: string[];
-  billing_address?: string[];
-  shipping_address?: string[];
-  customer_type?: string[];
-  credit_limit?: string[];
-  current_balance?: string[];
-  general?: string[];
-}
-
 const CustomerList: React.FC = () => {
+  const { t } = useTranslation();
+
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [topSalesCustomers, setTopSalesCustomers] = useState<CustomerSales[]>([]);
   const [topOrdersCustomers, setTopOrdersCustomers] = useState<CustomerOrders[]>([]);
@@ -79,7 +46,7 @@ const CustomerList: React.FC = () => {
       setCustomers(response.data.results);
       setTotalCount(response.data.count);
     } catch (error) {
-      console.error('Error fetching customers', error);
+      console.error(t('error_fetching_customers'), error);
     }
   };
 
@@ -88,7 +55,7 @@ const CustomerList: React.FC = () => {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-sales/`);
       setTopSalesCustomers(response.data);
     } catch (error) {
-      console.error('Error fetching top sales customers', error);
+      console.error(t('error_fetching_top_sales_customers'), error);
     }
   };
 
@@ -97,7 +64,7 @@ const CustomerList: React.FC = () => {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-orders/`);
       setTopOrdersCustomers(response.data);
     } catch (error) {
-      console.error('Error fetching top orders customers', error);
+      console.error(t('error_fetching_top_orders_customers'), error);
     }
   };
 
@@ -137,11 +104,11 @@ const CustomerList: React.FC = () => {
     try {
       if (editingCustomerId) {
         await axios.patch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/${editingCustomerId}/`, formData);
-        setSuccess('Customer updated successfully!');
+        setSuccess(t('customer_updated_successfully'));
         setEditingCustomerId(null);
       } else {
         await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`, formData);
-        setSuccess('Customer added successfully!');
+        setSuccess(t('customer_added_successfully'));
       }
       setErrorMessages({});
       setFormData({
@@ -157,12 +124,10 @@ const CustomerList: React.FC = () => {
       setFormVisible(false);
       fetchCustomers();
       setTimeout(() => setSuccess(''), 3000);
-    } catch (error:any) {
-      if (error.response && error.response.data) {
-        setErrorMessages(error.response.data);
-      } else {
-        setErrorMessages({ general: ['Failed to save customer. Please try again.'] });
-      }
+    } catch (error: any) {
+      setErrorMessages({
+        general: [t('failed_to_save_customer')],
+      });
     }
   };
 
@@ -195,7 +160,7 @@ const CustomerList: React.FC = () => {
     labels: topSalesCustomers.map((customer) => customer.name),
     datasets: [
       {
-        label: 'Top Sales',
+        label: t('top_sales'),
         data: topSalesCustomers.map((customer) => customer.total_sales),
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
         hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
@@ -207,7 +172,7 @@ const CustomerList: React.FC = () => {
     labels: topOrdersCustomers.map((customer) => customer.name),
     datasets: [
       {
-        label: 'Top Orders',
+        label: t('top_orders'),
         data: topOrdersCustomers.map((customer) => customer.total_orders),
         backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
         hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
@@ -221,7 +186,7 @@ const CustomerList: React.FC = () => {
       <div className="flex flex-wrap mb-8">
         <div className="w-full md:w-1/2 p-4">
           <div className="bg-white shadow-md rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">Top Customers by Sales</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-800">{t('top_customers_by_sales')}</h3>
             <div className="w-full h-80">
               <Pie data={salesChartData} options={{ responsive: true, maintainAspectRatio: false }} />
             </div>
@@ -229,7 +194,7 @@ const CustomerList: React.FC = () => {
         </div>
         <div className="w-full md:w-1/2 p-4">
           <div className="bg-white shadow-md rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">Top Customers by Orders</h3>
+            <h3 className="text-xl font-bold mb-4 text-gray-800">{t('top_customers_by_orders')}</h3>
             <div className="w-full h-80">
               <Pie data={ordersChartData} options={{ responsive: true, maintainAspectRatio: false }} />
             </div>
@@ -239,13 +204,13 @@ const CustomerList: React.FC = () => {
 
       {/* Customer List and Search */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Customer List</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">{t('customer_list')}</h2>
         <div className="flex items-center space-x-4 w-full sm:w-auto">
           <input
             type="text"
             value={searchQuery}
             onChange={handleSearch}
-            placeholder="Search by name..."
+            placeholder={t('search_by_name')}
             className="px-4 py-2 border border-gray-300 rounded-lg w-full sm:w-72"
           />
           <button
@@ -265,27 +230,26 @@ const CustomerList: React.FC = () => {
             }}
             className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
           >
-            <FaPlus className="mr-2" />  {/* Add margin to the right of the icon */}
-            Add Customer
+            <FaPlus className="mr-2" />
+            {t('add_customer')}
           </button>
-
         </div>
       </div>
 
-      {/* Customer Table */}
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg mb-8">
+            {/* Customer Table */}
+            <div className="overflow-x-auto bg-white shadow-md rounded-lg mb-8">
         <table className="min-w-full text-sm text-gray-700">
           <thead className="text-xs uppercase bg-blue-500 text-white">
             <tr>
-              <th className="py-3 px-6 text-left">Customer Name</th>
-              <th className="py-3 px-6 text-left">Email</th>
-              <th className="py-3 px-6 text-left">Contact</th>
-              <th className="py-3 px-6 text-left">Billing Address</th>
-              <th className="py-3 px-6 text-left">Shipping Address</th>
-              <th className="py-3 px-6 text-left">Customer Type</th>
-              <th className="py-3 px-6 text-left">Credit Limit</th>
-              <th className="py-3 px-6 text-left">Current Balance</th>
-              <th className="py-3 px-6 text-left">Actions</th>
+              <th className="py-3 px-6 text-left">{t('customer_name')}</th>
+              <th className="py-3 px-6 text-left">{t('email')}</th>
+              <th className="py-3 px-6 text-left">{t('contact')}</th>
+              <th className="py-3 px-6 text-left">{t('billing_address')}</th>
+              <th className="py-3 px-6 text-left">{t('shipping_address')}</th>
+              <th className="py-3 px-6 text-left">{t('customer_type')}</th>
+              <th className="py-3 px-6 text-left">{t('credit_limit')}</th>
+              <th className="py-3 px-6 text-left">{t('current_balance')}</th>
+              <th className="py-3 px-6 text-left">{t('actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -310,13 +274,13 @@ const CustomerList: React.FC = () => {
                       onClick={() => handleEditClick(customer)}
                       className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition duration-300"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                     <button
                       onClick={() => handleCustomerClick(customer)}
                       className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300"
                     >
-                      View
+                      {t('view')}
                     </button>
                   </td>
                 </tr>
@@ -324,7 +288,7 @@ const CustomerList: React.FC = () => {
             ) : (
               <tr>
                 <td colSpan={9} className="text-center py-4 text-gray-500">
-                  No customers found.
+                  {t('no_customers_found')}
                 </td>
               </tr>
             )}
@@ -342,11 +306,11 @@ const CustomerList: React.FC = () => {
               : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'
             }`}
         >
-          Previous
+          {t('previous')}
         </button>
 
         <p className="text-gray-700">
-          Showing {offset + 1} to {Math.min(offset + limit, totalCount)} of {totalCount} customers
+          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('customers')}
         </p>
 
         <button
@@ -357,7 +321,7 @@ const CustomerList: React.FC = () => {
               : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'
             }`}
         >
-          Next
+          {t('next')}
         </button>
       </div>
 
@@ -369,31 +333,31 @@ const CustomerList: React.FC = () => {
             <h3 className="text-2xl font-bold text-gray-800 mb-4">{selectedCustomer.name}</h3>
             <div className="space-y-4">
               <div className="flex">
-                <span className="font-semibold text-gray-600 w-1/3">Email:</span>
+                <span className="font-semibold text-gray-600 w-1/3">{t('email')}:</span>
                 <span className="text-gray-800">{selectedCustomer.email}</span>
               </div>
               <div className="flex">
-                <span className="font-semibold text-gray-600 w-1/3">Contact:</span>
+                <span className="font-semibold text-gray-600 w-1/3">{t('contact')}:</span>
                 <span className="text-gray-800">{selectedCustomer.contact}</span>
               </div>
               <div className="flex">
-                <span className="font-semibold text-gray-600 w-1/3">Billing Address:</span>
+                <span className="font-semibold text-gray-600 w-1/3">{t('billing_address')}:</span>
                 <span className="text-gray-800">{selectedCustomer.billing_address}</span>
               </div>
               <div className="flex">
-                <span className="font-semibold text-gray-600 w-1/3">Shipping Address:</span>
+                <span className="font-semibold text-gray-600 w-1/3">{t('shipping_address')}:</span>
                 <span className="text-gray-800">{selectedCustomer.shipping_address}</span>
               </div>
               <div className="flex">
-                <span className="font-semibold text-gray-600 w-1/3">Customer Type:</span>
+                <span className="font-semibold text-gray-600 w-1/3">{t('customer_type')}:</span>
                 <span className="text-gray-800">{selectedCustomer.customer_type}</span>
               </div>
               <div className="flex">
-                <span className="font-semibold text-gray-600 w-1/3">Credit Limit:</span>
+                <span className="font-semibold text-gray-600 w-1/3">{t('credit_limit')}:</span>
                 <span className="text-gray-800">{selectedCustomer.credit_limit}</span>
               </div>
               <div className="flex">
-                <span className="font-semibold text-gray-600 w-1/3">Current Balance:</span>
+                <span className="font-semibold text-gray-600 w-1/3">{t('current_balance')}:</span>
                 <span className="text-gray-800">{selectedCustomer.current_balance}</span>
               </div>
             </div>
@@ -402,7 +366,7 @@ const CustomerList: React.FC = () => {
                 onClick={closeModal}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-300"
               >
-                Close
+                {t('close')}
               </button>
             </div>
           </div>
@@ -414,7 +378,7 @@ const CustomerList: React.FC = () => {
           <div className="fixed inset-0 bg-gray-800 opacity-50" onClick={() => setFormVisible(false)}></div>
           <div className="bg-white rounded-lg shadow-lg p-8 relative z-20 w-full max-w-lg">
             <h3 className="text-2xl font-bold text-gray-800 mb-6 bg-gray-200 px-4 py-2 rounded-lg">
-              {editingCustomerId ? 'Edit Customer' : 'Add New Customer'}
+              {editingCustomerId ? t('edit_customer') : t('add_new_customer')}
             </h3>
 
             <form onSubmit={handleSubmit}>
@@ -426,7 +390,7 @@ const CustomerList: React.FC = () => {
               {/* Customer Name */}
               <div className="mb-4">
                 <label htmlFor="name" className="block text-gray-700">
-                  Customer Name <span className="text-red-500">*</span>
+                  {t('customer_name')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -446,7 +410,7 @@ const CustomerList: React.FC = () => {
               {/* Email */}
               <div className="mb-4">
                 <label htmlFor="email" className="block text-gray-700">
-                  Email <span className="text-red-500">*</span>
+                  {t('email')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -459,14 +423,14 @@ const CustomerList: React.FC = () => {
                   required
                 />
                 {errorMessages.email && (
-                  <p className="text-red-500 text-sm">{errorMessages.email[0]}</p>
+                  <p className="text-red-500 text-sm">{errorMessages.email[0                  ]}</p>
                 )}
               </div>
 
               {/* Contact */}
               <div className="mb-4">
                 <label htmlFor="contact" className="block text-gray-700">
-                  Contact <span className="text-red-500">*</span>
+                  {t('contact')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -486,7 +450,7 @@ const CustomerList: React.FC = () => {
               {/* Billing Address */}
               <div className="mb-4">
                 <label htmlFor="billing_address" className="block text-gray-700">
-                  Billing Address <span className="text-red-500">*</span>
+                  {t('billing_address')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="billing_address"
@@ -505,7 +469,7 @@ const CustomerList: React.FC = () => {
               {/* Shipping Address */}
               <div className="mb-4">
                 <label htmlFor="shipping_address" className="block text-gray-700">
-                  Shipping Address <span className="text-red-500">*</span>
+                  {t('shipping_address')} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="shipping_address"
@@ -524,7 +488,7 @@ const CustomerList: React.FC = () => {
               {/* Customer Type */}
               <div className="mb-4">
                 <label htmlFor="customer_type" className="block text-gray-700">
-                  Customer Type <span className="text-red-500">*</span>
+                  {t('customer_type')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   id="customer_type"
@@ -535,18 +499,19 @@ const CustomerList: React.FC = () => {
                     } rounded-lg`}
                   required
                 >
-                  <option value="Retailer">Retailer</option>
-                  <option value="Wholesaler">Wholesaler</option>
-                  <option value="Distributor">Distributor</option>
+                  <option value="Retailer">{t('retailer')}</option>
+                  <option value="Wholesaler">{t('wholesaler')}</option>
+                  <option value="Distributor">{t('distributor')}</option>
                 </select>
                 {errorMessages.customer_type && (
                   <p className="text-red-500 text-sm">{errorMessages.customer_type[0]}</p>
                 )}
               </div>
 
+              {/* Credit Limit */}
               <div className="mb-4">
                 <label htmlFor="credit_limit" className="block text-gray-700">
-                  Credit Limit <span className="text-red-500">*</span>
+                  {t('credit_limit')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -568,7 +533,7 @@ const CustomerList: React.FC = () => {
               {/* Current Balance */}
               <div className="mb-4">
                 <label htmlFor="current_balance" className="block text-gray-700">
-                  Current Balance <span className="text-red-500">*</span>
+                  {t('current_balance')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -594,13 +559,13 @@ const CustomerList: React.FC = () => {
                   className="mr-4 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-300"
                   onClick={() => setFormVisible(false)}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
                 >
-                  {editingCustomerId ? 'Update Customer' : 'Add Customer'}
+                  {editingCustomerId ? t('update_customer') : t('add_customer')}
                 </button>
               </div>
             </form>
@@ -612,5 +577,4 @@ const CustomerList: React.FC = () => {
 };
 
 export default CustomerList;
-
 
