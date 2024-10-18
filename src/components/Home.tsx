@@ -104,7 +104,10 @@ const Home: React.FC = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get<DashboardData>(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/dashboard/`
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/dashboard/`,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        }
       );
       setData(response.data);
     } catch (error) {
@@ -143,38 +146,53 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-100">
       {/* Mobile Header */}
-      <header className="flex items-center justify-between bg-white p-4 md:hidden">
-        <button onClick={() => setSidebarOpen(true)}>
-          <MenuIcon className="h-6 w-6 text-gray-800" />
-        </button>
-        <h1 className="text-xl font-bold text-blue-600">Dashboard</h1>
-        <div className="relative">
-          <button
-            onClick={toggleDropdown}
-            className="flex items-center focus:outline-none"
-          >
-            <span className="text-gray-800">{user.username}</span>
-            <svg
-              className="w-4 h-4 ml-1"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
-            </svg>
+      <header className="flex items-center justify-between bg-white p-4 md:hidden w-full">
+        <div className="flex items-center space-x-4">
+          <button onClick={() => setSidebarOpen(true)}>
+            <MenuIcon className="h-6 w-6 text-gray-800" />
           </button>
-          {user.isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10">
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+          <h1 className="text-xl font-bold text-blue-600">{t('dashboard')}</h1>
         </div>
-        
+
+        <div className="flex items-center space-x-4">
+          {/* Username and dropdown */}
+          <div className="relative flex items-center space-x-1">
+            <span className="text-gray-800">{user.username}</span>
+            <button onClick={toggleDropdown} className="focus:outline-none">
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
+              </svg>
+            </button>
+
+            {user.isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10">
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Language switcher */}
+          <div className="flex items-center">
+            <button
+              onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
+              className="px-2 py-1 text-xs border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
+            >
+              {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
+            </button>
+          </div>
+        </div>
       </header>
+
+
 
       {/* Sidebar */}
       <aside

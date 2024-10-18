@@ -42,6 +42,9 @@ const CustomerList: React.FC = () => {
           offset: offset,
           search: searchQuery,
         },
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
       });
       setCustomers(response.data.results);
       setTotalCount(response.data.count);
@@ -52,7 +55,15 @@ const CustomerList: React.FC = () => {
 
   const fetchTopSalesCustomers = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-sales/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-sales/`,
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem('token')}`,
+          },
+        }
+
+    );
       setTopSalesCustomers(response.data);
     } catch (error) {
       console.error(t('error_fetching_top_sales_customers'), error);
@@ -61,7 +72,14 @@ const CustomerList: React.FC = () => {
 
   const fetchTopOrdersCustomers = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-orders/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/top-orders/`,
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem('token')}`,
+          },
+        }
+      );
       setTopOrdersCustomers(response.data);
     } catch (error) {
       console.error(t('error_fetching_top_orders_customers'), error);
@@ -103,11 +121,27 @@ const CustomerList: React.FC = () => {
     e.preventDefault();
     try {
       if (editingCustomerId) {
-        await axios.patch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/${editingCustomerId}/`, formData);
+        await axios.patch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/${editingCustomerId}/`, 
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem('token')}`,
+            },
+            formData,
+          }
+        );
         setSuccess(t('customer_updated_successfully'));
         setEditingCustomerId(null);
       } else {
-        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`, formData);
+        await axios.post(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`,
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem('token')}`,
+            },
+            formData,
+          }
+        );
         setSuccess(t('customer_added_successfully'));
       }
       setErrorMessages({});
