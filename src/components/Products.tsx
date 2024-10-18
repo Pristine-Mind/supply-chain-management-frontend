@@ -109,7 +109,12 @@ const Products: React.FC = () => {
       if (category) {
         url += `&category=${category}`;
       }
-      const response = await axios.get(url);
+      const response = await axios.get(
+        url,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        },
+      );
       setProducts(response.data.results);
     } catch (error) {
       console.error(t('error_fetching_products'), error);
@@ -119,7 +124,10 @@ const Products: React.FC = () => {
   const fetchProducers = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        },
       );
       setProducers(response.data.results);
     } catch (error) {
@@ -169,6 +177,7 @@ const Products: React.FC = () => {
           {
             headers: {
               'Content-Type': 'multipart/form-data',
+              'Authorization': `Token ${localStorage.getItem('token')}`,
             },
           }
         );
@@ -180,6 +189,7 @@ const Products: React.FC = () => {
           {
             headers: {
               'Content-Type': 'multipart/form-data',
+              'Authorization': `Token ${localStorage.getItem('token')}`,
             },
           }
         );

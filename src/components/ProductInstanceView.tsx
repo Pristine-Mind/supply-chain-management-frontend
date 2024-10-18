@@ -56,7 +56,12 @@ const ProductInstanceView: React.FC = () => {
 
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        }
+    );
       setProduct(response.data);
     } catch (error) {
       console.error('Error fetching product details', error);

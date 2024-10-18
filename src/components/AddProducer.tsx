@@ -50,6 +50,9 @@ const AddProducer: React.FC = () => {
           offset,
           search: searchQuery,
         },
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
       });
       setProducers(response.data.results);
       setTotalCount(response.data.count);
@@ -79,11 +82,24 @@ const AddProducer: React.FC = () => {
     e.preventDefault();
     try {
       if (editingProducerId) {
-        await axios.patch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/${editingProducerId}/`, formData);
+        await axios.patch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/${editingProducerId}/`,{
+            headers: {
+              Authorization: `Token ${localStorage.getItem('token')}`,
+            },
+            formData,
+          }
+          
+        );
         setSuccess(t('producer_updated_successfully'));
         setEditingProducerId(null);
       } else {
-        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, formData);
+        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`,{
+          headers: {
+            Authorization: `Token ${localStorage.getItem('token')}`,
+          },
+          formData,
+        });
         setSuccess(t('producer_added_successfully'));
       }
       setErrorMessages({});
