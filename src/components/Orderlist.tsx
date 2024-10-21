@@ -61,7 +61,12 @@ const OrderList: React.FC = () => {
       if (filterProduct !== 'all') params.product = filterProduct;
       if (filterStatus !== 'all') params.status = filterStatus;
 
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`, { params });
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}`},
+          params,
+        });
       setOrders(response.data.results);
       setTotalCount(response.data.count);
     } catch (error) {
@@ -71,7 +76,12 @@ const OrderList: React.FC = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}`},
+        }
+      );
       setCustomers(response.data.results);
     } catch (error) {
       console.error(t('error_fetching_customers'), error);
@@ -80,7 +90,12 @@ const OrderList: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`);
+      const response = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/`,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        }
+      );
       setProducts(response.data.results);
     } catch (error) {
       console.error(t('error_fetching_products'), error);
@@ -135,7 +150,13 @@ const OrderList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`, formData);
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/orders/`,
+        formData,
+        {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        },
+      );
       setSuccess(t('order_added_successfully'));
       setError('');
       setFormData({

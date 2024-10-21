@@ -42,6 +42,9 @@ const Stocks: React.FC = () => {
             limit: itemsPerPage,
             offset: offset,
           },
+          headers: {
+            Authorization: `Token ${localStorage.getItem('token')}`,
+          },
         }
       );
 
@@ -57,9 +60,16 @@ const Stocks: React.FC = () => {
   }, [currentPage]);
 
   const handlePushToMarketplace = async (productId: number) => {
+    console.log(localStorage.getItem('token'), "ppp")
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/${productId}/push-to-marketplace/`
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/${productId}/push-to-marketplace/`,
+        {},
+        {
+          headers: {
+            Authorization: `Token ${localStorage.getItem('token')}`,
+          },
+        }
       );
       if (response.status === 200 || response.status === 201) {
         alert(t('product_pushed_successfully', { productId }));
