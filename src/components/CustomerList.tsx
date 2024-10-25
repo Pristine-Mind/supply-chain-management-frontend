@@ -123,11 +123,11 @@ const CustomerList: React.FC = () => {
       if (editingCustomerId) {
         await axios.patch(
           `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/${editingCustomerId}/`, 
+          formData,
           {
             headers: {
               Authorization: `Token ${localStorage.getItem('token')}`,
             },
-            formData,
           }
         );
         setSuccess(t('customer_updated_successfully'));
@@ -135,11 +135,11 @@ const CustomerList: React.FC = () => {
       } else {
         await axios.post(
           `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`,
+          formData,
           {
             headers: {
               Authorization: `Token ${localStorage.getItem('token')}`,
             },
-            formData,
           }
         );
         setSuccess(t('customer_added_successfully'));

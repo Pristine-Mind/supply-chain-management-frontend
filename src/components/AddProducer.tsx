@@ -56,10 +56,24 @@ const AddProducer: React.FC = () => {
       });
       setProducers(response.data.results);
       setTotalCount(response.data.count);
-    } catch (error) {
-      console.error(t('error_fetching_producers'), error);
+    } catch (error: any) {
+      if (error.response) {
+        // Server responded with a status other than 200 range
+        console.error('Response error:', error.response);
+        console.error('Data:', error.response.data);
+        console.error('Status:', error.response.status);
+        console.error('Headers:', error.response.headers);
+      } else if (error.request) {
+        // Request was made but no response was received
+        console.error('No response:', error.request);
+      } else {
+        // Something happened in setting up the request that triggered an error
+        console.error('Error message:', error.message);
+      }
+      console.error('Config:', error.config);
     }
   };
+  
 
   useEffect(() => {
     fetchProducers(limit, offset, searchQuery);
@@ -83,23 +97,27 @@ const AddProducer: React.FC = () => {
     try {
       if (editingProducerId) {
         await axios.patch(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/${editingProducerId}/`,{
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/${editingProducerId}/`,
+          formData,
+          {
             headers: {
               Authorization: `Token ${localStorage.getItem('token')}`,
-            },
-            formData,
-          }
-          
+            }
+          } 
         );
         setSuccess(t('producer_updated_successfully'));
         setEditingProducerId(null);
       } else {
-        await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`,{
-          headers: {
-            Authorization: `Token ${localStorage.getItem('token')}`,
-          },
+        await axios.post(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`,
           formData,
-        });
+          {
+            headers: {
+              Authorization: `Token ${localStorage.getItem('token')}`,
+            },
+          }
+        );
+        
         setSuccess(t('producer_added_successfully'));
       }
       setErrorMessages({});
@@ -363,4 +381,3 @@ const AddProducer: React.FC = () => {
 };
 
 export default AddProducer;
-
