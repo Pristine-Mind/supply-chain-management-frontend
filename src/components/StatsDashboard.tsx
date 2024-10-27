@@ -71,7 +71,13 @@ const StatsDashboard: React.FC = () => {
     if (endDate) params.end_date = endDate;
 
     axios
-      .get<StatsResponse>(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stats/`, { params })
+      .get<StatsResponse>(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stats/`,
+        { 
+          params,
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` }
+        }
+      )
       .then((response) => {
         const { total_products_sold, total_revenue, top_customers, top_products, top_categories, monthly_sales } = response.data;
 
