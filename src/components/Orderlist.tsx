@@ -308,7 +308,7 @@ const OrderList: React.FC = () => {
         </button>
 
         <p>
-          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('no_orders')}
+          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('orders_no')}
         </p>
 
         <button

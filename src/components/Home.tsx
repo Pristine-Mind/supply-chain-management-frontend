@@ -145,7 +145,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-gray-100">
-      {/* Mobile Header */}
       <header className="flex items-center justify-between bg-white p-4 md:hidden w-full">
         <div className="flex items-center space-x-4">
           <button onClick={() => setSidebarOpen(true)}>
@@ -155,7 +154,6 @@ const Home: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Username and dropdown */}
           <div className="relative flex items-center space-x-1">
             <span className="text-gray-800">{user.username}</span>
             <button onClick={toggleDropdown} className="focus:outline-none">
@@ -179,8 +177,6 @@ const Home: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* Language switcher */}
           <div className="flex items-center">
             <button
               onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
@@ -194,10 +190,9 @@ const Home: React.FC = () => {
 
 
 
-      {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-900 text-white w-64 z-50`}
+          } md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-green-900 text-white w-64 z-50`}
       >
         <div className="p-4 flex items-center justify-between md:justify-center">
           <h2 className="text-2xl font-bold">{t('menu')}</h2>
@@ -283,61 +278,73 @@ const Home: React.FC = () => {
         ></div>
       )}
 
-<div className="flex-1 p-4 md:p-8">
-  {/* Desktop Header */}
-  <div className="hidden md:flex justify-between items-center mb-8">
-    <h1 className="text-3xl font-bold text-blue-600">
-      {t('supply_chain_dashboard')}
-    </h1>
-    
-    {/* Right side: Search bar, User dropdown, and Language switcher */}
-    <div className="flex items-center space-x-4">
-      {/* Search Input */}
-      <input
-        type="text"
-        placeholder={t('search_placeholder')}
-        className="px-4 py-2 border rounded-lg w-64"  // Adjusted width for better appearance
-      />
+      <div className="flex-1 p-4 md:p-8">
+        <div className="hidden md:flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-yellow-800">
+            {t('supply_chain_dashboard')}
+          </h1>
+          
+          <div className="flex items-center space-x-4">
+            <form className="max-w-md mx-auto">   
+                <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                    </svg>
+                  </div>
+                  <input 
+                    type="search" 
+                    id="default-search" 
+                    className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+                    placeholder={t('search_placeholder')} 
+                    required 
+                  />
+                  <button 
+                    type="submit" 
+                    className="text-white absolute end-2.5 bottom-2.5 bg-yellow-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  >
+                    {t('search')}
+                  </button>
+                </div>
+              </form>
 
-      {/* User dropdown */}
-      <div className="relative">
-        <button
-          onClick={() => setUser({ ...user, isDropdownOpen: !user.isDropdownOpen })}
-          className="flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
-        >
-          {user.username}
-          <svg className="w-4 h-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
-          </svg>
-        </button>
+            <div className="relative">
+              <button
+                onClick={() => setUser({ ...user, isDropdownOpen: !user.isDropdownOpen })}
+                className="flex items-center px-4 py-2 border border-blue-600 text-yellow-700 rounded-lg bg-transparent focus:outline-none transition duration-300"
+              >
+                {user.username}
+                <svg className="w-4 h-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.25 8.27a.75.75 0 01-.02-1.06z" />
+                </svg>
+              </button>
 
-        {/* Dropdown menu */}
-        {user.isDropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
-            <button
-              onClick={() => {
-                setUser({ ...user, isDropdownOpen: false });
-                navigate('/login');
-              }}
-              className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-            >
-              {t('logout')}
-            </button>
+              {user.isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
+                  <button
+                    onClick={() => {
+                      setUser({ ...user, isDropdownOpen: false });
+                      navigate('/login');
+                    }}
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+                  >
+                    {t('logout')}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
+                className="px-4 py-2 border border-blue-600 text-yellow-700 rounded-lg bg-transparent focus:outline-none transition duration-300"
+              >
+                {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
+              </button>
+            </div>
           </div>
-        )}
-      </div>
-
-      {/* Language Switcher */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
-          className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
-        >
-          {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
-        </button>
-      </div>
-    </div>
-  </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-lg shadow flex items-center">

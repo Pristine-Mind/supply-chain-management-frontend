@@ -32,19 +32,19 @@ const Login: React.FC = () => {
       localStorage.setItem('token', token);
       navigate('/home');
     } catch (error) {
-      setErrorMessage(t('invalid_credentials')); // Use translation for error message
+      setErrorMessage(t('invalid_credentials'));
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-blue-600 mb-8">
-        {t('supply_chain_management')} {/* Translated text */}
+      <h1 className="text-4xl font-bold text-orange-500 mb-8">
+        {t('supply_chain_management')}
       </h1>
 
       <div className="bg-white shadow-md rounded-lg px-8 py-6 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-4">
-          {t('login')} {/* Translated text */}
+          {t('login')}
         </h2>
 
         {errorMessage && (
@@ -54,7 +54,7 @@ const Login: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-gray-700">
-              {t('username')} {/* Translated label */}
+              {t('username')}
             </label>
             <input
               type="text"
@@ -69,7 +69,7 @@ const Login: React.FC = () => {
 
           <div className="mb-6">
             <label htmlFor="password" className="block text-gray-700">
-              {t('password')} {/* Translated label */}
+              {t('password')}
             </label>
             <input
               type="password"
@@ -84,9 +84,9 @@ const Login: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+            className="w-full bg-yellow-500 text-white px-4 py-2 rounded-lg transition"
           >
-            {t('login')} {/* Translated button */}
+            {t('login')}
           </button>
         </form>
       </div>

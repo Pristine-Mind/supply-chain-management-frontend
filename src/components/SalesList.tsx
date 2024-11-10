@@ -168,7 +168,7 @@ const SaleList: React.FC = () => {
         </button>
 
         <p>
-          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('no_sales')}
+          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('sales_no')}
         </p>
 
         <button
