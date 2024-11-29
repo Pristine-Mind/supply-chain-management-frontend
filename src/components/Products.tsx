@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios, { isAxiosError } from 'axios';
 import ProductCard from './ProductCard';
-import { FaEdit, FaPlus } from "react-icons/fa";
+import { FaEdit, FaPlus, FaDownload } from "react-icons/fa";
 import { useTranslation } from 'react-i18next';
 
 interface ProductImage {
@@ -144,6 +144,36 @@ const Products: React.FC = () => {
     setExistingImages(existingImages.filter((image) => image.id !== imageId));
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/export/products/`, {
+        responseType: 'blob',
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+
+      link.setAttribute('download', 'products.xlsx');
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.parentNode?.removeChild(link);
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        console.error('Export error:', error.response?.data);
+        setErrorMessages({ general: [t('error_exporting_data')] });
+      } else {
+        console.error('Unexpected error:', error);
+        setErrorMessages({ general: [t('error_exporting_data')] });
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -274,6 +304,7 @@ const Products: React.FC = () => {
             </option>
           ))}
         </select>
+        <div className="flex space-x-2">
         <button
           onClick={() => {
             resetForm();
@@ -284,6 +315,14 @@ const Products: React.FC = () => {
           <FaPlus className="mr-2" />
           {t('add_new_product')}
         </button>
+        <button
+            onClick={handleExport}
+            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+          >
+            <FaDownload className="mr-2" /> Export
+          </button>
+        </div>
+        
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

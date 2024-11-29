@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaDownload } from "react-icons/fa";
 import { useTranslation } from 'react-i18next';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -190,6 +190,36 @@ const CustomerList: React.FC = () => {
     setSelectedCustomer(null);
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/export/customers/`, {
+        responseType: 'blob',
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+
+      link.setAttribute('download', 'customers.xlsx');
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.parentNode?.removeChild(link);
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        console.error('Export error:', error.response?.data);
+        setErrorMessages({ general: [t('error_exporting_data')] });
+      } else {
+        console.error('Unexpected error:', error);
+        setErrorMessages({ general: [t('error_exporting_data')] });
+      }
+    }
+  };
+
   const salesChartData = {
     labels: topSalesCustomers.map((customer) => customer.name),
     datasets: [
@@ -247,6 +277,7 @@ const CustomerList: React.FC = () => {
             placeholder={t('search_by_name')}
             className="px-4 py-2 border border-gray-300 rounded-lg w-full sm:w-72"
           />
+          <div className="flex space-x-2">
           <button
             onClick={() => {
               setFormVisible(true);
@@ -267,6 +298,14 @@ const CustomerList: React.FC = () => {
             <FaPlus className="mr-2" />
             {t('add_customer')}
           </button>
+          <button
+            onClick={handleExport}
+            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+          >
+            <FaDownload className="mr-2" /> Export
+          </button>
+          </div>
+          
         </div>
       </div>
 

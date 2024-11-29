@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios, { isAxiosError } from 'axios';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaDownload } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 
 interface Producer {
@@ -161,6 +161,36 @@ const AddProducer: React.FC = () => {
     setEditingProducerId(producer.id);
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/export/producers/`, {
+        responseType: 'blob',
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+
+      link.setAttribute('download', 'producers.xlsx');
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.parentNode?.removeChild(link);
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        console.error('Export error:', error.response?.data);
+        setErrorMessages({ general: [t('error_exporting_data')] });
+      } else {
+        console.error('Unexpected error:', error);
+        setErrorMessages({ general: [t('error_exporting_data')] });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
@@ -172,16 +202,24 @@ const AddProducer: React.FC = () => {
           placeholder={t('search_by_name')}
           className="px-4 py-2 border rounded-lg w-full sm:w-1/3 mb-4 sm:mb-0"
         />
-        <button
-          onClick={() => {
-            setFormVisible(true);
-            setFormData({ name: '', contact: '', email: '', address: '', registration_number: '' });
-            setEditingProducerId(null);
-          }}
-          className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
-        >
-          <FaPlus className="mr-2" /> {t('add_farmer')}
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => {
+              setFormVisible(true);
+              setFormData({ name: '', contact: '', email: '', address: '', registration_number: '' });
+              setEditingProducerId(null);
+            }}
+            className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+          >
+            <FaPlus className="mr-2" /> {t('add_farmer')}
+          </button>
+          <button
+            onClick={handleExport}
+            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+          >
+            <FaDownload className="mr-2" /> Export
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">

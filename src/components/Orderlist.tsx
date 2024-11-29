@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
+import { FaPlus, FaDownload } from 'react-icons/fa';
 
 interface Customer {
   id: number;
@@ -102,6 +103,34 @@ const OrderList: React.FC = () => {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/export/orders/`, {
+        responseType: 'blob',
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+
+      link.setAttribute('download', 'order.xlsx');
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.parentNode?.removeChild(link);
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        console.error('Export error:', error.response?.data);
+      } else {
+        console.error('Unexpected error:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
     fetchCustomers();
@@ -179,12 +208,21 @@ const OrderList: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('order_list')}</h2>
+        <div className="flex space-x-2">
         <button
           onClick={() => setFormVisible(true)}
-          className="px-4 py-2 bg-green-500 text-white rounded-lg w-full sm:w-auto"
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto"
         >
           {t('add_order')}
         </button>
+        <button
+            onClick={handleExport}
+            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+          >
+            <FaDownload className="mr-2" /> Export
+          </button>
+        </div>
+        
       </div>
 
       <div className="flex flex-wrap gap-4 mb-4">
