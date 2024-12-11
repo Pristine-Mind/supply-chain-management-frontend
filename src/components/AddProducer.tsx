@@ -211,7 +211,7 @@ const AddProducer: React.FC = () => {
             }}
             className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
           >
-            <FaPlus className="mr-2" /> {t('add_farmer')}
+            <FaPlus className="mr-2" /> {t('add_producer')}
           </button>
           <button
             onClick={handleExport}

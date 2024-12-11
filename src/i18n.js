@@ -32,7 +32,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         supply_chain_management: "Supply Chain Management",
         farmers_list: "Farmers List",
         search_by_name: "Search by name...",
-        add_farmer: "Add Farmer",
+        // add_producer: "Add Producer",
         producer_name: "Producer Name",
         contact: "Contact",
         email: "Email",
