@@ -380,7 +380,6 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {/* Charts and Metrics */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Sales Trends Line Chart */}
           <div className="bg-white p-4 rounded-lg shadow h-80">
@@ -390,7 +389,6 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          {/* Pending Orders and Revenue */}
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-lg font-bold mb-4">
               {t('pending_orders')} & {t('total_revenue')}
