@@ -9,6 +9,8 @@ import SaleList from './components/SalesList';
 import Stocks from './components/Stocks';
 import ProductInstanceView from './components/ProductInstanceView';  
 import StatsDashboard from './components/StatsDashboard';
+import AuditLogList from './components/AuditLogList';
+import AuditLogForm from './components/AuditLogForm';
 // import Marketplace from './components/Marketplace';
 import BackButton from './components/BackButton';
 
@@ -29,6 +31,9 @@ const App: React.FC = () => {
           <Route path="/stocks" element={<Stocks />} />
           <Route path="/stats" element={<StatsDashboard />} />
           <Route path="/marketplace/:productId" element={<ProductInstanceView />} />
+          <Route path="/audit-logs" element={<AuditLogList />} />
+          <Route path="/audit-logs/new" element={<AuditLogForm />} />
+          <Route path="/audit-logs/:id" element={<AuditLogForm />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
