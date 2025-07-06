@@ -21,7 +21,8 @@ import {
   OfficeBuildingIcon,
   CurrencyDollarIcon,
   ChartSquareBarIcon,
-  ScaleIcon
+  ScaleIcon,
+  ClipboardListIcon
 } from '@heroicons/react/solid';
 import { useTranslation } from 'react-i18next';
 
@@ -256,6 +257,15 @@ const Home: React.FC = () => {
               >
                 <ChartSquareBarIcon className="h-5 w-5 mr-3" />
                 {t('stats_and_analytics')}
+              </Link>
+            </li>
+            <li className="mb-4">
+              <Link
+                to="/audit-logs"
+                className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
+              >
+                <ClipboardListIcon className="h-5 w-5 mr-3" />
+                {t('audit_logs')}
               </Link>
             </li>
             <li className="mb-4">

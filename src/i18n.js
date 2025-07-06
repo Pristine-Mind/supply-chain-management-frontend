@@ -266,7 +266,8 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         fodder_forage: "Fodder & Forage",
         flowers_ornamental_plants: "Flowers & Ornamental Plants",
         herbs_medicinal_plants: "Herbs & Medicinal Plants",
-        other: "Other"
+        other: "Other",
+        audit_logs: "Audit Logs",
       }
         
     },
@@ -541,6 +542,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         flowers_ornamental_plants: "फूल र सजावटी बिरुवा",
         herbs_medicinal_plants: "औषधीय जडीबुटीहरू",
         other: "अन्य",
+        audit_logs: "आफिड लाग्स",
     }    
     },
   },
