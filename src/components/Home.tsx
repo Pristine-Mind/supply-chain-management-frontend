@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { LedgerEntry, fetchLedgerEntries } from '../api/ledgerApi';
 import LedgerEntriesTable from './LedgerEntriesTable';
+import PurchaseOrderCards from './PurchaseOrderCards';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -248,6 +249,15 @@ const Home: React.FC = () => {
             </li>
             <li className="mb-4">
               <Link
+                to="/purchase-orders"
+                className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
+              >
+                <ClipboardListIcon className="h-5 w-5 mr-3" />
+                Purchase Order Management
+              </Link>
+            </li>
+            <li className="mb-4">
+              <Link
                 to="/products"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
@@ -450,6 +460,17 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Purchase Order Management Section - card view
+        <div id="purchase-orders" className="mt-8">
+          <div className="bg-white p-4 rounded-lg shadow">
+            <h2 className="text-xl font-bold mb-4 flex items-center">
+              <ClipboardListIcon className="h-6 w-6 text-blue-600 mr-2" />
+              Purchase Order Management
+            </h2>
+            <PurchaseOrderCards pageSize={6} />
+          </div>
+        </div> */}
 
         {/* Ledger Entries Table Section - new row below dashboard cards */}
         <div className="mt-8">
