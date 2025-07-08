@@ -34,7 +34,13 @@ const AuditLogList: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetchAuditLogs();
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No token found');
+        setLoading(false);
+        return;
+      }
+      const response = await fetchAuditLogs(token);
       setLogs(response.data.results);
     } catch (e: any) {
       setError(e.message);
