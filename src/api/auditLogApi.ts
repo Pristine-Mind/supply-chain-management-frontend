@@ -11,17 +11,23 @@ interface AuditLog {
   amount: string;
 }
 
-const getAuthHeaders = () => ({
-  headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-});
-
-interface AuditLogApiResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: AuditLog[];
+export async function fetchAuditLogs(token: string) {
+  const response = await axios.get(`${BASE_URL}`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+  return response;
 }
 
-export const fetchAuditLogs = () => axios.get<AuditLogApiResponse>(BASE_URL, getAuthHeaders());
-export const addAuditLog = (data: Omit<AuditLog, 'id'>) => axios.post(BASE_URL, data, getAuthHeaders());
-export const updateAuditLog = (id: number, data: Omit<AuditLog, 'id'>) => axios.patch(`${BASE_URL}${id}/`, data, getAuthHeaders());
+export async function addAuditLog(data: Omit<AuditLog, 'id'>, token: string) {
+  const response = await axios.post(`${BASE_URL}`, data, {
+    headers: { Authorization: `Token ${token}` },
+  });
+  return response;
+}
+
+export async function updateAuditLog(id: number, data: Omit<AuditLog, 'id'>, token: string) {
+  const response = await axios.patch(`${BASE_URL}${id}/`, data, {
+    headers: { Authorization: `Token ${token}` },
+  });
+  return response;
+}

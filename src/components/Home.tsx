@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { LedgerEntry, fetchLedgerEntries } from '../api/ledgerApi';
+import LedgerEntriesTable from './LedgerEntriesTable';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -66,6 +68,14 @@ const Home: React.FC = () => {
   });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
+  // Ledger entries state
+  const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
+  const [ledgerCount, setLedgerCount] = useState(0);
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [ledgerError, setLedgerError] = useState<string | null>(null);
+  const [ledgerPage, setLedgerPage] = useState(1);
+  const [ledgerPageSize, setLedgerPageSize] = useState(10);
+
   const fetchUserInfo = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -123,8 +133,29 @@ const Home: React.FC = () => {
     } else {
       fetchData();
       fetchUserInfo();
+      // Fetch ledger entries
+      const fetchLedger = async () => {
+        setLedgerLoading(true);
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const offset = (ledgerPage - 1) * ledgerPageSize;
+            const res = await fetchLedgerEntries(token, ledgerPageSize, offset);
+            setLedgerEntries(res.results);
+            setLedgerCount(res.count);
+          } catch (e: any) {
+            setLedgerError(e.message);
+          } finally {
+            setLedgerLoading(false);
+          }
+        } else {
+          setLedgerError('No token found');
+          setLedgerLoading(false);
+        }
+      };
+      fetchLedger();
     }
-  }, [navigate]);
+  }, [navigate, ledgerPage, ledgerPageSize]);
 
   const salesTrendsData = {
     labels: data.salesTrends.map((item) => item.month),
@@ -390,7 +421,7 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Sales Trends Line Chart */}
           <div className="bg-white p-4 rounded-lg shadow h-80">
             <h2 className="text-lg font-bold mb-4">{t('monthly_sales_trends')}</h2>
@@ -417,6 +448,59 @@ const Home: React.FC = () => {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Ledger Entries Table Section - new row below dashboard cards */}
+        <div className="mt-8">
+          <div className="bg-white p-4 rounded-lg shadow">
+            {ledgerLoading ? (
+              <p>Loading ledger entries...</p>
+            ) : ledgerError ? (
+              <p className="text-red-600">Error: {ledgerError}</p>
+            ) : (
+              <>
+                <LedgerEntriesTable entries={ledgerEntries} />
+                {/* Pagination Controls */}
+                <div className="flex justify-between items-center mt-4">
+                  <div>
+                    <label htmlFor="ledger-page-size" className="mr-2">Rows per page:</label>
+                    <select
+                      id="ledger-page-size"
+                      value={ledgerPageSize}
+                      onChange={e => {
+                        setLedgerPageSize(Number(e.target.value));
+                        setLedgerPage(1); // Reset to first page on page size change
+                      }}
+                      className="border rounded px-2 py-1"
+                    >
+                      {[5, 10, 20, 50].map(size => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <button
+                      className="px-3 py-1 border rounded mr-2 disabled:opacity-50"
+                      onClick={() => setLedgerPage(p => Math.max(1, p - 1))}
+                      disabled={ledgerPage === 1}
+                    >
+                      Previous
+                    </button>
+                    <span>
+                      Page {ledgerPage} of {Math.ceil(ledgerCount / ledgerPageSize) || 1}
+                    </span>
+                    <button
+                      className="px-3 py-1 border rounded ml-2 disabled:opacity-50"
+                      onClick={() => setLedgerPage(p => p + 1)}
+                      disabled={ledgerPage >= Math.ceil(ledgerCount / ledgerPageSize)}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

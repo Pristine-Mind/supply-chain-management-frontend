@@ -45,7 +45,13 @@ const AuditLogForm: React.FC = () => {
 
   useEffect(() => {
     if (isEdit) {
-      fetchAuditLogs()
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No token found');
+        setLoading(false);
+        return;
+      }
+      fetchAuditLogs(token)
         .then(res => {
           const entry = res.data.results.find(e => e.id === Number(id));
           if (entry) {
@@ -67,8 +73,10 @@ const AuditLogForm: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      if (isEdit) await updateAuditLog(Number(id), form);
-      else await addAuditLog(form);
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+      if (isEdit) await updateAuditLog(Number(id), form, token);
+      else await addAuditLog(form, token);
       navigate('/audit-logs');
     } catch (e: any) {
       setError(e.message);
