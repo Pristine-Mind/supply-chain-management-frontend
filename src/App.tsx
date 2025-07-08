@@ -54,7 +54,8 @@ const ConditionalBackButton: React.FC = () => {
     '/stocks',
     '/stats',
     '/marketplace',
-    '/purchase-orders'
+    '/purchase-orders',
+    '/audit-logs'
   ];
 
   const shouldShowBackButton = routesWithBackButton.some(route => location.pathname.startsWith(route));

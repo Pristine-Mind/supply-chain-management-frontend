@@ -249,15 +249,6 @@ const Home: React.FC = () => {
             </li>
             <li className="mb-4">
               <Link
-                to="/purchase-orders"
-                className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
-              >
-                <ClipboardListIcon className="h-5 w-5 mr-3" />
-                Purchase Order Management
-              </Link>
-            </li>
-            <li className="mb-4">
-              <Link
                 to="/products"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
@@ -282,6 +273,7 @@ const Home: React.FC = () => {
                 {t('order_management')}
               </Link>
             </li>
+          
             <li className="mb-4">
               <Link
                 to="/sales"
@@ -289,6 +281,15 @@ const Home: React.FC = () => {
               >
                 <CurrencyDollarIcon className="h-5 w-5 mr-3" />
                 {t('sales_management')}
+              </Link>
+            </li>
+            <li className="mb-4">
+              <Link
+                to="/purchase-orders"
+                className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
+              >
+                <ClipboardListIcon className="h-5 w-5 mr-3" />
+                Purchase Order Management
               </Link>
             </li>
             <li className="mb-4">
