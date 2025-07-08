@@ -11,6 +11,7 @@ import ProductInstanceView from './components/ProductInstanceView';
 import StatsDashboard from './components/StatsDashboard';
 import AuditLogList from './components/AuditLogList';
 import AuditLogForm from './components/AuditLogForm';
+import PurchaseOrdersPage from './components/PurchaseOrdersPage';
 // import Marketplace from './components/Marketplace';
 import BackButton from './components/BackButton';
 
@@ -34,6 +35,7 @@ const App: React.FC = () => {
           <Route path="/audit-logs" element={<AuditLogList />} />
           <Route path="/audit-logs/new" element={<AuditLogForm />} />
           <Route path="/audit-logs/:id" element={<AuditLogForm />} />
+          <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
@@ -51,7 +53,8 @@ const ConditionalBackButton: React.FC = () => {
     '/sales',
     '/stocks',
     '/stats',
-    '/marketplace'
+    '/marketplace',
+    '/purchase-orders'
   ];
 
   const shouldShowBackButton = routesWithBackButton.some(route => location.pathname.startsWith(route));
