@@ -1,20 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-<<<<<<< HEAD
-import { LedgerEntry, fetchLedgerEntries } from '../api/ledgerApi';
-import LedgerEntriesTable from './LedgerEntriesTable';
-||||||| parent of b7301a2 (Purchase Order: Add api and view for PurchaseOrder)
-=======
-<<<<<<< Updated upstream
-||||||| Stash base
-import { LedgerEntry, fetchLedgerEntries } from '../api/ledgerApi';
-import LedgerEntriesTable from './LedgerEntriesTable';
-=======
 import { LedgerEntry, fetchLedgerEntries } from '../api/ledgerApi';
 import LedgerEntriesTable from './LedgerEntriesTable';
 import PurchaseOrderCards from './PurchaseOrderCards';
->>>>>>> Stashed changes
->>>>>>> b7301a2 (Purchase Order: Add api and view for PurchaseOrder)
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -237,7 +225,7 @@ const Home: React.FC = () => {
 
       <aside
         className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-yellow-900 text-white w-64 z-50`}
+          } md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-green-900 text-white w-64 z-50`}
       >
         <div className="p-4 flex items-center justify-between md:justify-center">
           <h2 className="text-2xl font-bold">{t('menu')}</h2>
@@ -257,6 +245,15 @@ const Home: React.FC = () => {
               >
                 <OfficeBuildingIcon className="h-5 w-5 mr-3" />
                 {t('producer_management')}
+              </Link>
+            </li>
+            <li className="mb-4">
+              <Link
+                to="/purchase-orders"
+                className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
+              >
+                <ClipboardListIcon className="h-5 w-5 mr-3" />
+                Purchase Order Management
               </Link>
             </li>
             <li className="mb-4">
@@ -305,15 +302,6 @@ const Home: React.FC = () => {
             </li>
             <li className="mb-4">
               <Link
-                to="/purchase-orders"
-                className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
-              >
-                <ClipboardListIcon className="h-5 w-5 mr-3" />
-                Purchase Order Management
-              </Link>
-            </li>
-            <li className="mb-4">
-              <Link
                 to="/audit-logs"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
@@ -344,15 +332,7 @@ const Home: React.FC = () => {
       <div className="flex-1 p-4 md:p-8">
         <div className="hidden md:flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-yellow-800">
-            {(() => {
-              const now = new Date();
-              const hour = now.getHours();
-              let greeting = 'Good Morning';
-              if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
-              else if (hour >= 17 || hour < 5) greeting = 'Good Evening';
-              const name = user.username || 'there';
-              return `${greeting}, ${name}!`;
-            })()}
+            {t('supply_chain_dashboard')}
           </h1>
           
           <div className="flex items-center space-x-4">
@@ -480,118 +460,6 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-<<<<<<< HEAD
-
-        {/* Ledger Entries Table Section - new row below dashboard cards */}
-        <div className="mt-8">
-          <div className="bg-white p-4 rounded-lg shadow">
-            {ledgerLoading ? (
-              <p>Loading ledger entries...</p>
-            ) : ledgerError ? (
-              <p className="text-red-600">Error: {ledgerError}</p>
-            ) : (
-              <>
-                <LedgerEntriesTable entries={ledgerEntries} />
-                {/* Pagination Controls */}
-                <div className="flex justify-between items-center mt-4">
-                  <div>
-                    <label htmlFor="ledger-page-size" className="mr-2">Rows per page:</label>
-                    <select
-                      id="ledger-page-size"
-                      value={ledgerPageSize}
-                      onChange={e => {
-                        setLedgerPageSize(Number(e.target.value));
-                        setLedgerPage(1); // Reset to first page on page size change
-                      }}
-                      className="border rounded px-2 py-1"
-                    >
-                      {[5, 10, 20, 50].map(size => (
-                        <option key={size} value={size}>{size}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <button
-                      className="px-3 py-1 border rounded mr-2 disabled:opacity-50"
-                      onClick={() => setLedgerPage(p => Math.max(1, p - 1))}
-                      disabled={ledgerPage === 1}
-                    >
-                      Previous
-                    </button>
-                    <span>
-                      Page {ledgerPage} of {Math.ceil(ledgerCount / ledgerPageSize) || 1}
-                    </span>
-                    <button
-                      className="px-3 py-1 border rounded ml-2 disabled:opacity-50"
-                      onClick={() => setLedgerPage(p => p + 1)}
-                      disabled={ledgerPage >= Math.ceil(ledgerCount / ledgerPageSize)}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-||||||| parent of b7301a2 (Purchase Order: Add api and view for PurchaseOrder)
-=======
-<<<<<<< Updated upstream
-||||||| Stash base
-
-        {/* Ledger Entries Table Section - new row below dashboard cards */}
-        <div className="mt-8">
-          <div className="bg-white p-4 rounded-lg shadow">
-            {ledgerLoading ? (
-              <p>Loading ledger entries...</p>
-            ) : ledgerError ? (
-              <p className="text-red-600">Error: {ledgerError}</p>
-            ) : (
-              <>
-                <LedgerEntriesTable entries={ledgerEntries} />
-                {/* Pagination Controls */}
-                <div className="flex justify-between items-center mt-4">
-                  <div>
-                    <label htmlFor="ledger-page-size" className="mr-2">Rows per page:</label>
-                    <select
-                      id="ledger-page-size"
-                      value={ledgerPageSize}
-                      onChange={e => {
-                        setLedgerPageSize(Number(e.target.value));
-                        setLedgerPage(1); // Reset to first page on page size change
-                      }}
-                      className="border rounded px-2 py-1"
-                    >
-                      {[5, 10, 20, 50].map(size => (
-                        <option key={size} value={size}>{size}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <button
-                      className="px-3 py-1 border rounded mr-2 disabled:opacity-50"
-                      onClick={() => setLedgerPage(p => Math.max(1, p - 1))}
-                      disabled={ledgerPage === 1}
-                    >
-                      Previous
-                    </button>
-                    <span>
-                      Page {ledgerPage} of {Math.ceil(ledgerCount / ledgerPageSize) || 1}
-                    </span>
-                    <button
-                      className="px-3 py-1 border rounded ml-2 disabled:opacity-50"
-                      onClick={() => setLedgerPage(p => p + 1)}
-                      disabled={ledgerPage >= Math.ceil(ledgerCount / ledgerPageSize)}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-=======
 
         {/* Purchase Order Management Section - card view
         <div id="purchase-orders" className="mt-8">
@@ -656,8 +524,6 @@ const Home: React.FC = () => {
             )}
           </div>
         </div>
->>>>>>> Stashed changes
->>>>>>> b7301a2 (Purchase Order: Add api and view for PurchaseOrder)
       </div>
     </div>
   );
