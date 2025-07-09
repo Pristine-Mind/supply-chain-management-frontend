@@ -18,6 +18,7 @@ import BackButton from './components/BackButton';
 import AboutUs from './components/AboutUs';
 import Contact from './components/Contact';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import ProductPage from './components/ProductPage';
 
 const App: React.FC = () => {
   return (
@@ -35,7 +36,7 @@ const App: React.FC = () => {
           <Route path="/sales" element={<SaleList />} />
           <Route path="/stocks" element={<Stocks />} />
           <Route path="/stats" element={<StatsDashboard />} />
-          <Route path="/marketplace/:productId" element={<ProductInstanceView />} />
+          <Route path="/marketplace/:productId" element={<ProductPage />} />
           <Route path="/audit-logs" element={<AuditLogList />} />
           <Route path="/audit-logs/new" element={<AuditLogForm />} />
           <Route path="/audit-logs/:id" element={<AuditLogForm />} />
