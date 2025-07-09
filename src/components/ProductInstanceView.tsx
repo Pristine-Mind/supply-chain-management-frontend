@@ -182,9 +182,9 @@ const ProductInstanceView: React.FC = () => {
         <>
           <h2 className="text-3xl font-bold mb-6 text-gray-800">{product.product.name}</h2>
           <p className="text-gray-600 mb-4">{product.product.description}</p>
-          <p className="text-gray-900 font-bold mb-4">Price: ${product.listed_price}</p>
+          <p className="text-gray-900 font-bold mb-4">Price: Rs.{product.listed_price}</p>
 
-          <p className="text-gray-900 font-bold mb-4">Current Maximum Bid: ${maxBidAmount || 'No bids yet'}</p>
+          <p className="text-gray-900 font-bold mb-4">Current Maximum Bid: Rs.{maxBidAmount || 'No bids yet'}</p>
 
           <div className="flex flex-col md:flex-row gap-6">
             <div className="bg-white p-4 rounded-lg shadow-md w-full md:w-1/2">
@@ -216,7 +216,7 @@ const ProductInstanceView: React.FC = () => {
                   <ul className="list-disc list-inside">
                     {bids.map((bid, index) => (
                       <li key={index} className="mb-2">
-                        <span className="font-semibold">Bid Amount:</span> ${bid.bid_amount}
+                        <span className="font-semibold">Bid Amount:</span> Rs.{bid.bid_amount}
                         <span className="ml-4 font-semibold">Date:</span> {new Date(bid.bid_date).toLocaleDateString()}
                       </li>
                     ))}
