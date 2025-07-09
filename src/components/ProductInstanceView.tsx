@@ -39,33 +39,38 @@ interface Review {
   created_at: string;
 }
 
-const ProductInstanceView: React.FC = () => {
-  const { productId } = useParams<{ productId: string }>();
-  const navigate = useNavigate();
+interface ProductInstanceViewProps {
+  product: MarketplaceProduct;
+}
 
-  const [product, setProduct] = useState<MarketplaceProduct | null>(null);
+const ProductInstanceView: React.FC<ProductInstanceViewProps> = ({ product }) => {
+  const navigate = useNavigate();
   const [cartCount, setCartCount] = useState(0);
   const [tab, setTab] = useState(0);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsError, setReviewsError] = useState('');
   const [related, setRelated] = useState<MarketplaceProduct[]>([]);
+const [recommended, setRecommended] = useState<MarketplaceProduct[]>([]);
+
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`, {
+    if (product) {
+      // Fetch recommended products (top rated, excluding current)
+      axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?ordering=-rating`, {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` }
       })
-      .then(res => setProduct(res.data))
-      .catch(() => setProduct(null));
-  }, [productId]);
+      .then(res => setRecommended((res.data.results || []).filter((p: any) => p.id !== product.id)))
+      .catch(() => setRecommended([]));
+    }
+  }, [product]);
 
   useEffect(() => {
     if (tab === 1) {
       setReviewsLoading(true);
       axios
         .get(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/feedback/product/${productId}/`,
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/feedback/product/${product?.id}/`,
           { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
         )
         .then(res => setReviews(res.data || []))
@@ -84,7 +89,7 @@ const ProductInstanceView: React.FC = () => {
         .then(res => setRelated(res.data.results.filter((p: any) => p.id !== product.id)))
         .catch(() => setRelated([]));
     }
-  }, [tab, productId, product]);
+  }, [tab, product?.id, product]);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -118,6 +123,29 @@ const ProductInstanceView: React.FC = () => {
               <FaChevronLeft className="text-lg text-gray-700" />
             </button>
           </div>
+
+          {/* {recommended.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-bold mb-4">Recommended Products</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {recommended.slice(0, 3).map(rec => (
+                  <div
+                    key={rec.id}
+                    className="bg-white p-3 rounded-lg shadow hover:shadow-md transition cursor-pointer"
+                    onClick={() => navigate(`/marketplace/${rec.id}`)}
+                  >
+                    <img
+                      src={rec.product_details?.images?.[0]?.image || ''}
+                      alt={rec.product_details?.name}
+                      className="w-full h-24 object-cover rounded mb-2"
+                    />
+                    <div className="font-semibold text-gray-800 truncate">{rec.product_details?.name}</div>
+                    <div className="text-orange-600 font-bold">Rs.{rec.listed_price.toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )} */}
 
           <div className="p-6 space-y-4">
             <h1 className="text-3xl font-bold text-gray-800">{product.product_details?.name}</h1>
@@ -169,7 +197,7 @@ const ProductInstanceView: React.FC = () => {
 
             {/* Tabs */}
             <div className="mt-8 border-b flex">
-              {['Description', 'Reviews', 'Related'].map((label, idx) => (
+              {['Description', 'Reviews'].map((label, idx) => (
                 <button
                   key={idx}
                   className={`flex-1 py-2 text-center ${
@@ -225,45 +253,13 @@ const ProductInstanceView: React.FC = () => {
                   )}
                 </div>
               )}
-
-              {tab === 2 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-bold text-gray-800">Related Products</h2>
-                  {related.length === 0 ? (
-                    <p className="text-gray-500">No related products found.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {related.map(rel => (
-                        <div
-                          key={rel.id}
-                          className="bg-white p-4 rounded-lg shadow hover:shadow-md transition cursor-pointer"
-                          onClick={() => navigate(`/marketplace/${rel.id}`)}
-                        >
-                          <img
-                            src={rel.product_details?.images?.[0]?.image || ''}
-                            alt={rel.product_details?.name}
-                            className="w-full h-32 object-cover rounded-md mb-2"
-                          />
-                          <div className="flex justify-between items-center">
-                            <span className="font-semibold text-gray-800 truncate">
-                              {rel.product_details?.name}
-                            </span>
-                            <span className="text-orange-600 font-bold">
-                              Rs.{rel.listed_price.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
       ) : (
         <div className="text-center text-gray-500 py-16">Loading product details...</div>
       )}
+
     </div>
   );
 };

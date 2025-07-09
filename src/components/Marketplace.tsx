@@ -18,15 +18,7 @@ interface Product {
   images: ProductImage[];
 }
 
-interface MarketplaceProduct {
-  id: number;
-  product: Product;
-  listed_price: string;
-  listed_date: string;
-  is_available: boolean;
-  bid_end_date: string | null;
-  product_details: Product
-}
+import { MarketplaceProduct } from '../types';
 
 const CATEGORY_OPTIONS = [
   { code: 'All', label: 'All' },
