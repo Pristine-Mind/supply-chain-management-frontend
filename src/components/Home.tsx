@@ -28,6 +28,7 @@ import {
   ClipboardListIcon
 } from '@heroicons/react/solid';
 import { useTranslation } from 'react-i18next';
+import { FaFirstOrder, FaJediOrder } from 'react-icons/fa';
 
 ChartJS.register(
   CategoryScale,
@@ -269,7 +270,7 @@ const Home: React.FC = () => {
                 to="/orders"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
-                <ShoppingCartIcon className="h-5 w-5 mr-3" />
+                <FaFirstOrder className="h-5 w-5 mr-3" />
                 {t('order_management')}
               </Link>
             </li>
@@ -324,7 +325,7 @@ const Home: React.FC = () => {
                 to="/marketplace"
                 className="flex items-center px-4 py-2 text-sm font-medium rounded hover:bg-gray-700"
               >
-                <ScaleIcon className="h-5 w-5 mr-3" />
+                <ShoppingCartIcon className="h-5 w-5 mr-3" />
                 {t('marketplace')}
               </Link>
             </li>
