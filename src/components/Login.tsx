@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import logo from '../assets/logo.png';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -37,12 +38,13 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-orange-500 mb-8">
-        {t('supply_chain_management')}
-      </h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+      <img src={logo} alt="Logo" className="w-64 h-64 mb-4" />
+      {/* <h1 className="text-4xl font-bold text-orange-500 mb-8">
+        Mulya Bazzar
+      </h1> */}
 
-      <div className="bg-white shadow-md rounded-lg px-8 py-6 w-full max-w-md">
+      <div className="bg-gray-100 shadow-md rounded-lg px-8 py-6 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-4">
           {t('login')}
         </h2>
@@ -84,7 +86,7 @@ const Login: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-yellow-500 text-white px-4 py-2 rounded-lg transition"
+            className="w-full bg-orange-500 text-white px-4 py-2 rounded-lg transition"
           >
             {t('login')}
           </button>

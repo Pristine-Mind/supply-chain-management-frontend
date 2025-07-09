@@ -280,6 +280,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         related_entity: "Related Entity",
         add: "Add",
         cancel: "Cancel",
+        marketplace: "Marketplace",
       }
         
     },
@@ -567,6 +568,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         related_entity: "सम्बन्धित इकाई",
         add: "थप्नुहोस्",
         cancel: "रद्द गर्नुहोस्",
+        marketplace: "बजारमा",
     }    
     },
   },

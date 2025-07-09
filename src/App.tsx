@@ -12,8 +12,12 @@ import StatsDashboard from './components/StatsDashboard';
 import AuditLogList from './components/AuditLogList';
 import AuditLogForm from './components/AuditLogForm';
 import PurchaseOrdersPage from './components/PurchaseOrdersPage';
-// import Marketplace from './components/Marketplace';
+import Marketplace from './components/Marketplace';
+import MarketplaceAllProducts from './components/MarketplaceAllProducts';
 import BackButton from './components/BackButton';
+import AboutUs from './components/AboutUs';
+import Contact from './components/Contact';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 const App: React.FC = () => {
   return (
@@ -36,6 +40,11 @@ const App: React.FC = () => {
           <Route path="/audit-logs/new" element={<AuditLogForm />} />
           <Route path="/audit-logs/:id" element={<AuditLogForm />} />
           <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/marketplace/all-products" element={<MarketplaceAllProducts />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
@@ -53,7 +62,6 @@ const ConditionalBackButton: React.FC = () => {
     '/sales',
     '/stocks',
     '/stats',
-    '/marketplace',
     '/purchase-orders',
     '/audit-logs'
   ];
