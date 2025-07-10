@@ -14,7 +14,6 @@ interface MarketplaceProduct {
 }
 
 const RelatedProductsSection: React.FC<{ productId: number; category: string }> = ({ productId, category }) => {
-  console.log(category, "category");
   const [related, setRelated] = useState<MarketplaceProduct[]>([]);
   const navigate = useNavigate();
 
@@ -33,7 +32,7 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
 
   if (related.length === 0) return null;
   return (
-    <div className="w-full max-w-5xl mx-auto mt-12">
+    <div className="w-full mt-12">
       <h2 className="text-2xl font-bold mb-6">Related Products</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {related.map(rel => (
