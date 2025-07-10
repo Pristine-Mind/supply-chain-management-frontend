@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import axios, { isAxiosError } from 'axios';
 import ProductCard from './ProductCard';
 import { FaEdit, FaPlus, FaDownload } from "react-icons/fa";
@@ -393,8 +395,9 @@ const Products: React.FC = () => {
                     <strong>{t('category')}:</strong> {viewingProductId.category_details}
                   </p>
                   <p>
-                    <strong>{t('description')}:</strong> {viewingProductId.description}
-                  </p>
+  <strong>{t('description')}:</strong>{' '}
+  <span dangerouslySetInnerHTML={{ __html: viewingProductId.description }} />
+</p>
                   <p>
                     <strong>{t('sku')}:</strong> {viewingProductId.sku}
                   </p>
@@ -489,8 +492,7 @@ const Products: React.FC = () => {
                   <div className="mb-4 relative" ref={producerSearchRef}>
                     <label htmlFor="producer" className="block text-gray-700">
                       {t('producer')} <span className="text-red-500">*</span>
-                    </label>
-                    <input
+                    </label>                    <input
                       type="text"
                       id="producer"
                       name="producer"
@@ -544,7 +546,27 @@ const Products: React.FC = () => {
                     </p>
                   )}
                 </div>
-
+                
+                <div className="mb-4">
+                  <label htmlFor="name" className="block text-gray-700">
+                    {t('product_name')} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''
+                      }`}
+                    required
+                  />
+                  {errorMessages.name && (
+                    <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>
+                  )}
+                </div>
                 <div className="mb-4">
                   <label htmlFor="category" className="block text-gray-700">
                     {t('category')} <span className="text-red-500">*</span>
@@ -573,49 +595,23 @@ const Products: React.FC = () => {
                     </p>
                   )}
                 </div>
-
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-gray-700">
-                    {t('product_name')} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''
-                      }`}
-                    required
-                  />
-                  {errorMessages.name && (
-                    <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>
-                  )}
-                </div>
-
+                
                 <div className="mb-4">
                   <label htmlFor="description" className="block text-gray-700">
                     {t('description')} <span className="text-red-500">*</span>
                   </label>
-                  <textarea
-                    id="description"
-                    name="description"
+                  <ReactQuill
+                    theme="snow"
                     value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.description ? 'border-red-500' : ''
-                      }`}
-                    required
-                  ></textarea>
+                    onChange={value => setFormData({ ...formData, description: value })}
+                    className="mb-2 bg-white"
+                  />
                   {errorMessages.description && (
-                    <p className="text-red-500 text-sm">
-                      {errorMessages.description[0]}
-                    </p>
+                    <p className="text-red-500 text-sm">{errorMessages.description[0]}</p>
                   )}
                 </div>
+
+                
 
                 <div className="mb-4">
                   <label htmlFor="sku" className="block text-gray-700">

@@ -194,7 +194,7 @@ const AddProducer: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('farmers_list')}</h2>
+        <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('producers_list')}</h2>
         <input
           type="text"
           value={searchQuery}
@@ -288,7 +288,7 @@ const AddProducer: React.FC = () => {
             </div>
             <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6 bg-gray-200 px-4 py-2 rounded-lg">
-                {editingProducerId ? t('edit_farmer') : t('add_farmer')}
+                {editingProducerId ? t('edit_producer') : t('add_producer')}
               </h3>
 
               <form onSubmit={handleSubmit}>

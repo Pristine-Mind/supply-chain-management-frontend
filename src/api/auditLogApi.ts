@@ -6,7 +6,7 @@ interface AuditLog {
   id: number;
   transactionType: string;
   referenceId: string;
-  date: string; // YYYY-MM-DD
+  date: string;
   entityId: number;
   amount: string;
 }

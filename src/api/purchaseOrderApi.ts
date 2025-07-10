@@ -52,6 +52,5 @@ export async function fetchPurchaseOrders(token: string, limit = 10, offset = 0)
       headers: { Authorization: `Token ${token}` },
     }
   );
-  console.log(response.data.results, "yyyyyy");
   return response.data;
 }
