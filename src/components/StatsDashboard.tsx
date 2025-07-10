@@ -137,12 +137,12 @@ const StatsDashboard: React.FC = () => {
       {
         label: t('products_sold'),
         data: monthly_sales.map((sale) => sale.total_sold),
-        backgroundColor: 'rgba(78, 205, 196, 0.2)',
-        borderColor: '#4ECDC4',
+        backgroundColor: 'rgba(255, 214, 0, 0.15)',
+        borderColor: '#FFD600',
         borderWidth: 2,
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: '#4ECDC4',
+        pointBackgroundColor: '#FFD600',
         pointBorderColor: '#fff',
         pointHoverRadius: 6,
       },
@@ -211,7 +211,7 @@ const StatsDashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center bg-gradient-to-r from-blue-600 to-teal-500 text-transparent bg-clip-text">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center bg-gradient-to-r from-orange-600 to-orange-500 text-transparent bg-clip-text">
         {t('sales_statistics_dashboard')}
       </h1>
 
@@ -273,13 +273,13 @@ const StatsDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform">
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform">
           <h3 className="text-lg font-medium mb-2">{t('total_products_sold')}</h3>
           <p className="text-3xl font-bold">
             {total_products_sold !== null ? total_products_sold.toLocaleString() : t('na')}
           </p>
         </div>
-        <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform">
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform">
           <h3 className="text-lg font-medium mb-2">{t('total_revenue')}</h3>
           <p className="text-3xl font-bold">
             {total_revenue !== null ? `$${total_revenue.toFixed(2)}` : t('na')}

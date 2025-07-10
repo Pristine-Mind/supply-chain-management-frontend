@@ -165,8 +165,11 @@ const Home: React.FC = () => {
       {
         label: t('monthly_sales_trends'),
         data: data.salesTrends.map((item) => item.value),
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: '#FFD600',
+        backgroundColor: 'rgba(255, 214, 0, 0.15)',
+        pointBackgroundColor: '#FFD600',
+        pointBorderColor: '#fff',
+        pointHoverRadius: 6,
         fill: true,
       },
     ],

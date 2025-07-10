@@ -281,6 +281,11 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         add: "Add",
         cancel: "Cancel",
         marketplace: "Marketplace",
+        select_category: "Select Category",
+        add_product: "Add Product",
+        edit_producer: "Edit Producer",
+        producers_list: "Producers List",
+
       }
         
     },
@@ -569,6 +574,9 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         add: "थप्नुहोस्",
         cancel: "रद्द गर्नुहोस्",
         marketplace: "बजारमा",
+        select_category: "श्रेणी छान्नुहोस्",
+        edit_producer: "संपादन गर्नुहोस्",
+        producers_list: "उत्पादकहरूको सूची",
     }    
     },
   },
