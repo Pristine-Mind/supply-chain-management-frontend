@@ -45,16 +45,34 @@ const ProductPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <ProductSearchBar />
-      <div className="flex flex-col items-center flex-1">
-        <div className="w-full max-w-3xl">
-          <ProductInstanceView product={product} />
-        </div>
-        {product.product_details?.category && (
-          <RelatedProductsSection
-            productId={product.id}
-            category={product.product_details?.category}
+      <div className="flex flex-1 justify-center items-start py-8 px-2 md:px-0 gap-4 w-full">
+        <div className="hidden md:block w-96 h-[800px]">
+          <img
+            src="https://media.istockphoto.com/id/1979468745/vector/discount-coupon-vector-set-on-white-background.jpg?s=2048x2048&w=is&k=20&c=HD1MCSyYwum6ByCfP0UKBiajQS72pV8sI2cW4DnvF1E="
+            alt="Left Banner"
+            className="object-cover w-96 h-[800px] rounded-xl shadow-lg"
           />
-        )}
+        </div>
+
+        <div className="flex flex-col items-center flex-1">
+          <div className="w-full max-w-3xl">
+            <ProductInstanceView product={product} />
+          </div>
+          {product.product_details?.category && (
+            <RelatedProductsSection
+              productId={product.id}
+              category={product.product_details?.category}
+            />
+          )}
+        </div>
+
+        <div className="hidden md:block w-96 h-[800px]">
+          <img
+            src="https://media.istockphoto.com/id/1979468745/vector/discount-coupon-vector-set-on-white-background.jpg?s=2048x2048&w=is&k=20&c=HD1MCSyYwum6ByCfP0UKBiajQS72pV8sI2cW4DnvF1E="
+            alt="Right Banner"
+            className="object-cover w-96 h-[800px] rounded-xl shadow-lg"
+          />
+        </div>
       </div>
       <div className="w-full">
         <Footer />

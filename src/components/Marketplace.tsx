@@ -62,7 +62,7 @@ const PROFILE_TYPE_OPTIONS = ['All', 'Retailer', 'Distributor'];
 
 const Marketplace: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]); // For popular categories
+  const [categories, setCategories] = useState<any[]>([]);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [newArrivals, setNewArrivals] = useState<any[]>([]);
   const [query, setQuery] = useState('');
@@ -74,8 +74,6 @@ const Marketplace: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Fetch products (simulate API)
-  // Fetch products from server with filters
   const PROFILE_TYPE_OPTIONS = ['All', 'Retailer', 'Distributor'];
   const fetchMarketplaceProducts = async (search = '', category = 'All', location = 'All', business_type = 'All') => {
     setLoading(true);
@@ -116,26 +114,21 @@ const Marketplace: React.FC = () => {
     }
   };
 
-  // Fetch whenever search or filters change
   useEffect(() => {
     fetchMarketplaceProducts(query, selectedCategory, selectedLocation, selectedProfileType);
     // eslint-disable-next-line
   }, [query, selectedCategory, selectedLocation, selectedProfileType]);
 
-  // No client-side filter anymore, just show recommendations
   const filteredRecommendations = recommendations;
 
   return (
     <div className="min-h-screen bg-white">
       <div className="sticky top-0 bg-white z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          {/* Left: Logo and Title */}
           <div className="flex items-center gap-2 min-w-[220px]">
             <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
             <span className="font-extrabold text-2xl text-orange-600 whitespace-nowrap">MulyaBazzar</span>
           </div>
-
-          {/* Center: Search Bar */}
           <div className="flex-1 max-w-xl mx-4 relative">
             <input
               type="text"
@@ -173,9 +166,7 @@ const Marketplace: React.FC = () => {
             )}
           </div>
 
-          {/* Right: Filters */}
           <div className="flex gap-2 min-w-[450px]">
-            {/* Category Filter */}
             <div>
               <select
                 className="rounded-lg border px-3 py-2 bg-gray-100"
@@ -188,7 +179,6 @@ const Marketplace: React.FC = () => {
                 ))}
               </select>
             </div>
-            {/* Location Filter */}
             <div>
               <select
                 className="rounded-lg border px-3 py-2 bg-gray-100"
@@ -201,7 +191,6 @@ const Marketplace: React.FC = () => {
                 ))}
               </select>
             </div>
-            {/* Business Type Filter */}
             <div>
               <select
                 className="rounded-lg border px-3 py-2 bg-gray-100"
@@ -216,7 +205,6 @@ const Marketplace: React.FC = () => {
             </div>
           </div>
         </div>
-        {/* Categories Row */}
         <div className="w-full bg-white border-b border-gray-100 py-3">
           <div className="container mx-auto px-4">
             <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 pb-2">

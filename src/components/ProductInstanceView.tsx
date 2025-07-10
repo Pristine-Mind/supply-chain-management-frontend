@@ -81,14 +81,11 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProduct }> = ({ produc
   const images = product.product_details?.images || [];
 
   return (
-    <div className="w-full h-screen bg-gray-50 overflow-auto flex flex-col">
+    <div className="w-full h-screen overflow-auto flex flex-col">
       <div className="flex justify-center items-start flex-1 py-8 px-2 md:px-0">
         <div className="bg-white rounded-2xl shadow-2xl p-6 w-full h-full max-w-5xl flex flex-col">
 
-          {/* Gallery + Info */}
           <div className="flex flex-col md:flex-row gap-6 flex-1 overflow-hidden">
-
-            {/* Image Gallery */}
             <div className="md:w-1/2 w-full h-full flex flex-col">
               <div className="flex-1 bg-gray-100 rounded-xl overflow-hidden flex items-center justify-center">
                 <img
@@ -115,9 +112,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProduct }> = ({ produc
               )}
             </div>
 
-            {/* Product Info */}
             <div className="md:w-1/2 w-full h-full flex flex-col">
-              {/* Header */}
               <div className="flex justify-between items-start">
                 <h1 className="text-3xl font-extrabold text-gray-900">{product.product_details?.name}</h1>
                 <div className="flex items-center gap-2 text-orange-600">
@@ -126,7 +121,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProduct }> = ({ produc
                 </div>
               </div>
 
-              {/* Price & Stock */}
               <div className="mt-4 flex items-center gap-4">
                 <span className="text-4xl font-bold text-orange-600">Rs.{product.listed_price.toFixed(2)}</span>
                 {product.min_order && <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">Min {product.min_order} pcs</span>}
@@ -135,13 +129,11 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProduct }> = ({ produc
                 </span>
               </div>
 
-              {/* Description */}
               <section aria-labelledby="product-desc" className="prose max-w-none mt-6 text-gray-700 flex-1 overflow-auto">
                 <h2 id="product-desc" className="text-lg font-bold flex items-center gap-2 mb-2"><FaInfoCircle className="text-orange-400"/> Description</h2>
                 <p>{product.product_details?.description}</p>
               </section>
 
-              {/* Actions */}
               <div className="mt-4 flex gap-4 sticky bottom-0 bg-white py-4">
                 <button onClick={() => setCartCount(c => c + 1)} className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg shadow hover:bg-green-700 transition text-lg font-semibold">
                   <FaCartPlus /> Add to Cart
@@ -158,7 +150,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProduct }> = ({ produc
 
           </div>
 
-          {/* Tabs */}
           <div className="mt-6 flex flex-col">
             <div role="tablist" className="flex border-b">
               {['Description', 'Reviews'].map((label, idx) => (
