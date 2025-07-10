@@ -219,7 +219,7 @@ const Marketplace: React.FC = () => {
                   <img
                     src={cat.value}
                     alt={cat.key}
-                    className="w-16 h-16 object-cover rounded-xl mb-1 border border-gray-200 shadow group-hover:shadow-lg transition-shadow"
+                    className="w-52 h-20 object-cover rounded-xl mb-1 border border-gray-200 shadow group-hover:shadow-lg transition-shadow"
                   />
                   <span className="text-xs font-semibold text-gray-700 text-center truncate w-full group-hover:text-orange-600">{cat.key}</span>
                 </button>

@@ -70,7 +70,6 @@ const Home: React.FC = () => {
   });
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
-  // Ledger entries state
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
   const [ledgerCount, setLedgerCount] = useState(0);
   const [ledgerLoading, setLedgerLoading] = useState(false);
@@ -446,7 +445,6 @@ const Home: React.FC = () => {
         </div>
 
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sales Trends Line Chart */}
           <div className="bg-white p-4 rounded-lg shadow h-80">
             <h2 className="text-lg font-bold mb-4">{t('monthly_sales_trends')}</h2>
             <div className="w-full h-64">
@@ -474,19 +472,6 @@ const Home: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Purchase Order Management Section - card view
-        <div id="purchase-orders" className="mt-8">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <ClipboardListIcon className="h-6 w-6 text-blue-600 mr-2" />
-              Purchase Order Management
-            </h2>
-            <PurchaseOrderCards pageSize={6} />
-          </div>
-        </div> */}
-
-        {/* Ledger Entries Table Section - new row below dashboard cards */}
         <div className="mt-8">
           <div className="bg-white p-4 rounded-lg shadow">
             {ledgerLoading ? (
@@ -496,7 +481,6 @@ const Home: React.FC = () => {
             ) : (
               <>
                 <LedgerEntriesTable entries={ledgerEntries} />
-                {/* Pagination Controls */}
                 <div className="flex justify-between items-center mt-4">
                   <div>
                     <label htmlFor="ledger-page-size" className="mr-2">Rows per page:</label>
@@ -505,7 +489,7 @@ const Home: React.FC = () => {
                       value={ledgerPageSize}
                       onChange={e => {
                         setLedgerPageSize(Number(e.target.value));
-                        setLedgerPage(1); // Reset to first page on page size change
+                        setLedgerPage(1);
                       }}
                       className="border rounded px-2 py-1"
                     >

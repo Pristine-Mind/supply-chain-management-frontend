@@ -190,7 +190,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   tabIndex={0}
                   aria-label={cat.key}
                 >
-                  <div className="w-16 h-16 bg-gray-100 rounded-xl mb-1 flex items-center justify-center overflow-hidden">
+                  <div className="w-24 h-16 bg-gray-100 rounded-xl mb-1 flex items-center justify-center overflow-hidden">
                     <img src={cat.value} alt={cat.key} className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-200" />
                   </div>
                   <span className="text-xs font-semibold text-gray-700 text-center truncate w-full group-hover:text-orange-600">{cat.key}</span>
