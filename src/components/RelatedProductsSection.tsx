@@ -35,7 +35,7 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
     <div className="w-full mt-12">
       <h2 className="text-2xl font-bold mb-6">Related Products</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {related.map(rel => (
+        {related.slice(0, 4).map(rel => (
           <div
             key={rel.id}
             className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer flex flex-col"

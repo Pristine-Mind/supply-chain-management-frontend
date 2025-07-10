@@ -395,9 +395,9 @@ const Products: React.FC = () => {
                     <strong>{t('category')}:</strong> {viewingProductId.category_details}
                   </p>
                   <p>
-  <strong>{t('description')}:</strong>{' '}
-  <span dangerouslySetInnerHTML={{ __html: viewingProductId.description }} />
-</p>
+                      <strong>{t('description')}:</strong>{' '}
+                      <span dangerouslySetInnerHTML={{ __html: viewingProductId.description }} />
+                    </p>
                   <p>
                     <strong>{t('sku')}:</strong> {viewingProductId.sku}
                   </p>
