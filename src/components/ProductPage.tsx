@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import ProductInstanceView from './ProductInstanceView';
 import RelatedProductsSection from './RelatedProductsSection';
+import Footer from './Footer';
+import ProductSearchBar from './ProductSearchBar';
 
 interface ProductDetails {
   name: string;
@@ -41,16 +43,22 @@ const ProductPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
-      <div className="w-full max-w-3xl">
-        <ProductInstanceView product={product} />
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <ProductSearchBar />
+      <div className="flex flex-col items-center flex-1">
+        <div className="w-full max-w-3xl">
+          <ProductInstanceView product={product} />
+        </div>
+        {product.product_details?.category && (
+          <RelatedProductsSection
+            productId={product.id}
+            category={product.product_details?.category}
+          />
+        )}
       </div>
-      {product.product_details?.category && (
-        <RelatedProductsSection
-          productId={product.id}
-          category={product.product_details?.category}
-        />
-      )}
+      <div className="w-full">
+        <Footer />
+      </div>
     </div>
   );
 };
