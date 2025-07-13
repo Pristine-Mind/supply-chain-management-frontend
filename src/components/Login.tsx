@@ -27,12 +27,37 @@ const Login: React.FC = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post<{ token: string }>(`${import.meta.env.VITE_REACT_APP_API_URL}/login/`, formData);
-      const { token } = response.data;
-
+      // 1. Login to get the token
+      const loginResponse = await axios.post<{ token: string }>(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/login/`,
+        formData
+      );
+      
+      const { token } = loginResponse.data;
       localStorage.setItem('token', token);
+
+      // 2. Fetch user info using the token
+      const userInfoResponse = await axios.get(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-info/`,
+        {
+          headers: {
+            'Authorization': `Token ${token}`
+          }
+        }
+      );
+      
+      // 3. Store user info in localStorage
+      if (userInfoResponse.data && userInfoResponse.data.username) {
+        localStorage.setItem('username', userInfoResponse.data.username);
+        // Store any other user info you might need
+        if (userInfoResponse.data.email) {
+          localStorage.setItem('email', userInfoResponse.data.email);
+        }
+      }
+
       navigate('/home');
     } catch (error) {
+      console.error('Login error:', error);
       setErrorMessage(t('invalid_credentials'));
     }
   };

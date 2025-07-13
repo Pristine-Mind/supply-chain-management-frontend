@@ -345,9 +345,8 @@ const Home: React.FC = () => {
       <div className="flex-1 p-4 md:p-8">
         <div className="hidden md:flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-yellow-800">
-            {t('supply_chain_dashboard')}
+            Welcome, {localStorage.getItem('username') || 'User'}
           </h1>
-          
           <div className="flex items-center space-x-4">
             <form className="max-w-md mx-auto">   
                 <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
