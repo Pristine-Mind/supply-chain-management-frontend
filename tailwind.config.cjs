@@ -6,6 +6,9 @@ module.exports = {
   ],
   darkMode: 'class',
   theme: {
+    fontFamily: {
+      sans: ['Poppins', 'sans-serif'],
+    },
     extend: {
       keyframes: {
         'fade-in': {
