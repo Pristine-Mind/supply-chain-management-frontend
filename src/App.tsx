@@ -19,6 +19,7 @@ import AboutUs from './components/AboutUs';
 import Contact from './components/Contact';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import ProductPage from './components/ProductPage';
+import Cart from './components/Cart';
 
 const App: React.FC = () => {
   return (
@@ -46,6 +47,7 @@ const App: React.FC = () => {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
@@ -63,8 +65,10 @@ const ConditionalBackButton: React.FC = () => {
     '/sales',
     '/stocks',
     '/stats',
+    '/marketplace',
     '/purchase-orders',
-    '/audit-logs'
+    '/audit-logs',
+    '/cart'
   ];
 
   const shouldShowBackButton = routesWithBackButton.some(route => location.pathname.startsWith(route));

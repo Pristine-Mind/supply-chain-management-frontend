@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { MarketplaceProduct } from '../types/marketplace';
 import {
   FaCartPlus,
   FaShoppingCart,
   FaStar,
   FaStarHalfAlt,
-  FaRegStar,
-  FaInfoCircle
+  FaRegStar
 } from 'react-icons/fa';
+import ChatTab from './ChatTab';
 
 interface ProductImage {
   id: number;
@@ -90,9 +92,11 @@ interface MarketplaceProductInstance {
 
 const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = ({ product }) => {
   const navigate = useNavigate();
-  const [cartCount, setCartCount] = useState(0);
-  const [tab, setTab] = useState(0);
   const [currentImage, setCurrentImage] = useState(0);
+  const [quantity] = useState(1);
+  const [tab, setTab] = useState(0);
+  const { addToCart, itemCount } = useCart();
+  const isAuthenticated = !!localStorage.getItem('token');
   const reviews = product.reviews || [];
   const reviewsLoading = false;
 
@@ -233,36 +237,72 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
               {bulkPricing}
               {ratingsBreakdown}
 
-              <div className="flex gap-4 mt-6">
-                <button
-                  onClick={() => setCartCount(c => c + 1)}
-                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 transition-all shadow-md text-lg font-medium"
-                  aria-label="Add to cart"
+              <div className="mt-8 space-y-4">
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => {
+                      const cartProduct = {
+                        id: product.id,
+                        product: {
+                          id: product.id,
+                          name: product.product_details?.name || 'Product',
+                          description: product.product_details?.description || '',
+                          images: product.product_details?.images || [],
+                          stock: product.product_details?.stock || 0,
+                        },
+                        product_details: {
+                          id: product.product_details?.id || 0,
+                          name: product.product_details?.name || 'Product',
+                          description: product.product_details?.description || '',
+                          images: product.product_details?.images || [],
+                          stock: product.product_details?.stock || 0,
+                          category_details: 'Uncategorized',
+                        },
+                        listed_price: product.listed_price.toString(),
+                        listed_date: product.listed_date || new Date().toISOString(),
+                        is_available: true,
+                        bid_end_date: null,
+                        reviews: [],
+                        average_rating: product.average_rating || 0,
+                        ratings_breakdown: {},
+                        total_reviews: 0,
+                      } as unknown as MarketplaceProduct;
+                      
+                      addToCart(cartProduct, quantity);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-3.5 rounded-lg hover:bg-emerald-700 transition-all shadow-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                    aria-label="Add to cart"
+                  >
+                    <FaCartPlus className="text-lg" /> Add to Cart
+                  </button>
+                  <button
+                    onClick={() => navigate('/checkout')}
+                    className="flex-1 flex items-center justify-center gap-2 bg-orange-600 text-white py-3.5 rounded-lg hover:bg-orange-700 transition-all shadow-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                    aria-label="Buy now"
+                  >
+                    <FaShoppingCart className="text-lg" /> Buy Now
+                  </button>
+                </div>
+                
+                <button 
+                  onClick={() => navigate('/cart')}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-rose-100 relative"
                 >
-                  <FaCartPlus /> Add to Cart
-                </button>
-                <button
-                  onClick={() => alert('Proceed to buy (mock)')}
-                  className="flex items-center justify-center gap-2 bg-orange-600 text-white py-3 px-6 rounded-lg hover:bg-orange-700 transition-all shadow-md text-lg font-medium"
-                  aria-label="Buy now"
-                >
-                  <FaShoppingCart /> Buy Now
-                </button>
-                <div className="relative flex items-center" onClick={() => navigate('/cart')}>
-                  <FaShoppingCart className="text-2xl text-gray-600 hover:text-gray-800 transition cursor-pointer" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full px-2 py-1">
-                      {cartCount}
+                  <FaShoppingCart className="text-gray-600" />
+                  View Cart
+                  {itemCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {itemCount}
                     </span>
                   )}
-                </div>
+                </button>
               </div>
             </div>
           </div>
 
           <div className="mt-8">
             <div role="tablist" className="flex border-b border-gray-200">
-              {['Description', 'Reviews'].map((label, idx) => (
+              {['Description', 'Reviews', 'Chat'].map((label, idx) => (
                 <button
                   key={idx}
                   role="tab"
@@ -279,14 +319,9 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
             <div className="mt-6">
               {tab === 0 && (
                 <div className="space-y-4 text-gray-700">
-                  <ul className="list-disc pl-6 space-y-2 text-sm">
-                    <li>High quality and best price</li>
-                    <li>Fast delivery and easy returns</li>
-                    <li>Trusted by thousands of customers</li>
-                  </ul>
-                  <p
-                    className="text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: product.product_details?.description }}
+                  <div
+                    className="text-sm leading-relaxed text-justify"
+                    dangerouslySetInnerHTML={{ __html: product.product_details?.description || '' }}
                   />
                 </div>
               )}
@@ -316,6 +351,14 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+              {tab === 2 && (
+                <div className="mt-4">
+                  <ChatTab 
+                    productId={product.id}
+                    isAuthenticated={isAuthenticated}
+                  />
                 </div>
               )}
             </div>
