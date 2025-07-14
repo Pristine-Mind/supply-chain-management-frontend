@@ -26,6 +26,7 @@ import Payment from './components/Payment';
 import SellerLanding from './components/SellerLanding';
 import Register from './components/Register';
 import BusinessRegister from './components/BusinessRegister';
+import MarketplaceUserProduct from './components/MarketplaceUserProduct';
 
 const App: React.FC = () => {
   return (
@@ -60,7 +61,7 @@ const App: React.FC = () => {
           <Route path="/sellers" element={<SellerLanding />} />
           <Route path="/register" element={<Register />} />
           <Route path="/business-register" element={<BusinessRegister />} />
-          
+          <Route path="/marketplace/user-product" element={<MarketplaceUserProduct />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
