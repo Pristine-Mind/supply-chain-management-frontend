@@ -26,6 +26,13 @@ interface Product {
   producer: string;
   images: ProductImage[];
   category_details: string;
+  avg_daily_demand?: number;
+  stddev_daily_demand?: number;
+  safety_stock?: number;
+  reorder_point?: number;
+  reorder_quantity?: number;
+  lead_time_days?: number;
+  projected_stockout_date_field?: string;
 }
 
 interface Producer {
@@ -419,6 +426,60 @@ const Products: React.FC = () => {
                   <p>
                     <strong>{t('reorder_level')}:</strong> {viewingProductId.reorder_level}
                   </p>
+                  
+                  {/* Inventory Metrics */}
+                  <div className="mt-6 border-t border-gray-200 pt-4">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                      {t('inventory_metrics')}
+                    </h3>
+                    <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                      <div className="px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-500">{t('avg_daily_demand')}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {viewingProductId.avg_daily_demand ? viewingProductId.avg_daily_demand.toFixed(2) : 'N/A'}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-500">{t('safety_stock')}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {viewingProductId.safety_stock || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-500">{t('reorder_point')}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {viewingProductId.reorder_point || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-500">{t('reorder_quantity')}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {viewingProductId.reorder_quantity || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-500">{t('lead_time_days')}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {viewingProductId.lead_time_days || 'N/A'}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm text-gray-500">{t('projected_stockout_date')}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {viewingProductId.projected_stockout_date_field || 'N/A'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p>
+                    <strong>{t('category')}:</strong> {viewingProductId.category_details}
+                  </p>
                   <p>
                     <strong>{t('active_status')}:</strong>
                     <span
@@ -431,6 +492,7 @@ const Products: React.FC = () => {
                     </span>
                   </p>
                 </div>
+
 
                 {viewingProductId.images && viewingProductId.images.length > 0 && (
                   <div className="mt-6">

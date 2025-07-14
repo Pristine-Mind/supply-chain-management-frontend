@@ -10,19 +10,34 @@ interface CartItem {
   name: string;
 }
 
+export interface CartState {
+  cartId: number | null;
+  // Add other state properties if needed
+}
+
 interface CartContextType {
   cart: CartItem[];
+  state: CartState;
   addToCart: (product: MarketplaceProduct, quantity?: number) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
+  createCartOnBackend: () => Promise<void>;
+  updateCustomerLatLng: (lat: number, lng: number) => Promise<void>;
+  createDelivery: (delivery: any) => Promise<void>;
   itemCount: number;
+  subTotal: number;
+  shipping: number;
   total: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [state, setState] = useState<CartState>({
+    cartId: null,
+  });
+
   const [cart, setCart] = useState<CartItem[]>(() => {
     // Load cart from localStorage on initial render
     if (typeof window !== 'undefined') {
@@ -31,6 +46,87 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     return [];
   });
+
+  const createCartOnBackend = async (): Promise<void> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await fetch('http://localhost:8000/api/v1/carts/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify({ items: cart })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to create cart');
+      }
+
+      const responseData = await response.json();
+      setState(prev => ({ ...prev, cartId: responseData.id }));
+      return responseData;
+    } catch (error) {
+      console.error('Cart creation failed:', error);
+      throw error;
+    }
+  };
+
+  const updateCustomerLatLng = async (lat: number, lng: number): Promise<void> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await fetch('http://localhost:8000/api/v1/customer/location/', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify({ latitude: lat, longitude: lng })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to update location');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Location update failed:', error);
+      throw error;
+    }
+  };
+
+  const createDelivery = async (delivery: any): Promise<void> => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await fetch('http://localhost:8000/api/v1/deliveries/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
+        body: JSON.stringify(delivery)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Failed to create delivery');
+      }
+
+      const responseData = await response.json();
+      return responseData;
+    } catch (error) {
+      console.error('Delivery creation failed:', error);
+      throw error;
+    }
+  };
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -86,21 +182,26 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCart([]);
   };
 
-  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
+  const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = subTotal > 0 ? 100 : 0;
+  const total = subTotal + shipping;
 
   return (
     <CartContext.Provider
       value={{
         cart,
+        state,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
+        createCartOnBackend,
+        updateCustomerLatLng,
+        createDelivery,
         itemCount,
+        subTotal,
+        shipping,
         total,
       }}
     >
@@ -108,6 +209,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     </CartContext.Provider>
   );
 };
+
+export { CartContext };
 
 export const useCart = () => {
   const context = useContext(CartContext);

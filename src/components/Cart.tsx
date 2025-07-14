@@ -17,8 +17,7 @@ const Cart: React.FC = () => {
   } = useCart();
 
   const handleCheckout = () => {
-    alert('Proceeding to checkout!');
-    // TODO: Implement checkout logic
+    navigate('/delivery-details');
   };
 
   if (cart.length === 0) {

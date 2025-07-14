@@ -285,7 +285,14 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         add_product: "Add Product",
         edit_producer: "Edit Producer",
         producers_list: "Producers List",
-
+        product_images: "Product Images",
+        avg_daily_demand: "Average Daily Demand",
+        safety_stock: "Safety Stock",
+        reorder_point: "Reorder Point",
+        reorder_quantity: "Reorder Quantity",
+        lead_time_days: "Lead Time Days",
+        projected_stockout_date: "Projected Stockout Date",
+        inventory_metrics: "Inventory Metrics",
       }
         
     },
@@ -577,6 +584,14 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         select_category: "श्रेणी छान्नुहोस्",
         edit_producer: "संपादन गर्नुहोस्",
         producers_list: "उत्पादकहरूको सूची",
+        product_images: "उत्पादन छविहरू",
+        avg_daily_demand: "सम्मानित दैनिक दर्दरी",
+        safety_stock: "सुरक्षा स्टॉक",
+        reorder_point: "रिएर बिन्दु",
+        reorder_quantity: "रिएर मात्रा",
+        lead_time_days: "लीड टाइम दिन",
+        projected_stockout_date: "प्रोजेक्टेड स्टॉकआउट मिति",
+        inventory_metrics: "सूची मेट्रिक्स",
     }    
     },
   },
