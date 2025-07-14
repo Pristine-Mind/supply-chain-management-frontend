@@ -81,7 +81,7 @@ const Marketplace: React.FC = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isChatOpen, setIsChatOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const navigate = useNavigate();
 
   const fetchMarketplaceProducts = async () => {
@@ -394,7 +394,7 @@ const Marketplace: React.FC = () => {
         {/* Chat Interface */}
         {isChatOpen && (
           <div className="fixed bottom-4 right-4 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
-            <div className="bg-blue-500 text-white p-3 font-medium flex justify-between items-center">
+            <div className="bg-orange-500 text-white p-3 font-medium flex justify-between items-center">
               <span>Marketplace Assistant</span>
               <button 
                 onClick={() => setIsChatOpen(false)}

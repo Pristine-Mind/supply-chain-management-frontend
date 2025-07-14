@@ -46,7 +46,7 @@ const MarketplaceAllProducts: React.FC = () => {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const PAGE_SIZE = 5;
+  const PAGE_SIZE = 20;
   const navigate = useNavigate();
 
   const fetchAllProducts = async (
