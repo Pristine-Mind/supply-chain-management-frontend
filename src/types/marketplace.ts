@@ -1,57 +1,57 @@
-export interface ProductImage {
-  id: number;
-  image: string;
-  alt_text: string | null;
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { FaHome, FaMapMarkerAlt } from 'react-icons/fa';
+import { useCart } from '../context/CartContext';
+
+// --- Delivery type & JSON helpers in the same file ---
+export interface Delivery {
+  id?: number;
+  cartId: number;
+  customerName: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  latitude?: number;
+  longitude?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface Product {
-  id: number;
-  name: string;
-  description: string;
-  images: ProductImage[];
-  stock?: number;
-  category_details?: {
-    id: number;
-    name: string;
+export function deliveryFromJson(json: any): Delivery {
+  return {
+    id: json.id ?? undefined,
+    cartId: json.cart ?? -1,
+    customerName: json.customer_name,
+    phoneNumber: json.phone_number,
+    address: json.address,
+    city: json.city,
+    state: json.state,
+    zipCode: json.zip_code,
+    latitude: json.latitude != null ? Number(json.latitude) : undefined,
+    longitude: json.longitude != null ? Number(json.longitude) : undefined,
+    createdAt: json.created_at ?? undefined,
+    updatedAt: json.updated_at ?? undefined,
   };
 }
 
-export interface BulkPriceTier {
-  min_quantity: number;
-  price: string;
-  price_per_unit: string;
-  discount_percent: number;
+export function deliveryToJson(delivery: Delivery): any {
+  return {
+    cart: delivery.cartId,
+    customer_name: delivery.customerName,
+    phone_number: delivery.phoneNumber,
+    address: delivery.address,
+    city: delivery.city,
+    state: delivery.state,
+    zip_code: delivery.zipCode,
+    latitude: delivery.latitude,
+    longitude: delivery.longitude,
+  };
+}
+// --------------------------------------------------------
+
+interface LocationState {
+  delivery?: Delivery;
 }
 
-export interface RatingBreakdown {
-  [key: number]: number;
-}
-
-export interface MarketplaceProduct {
-  id: number;
-  product: Product;
-  listed_price: string;
-  listed_date: string;
-  is_available: boolean;
-  bid_end_date: string | null;
-  product_details: Product;
-  is_offer_active?: boolean;
-  discounted_price?: string;
-  percent_off?: number;
-  is_free_shipping?: boolean;
-  shipping_cost?: string;
-  bulk_price_tiers?: BulkPriceTier[];
-  min_order?: number;
-  ratings_breakdown?: RatingBreakdown;
-  reviews?: Array<{
-    id: number;
-    rating: number;
-    comment: string;
-    review_text?: string;
-    created_at: string;
-    user: {
-      username: string;
-      [key: string]: any;
-    };
-  }>;
-}

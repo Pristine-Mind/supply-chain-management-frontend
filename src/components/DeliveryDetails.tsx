@@ -15,13 +15,13 @@ interface FormValues {
 }
 
 interface Delivery {
-  cartId: number
-  customerName: string
-  phoneNumber: string
+  cart: number
+  customer_name: string
+  phone_number: string
   address: string
   city: string
   state: string
-  zipCode: string
+  zip_code: string
   latitude: number
   longitude: number
 }
@@ -48,21 +48,28 @@ const DeliveryDetails: React.FC = () => {
     setLoading(true)
     setError(null)
     try {
-      if (!cartState.cartId) await createCartOnBackend()
+      if (!cartState.cartId) {
+        await createCartOnBackend()
+        if (!cartState.cartId) throw new Error('Failed to create cart')
+      }
+
+      if (!cartState.cartId) {
+        throw new Error('Cart ID is missing')
+      }
 
       const delivery: Delivery = {
-        cartId: cartState.cartId || 0,
-        customerName: data.name,
-        phoneNumber: data.phone,
+        cart: cartState.cartId,
+        customer_name: data.name,
+        phone_number: data.phone,
         address: data.address,
         city: data.city,
         state: data.region,
-        zipCode: data.zip,
+        zip_code: data.zip,
         latitude: latLng.lat,
         longitude: latLng.lng,
       }
       await createDelivery(delivery)
-      navigate('/confirmation')
+      navigate('/checkout', { state: { delivery } })
     } catch (err) {
       console.error(err)
       setError('Failed to process delivery. Please try again.')

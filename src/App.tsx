@@ -21,6 +21,8 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import ProductPage from './components/ProductPage';
 import Cart from './components/Cart';
 import DeliveryDetails from './components/DeliveryDetails';
+import CheckoutScreen from './components/CheckoutScreen';
+import Payment from './components/Payment';
 
 const App: React.FC = () => {
   return (
@@ -50,6 +52,8 @@ const App: React.FC = () => {
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/delivery-details" element={<DeliveryDetails />} />
+          <Route path="/checkout" element={<CheckoutScreen />} />
+          <Route path="/payment" element={<Payment />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
@@ -71,7 +75,9 @@ const ConditionalBackButton: React.FC = () => {
     '/purchase-orders',
     '/audit-logs',
     '/cart',
-    '/delivery-details'
+    '/delivery-details',
+    '/checkout',
+    '/payment'
   ];
 
   const shouldShowBackButton = routesWithBackButton.some(route => location.pathname.startsWith(route));

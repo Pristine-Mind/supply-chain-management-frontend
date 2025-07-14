@@ -26,6 +26,8 @@ interface CartContextType {
   updateCustomerLatLng: (lat: number, lng: number) => Promise<void>;
   createDelivery: (delivery: any) => Promise<void>;
   itemCount: number;
+  subTotal: number;
+  shipping: number;
   total: number;
 }
 
@@ -180,11 +182,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCart([]);
   };
 
-  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
+  const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = subTotal > 0 ? 100 : 0;
+  const total = subTotal + shipping;
 
   return (
     <CartContext.Provider
@@ -198,8 +199,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         createCartOnBackend,
         updateCustomerLatLng,
         createDelivery,
-        itemCount: cart.reduce((total, item) => total + item.quantity, 0),
-        total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        itemCount,
+        subTotal,
+        shipping,
+        total,
       }}
     >
       {children}
