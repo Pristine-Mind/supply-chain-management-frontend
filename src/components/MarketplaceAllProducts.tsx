@@ -52,8 +52,8 @@ const MarketplaceAllProducts: React.FC = () => {
   const fetchAllProducts = async (
     search = '',
     category = 'All',
-    location = 'All',
-    business_type = 'All',
+    city = 'All',
+    profile_type = 'All',
     min_price = '',
     max_price = '',
     min_order = '',
@@ -65,8 +65,8 @@ const MarketplaceAllProducts: React.FC = () => {
       const params: any = { limit: PAGE_SIZE, offset: (pageNum - 1) * PAGE_SIZE };
       if (search) params.search = search;
       if (category && category !== 'All') params.category = category;
-      if (location && location !== 'All') params.location = location;
-      if (business_type && business_type !== 'All') params.business_type = business_type;
+      if (city && city !== 'All') params.city = city;
+      if (profile_type && profile_type !== 'All') params.profile_type = profile_type;
       if (min_price) params.min_price = min_price;
       if (max_price) params.max_price = max_price;
       if (min_order) params.min_order = min_order;

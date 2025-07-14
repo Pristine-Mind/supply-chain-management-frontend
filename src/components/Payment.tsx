@@ -78,12 +78,12 @@ const Payment: React.FC = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      <header className="flex items-center p-4 shadow-md bg-white">
-        <h1 className="ml-4 text-2xl font-bold text-gray-900">Payment</h1>
+      <header className="flex items-center p-4 shadow-md bg-white justify-center">
+        <h1 className="text-2xl font-bold text-gray-900">Payment</h1>
       </header>
 
       <main className="max-w-2xl mx-auto p-4 space-y-6">
-        <Card className="shadow-lg rounded-2xl mb-6">
+        <Card className="shadow-lg rounded-2xl mb-6 border-gray-500">
           <CardContent className="p-6">
             <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
             <div className="space-y-3">
@@ -104,7 +104,7 @@ const Payment: React.FC = () => {
         </Card>
 
         <div>
-          <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+          <h2 className="text-xl font-semibold mb-4 text-center">Payment Method</h2>
           {(['cod','card','khalti'] as const).map(key => {
             const opts = {
               cod: { title:'Cash on Delivery', desc:'Pay on delivery' },
@@ -119,7 +119,7 @@ const Payment: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`p-4 mb-3 border rounded-xl cursor-pointer transition
-                  ${sel ? 'border-orange-500 bg-orange-50 shadow' : 'border-gray-200'}`}
+                  ${sel ? 'border-orange-500 bg-orange-50 shadow' : 'border-gray-500'}`}
               >
                 <div className="flex justify-between items-center">
                   <div>
@@ -134,7 +134,7 @@ const Payment: React.FC = () => {
         </div>
 
         {delivery && (
-          <Card className="shadow-lg rounded-2xl">
+          <Card className="shadow-lg rounded-2xl border-gray-500">
             <CardContent>
               <h2 className="text-xl font-semibold mb-4">Delivery Address</h2>
               <p className="font-medium">{delivery.customerName}</p>
@@ -147,7 +147,7 @@ const Payment: React.FC = () => {
         <Button
           onClick={handleConfirm}
           disabled={processing}
-          className="w-full py-4 text-lg"
+          className="w-full py-4 text-lg bg-orange-500 hover:bg-orange-600"
         >
           {processing ? 'Processing...' : `Confirm & Pay Rs.${cartTotal}`}
         </Button>
