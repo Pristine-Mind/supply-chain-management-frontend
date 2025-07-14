@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import prom from '../assets/promo.png';
+import { useNavigate } from 'react-router-dom';
+import * as Dialog from '@radix-ui/react-dialog';
+import * as Select from '@radix-ui/react-select';
+import {
+  MagnifyingGlassIcon,
+  Cross2Icon,
+  ChevronDownIcon,
+  CheckIcon,
+} from '@radix-ui/react-icons';
 import logo from '../assets/logo.png';
 import Footer from './Footer';
+import Message from './Message';
 
 interface ProductImage {
   id: number;
@@ -15,7 +23,7 @@ interface Product {
   id: number;
   name: string;
   description: string;
-  images: ProductImage[];
+  images?: ProductImage[];
 }
 
 interface MarketplaceProduct {
@@ -25,7 +33,6 @@ interface MarketplaceProduct {
   listed_date: string;
   is_available: boolean;
   bid_end_date: string | null;
-  product_details: Product
 }
 
 const CATEGORY_OPTIONS = [
@@ -41,7 +48,7 @@ const CATEGORY_OPTIONS = [
   { code: 'FL', label: 'Flowers & Ornamental Plants' },
   { code: 'HR', label: 'Herbs & Medicinal Plants' },
   { code: 'OT', label: 'Other' },
-];
+] as const;
 
 const LOCATION_OPTIONS = [
   'All',
@@ -56,44 +63,48 @@ const LOCATION_OPTIONS = [
   'Hetauda',
   'Nepalgunj',
   'Other',
-];
+] as const;
 
-const PROFILE_TYPE_OPTIONS = ['All', 'Retailer', 'Distributor'];
+const PROFILE_TYPE_OPTIONS = ['All', 'Retailer', 'Distributor'] as const;
+
+const PLACEHOLDER = 'https://via.placeholder.com/150';
 
 const Marketplace: React.FC = () => {
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [recommendations, setRecommendations] = useState<any[]>([]);
-  const [newArrivals, setNewArrivals] = useState<any[]>([]);
+  const [products, setProducts] = useState<MarketplaceProduct[]>([]);
+  const [recommendations, setRecommendations] = useState<MarketplaceProduct[]>([]);
+  const [newArrivals, setNewArrivals] = useState<MarketplaceProduct[]>([]);
+  const [categories, setCategories] = useState<{ key: string; value: string }[]>([]);
   const [query, setQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedLocation, setSelectedLocation] = useState('All');
-  const [selectedProfileType, setSelectedProfileType] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState(CATEGORY_OPTIONS[0].code);
+  const [selectedLocation, setSelectedLocation] = useState(LOCATION_OPTIONS[0]);
+  const [selectedProfileType, setSelectedProfileType] = useState(PROFILE_TYPE_OPTIONS[0]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isChatOpen, setIsChatOpen] = useState(true);
   const navigate = useNavigate();
 
-  const PROFILE_TYPE_OPTIONS = ['All', 'Retailer', 'Distributor'];
-  const fetchMarketplaceProducts = async (search = '', category = 'All', location = 'All', business_type = 'All') => {
+  const fetchMarketplaceProducts = async () => {
     setLoading(true);
     setError('');
     try {
-      const params: any = {};
-      if (search) params.search = search;
-      if (category && category !== 'All') params.category = category;
-      if (location && location !== 'All') params.location = location;
-      if (business_type && business_type !== 'All') params.business_type = business_type;
-      const response = await axios.get(
+      const params: Record<string, string> = {};
+      if (query) params.search = query;
+      if (selectedCategory !== 'All') params.category = selectedCategory;
+      if (selectedLocation !== 'All') params.city = selectedLocation;
+      if (selectedProfileType !== 'All') params.profile_type = selectedProfileType;
+
+      const { data } = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
         {
           headers: { Authorization: `Token ${localStorage.getItem('token')}` },
           params,
         }
       );
-      setProducts(response.data.results);
-      setRecommendations(response.data.results);
-      setNewArrivals(response.data.results.slice(0, 5));
+
+      setProducts(data.results);
+      setRecommendations(data.results);
+      setNewArrivals(data.results.slice(0, 5));
       setCategories([
         { key: 'Fruits', value: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80' },
         { key: 'Vegetables', value: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=400&q=80' },
@@ -107,7 +118,7 @@ const Marketplace: React.FC = () => {
         { key: 'Herbs & Medicinal Plants', value: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80' },
         { key: 'Other', value: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80' },
       ]);
-    } catch (err: any) {
+    } catch {
       setError('Error fetching marketplace products');
     } finally {
       setLoading(false);
@@ -115,184 +126,331 @@ const Marketplace: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchMarketplaceProducts(query, selectedCategory, selectedLocation, selectedProfileType);
-    // eslint-disable-next-line
+    fetchMarketplaceProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, selectedCategory, selectedLocation, selectedProfileType]);
 
-  const filteredRecommendations = recommendations;
+  if (error) {
+    return <div className="text-center text-red-600 py-8">{error}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="sticky top-0 bg-white z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 min-w-[220px]">
-            <img src={logo} alt="Logo" className="w-10 h-10 object-contain" />
-            <span className="font-extrabold text-2xl text-orange-600 whitespace-nowrap">MulyaBazzar</span>
-          </div>
-          <div className="flex-1 max-w-xl mx-4 relative">
-            <input
-              type="text"
-              className="w-full rounded-lg border px-4 py-2 bg-gray-100 focus:outline-none"
-              placeholder="Search products"
-              value={query}
-              onChange={e => {
-                setQuery(e.target.value);
-                setShowSuggestions(e.target.value.length >= 3);
-              }}
-            />
-            {showSuggestions && filteredRecommendations.length > 0 && (
-              <div className="absolute left-0 right-0 bg-white border rounded-lg shadow-md max-h-60 overflow-y-auto mt-1 z-20">
-                {filteredRecommendations.map((p, i) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-50"
-                    onClick={() => {
-                      setShowSuggestions(false);
-                      navigate(`/marketplace/${p.id}`);
-                    }}
-                  >
-                    {p.product_details?.images?.length > 0 ? (
-                      <img src={p.product_details.images[0].image} alt="" className="w-9 h-9 rounded mr-2 object-cover" />
-                    ) : (
-                      <div className="w-9 h-9 bg-gray-200 rounded mr-2" />
-                    )}
-                    <div>
-                      <div className="font-semibold text-sm">{p.product_details?.name}</div>
-                      <div className="text-xs text-gray-500">Rs.{p.listed_price}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* Top Bar */}
+      <div className="sticky top-0 bg-white shadow-sm border-b z-10">
+        <div className="container mx-auto flex items-center justify-between p-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2 ml-0 mr-16">
+            <img src={logo} alt="Logo" className="w-10 h-10 ml-0 mr-0" />
+            <span className="font-extrabold text-2xl text-orange-600 ml-0 mr-0">MulyaBazzar</span>
           </div>
 
-          <div className="flex gap-2 min-w-[450px]">
-            <div>
-              <select
-                className="rounded-lg border px-3 py-2 bg-gray-100"
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
+          {/* Search */}
+          <Dialog.Root>
+            <Dialog.Trigger asChild>
+              <button
+                className="flex items-center gap-4 px-8 py-4 border-2 rounded-xl text-xl w-full max-w-2xl"
+                onClick={() => setShowSuggestions(true)}
               >
-                <option value="All">All Categories</option>
-                {CATEGORY_OPTIONS.slice(1).map((c) => (
-                  <option key={c.label} value={c.label}>{c.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <select
-                className="rounded-lg border px-3 py-2 bg-gray-100"
-                value={selectedLocation}
-                onChange={e => setSelectedLocation(e.target.value)}
-              >
-                <option value="All">All Locations</option>
-                {LOCATION_OPTIONS.map((loc) => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <select
-                className="rounded-lg border px-3 py-2 bg-gray-100"
-                value={selectedProfileType}
-                onChange={e => setSelectedProfileType(e.target.value)}
-              >
-                <option value="All">All Business Types</option>
-                {PROFILE_TYPE_OPTIONS.map((type) => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
+                <MagnifyingGlassIcon className="w-7 h-7 text-gray-500" />
+                <span className="text-gray-500 text-xl">Search products...</span>
+              </button>
+            </Dialog.Trigger>
+
+            <Dialog.Portal>
+              <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[1000]" />
+              <Dialog.Content className="fixed top-1/4 left-1/2 max-w-lg w-[95vw] -translate-x-1/2 bg-white p-6 rounded-lg shadow-lg z-[1001]">
+                <div className="relative w-full max-w-3xl">
+                  <input
+                    autoFocus
+                    className="w-full h-16 pl-16 pr-16 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-xl"
+                    placeholder="Search products..."
+                    value={query}
+                    onChange={e => {
+                      setQuery(e.target.value);
+                      setShowSuggestions(e.target.value.length >= 3);
+                    }}
+                  />
+                  <MagnifyingGlassIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-7 h-7 text-gray-400" />
+                  <Dialog.Close asChild>
+                    <button className="absolute right-6 top-1/2 -translate-y-1/2">
+                      <Cross2Icon className="w-7 h-7 text-gray-400 hover:text-gray-600 transition-colors" />
+                    </button>
+                  </Dialog.Close>
+                </div>
+
+                {showSuggestions && recommendations.length > 0 && (
+                  <div className="mt-4 max-h-60 overflow-auto border-t pt-2">
+                    {recommendations.map(p => (
+                      <div
+                        key={p.id}
+                        className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
+                        onClick={() => {
+                          setShowSuggestions(false);
+                          navigate(`/marketplace/${p.id}`);
+                        }}
+                      >
+                        <img
+                          src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER}
+                          // alt={p.product_details?.name}
+                          className="w-8 h-8 rounded mr-2 object-cover"
+                        />
+                        <div>
+                          <div className="font-medium text-sm">{p.product_details?.name}</div>
+                          <div className="text-xs text-gray-500">Rs.{p.listed_price}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+
+          <div className="flex gap-2 relative">
+            {[
+              {
+                placeholder: 'Category',
+                options: CATEGORY_OPTIONS.map(c => ({ code: c.code, label: c.label })),
+                value: selectedCategory,
+                onChange: setSelectedCategory,
+              },
+              {
+                placeholder: 'City',
+                options: LOCATION_OPTIONS.map(l => ({ code: l, label: l })),
+                value: selectedLocation,
+                onChange: setSelectedLocation,
+              },
+              {
+                placeholder: 'Seller type',
+                options: PROFILE_TYPE_OPTIONS.map(p => ({ code: p, label: p })),
+                value: selectedProfileType,
+                onChange: setSelectedProfileType,
+              },
+            ].map(({ placeholder, options, value, onChange }, idx) => (
+              <Select.Root key={idx} value={value} onValueChange={onChange}>
+                <Select.Trigger 
+                  className="inline-flex items-center justify-between px-6 py-4 border-2 rounded-xl bg-white text-lg min-w-[120px] hover:bg-gray-50 transition-colors"
+                  aria-label={placeholder}
+                >
+                  <span className="truncate">
+                    {options.find(opt => opt.code === value)?.label || placeholder}
+                  </span>
+                  <Select.Icon className="text-gray-700 ml-2">
+                    <ChevronDownIcon className="w-6 h-6" />
+                  </Select.Icon>
+                </Select.Trigger>
+
+                <Select.Portal>
+                  <Select.Content 
+                    className="z-[100] bg-white rounded-lg shadow-lg border border-gray-200 min-w-[200px]"
+                    position="popper"
+                    sideOffset={5}
+                  >
+                    <Select.Viewport className="p-2">
+                      <Select.Group>
+                        <Select.Label className="px-4 py-2 text-sm font-medium text-gray-500">
+                          {placeholder}
+                        </Select.Label>
+                        {options.map(opt => (
+                          <Select.Item
+                            key={opt.code}
+                            value={opt.code}
+                            className="relative flex items-center px-4 py-2 text-sm rounded-md hover:bg-orange-50 hover:text-orange-900 cursor-pointer outline-none"
+                          >
+                            <Select.ItemText>{opt.label}</Select.ItemText>
+                            <Select.ItemIndicator className="absolute left-2">
+                              <CheckIcon className="w-4 h-4 text-orange-600" />
+                            </Select.ItemIndicator>
+                          </Select.Item>
+                        ))}
+                      </Select.Group>
+                    </Select.Viewport>
+                  </Select.Content>
+                </Select.Portal>
+              </Select.Root>
+            ))}
           </div>
         </div>
-        <div className="w-full bg-white border-b border-gray-100 py-3">
-          <div className="container mx-auto px-4">
-            <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-200 pb-2">
-              {categories.map((cat) => (
+
+        <div className="relative border-b py-3" style={{ zIndex: 10 }}>
+          <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent" style={{ zIndex: 5, pointerEvents: 'none' }}></div>
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent" style={{ zIndex: 5, pointerEvents: 'none' }}></div>
+          
+          <div 
+            className="flex gap-4 px-4 overflow-x-auto pb-2 scrollbar-hide"
+            style={{
+              scrollbarWidth: 'none', // Firefox
+              msOverflowStyle: 'none', // IE and Edge
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+            }}
+          >
+            {categories.map(cat => (
+              <div 
+                key={cat.key}
+                className="flex-shrink-0"
+                style={{ scrollSnapAlign: 'start' }}
+              >
                 <button
-                  key={cat.key}
-                  className={`flex flex-col items-center min-w-[90px] max-w-[110px] focus:outline-none transition-transform hover:-translate-y-1 group ${selectedCategory === cat.key ? 'ring-2 ring-orange-400' : ''}`}
-                  onClick={() => setSelectedCategory(cat.key)}
-                  tabIndex={0}
-                  aria-label={cat.key}
+                  onClick={() =>
+                    setSelectedCategory(
+                      CATEGORY_OPTIONS.find(c => c.label === cat.key)?.code || 'All'
+                    )
+                  }
+                  className={`flex flex-col items-center p-2 rounded-lg focus:outline-none transition-all ${
+                    selectedCategory === cat.key 
+                      ? 'bg-orange-50 ring-2 ring-orange-400' 
+                      : 'hover:bg-gray-50'
+                  }`}
                 >
-                  <img
-                    src={cat.value}
-                    alt={cat.key}
-                    className="w-52 h-20 object-cover rounded-xl mb-1 border border-gray-200 shadow group-hover:shadow-lg transition-shadow"
-                  />
-                  <span className="text-xs font-semibold text-gray-700 text-center truncate w-full group-hover:text-orange-600">{cat.key}</span>
+                  <div className="w-20 h-16 overflow-hidden rounded-lg mb-1">
+                    <img
+                      src={cat.value}
+                      alt={cat.key}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="text-xs font-medium text-gray-700">{cat.key}</div>
                 </button>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
       <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <img src={prom} alt="Promo" className="w-full h-64 object-cover rounded-lg" />
-        </div>
+        <img
+          src="https://img.lazcdn.com/us/lazgcp/3fc84778-c749-4ead-96f2-42a1093144d0_NP-1188-340.gif"
+          alt="Promo"
+          className="w-full h-64 object-cover rounded-lg mb-8"
+        />
+
         {newArrivals.length > 0 && (
-          <div className="mb-8">
-            <h2 className="font-bold text-3xl mb-2">Trending Deals</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {newArrivals.map((deal) => (
+          <>
+            <h2 className="font-bold text-2xl mb-4">Trending Deals</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-8">
+              {newArrivals.map(deal => (
                 <div
                   key={deal.id}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-lg hover:shadow-2xl transition-shadow duration-200 p-4 cursor-pointer flex flex-col items-center group hover:-translate-y-1"
+                  className="bg-white rounded-xl shadow p-4 text-center cursor-pointer hover:shadow-lg border-2 border-orange-400"
                   onClick={() => navigate(`/marketplace/${deal.id}`)}
                 >
-                  {deal.product_details?.images?.length > 0 ? (
-                    <img src={deal.product_details.images[0].image} alt="" className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform duration-200" />
-                  ) : (
-                    <div className="w-full h-28 bg-gray-200 rounded-xl mb-2" />
-                  )}
-                  <div className="font-semibold text-base mt-1 mb-1 text-center truncate w-full">{deal.product_details?.name}</div>
-                  <div className="text-xs text-green-700 font-bold mb-1">Rs.{deal.listed_price}</div>
+                  <img
+                    src={deal.product_details.images?.[0]?.image ?? PLACEHOLDER}
+                    alt={deal.product_details.name}
+                    className="w-full h-28 object-cover rounded mb-2"
+                  />
+                  <div className="font-medium truncate">{deal.product_details.name}</div>
+                  <div className="text-green-700 font-bold">
+                    Rs.{deal.listed_price}
+                  </div>
                 </div>
               ))}
             </div>
+          </>
+        )}
+        
+        <img
+          src="https://img.lazcdn.com/us/lazgcp/3fc84778-c749-4ead-96f2-42a1093144d0_NP-1188-340.gif"
+          alt="Promo"
+          className="w-full h-72 object-cover rounded-lg mb-8"
+        />
+        <h2 className="font-bold text-2xl mb-4">Recommended for you</h2>
+        {products.length === 0 ? (
+          <div className="text-center text-gray-500">No products found.</div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {products.map(item => (
+              <div
+                key={item.id}
+                className="bg-white rounded-xl shadow p-4 text-center cursor-pointer hover:shadow-lg border-2 border-orange-400"
+                onClick={() => navigate(`/marketplace/${item.id}`)}
+              >
+                <img
+                  src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
+                  alt={item.product_details.name}
+                  className="w-full h-28 object-cover rounded mb-2"
+                />
+                <div className="font-medium truncate">{item.product_details.name}</div>
+                <div className="text-green-700 font-bold">
+                  Rs.{item.listed_price}
+                </div>
+              </div>
+            ))}
           </div>
         )}
-        <div className="mb-8">
-          <img src="https://media.istockphoto.com/id/2216591236/video/big-sale-40-discount-banner-with-shopping-bags-on-blue-background.jpg?s=640x640&k=20&c=So2NjCiE1b2uw0fqcaMpU7qHxl6nJE4zS_3HLWtXLBc=" alt="Big Sale" className="w-full h-64 object-cover rounded-lg" />
-        </div>
-        <div className="mb-8">
-          <h2 className="font-bold text-3xl mb-2">Recommended for you</h2>
-          {filteredRecommendations.length === 0 ? (
-            <div className="py-10 text-center text-gray-500">No products found for your search.</div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {filteredRecommendations.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-lg hover:shadow-2xl transition-shadow duration-200 p-4 cursor-pointer flex flex-col items-center group hover:-translate-y-1"
-                  onClick={() => navigate(`/marketplace/${item.id}`)}
-                >
-                  {item.product_details?.images?.length > 0 ? (
-                    <img src={item.product_details.images[0].image} alt="" className="w-full h-28 object-cover rounded-xl mb-2 group-hover:scale-105 transition-transform duration-200" />
-                  ) : (
-                    <div className="w-full h-28 bg-gray-200 rounded-xl mb-2" />
-                  )}
-                  <div className="font-semibold text-base mt-1 mb-1 text-center truncate w-full">{item.product_details?.name}</div>
-                  <div className="text-xs text-green-700 font-bold mb-1">Rs.{item.listed_price}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="flex justify-center">
+
+        <div className="flex justify-center mt-8">
           <button
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-bold shadow"
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-bold"
             onClick={() => navigate('/marketplace/all-products')}
           >
             View More
           </button>
         </div>
+
+        {/* Chat Interface */}
+        {isChatOpen && (
+          <div className="fixed bottom-4 right-4 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+            <div className="bg-blue-500 text-white p-3 font-medium flex justify-between items-center">
+              <span>Marketplace Assistant</span>
+              <button 
+                onClick={() => setIsChatOpen(false)}
+                className="text-white hover:bg-blue-600 rounded-full p-1 transition-colors"
+                aria-label="Close chat"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          
+          <div className="h-80 overflow-y-auto p-4 space-y-4">
+            <Message 
+              type="bot"
+              message="Hello! I'm your marketplace assistant. How can I help you today?"
+              timestamp={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            />
+          </div>
+          
+          <div className="border-t border-gray-200 p-3">
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                placeholder="Type your message..."
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button 
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                onClick={() => {
+                  // Handle send message
+                }}
+              >
+                Send
+              </button>
+            </div>
+          </div>
+          </div>
+        )}
+        
+        {!isChatOpen && (
+          <button 
+            onClick={() => setIsChatOpen(true)}
+            className="fixed bottom-4 right-4 bg-orange-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition-colors"
+            aria-label="Open chat"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          </button>
+        )}
       </div>
+      
       <Footer />
     </div>
   );
-}
+};
 
 export default Marketplace;

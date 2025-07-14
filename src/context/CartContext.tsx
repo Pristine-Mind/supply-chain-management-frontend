@@ -12,7 +12,6 @@ interface CartItem {
 
 export interface CartState {
   cartId: number | null;
-  // Add other state properties if needed
 }
 
 interface CartContextType {
@@ -39,7 +38,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   const [cart, setCart] = useState<CartItem[]>(() => {
-    // Load cart from localStorage on initial render
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('cart');
       return savedCart ? JSON.parse(savedCart) : [];
@@ -128,7 +126,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Save cart to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('cart', JSON.stringify(cart));
