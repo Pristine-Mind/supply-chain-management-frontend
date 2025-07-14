@@ -24,6 +24,8 @@ import DeliveryDetails from './components/DeliveryDetails';
 import CheckoutScreen from './components/CheckoutScreen';
 import Payment from './components/Payment';
 import SellerLanding from './components/SellerLanding';
+import Register from './components/Register';
+import BusinessRegister from './components/BusinessRegister';
 
 const App: React.FC = () => {
   return (
@@ -56,6 +58,9 @@ const App: React.FC = () => {
           <Route path="/checkout" element={<CheckoutScreen />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/sellers" element={<SellerLanding />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/business-register" element={<BusinessRegister />} />
+          
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
