@@ -28,7 +28,7 @@ interface Sale {
 }
 
 const SaleList: React.FC = () => {
-  const { t } = useTranslation(); // Add translation hook
+  const { t } = useTranslation();
   const [sales, setSales] = useState<Sale[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [formVisible, setFormVisible] = useState(false);

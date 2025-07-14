@@ -36,9 +36,9 @@ export const SellerLanding: React.FC = () => {
           <div className="md:w-1/2 text-center md:text-left space-y-4 px-4">
             <h1 className="text-4xl font-bold text-gray-800">Grow Your Business with MulyaBazzar!</h1>
             <p className="text-gray-600">Reach millions of customers & enjoy zero commission until you sell.</p>
-            <Link to="/seller/register" className="inline-block">   
+            <Link to="/business-register" className="inline-block">   
             <button className="mt-4 px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">
-              Sign Up as a Seller
+              Sign Up as a Business
             </button>
             </Link>
           </div>
@@ -70,9 +70,11 @@ export const SellerLanding: React.FC = () => {
             <p className="text-gray-600 mb-6">
               As a MulyaBazzar seller you’ll get everything you need to grow your business online.
             </p>
+            <Link to="/business-register" className="inline-block">   
             <button className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
               Sign Up Now
             </button>
+            </Link>
           </div>
           <div className="md:w-1/2 mt-8 md:mt-0">
             {STEPS.map((step, i) => (
@@ -141,7 +143,7 @@ export const SellerLanding: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4">
           What are you waiting for? Start selling with MulyaBazzar today.
         </h2>
-        <Link to="/seller/register" className="inline-block">
+        <Link to="/marketplace" className="inline-block">
           <button className="px-8 py-3 bg-white text-orange-500 font-semibold rounded-lg hover:bg-gray-100">
             Get Started
           </button>
