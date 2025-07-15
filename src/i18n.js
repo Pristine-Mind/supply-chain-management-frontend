@@ -296,6 +296,11 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         action: "Action",
         status_updated_successfully: "Status updated successfully!",
         failed_to_update_status: "Failed to update status",
+        no_actions_available: "No actions available.",
+        order_receipt: "Order Receipt", 
+        print_receipt: "Print Receipt",
+        close: "Close",
+        thank_you_message: "Thank you for your order!",
         
       }
         
@@ -599,6 +604,11 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         action: "कार्य",
         status_updated_successfully: "स्थिति सफलतापूर्वक अपडेट गरियो!",
         failed_to_update_status: "स्थिति अपडेट गर्न असफल भयो",
+        no_actions_available: "कुनै कार्य उपलब्ध छैन।",
+        order_receipt: "अर्डर रसिद",
+        print_receipt: "रसिद प्रिन्ट गर्नुहोस्",
+        close: "बन्द गर्नुहोस्",
+        thank_you_message: "तपाईंको अर्डरको लागि धन्यवाद!",
     }    
     },
   },

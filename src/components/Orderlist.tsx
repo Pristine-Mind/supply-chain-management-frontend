@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { isAxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
-import { FaPlus, FaDownload } from 'react-icons/fa';
+import { FaPlus, FaDownload, FaPrint } from 'react-icons/fa';
 
 interface Customer {
   id: number;
@@ -51,6 +51,100 @@ const OrderList: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
+
+  const handlePrintOrder = (order: Order) => {
+    // Open a new window with the order details
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    // Create a simple HTML template for printing
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${t('order')} #${order.order_number}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .order-info { margin-bottom: 20px; }
+          .order-items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          .order-items th, .order-items td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          .order-items th { background-color: #f2f2f2; }
+          .text-right { text-align: right; }
+          .mt-20 { margin-top: 20px; }
+          @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${t('order_receipt')}</h1>
+          <p>${new Date().toLocaleDateString()}</p>
+        </div>
+        
+        <div class="order-info">
+          <p><strong>${t('order_number')}:</strong> ${order.order_number}</p>
+          <p><strong>${t('customer')}:</strong> ${order.customer_details.name}</p>
+          <p><strong>${t('order_date')}:</strong> ${new Date(order.order_date).toLocaleDateString()}</p>
+        </div>
+        
+        <table class="order-items">
+          <thead>
+            <tr>
+              <th>${t('product')}</th>
+              <th>${t('quantity')}</th>
+              <th class="text-right">${t('price')}</th>
+              <th class="text-right">${t('total')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${order.product_details.name}</td>
+              <td>${order.quantity}</td>
+              <td class="text-right">NPR ${(order.total_price / order.quantity).toFixed(2)}</td>
+              <td class="text-right">NPR ${order.total_price.toFixed(2)}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right"><strong>${t('total')}:</strong></td>
+              <td class="text-right"><strong>NPR ${order.total_price.toFixed(2)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+        
+        <div class="mt-20">
+          <p>${t('thank_you_message')}</p>
+        </div>
+        
+        <div class="no-print" style="margin-top: 20px; text-align: center;">
+          <button onclick="window.print()" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ${t('print_receipt')}
+          </button>
+          <button onclick="window.close()" style="margin-left: 10px; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ${t('close')}
+          </button>
+        </div>
+        
+        <script>
+          // Auto-print when the window loads
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+    
+    // Write the content to the new window
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
   const [isLoading, setIsLoading] = useState(false);
 
   // Normalize status to lowercase to avoid case sensitivity issues
@@ -458,55 +552,67 @@ const OrderList: React.FC = () => {
                         : t('not_applicable')}
                     </td>
                     <td className="py-4 px-6">
-                      {getNextStatusOptions(order.status).length > 0 ? (
+                      <div className="flex flex-col space-y-2">
                         <div className="flex space-x-2">
-                          {getNextStatusOptions(order.status).map((option) => (
-                            <button
-                              key={option.value}
-                              onClick={() => handleStatusUpdate(order.id, option.value)}
-                              disabled={updatingStatus === order.id}
-                              className={`px-2 py-1 text-xs rounded ${
-                                option.value === 'cancelled'
-                                  ? 'bg-red-500 hover:bg-red-600 text-white'
-                                  : 'bg-blue-500 hover:bg-blue-600 text-white'
-                              } ${updatingStatus === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                              aria-label={option.label}
-                            >
-                              {updatingStatus === order.id ? (
-                                <span className="flex items-center">
-                                  <svg
-                                    className="animate-spin -ml-1 mr-1 h-3 w-3 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
-                                  </svg>
-                                  {t('updating')}
-                                </span>
-                              ) : (
-                                option.label
-                              )}
-                            </button>
-                          ))}
+                          <button
+                            onClick={() => handlePrintOrder(order)}
+                            className="px-2 py-1 text-xs rounded bg-gray-500 hover:bg-gray-600 text-white flex items-center"
+                            aria-label={t('print')}
+                          >
+                            <FaPrint className="mr-1" size={12} />
+                            {t('print')}
+                          </button>
                         </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">
-                          {t('no_actions_available')} ({order.status})
-                        </span>
-                      )}
+                        {getNextStatusOptions(order.status).length > 0 ? (
+                          <div className="flex space-x-2">
+                            {getNextStatusOptions(order.status).map((option) => (
+                              <button
+                                key={option.value}
+                                onClick={() => handleStatusUpdate(order.id, option.value)}
+                                disabled={updatingStatus === order.id}
+                                className={`px-2 py-1 text-xs rounded ${
+                                  option.value === 'cancelled'
+                                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                } ${updatingStatus === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                aria-label={option.label}
+                              >
+                                {updatingStatus === order.id ? (
+                                  <span className="flex items-center">
+                                    <svg
+                                      className="animate-spin -ml-1 mr-1 h-3 w-3 text-white"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                      ></circle>
+                                      <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                      ></path>
+                                    </svg>
+                                    {t('updating')}
+                                  </span>
+                                ) : (
+                                  option.label
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">
+                            {t('no_actions_available')}
+                          </span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
