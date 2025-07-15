@@ -302,6 +302,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         close: "Close",
         thank_you_message: "Thank you for your order!",
         grand_total: "Grand Total",
+        edit_product: "Edit Product",
         
       }
         
@@ -611,6 +612,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         close: "बन्द गर्नुहोस्",
         thank_you_message: "तपाईंको अर्डरको लागि धन्यवाद!",
         grand_total: "कुल राजस्व",
+        edit_product: "उत्पादन संपादन गर्नुहोस्",
     }    
     },
   },
