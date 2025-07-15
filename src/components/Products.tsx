@@ -91,6 +91,7 @@ const Products: React.FC = () => {
   const [stockUpdateError, setStockUpdateError] = useState('');
   const [stockUpdateSuccess, setStockUpdateSuccess] = useState('');
   const [quickUpdateStock, setQuickUpdateStock] = useState<{id: number | null, value: string}>({id: null, value: ''});
+  const [exportingProductId, setExportingProductId] = useState<number | null>(null);
 
   const [producerSearchTerm, setProducerSearchTerm] = useState('');
   const [showProducerList, setShowProducerList] = useState(false);
@@ -349,6 +350,53 @@ const Products: React.FC = () => {
     setDeletedImages([]);
   };
 
+  const handleExportStats = async (productId: number) => {
+    try {
+      setExportingProductId(productId);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(
+        `http://localhost:8000/api/v1/daily-product-stats/?product=${productId}&export=excel`,
+        {
+          headers: {
+            'Authorization': `Token ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `product_${productId}_stats.xlsx`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1].replace(/['"]/g, '');
+        }
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      
+    } catch (error) {
+      console.error('Error exporting product stats:', error);
+    } finally {
+      setExportingProductId(null);
+    }
+  };
+
   const handleCloseModal = () => {
     setViewingProductId(null);
     setEditingStock({id: null, value: ''});
@@ -422,42 +470,67 @@ const Products: React.FC = () => {
                 </button>
               </div>
               <div className="flex items-center space-x-2">
-                {quickUpdateStock.id === product.id ? (
-                  <div className="flex items-center space-x-2 bg-white p-1 rounded-lg">
-                    <input
-                      type="number"
-                      value={quickUpdateStock.value}
-                      onChange={(e) => setQuickUpdateStock({...quickUpdateStock, value: e.target.value})}
-                      className="w-20 px-2 py-1 border rounded text-sm"
-                      min="0"
-                      step="1"
-                    />
+                <div className="flex flex-col space-y-2">
+                  {quickUpdateStock.id === product.id ? (
+                    <div className="flex items-center space-x-2 bg-white p-1 rounded-lg">
+                      <input
+                        type="number"
+                        value={quickUpdateStock.value}
+                        onChange={(e) => setQuickUpdateStock({...quickUpdateStock, value: e.target.value})}
+                        className="w-20 px-2 py-1 border rounded text-sm"
+                        min="0"
+                        step="1"
+                      />
+                      <button
+                        onClick={() => {
+                          handleUpdateStock(product.id);
+                          setQuickUpdateStock({id: null, value: ''});
+                        }}
+                        disabled={isUpdatingStock}
+                        className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs whitespace-nowrap"
+                      >
+                        {isUpdatingStock ? 'Updating...' : 'Update'}
+                      </button>
+                      <button
+                        onClick={() => setQuickUpdateStock({id: null, value: ''})}
+                        className="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
                     <button
-                      onClick={() => {
-                        handleUpdateStock(product.id);
-                        setQuickUpdateStock({id: null, value: ''});
-                      }}
-                      disabled={isUpdatingStock}
-                      className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs whitespace-nowrap"
+                      onClick={() => handleQuickUpdateStock(product)}
+                      className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-full text-xs whitespace-nowrap"
+                      title="Update stock"
                     >
-                      {isUpdatingStock ? 'Updating...' : 'Update'}
+                      Update Stock
                     </button>
-                    <button
-                      onClick={() => setQuickUpdateStock({id: null, value: ''})}
-                      className="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
+                  )}
                   <button
-                    onClick={() => handleQuickUpdateStock(product)}
-                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-full text-xs whitespace-nowrap"
-                    title="Update stock"
+                    onClick={() => handleExportStats(product.id)}
+                    disabled={exportingProductId === product.id}
+                    className="flex items-center justify-center bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded-full text-xs whitespace-nowrap"
+                    title="Export daily stats"
                   >
-                    Update Stock
+                    {exportingProductId === product.id ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Export Stats
+                      </>
+                    )}
                   </button>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -514,7 +587,7 @@ const Products: React.FC = () => {
                   <p>
                     <strong>{t('price')}:</strong>{' '}
                     <span className="text-green-600 font-semibold">
-                      NPR {viewingProductId.price.toFixed(2)}
+                      Rs. {viewingProductId.price.toFixed(2)}
                     </span>
                   </p>
                   <p>
