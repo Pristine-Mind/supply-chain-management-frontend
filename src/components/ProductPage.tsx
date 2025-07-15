@@ -82,7 +82,7 @@ const ProductPage: React.FC = () => {
         </div>
 
         {product.product_details?.category && (
-          <div className="mt-4 w-full px-2 sm:px-2 lg:px-0">
+          <div className="mt-4 mb-8 w-full px-2 sm:px-2 lg:px-0">
             <RelatedProductsSection
               productId={product.id}
               category={product.product_details?.category}

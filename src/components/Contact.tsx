@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import banner from "../assets/banner2.png";
+import Footer from "./Footer";
+import Navbar from "./Navbar";
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -46,13 +49,20 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-6 py-12">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold">Contact Us</h1>
-        <p className="text-gray-500 mt-2">
-          Your feedback are always welcome !!!!
-        </p>
+    <div className="w-full">
+      {/* Banner Section */}
+      <Navbar />
+      <div className="relative h-64 bg-yellow-600 overflow-hidden ml-20 mr-20 mt-4">
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
+          <p className="text-xl md:text-2xl text-center max-w-2xl">
+            We'd love to hear from you. Get in touch with our team.
+          </p>
+        </div>
       </div>
+      
+      <div className="container mx-auto px-6 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 bg-gray-100 p-8 rounded-lg shadow-md dark:bg-gray-800">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -175,6 +185,15 @@ const Contact: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
+      <div className="mt-12 rounded-lg overflow-hidden shadow-lg ml-20 mr-20 mb-4">
+        <img 
+          src={banner}
+          alt="Contact Us Banner"
+          className="w-full h-80 object-cover"
+        />
+      </div>
+      <Footer />
     </div>
   );
 };
