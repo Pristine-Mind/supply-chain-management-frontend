@@ -86,6 +86,11 @@ const Products: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
   const [success, setSuccess] = useState('');
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false);
+  const [editingStock, setEditingStock] = useState<{id: number | null, value: string}>({id: null, value: ''});
+  const [stockUpdateError, setStockUpdateError] = useState('');
+  const [stockUpdateSuccess, setStockUpdateSuccess] = useState('');
+  const [quickUpdateStock, setQuickUpdateStock] = useState<{id: number | null, value: string}>({id: null, value: ''});
 
   const [producerSearchTerm, setProducerSearchTerm] = useState('');
   const [showProducerList, setShowProducerList] = useState(false);
@@ -105,7 +110,6 @@ const Products: React.FC = () => {
     { value: 'OT', label: t('other') },
   ];
 
-  // Fetch Products and Producers
   useEffect(() => {
     fetchProducts(searchQuery, categoryFilter);
     fetchProducers();
@@ -247,10 +251,66 @@ const Products: React.FC = () => {
     }
   };
 
+  const handleQuickUpdateStock = (product: Product) => {
+    setQuickUpdateStock({id: product.id, value: product.stock.toString()});
+  };
+
+  const handleUpdateStock = async (productId: number) => {
+    const stockValue = quickUpdateStock.id === productId ? quickUpdateStock.value : editingStock.value;
+    
+    if (!stockValue || isNaN(Number(stockValue))) {
+      setStockUpdateError('Please enter a valid number');
+      return;
+    }
+
+    try {
+      setIsUpdatingStock(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `http://localhost:8000/api/v1/products/${productId}/update-stock/`,
+        { stock: Number(stockValue) },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`
+          }
+        }
+      );
+      
+      const updatedProduct = response.data; 
+      setProducts(products.map(product => 
+        product.id === productId 
+          ? { ...product, stock: updatedProduct.stock } 
+          : product
+      ));
+      
+      if (viewingProductId && viewingProductId.id === productId) {
+        setViewingProductId({
+          ...viewingProductId,
+          stock: updatedProduct.stock
+        });
+      }
+      
+      setStockUpdateSuccess('Stock updated successfully!');
+      setStockUpdateError('');
+      setEditingStock({id: null, value: ''});
+      
+      setTimeout(() => {
+        setStockUpdateSuccess('');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      setStockUpdateError('Failed to update stock. Please try again.');
+    } finally {
+      setIsUpdatingStock(false);
+    }
+  };
+
   const handleEdit = (product: Product) => {
     setEditingProductId(product.id);
     setFormData({
-      producer: product.producer?.toString() || '',
+      producer: product.producer.toString(),
       name: product.name,
       description: product.description,
       sku: product.sku,
@@ -262,7 +322,6 @@ const Products: React.FC = () => {
       category: product.category,
     });
     setExistingImages(product.images);
-    setDeletedImages([]);
     setFormVisible(true);
   };
 
@@ -288,6 +347,14 @@ const Products: React.FC = () => {
     setEditingProductId(null);
     setExistingImages([]);
     setDeletedImages([]);
+  };
+
+  const handleCloseModal = () => {
+    setViewingProductId(null);
+    setEditingStock({id: null, value: ''});
+    setStockUpdateError('');
+    setStockUpdateSuccess('');
+    setQuickUpdateStock({id: null, value: ''});
   };
 
   return (
@@ -338,33 +405,69 @@ const Products: React.FC = () => {
         {products.map((product) => (
           <div key={product.id} className="relative">
             <ProductCard product={product} />
-            <div className="absolute top-2 right-2 flex space-x-2">
-              <button
-                onClick={() => handleView(product)}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-              >
-                {t('view')}
-              </button>
-              <button
-                onClick={() => handleEdit(product)}
-                className="flex items-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full"
-              >
-                <FaEdit className="mr-2" />
-                {t('edit')}
-              </button>
+            <div className="absolute top-2 right-2 flex flex-col space-y-2">
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleView(product)}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-sm"
+                >
+                  {t('view')}
+                </button>
+                <button
+                  onClick={() => handleEdit(product)}
+                  className="flex items-center bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full text-sm"
+                >
+                  <FaEdit className="mr-1" />
+                  {t('edit')}
+                </button>
+              </div>
+              <div className="flex items-center space-x-2">
+                {quickUpdateStock.id === product.id ? (
+                  <div className="flex items-center space-x-2 bg-white p-1 rounded-lg">
+                    <input
+                      type="number"
+                      value={quickUpdateStock.value}
+                      onChange={(e) => setQuickUpdateStock({...quickUpdateStock, value: e.target.value})}
+                      className="w-20 px-2 py-1 border rounded text-sm"
+                      min="0"
+                      step="1"
+                    />
+                    <button
+                      onClick={() => {
+                        handleUpdateStock(product.id);
+                        setQuickUpdateStock({id: null, value: ''});
+                      }}
+                      disabled={isUpdatingStock}
+                      className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs whitespace-nowrap"
+                    >
+                      {isUpdatingStock ? 'Updating...' : 'Update'}
+                    </button>
+                    <button
+                      onClick={() => setQuickUpdateStock({id: null, value: ''})}
+                      className="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => handleQuickUpdateStock(product)}
+                    className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded-full text-xs whitespace-nowrap"
+                    title="Update stock"
+                  >
+                    Update Stock
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* View Product Details Modal */}
       {viewingProductId && (
         <div className="fixed z-20 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen p-4 sm:p-8">
-            <div
-              className="fixed inset-0 bg-gray-800 bg-opacity-75 transition-opacity duration-500 ease-in-out opacity-0 animate-fade-in-overlay"
-              aria-hidden="true"
-            ></div>
+            <div className="fixed inset-0 bg-gray-800 bg-opacity-75 transition-opacity duration-500 ease-in-out opacity-0 animate-fade-in-overlay" aria-hidden="true"></div>
 
             <div className="bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all sm:max-w-lg w-full z-30 scale-90 opacity-0 animate-fade-and-scale">
               <div className="bg-gray-50 px-6 py-5 sm:px-8 flex justify-between items-center">
@@ -373,7 +476,7 @@ const Products: React.FC = () => {
                 </h3>
 
                 <button
-                  onClick={() => setViewingProductId(null)}
+                  onClick={handleCloseModal}
                   className="text-gray-500 hover:text-gray-800 transition duration-300 ease-in-out"
                 >
                   <svg
@@ -420,14 +523,55 @@ const Products: React.FC = () => {
                       NPR {viewingProductId.cost_price.toFixed(2)}
                     </span>
                   </p>
-                  <p>
-                    <strong>{t('stock_quantity')}:</strong> {viewingProductId.stock}
-                  </p>
+                  <div className="flex items-center space-x-2">
+                    <strong>{t('stock_quantity')}:</strong>
+                    {editingStock.id === viewingProductId.id ? (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="number"
+                          value={editingStock.value}
+                          onChange={(e) => setEditingStock({...editingStock, value: e.target.value})}
+                          className="w-20 px-2 py-1 border rounded"
+                          min="0"
+                          step="1"
+                        />
+                        <button
+                          onClick={() => handleUpdateStock(viewingProductId.id)}
+                          disabled={isUpdatingStock}
+                          className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm disabled:opacity-50"
+                        >
+                          {isUpdatingStock ? 'Updating...' : 'Update'}
+                        </button>
+                        <button
+                          onClick={() => setEditingStock({id: null, value: ''})}
+                          className="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <span>{viewingProductId.stock}</span>
+                        <button
+                          onClick={() => setEditingStock({id: viewingProductId.id, value: viewingProductId.stock.toString()})}
+                          className="ml-2 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded text-gray-700"
+                          title="Update stock"
+                        >
+                          Update
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {stockUpdateError && (
+                    <p className="text-red-500 text-sm mt-1">{stockUpdateError}</p>
+                  )}
+                  {stockUpdateSuccess && (
+                    <p className="text-green-500 text-sm mt-1">{stockUpdateSuccess}</p>
+                  )}
                   <p>
                     <strong>{t('reorder_level')}:</strong> {viewingProductId.reorder_level}
                   </p>
                   
-                  {/* Inventory Metrics */}
                   <div className="mt-6 border-t border-gray-200 pt-4">
                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                       <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
