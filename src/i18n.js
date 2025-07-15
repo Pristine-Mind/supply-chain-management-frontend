@@ -293,6 +293,10 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         lead_time_days: "Lead Time Days",
         projected_stockout_date: "Projected Stockout Date",
         inventory_metrics: "Inventory Metrics",
+        action: "Action",
+        status_updated_successfully: "Status updated successfully!",
+        failed_to_update_status: "Failed to update status",
+        
       }
         
     },
@@ -592,6 +596,9 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         lead_time_days: "लीड टाइम दिन",
         projected_stockout_date: "प्रोजेक्टेड स्टॉकआउट मिति",
         inventory_metrics: "सूची मेट्रिक्स",
+        action: "कार्य",
+        status_updated_successfully: "स्थिति सफलतापूर्वक अपडेट गरियो!",
+        failed_to_update_status: "स्थिति अपडेट गर्न असफल भयो",
     }    
     },
   },
