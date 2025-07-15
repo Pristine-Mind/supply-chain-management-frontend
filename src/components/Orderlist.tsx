@@ -94,14 +94,17 @@ const OrderList: React.FC = () => {
           <thead>
             <tr>
               <th>${t('product')}</th>
+              <th>${t('category')}</th>
               <th>${t('quantity')}</th>
               <th class="text-right">${t('price')}</th>
               <th class="text-right">${t('total')}</th>
+              
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>${order.product_details.name}</td>
+              <td>${order.product_details.category_details}</td>
               <td>${order.quantity}</td>
               <td class="text-right">NPR ${(order.total_price / order.quantity).toFixed(2)}</td>
               <td class="text-right">NPR ${order.total_price.toFixed(2)}</td>
@@ -109,7 +112,7 @@ const OrderList: React.FC = () => {
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3" class="text-right"><strong>${t('total')}:</strong></td>
+              <td colspan="3" class="text-right"><strong>${t('grand_total')}:</strong></td>
               <td class="text-right"><strong>NPR ${order.total_price.toFixed(2)}</strong></td>
             </tr>
           </tfoot>
