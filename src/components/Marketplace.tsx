@@ -34,6 +34,7 @@ interface MarketplaceProduct {
   is_available: boolean;
   bid_end_date: string | null;
   view_count: number;
+  recent_purchases_count: number;
 }
 
 const CATEGORY_OPTIONS = [
@@ -352,6 +353,10 @@ const Marketplace: React.FC = () => {
                       <span>Views:</span>
                       <span className="font-medium">{deal.view_count || 0}</span>
                     </div>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>Recent Purchases:</span>
+                      <span className="font-medium">{deal.recent_purchases_count || 0}</span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -388,6 +393,10 @@ const Marketplace: React.FC = () => {
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>Views:</span>
                     <span className="font-medium">{item.view_count || 0}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>Recent Purchases:</span>
+                    <span className="font-medium">{item.recent_purchases_count || 0}</span>
                   </div>
                 </div>
               </div>

@@ -10,6 +10,7 @@ import {
   FaRegStar
 } from 'react-icons/fa';
 import ChatTab from './ChatTab';
+import { PopularityScore } from '../components/ui/PopularityScore';
 
 interface ProductImage {
   id: number;
@@ -88,6 +89,8 @@ interface MarketplaceProductInstance {
   average_rating: number;
   ratings_breakdown: RatingsBreakdown;
   total_reviews: number;
+  view_count: number;
+  rank_score: number;
 }
 
 const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = ({ product }) => {
@@ -171,6 +174,11 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
         <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div className="w-32">
+                  Popularity Score: <PopularityScore score={product.rank_score} size="lg" showLabel={true} />
+                </div>
+              </div>
               <div className="relative aspect-[4/3] bg-gray-100 rounded-xl overflow-hidden">
                 <img
                   src={images[currentImage]?.image || ''}
