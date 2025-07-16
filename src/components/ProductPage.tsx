@@ -20,6 +20,7 @@ interface MarketplaceProduct {
   product_details?: ProductDetails;
   listed_price: number;
   views_count: number;
+  recent_purchases_count: number;
 }
 
 
