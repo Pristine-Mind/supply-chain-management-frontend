@@ -33,6 +33,7 @@ interface MarketplaceProduct {
   listed_date: string;
   is_available: boolean;
   bid_end_date: string | null;
+  view_count: number;
 }
 
 const CATEGORY_OPTIONS = [
@@ -346,6 +347,12 @@ const Marketplace: React.FC = () => {
                   <div className="text-green-700 font-bold">
                     Rs.{deal.listed_price}
                   </div>
+                  <div className="mt-2 pt-2 border-t border-gray-100">
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>Views:</span>
+                      <span className="font-medium">{deal.view_count || 0}</span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -376,6 +383,12 @@ const Marketplace: React.FC = () => {
                 <div className="font-medium truncate">{item.product_details.name}</div>
                 <div className="text-green-700 font-bold">
                   Rs.{item.listed_price}
+                </div>
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>Views:</span>
+                    <span className="font-medium">{item.view_count || 0}</span>
+                  </div>
                 </div>
               </div>
             ))}

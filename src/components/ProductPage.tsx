@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie';
+
+const csrftoken = Cookies.get('csrftoken');
 import ProductInstanceView from './ProductInstanceView';
 import RelatedProductsSection from './RelatedProductsSection';
 import Footer from './Footer';
@@ -16,7 +19,10 @@ interface MarketplaceProduct {
   id: number;
   product_details?: ProductDetails;
   listed_price: number;
+  views_count: number;
 }
+
+
 
 const ProductPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -24,14 +30,43 @@ const ProductPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const logProductView = async (productId: string) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/products/${productId}/log-view/`,
+        {},
+        {
+          headers: { 
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          },
+        withCredentials: true,
+        }
+      );
+    } catch (error) {
+      console.error('Error logging product view:', error);
+    }
+  };
+
   useEffect(() => {
+    if (!productId) {
+      setError('Product ID is missing');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
     axios
       .get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`, {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` },
       })
-      .then(res => setProduct(res.data))
+      .then(res => {
+        setProduct(res.data);
+        // Log the product view after successfully fetching product details
+        logProductView(productId);
+      })
       .catch(() => setError('Product not found'))
       .finally(() => setLoading(false));
   }, [productId]);
