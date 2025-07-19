@@ -13,7 +13,7 @@ import Home from './components/Home';
 import AddProducer from './components/AddProducer';
 import Products from './components/Products';
 import CustomerList from './components/CustomerList';
-import OrderList from './components/OrderList';
+import OrderList from './components/Orderlist';
 import SaleList from './components/SalesList';
 import Stocks from './components/Stocks';
 import StatsDashboard from './components/StatsDashboard';

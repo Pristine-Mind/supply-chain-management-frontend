@@ -6,7 +6,7 @@ import axios from 'axios';
 import { Calendar as CalendarIcon, Loader2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
-import { Button } from './ui/Button';
+import { Button } from './ui/button';
 
 interface Product {
   id: number;

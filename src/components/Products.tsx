@@ -268,7 +268,7 @@ const Products: React.FC = () => {
       setIsUpdatingStock(true);
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `http://localhost:8000/api/v1/products/${productId}/update-stock/`,
+        `http://35.154.151.155:8000/api/v1/products/${productId}/update-stock/`,
         { stock: Number(stockValue) },
         {
           headers: {
@@ -356,7 +356,7 @@ const Products: React.FC = () => {
       const token = localStorage.getItem('token');
       
       const response = await fetch(
-        `http://localhost:8000/api/v1/daily-product-stats/?product=${productId}&export=excel`,
+        `http://35.154.151.155:8000/api/v1/daily-product-stats/?product=${productId}&export=excel`,
         {
           headers: {
             'Authorization': `Token ${token}`,
