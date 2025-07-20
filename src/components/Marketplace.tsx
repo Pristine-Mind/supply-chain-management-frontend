@@ -204,7 +204,7 @@ const Marketplace: React.FC = () => {
             </Dialog.Portal>
           </Dialog.Root>
           <div className="hidden md:flex items-center space-x-3 overflow-visible">
-\            <Select.Root 
+           <Select.Root 
               value={selectedCategory} 
               onValueChange={(value: string) => {
                 setSelectedCategory(value);
@@ -441,7 +441,7 @@ const Marketplace: React.FC = () => {
           className="w-full h-64 object-cover rounded-lg"
         />
 
-\        {newArrivals.length > 0 && (
+       {newArrivals.length > 0 && (
           <>
             <h2 className="font-bold text-2xl">Trending Deals</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">

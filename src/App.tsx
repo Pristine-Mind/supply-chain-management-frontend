@@ -32,6 +32,7 @@ import Register from './components/Register';
 import BusinessRegister from './components/BusinessRegister';
 import MarketplaceUserProduct from './components/MarketplaceUserProduct';
 import DirectSales from './components/DirectSales';
+import Contact from './components/Contact';
 import BlogPage from './components/BlogPage';
 import BackButton from './components/BackButton';
 
@@ -81,7 +82,7 @@ const App: React.FC = () => {
             <Route path="/marketplace" element={<Navigate to="/" replace />} />
             <Route path="/marketplace/all-products" element={<MarketplaceAllProducts />} />
             <Route path="/about" element={<BlogPage />} />
-            <Route path="/contact" element={<BlogPage />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/privacy" element={<BlogPage />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/delivery-details" element={<DeliveryDetails />} />

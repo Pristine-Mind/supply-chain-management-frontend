@@ -15,6 +15,8 @@ import {
 } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import Footer from './Footer';
+import Navbar from './Navbar';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -136,8 +138,8 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex flex-col lg:flex-row">
-        {/* Left Banner */}
+      <Navbar />
+      <div className="flex flex-col lg:flex-row mt-4">
         <div className="hidden lg:flex lg:w-1/3 bg-gradient-to-br from-orange-500 to-yellow-400 p-8 text-white">
           <div className="flex flex-col justify-center">
             <h2 className="text-3xl font-bold mb-4">Join Our Community</h2>
@@ -170,8 +172,6 @@ const Register: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        {/* Main Form */}
         <div className="w-full lg:w-1/3 p-6 bg-white shadow-lg">
           <div className="max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Create an Account</h2>
@@ -313,7 +313,6 @@ const Register: React.FC = () => {
           </div>
         </div>
         
-        {/* Right Banner */}
         <div className="hidden lg:flex lg:w-1/3 bg-gray-100 p-8">
           <div className="flex flex-col justify-center text-center">
             <div className="mb-6">
@@ -334,6 +333,7 @@ const Register: React.FC = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
