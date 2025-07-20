@@ -59,9 +59,11 @@ const App: React.FC = () => {
     <Router>
       <div className="p-4">
         <ConditionalBackButton />
+        <Routes>
+          <Route path="/" element={<Marketplace />} />
+        </Routes>
         <RouteWithHash>
           <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Home />} />
             <Route path="/producers" element={<AddProducer />} />
@@ -76,7 +78,7 @@ const App: React.FC = () => {
             <Route path="/audit-logs/new" element={<AuditLogForm />} />
             <Route path="/audit-logs/:id" element={<AuditLogForm />} />
             <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
-            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace" element={<Navigate to="/" replace />} />
             <Route path="/marketplace/all-products" element={<MarketplaceAllProducts />} />
             <Route path="/about" element={<BlogPage />} />
             <Route path="/contact" element={<BlogPage />} />
@@ -91,7 +93,7 @@ const App: React.FC = () => {
             <Route path="/marketplace/user-product" element={<MarketplaceUserProduct />} />
             <Route path="/direct-sales" element={<DirectSales />} />
             <Route path="/blog" element={<BlogPage />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/marketplace" replace />} />
           </Routes>
         </RouteWithHash>
       </div>
