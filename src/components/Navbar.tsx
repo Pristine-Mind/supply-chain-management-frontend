@@ -4,7 +4,6 @@ import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import { styled } from '@stitches/react';
 import logo from '../assets/logo.png';
 
-// Tailwind-friendly wrapper for stitches, you can omit styled if using pure Tailwind
 const MenuList = styled(NavigationMenu.List, {
   display: 'flex',
   gap: '1rem',
