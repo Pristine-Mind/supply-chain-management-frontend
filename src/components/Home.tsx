@@ -49,6 +49,9 @@ const Home: React.FC = () => {
     totalRevenue: 0,
   });
 
+  // Get business type from localStorage
+  const businessType = localStorage.getItem('business_type') || 'producer';
+
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
   const [ledgerCount, setLedgerCount] = useState(0);
   const [ledgerLoading, setLedgerLoading] = useState(false);
@@ -164,60 +167,93 @@ const Home: React.FC = () => {
         </div>
         <nav className="p-4">
           <ul className="space-y-4">
-            <li>
-              <a href="/producers" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <OfficeBuildingIcon className="h-5 w-5 mr-3" />
-                <span>{t('producer_management')}</span>
-              </a>
-            </li>
-            <li>
-              <a href="/products" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <ShoppingBagIcon className="h-5 w-5 mr-3" />
-                <span>{t('product_management')}</span>
-              </a>
-            </li>
-            <li>
-              <a href="/customers" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <UserGroupIcon className="h-5 w-5 mr-3" />
-                <span>{t('customer_management')}</span>
-              </a>
-            </li>
-            <li>
-              <a href="/orders" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <FaFirstOrder className="h-5 w-5 mr-3" />
-                <span>{t('order_management')}</span>
-              </a>
-            </li>
-            <li>
-              <a href="/purchase-orders" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <ClipboardListIcon className="h-5 w-5 mr-3" />
-                <span>Purchase Order Management</span>
-              </a>
-            </li>
-            <li>
-              <a href="/sales" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <CurrencyDollarIcon className="h-5 w-5 mr-3" />
-                <span>{t('sales_management')}</span>
-              </a>
-            </li>
-            <li>
-              <a href="/stats" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <ChartSquareBarIcon className="h-5 w-5 mr-3" />
-                <span>{t('stats_and_analytics')}</span>
-              </a>
-            </li>
-            <li>
-              <a href="/audit-logs" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <ClipboardListIcon className="h-5 w-5 mr-3" />
-                <span>{t('audit_logs')}</span>
-              </a>
-            </li>
-            <li>
-              <a href="/stocks" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
-                <ScaleIcon className="h-5 w-5 mr-3" />
-                <span>{t('stock_management')}</span>
-              </a>
-            </li>
+            {businessType === 'retailer' ? (
+              // Retailer specific menu
+              <>
+                <li>
+                  <a href="/producers" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <OfficeBuildingIcon className="h-5 w-5 mr-3" />
+                    <span>{t('producer_management')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/products" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <ShoppingBagIcon className="h-5 w-5 mr-3" />
+                    <span>{t('product_management')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/sales" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <CurrencyDollarIcon className="h-5 w-5 mr-3" />
+                    <span>Direct Sales</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/stocks" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <ScaleIcon className="h-5 w-5 mr-3" />
+                    <span>{t('stock_management')}</span>
+                  </a>
+                </li>
+              </>
+            ) : (
+              // Original menu for other business types
+              <>
+                <li>
+                  <a href="/producers" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <OfficeBuildingIcon className="h-5 w-5 mr-3" />
+                    <span>{t('producer_management')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/products" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <ShoppingBagIcon className="h-5 w-5 mr-3" />
+                    <span>{t('product_management')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/customers" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <UserGroupIcon className="h-5 w-5 mr-3" />
+                    <span>{t('customer_management')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/orders" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <FaFirstOrder className="h-5 w-5 mr-3" />
+                    <span>{t('order_management')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/purchase-orders" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <ClipboardListIcon className="h-5 w-5 mr-3" />
+                    <span>Purchase Order Management</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/sales" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <CurrencyDollarIcon className="h-5 w-5 mr-3" />
+                    <span>{t('sales_management')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/stats" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <ChartSquareBarIcon className="h-5 w-5 mr-3" />
+                    <span>{t('stats_and_analytics')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/audit-logs" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <ClipboardListIcon className="h-5 w-5 mr-3" />
+                    <span>{t('audit_logs')}</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="/stocks" className="flex items-center p-2 rounded hover:bg-green-700 transition-transform transform hover:scale-105">
+                    <ScaleIcon className="h-5 w-5 mr-3" />
+                    <span>{t('stock_management')}</span>
+                  </a>
+                </li>
+              </>
+            )}
           </ul>
         </nav>
       </aside>
