@@ -4,6 +4,7 @@ import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { FaSignOutAlt } from 'react-icons/fa';
 import { ShoppingBagIcon, ChartBarIcon, UserGroupIcon, ShoppingCartIcon, MoonIcon, SunIcon, OfficeBuildingIcon, CurrencyDollarIcon, ChartSquareBarIcon, ScaleIcon, ClipboardListIcon } from '@heroicons/react/solid';
 import { FaFirstOrder } from 'react-icons/fa';
 import { fetchLedgerEntries, LedgerEntry } from '../api/ledgerApi';
@@ -31,7 +32,13 @@ const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   const [data, setData] = useState<DashboardData>({
     totalProducts: 0,
     totalOrders: 0,
@@ -41,6 +48,7 @@ const Home: React.FC = () => {
     pendingOrders: 0,
     totalRevenue: 0,
   });
+
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
   const [ledgerCount, setLedgerCount] = useState(0);
   const [ledgerLoading, setLedgerLoading] = useState(false);
@@ -90,7 +98,7 @@ const Home: React.FC = () => {
   };
 
   const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const salesTrendsData = {
@@ -124,21 +132,27 @@ const Home: React.FC = () => {
         </button>
         <h1 className="text-2xl font-bold">{t('dashboard')}</h1>
         <div className="flex items-center space-x-4">
-          <button
+          {/* <button
             onClick={toggleDarkMode}
             className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
           >
             {darkMode ? <SunIcon className="h-5 w-5 text-yellow-500" /> : <MoonIcon className="h-5 w-5 text-gray-800" />}
-          </button>
+          </button> */}
           <button
             onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
-            className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
+            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg bg-transparent hover:bg-red-600 hover:text-white focus:outline-none transition duration-300"
           >
             {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
           </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
+            title={t('logout')}
+          >
+            <FaSignOutAlt className="h-5 w-5" />
+          </button>
         </div>
       </header>
-
       <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-green-900 text-white w-64 z-50`}>
         <div className="p-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold">Menu</h2>
@@ -218,17 +232,24 @@ const Home: React.FC = () => {
             Welcome, {localStorage.getItem('username') || 'User'}
           </h1>
           <div className="flex items-center space-x-4">
-            <button
+            {/* <button
               onClick={toggleDarkMode}
               className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
             >
               {darkMode ? <SunIcon className="h-5 w-5 text-yellow-500" /> : <MoonIcon className="h-5 w-5 text-gray-800" />}
-            </button>
+            </button> */}
             <button
-              onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
-              className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg bg-transparent hover:bg-blue-600 hover:text-white focus:outline-none transition duration-300"
+            onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
+            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg bg-transparent hover:bg-red-600 hover:text-white focus:outline-none transition duration-300"
+          >
+            {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
+          </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
+              title={t('logout')}
             >
-              {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
+              <FaSignOutAlt className="h-5 w-5" />
             </button>
           </div>
         </div>

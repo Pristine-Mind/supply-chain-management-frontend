@@ -305,6 +305,8 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         edit_product: "Edit Product",
         direct_sales: "Direct Sales",
         update_customer: "Update Customer",
+        pending_orders_revenue: "Pending Orders Revenue",
+        rows_per_page: "Rows per page",
         
       }
         
@@ -617,6 +619,8 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         edit_product: "उत्पादन संपादन गर्नुहोस्",
         direct_sales: "प्रत्यक्ष बिक्री",
         update_customer: "ग्राहक संपादन गर्नुहोस्",
+        pending_orders_revenue: "पेन्डिङ अर्डरहरूको राजस्व",
+        rows_per_page: "पृष्ठभन्दा लागि राख्नुहोस्",
     }    
     },
   },

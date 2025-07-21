@@ -101,7 +101,7 @@ const Marketplace: React.FC = () => {
       const { data } = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
         {
-          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+          // headers: { Authorization: `Token ${localStorage.getItem('token')}` },
           params,
         }
       );
