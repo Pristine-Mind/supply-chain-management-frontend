@@ -25,7 +25,6 @@ interface StockListItem {
 
 const Stocks: React.FC = () => {
   const { t } = useTranslation();
-
   const [stockItems, setStockItems] = useState<StockListItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -47,7 +46,6 @@ const Stocks: React.FC = () => {
           },
         }
       );
-
       setStockItems(response.data.results);
       setTotalPages(Math.ceil(response.data.count / itemsPerPage));
     } catch (error) {
@@ -60,7 +58,6 @@ const Stocks: React.FC = () => {
   }, [currentPage]);
 
   const handlePushToMarketplace = async (productId: number) => {
-    console.log(localStorage.getItem('token'), "ppp")
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/stocklist/${productId}/push-to-marketplace/`,
@@ -95,53 +92,48 @@ const Stocks: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-100 p-8">
       <h2 className="text-3xl font-bold mb-6 text-gray-800">{t('stock_list')}</h2>
-      <div className="overflow-x-auto">
-        <table className="min-w-full table-auto bg-white shadow-md rounded-lg">
-          <thead>
-            <tr className="bg-blue-600 text-white uppercase text-sm leading-normal">
-              <th className="py-3 px-6 text-left">{t('product_name')}</th>
-              <th className="py-3 px-6 text-left">{t('moved_date')}</th>
-              <th className="py-3 px-6 text-left">{t('stock_quantity')}</th>
-              <th className="py-3 px-6 text-center">{t('actions')}</th>
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('product_name')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('moved_date')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('stock_quantity')}</th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{t('actions')}</th>
             </tr>
           </thead>
-          <tbody className="text-gray-700 text-sm font-light">
+          <tbody className="bg-white divide-y divide-gray-200">
             {stockItems.map((item) => (
-              <tr
-                key={item.product}
-                className="border-b border-gray-200 hover:bg-gray-100"
-              >
-                <td className="py-3 px-6 text-left whitespace-nowrap">
+              <tr key={item.product} className="hover:bg-gray-50 transition duration-150">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <div className="mr-2">
+                    <div className="mr-3">
                       <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
                         {item.product_details.name.charAt(0)}
                       </div>
                     </div>
-                    <span>{item.product_details.name}</span>
+                    <span className="text-gray-900">{item.product_details.name}</span>
                   </div>
                 </td>
-                <td className="py-3 px-6 text-left">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                   {new Date(item.moved_date).toLocaleDateString()}
                 </td>
-                <td className="py-3 px-6 text-left">
+                <td className="px-6 py-4 whitespace-nowrap text-gray-500">
                   {item.product_details.stock}
                 </td>
-                <td className="py-3 px-6 text-center">
+                <td className="px-6 py-4 whitespace-nowrap text-center">
                   <button
                     onClick={() => handlePushToMarketplace(item.product)}
-                    disabled={pushedProducts.includes(item.product_details.id)}
-                    className={`${
-                      pushedProducts.includes(item.product_details.id)
+                    disabled={pushedProducts.includes(item.product)}
+                    className={`px-4 py-2 rounded-full text-white transition-colors duration-300 ${
+                      pushedProducts.includes(item.product)
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-green-500 hover:bg-green-600'
-                    } text-white px-4 py-2 rounded-full transition-colors duration-300`}
+                    }`}
                   >
-                    {pushedProducts.includes(item.product_details.id)
-                      ? t('pushed')
-                      : t('push_to_marketplace')}
+                    {pushedProducts.includes(item.product) ? t('pushed') : t('push_to_marketplace')}
                   </button>
                 </td>
               </tr>
@@ -149,32 +141,29 @@ const Stocks: React.FC = () => {
           </tbody>
         </table>
       </div>
-
       <div className="flex justify-between items-center mt-6">
         <button
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
-          className={`${
+          className={`px-4 py-2 rounded-full transition-colors duration-300 ${
             currentPage === 1
               ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
-          } text-white px-4 py-2 rounded-full transition-colors duration-300`}
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+          }`}
         >
           {t('previous')}
         </button>
-
         <span className="text-gray-700 font-semibold">
           {t('page')} {currentPage} {t('of')} {totalPages}
         </span>
-
         <button
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
-          className={`${
+          className={`px-4 py-2 rounded-full transition-colors duration-300 ${
             currentPage === totalPages
               ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600'
-          } text-white px-4 py-2 rounded-full transition-colors duration-300`}
+              : 'bg-blue-500 hover:bg-blue-600 text-white'
+          }`}
         >
           {t('next')}
         </button>

@@ -26,7 +26,6 @@ const PurchaseOrderCards: React.FC<PurchaseOrderCardsProps> = ({ pageSize = 6 })
       try {
         const offset = (page - 1) * pageSize;
         const res = await fetchPurchaseOrders(token, pageSize, offset);
-        console.log(res);
         setOrders(res.results);
         setCount(res.count);
       } catch (e: any) {
@@ -38,14 +37,15 @@ const PurchaseOrderCards: React.FC<PurchaseOrderCardsProps> = ({ pageSize = 6 })
     fetchOrders();
   }, [page, pageSize]);
 
-  if (loading) return <div>Loading purchase orders...</div>;
-  if (error) return <div className="text-red-600">Error: {error}</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen">Loading purchase orders...</div>;
+  if (error) return <div className="flex justify-center items-center h-screen text-red-600">Error: {error}</div>;
 
   return (
-    <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {orders.map(order => (
-          <div key={order.id} className="bg-white rounded-lg shadow p-5 flex flex-col space-y-3 border border-gray-100">
+    <div className="min-h-screen bg-gray-100 w-full p-4">
+      <h2 className="text-3xl font-bold mb-6 text-gray-800 text-center">Purchase Orders</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+        {orders.map((order) => (
+          <div key={order.id} className="bg-white rounded-lg shadow-lg p-5 flex flex-col space-y-3 border border-gray-200 transition-transform transform hover:scale-105">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <ClipboardListIcon className="h-6 w-6 text-blue-500" />
@@ -80,21 +80,22 @@ const PurchaseOrderCards: React.FC<PurchaseOrderCardsProps> = ({ pageSize = 6 })
           </div>
         ))}
       </div>
+
       {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-6">
+      <div className="flex justify-center items-center mt-6 space-x-4">
         <button
-          className="px-3 py-1 border rounded mr-2 disabled:opacity-50"
-          onClick={() => setPage(p => Math.max(1, p - 1))}
+          className={`px-4 py-2 rounded-lg ${page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'} transition-colors duration-300`}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
         >
           Previous
         </button>
-        <span>
+        <span className="text-gray-700 font-semibold">
           Page {page} of {Math.ceil(count / pageSize) || 1}
         </span>
         <button
-          className="px-3 py-1 border rounded ml-2 disabled:opacity-50"
-          onClick={() => setPage(p => p + 1)}
+          className={`px-4 py-2 rounded-lg ${page >= Math.ceil(count / pageSize) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'} transition-colors duration-300`}
+          onClick={() => setPage((p) => p + 1)}
           disabled={page >= Math.ceil(count / pageSize)}
         >
           Next

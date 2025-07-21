@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { isAxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
-import { FaPlus, FaDownload, FaPrint } from 'react-icons/fa';
+import { FaPlus, FaDownload, FaPrint, FaEdit, FaTimes, FaCheck, FaSpinner } from 'react-icons/fa';
 
 interface Customer {
   id: number;
@@ -51,106 +51,8 @@ const OrderList: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
-
-  const handlePrintOrder = (order: Order) => {
-    // Open a new window with the order details
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    
-    // Create a simple HTML template for printing
-    const printContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${t('order')} #${order.order_number}</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          .header { text-align: center; margin-bottom: 20px; }
-          .order-info { margin-bottom: 20px; }
-          .order-items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          .order-items th, .order-items td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          .order-items th { background-color: #f2f2f2; }
-          .text-right { text-align: right; }
-          .mt-20 { margin-top: 20px; }
-          @media print {
-            .no-print { display: none; }
-            body { padding: 0; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>${t('order_receipt')}</h1>
-          <p>${new Date().toLocaleDateString()}</p>
-        </div>
-        
-        <div class="order-info">
-          <p><strong>${t('order_number')}:</strong> ${order.order_number}</p>
-          <p><strong>${t('customer')}:</strong> ${order.customer_details.name}</p>
-          <p><strong>${t('order_date')}:</strong> ${new Date(order.order_date).toLocaleDateString()}</p>
-        </div>
-        
-        <table class="order-items">
-          <thead>
-            <tr>
-              <th>${t('product')}</th>
-              <th>${t('category')}</th>
-              <th>${t('quantity')}</th>
-              <th class="text-right">${t('price')}</th>
-              <th class="text-right">${t('total')}</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>${order.product_details.name}</td>
-              <td>${order.product_details.category_details}</td>
-              <td>${order.quantity}</td>
-              <td class="text-right">NPR ${(order.total_price / order.quantity).toFixed(2)}</td>
-              <td class="text-right">NPR ${order.total_price.toFixed(2)}</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="3" class="text-right"><strong>${t('grand_total')}:</strong></td>
-              <td class="text-right"><strong>NPR ${order.total_price.toFixed(2)}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
-        
-        <div class="mt-20">
-          <p>${t('thank_you_message')}</p>
-        </div>
-        
-        <div class="no-print" style="margin-top: 20px; text-align: center;">
-          <button onclick="window.print()" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            ${t('print_receipt')}
-          </button>
-          <button onclick="window.close()" style="margin-left: 10px; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
-            ${t('close')}
-          </button>
-        </div>
-        
-        <script>
-          // Auto-print when the window loads
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 500);
-          };
-        </script>
-      </body>
-      </html>
-    `;
-    
-    // Write the content to the new window
-    printWindow.document.open();
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-  };
   const [isLoading, setIsLoading] = useState(false);
 
-  // Normalize status to lowercase to avoid case sensitivity issues
   const normalizeStatus = (status: string) => status?.toLowerCase().trim();
 
   const fetchOrders = async () => {
@@ -169,11 +71,12 @@ const OrderList: React.FC = () => {
           params,
         }
       );
-      // Normalize status in fetched orders
+
       const normalizedOrders = response.data.results.map((order: Order) => ({
         ...order,
         status: normalizeStatus(order.status),
       }));
+
       setOrders(normalizedOrders);
       setTotalCount(response.data.count);
     } catch (error) {
@@ -228,7 +131,6 @@ const OrderList: React.FC = () => {
           },
         }
       );
-
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -286,9 +188,7 @@ const OrderList: React.FC = () => {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -312,7 +212,7 @@ const OrderList: React.FC = () => {
           status: normalizeStatus(formData.status),
         },
         {
-          headers: { Authorization: `Token ${localStorage.getItem('season')}` },
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
         }
       );
       setSuccess(t('order_added_successfully'));
@@ -358,7 +258,6 @@ const OrderList: React.FC = () => {
     }
   };
 
-  // Define possible status transitions
   const getNextStatusOptions = (currentStatus: string) => {
     const normalizedStatus = normalizeStatus(currentStatus);
     switch (normalizedStatus) {
@@ -386,20 +285,95 @@ const OrderList: React.FC = () => {
     }
   };
 
-  // Log all possible status values from orders for debugging
-  useEffect(() => {
-    if (orders.length > 0) {
-      console.log(
-        'All order statuses:',
-        orders.map((o) => ({
-          id: o.id,
-          status: o.status,
-          statusType: typeof o.status,
-          options: getNextStatusOptions(o.status),
-        }))
-      );
-    }
-  }, [orders]);
+  const handlePrintOrder = (order: Order) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${t('order')} #${order.order_number}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          .header { text-align: center; margin-bottom: 20px; }
+          .order-info { margin-bottom: 20px; }
+          .order-items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          .order-items th, .order-items td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          .order-items th { background-color: #f2f2f2; }
+          .text-right { text-align: right; }
+          .mt-20 { margin-top: 20px; }
+          @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${t('order_receipt')}</h1>
+          <p>${new Date().toLocaleDateString()}</p>
+        </div>
+
+        <div class="order-info">
+          <p><strong>${t('order_number')}:</strong> ${order.order_number}</p>
+          <p><strong>${t('customer')}:</strong> ${order.customer_details.name}</p>
+          <p><strong>${t('order_date')}:</strong> ${new Date(order.order_date).toLocaleDateString()}</p>
+        </div>
+
+        <table class="order-items">
+          <thead>
+            <tr>
+              <th>${t('product')}</th>
+              <th>${t('quantity')}</th>
+              <th class="text-right">${t('price')}</th>
+              <th class="text-right">${t('total')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${order.product_details.name}</td>
+              <td>${order.quantity}</td>
+              <td class="text-right">NPR ${(order.total_price / order.quantity).toFixed(2)}</td>
+              <td class="text-right">NPR ${order.total_price.toFixed(2)}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right"><strong>${t('grand_total')}:</strong></td>
+              <td class="text-right"><strong>NPR ${order.total_price.toFixed(2)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="mt-20">
+          <p>${t('thank_you_message')}</p>
+        </div>
+
+        <div class="no-print" style="margin-top: 20px; text-align: center;">
+          <button onclick="window.print()" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ${t('print_receipt')}
+          </button>
+          <button onclick="window.close()" style="margin-left: 10px; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ${t('close')}
+          </button>
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
@@ -408,14 +382,14 @@ const OrderList: React.FC = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300 flex items-center"
             aria-label={t('add_order')}
           >
-            <FaPlus className="inline mr-2" /> {t('add_order')}
+            <FaPlus className="mr-2" /> {t('add_order')}
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 flex items-center"
             aria-label={t('export_orders')}
           >
             <FaDownload className="mr-2" /> {t('export')}
@@ -479,26 +453,7 @@ const OrderList: React.FC = () => {
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
         {isLoading ? (
           <div className="text-center py-4">
-            <svg
-              className="animate-spin h-8 w-8 text-blue-500 mx-auto"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
+            <FaSpinner className="animate-spin h-8 w-8 text-blue-500 mx-auto" />
             <p>{t('loading')}</p>
           </div>
         ) : (
@@ -582,26 +537,7 @@ const OrderList: React.FC = () => {
                               >
                                 {updatingStatus === order.id ? (
                                   <span className="flex items-center">
-                                    <svg
-                                      className="animate-spin -ml-1 mr-1 h-3 w-3 text-white"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                    >
-                                      <circle
-                                        className="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                      ></circle>
-                                      <path
-                                        className="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                      ></path>
-                                    </svg>
+                                    <FaSpinner className="animate-spin -ml-1 mr-1 h-3 w-3 text-white" />
                                     {t('updating')}
                                   </span>
                                 ) : (
@@ -645,8 +581,7 @@ const OrderList: React.FC = () => {
           {t('previous')}
         </button>
         <p>
-          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')}{' '}
-          {totalCount} {t('orders_no')}
+          {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('orders_no')}
         </p>
         <button
           onClick={handleNextPage}
@@ -663,134 +598,128 @@ const OrderList: React.FC = () => {
       </div>
 
       {formVisible && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <div className="relative bg-white rounded-lg shadow-xl p-8 w-full max-w-lg z-20">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">
                 {t('add_new_order')}
               </h3>
-              <form onSubmit={handleSubmit}>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
-                {success && <p className="text-green-500 mb-4">{success}</p>}
-
-                <div className="mb-4">
-                  <label htmlFor="customer" className="block text-gray-700">
-                    {t('customer')} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="customer"
-                    name="customer"
-                    value={formData.customer}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                    aria-required="true"
-                  >
-                    <option value="">{t('select_customer')}</option>
-                    {customers.map((customer) => (
-                      <option key={customer.id} value={customer.id}>
-                        {customer.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="product" className="block text-gray-700">
-                    {t('product')} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="product"
-                    name="product"
-                    value={formData.product}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                    aria-required="true"
-                  >
-                    <option value="">{t('select_product')}</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="quantity" className="block text-gray-700">
-                    {t('quantity')} <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    id="quantity"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                    min="1"
-                    aria-required="true"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="status" className="block text-gray-700">
-                    {t('status')} <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                    aria-required="true"
-                  >
-                    <option value="pending">{t('pending')}</option>
-                    <option value="approved">{t('approved')}</option>
-                    <option value="shipped">{t('shipped')}</option>
-                    <option value="delivered">{t('delivered')}</option>
-                    <option value="cancelled">{t('cancelled')}</option>
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="notes" className="block text-gray-700">
-                    {t('notes')}
-                  </label>
-                  <textarea
-                    id="notes"
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    aria-label={t('notes')}
-                  />
-                </div>
-
-                <div className="flex justify-end space-x-4">
-                  <button
-                    type="button"
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-300"
-                    onClick={() => setFormVisible(false)}
-                    aria-label={t('cancel')}
-                  >
-                    {t('cancel')}
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
-                    aria-label={t('add_order')}
-                  >
-                    {t('add_order')}
-                  </button>
-                </div>
-              </form>
+              <button onClick={() => setFormVisible(false)} className="text-gray-500 hover:text-gray-700">
+                <FaTimes size={20} />
+              </button>
             </div>
+            <form onSubmit={handleSubmit}>
+              {error && <p className="text-red-500 mb-4">{error}</p>}
+              {success && <p className="text-green-500 mb-4">{success}</p>}
+              <div className="mb-4">
+                <label htmlFor="customer" className="block text-gray-700">
+                  {t('customer')} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="customer"
+                  name="customer"
+                  value={formData.customer}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  aria-required="true"
+                >
+                  <option value="">{t('select_customer')}</option>
+                  {customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="product" className="block text-gray-700">
+                  {t('product')} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="product"
+                  name="product"
+                  value={formData.product}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  aria-required="true"
+                >
+                  <option value="">{t('select_product')}</option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="quantity" className="block text-gray-700">
+                  {t('quantity')} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  id="quantity"
+                  name="quantity"
+                  value={formData.quantity}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  min="1"
+                  aria-required="true"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="status" className="block text-gray-700">
+                  {t('status')} <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                  aria-required="true"
+                >
+                  <option value="pending">{t('pending')}</option>
+                  <option value="approved">{t('approved')}</option>
+                  <option value="shipped">{t('shipped')}</option>
+                  <option value="delivered">{t('delivered')}</option>
+                  <option value="cancelled">{t('cancelled')}</option>
+                </select>
+              </div>
+              <div className="mb-4">
+                <label htmlFor="notes" className="block text-gray-700">
+                  {t('notes')}
+                </label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label={t('notes')}
+                />
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-300"
+                  onClick={() => setFormVisible(false)}
+                  aria-label={t('cancel')}
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
+                  aria-label={t('add_order')}
+                >
+                  {t('add_order')}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
