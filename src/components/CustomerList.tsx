@@ -2,14 +2,47 @@ import React, { useState, useEffect } from 'react';
 import axios, { isAxiosError } from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { FaPlus, FaDownload } from "react-icons/fa";
+import { FaPlus, FaDownload, FaEdit, FaEye, FaTimes } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+interface Customer {
+  id: number;
+  name: string;
+  email: string;
+  contact: string;
+  billing_address: string;
+  shipping_address: string;
+  customer_type: string;
+  credit_limit: number;
+  current_balance: number;
+}
+
+interface CustomerSales {
+  name: string;
+  total_sales: number;
+}
+
+interface CustomerOrders {
+  name: string;
+  total_orders: number;
+}
+
+interface ErrorMessages {
+  name?: string[];
+  email?: string[];
+  contact?: string[];
+  billing_address?: string[];
+  shipping_address?: string[];
+  customer_type?: string[];
+  credit_limit?: string[];
+  current_balance?: string[];
+  general?: string[];
+}
+
 const CustomerList: React.FC = () => {
   const { t } = useTranslation();
-
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [topSalesCustomers, setTopSalesCustomers] = useState<CustomerSales[]>([]);
   const [topOrdersCustomers, setTopOrdersCustomers] = useState<CustomerOrders[]>([]);
@@ -62,8 +95,7 @@ const CustomerList: React.FC = () => {
             Authorization: `Token ${localStorage.getItem('token')}`,
           },
         }
-
-    );
+      );
       setTopSalesCustomers(response.data);
     } catch (error) {
       console.error(t('error_fetching_top_sales_customers'), error);
@@ -122,7 +154,7 @@ const CustomerList: React.FC = () => {
     try {
       if (editingCustomerId) {
         await axios.patch(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/${editingCustomerId}/`, 
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/${editingCustomerId}/`,
           formData,
           {
             headers: {
@@ -198,16 +230,12 @@ const CustomerList: React.FC = () => {
           Authorization: `Token ${localStorage.getItem('token')}`,
         },
       });
-
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-
       link.setAttribute('download', 'customers.xlsx');
-
       document.body.appendChild(link);
       link.click();
-
       link.parentNode?.removeChild(link);
     } catch (error: unknown) {
       if (isAxiosError(error)) {
@@ -278,39 +306,38 @@ const CustomerList: React.FC = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg w-full sm:w-72"
           />
           <div className="flex space-x-2">
-          <button
-            onClick={() => {
-              setFormVisible(true);
-              setFormData({
-                name: '',
-                email: '',
-                contact: '',
-                billing_address: '',
-                shipping_address: '',
-                customer_type: 'Retailer',
-                credit_limit: 0.0,
-                current_balance: 0.0,
-              });
-              setEditingCustomerId(null);
-            }}
-            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
-          >
-            <FaPlus className="mr-2" />
-            {t('add_customer')}
-          </button>
-          <button
-            onClick={handleExport}
-            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
-          >
-            <FaDownload className="mr-2" /> Export
-          </button>
+            <button
+              onClick={() => {
+                setFormVisible(true);
+                setFormData({
+                  name: '',
+                  email: '',
+                  contact: '',
+                  billing_address: '',
+                  shipping_address: '',
+                  customer_type: 'Retailer',
+                  credit_limit: 0.0,
+                  current_balance: 0.0,
+                });
+                setEditingCustomerId(null);
+              }}
+              className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
+            >
+              <FaPlus className="mr-2" />
+              {t('add_customer')}
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+            >
+              <FaDownload className="mr-2" /> {t('export')}
+            </button>
           </div>
-          
         </div>
       </div>
 
-            {/* Customer Table */}
-            <div className="overflow-x-auto bg-white shadow-md rounded-lg mb-8">
+      {/* Customer Table */}
+      <div className="overflow-x-auto bg-white shadow-md rounded-lg mb-8">
         <table className="min-w-full text-sm text-gray-700">
           <thead className="text-xs uppercase bg-blue-500 text-white">
             <tr>
@@ -328,13 +355,8 @@ const CustomerList: React.FC = () => {
           <tbody className="divide-y divide-gray-200">
             {customers.length > 0 ? (
               customers.map((customer) => (
-                <tr
-                  key={customer.id}
-                  className="hover:bg-gray-100 cursor-pointer transition duration-200"
-                >
-                  <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">
-                    {customer.name}
-                  </td>
+                <tr key={customer.id} className="hover:bg-gray-100 cursor-pointer transition duration-200">
+                  <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{customer.name}</td>
                   <td className="py-4 px-6">{customer.email}</td>
                   <td className="py-4 px-6">{customer.contact}</td>
                   <td className="py-4 px-6">{customer.billing_address}</td>
@@ -345,15 +367,15 @@ const CustomerList: React.FC = () => {
                   <td className="py-4 px-6 flex space-x-2">
                     <button
                       onClick={() => handleEditClick(customer)}
-                      className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition duration-300"
+                      className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 flex items-center justify-center"
                     >
-                      {t('edit')}
+                      <FaEdit />
                     </button>
                     <button
                       onClick={() => handleCustomerClick(customer)}
-                      className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300"
+                      className="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition duration-300 flex items-center justify-center"
                     >
-                      {t('view')}
+                      <FaEye />
                     </button>
                   </td>
                 </tr>
@@ -374,25 +396,17 @@ const CustomerList: React.FC = () => {
         <button
           onClick={handlePreviousPage}
           disabled={offset === 0}
-          className={`px-4 py-2 rounded-lg ${offset === 0
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'
-            }`}
+          className={`px-4 py-2 rounded-lg ${offset === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'}`}
         >
           {t('previous')}
         </button>
-
         <p className="text-gray-700">
           {t('showing')} {offset + 1} {t('to')} {Math.min(offset + limit, totalCount)} {t('of')} {totalCount} {t('customers')}
         </p>
-
         <button
           onClick={handleNextPage}
           disabled={offset + limit >= totalCount}
-          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'
-            }`}
+          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'}`}
         >
           {t('next')}
         </button>
@@ -400,36 +414,40 @@ const CustomerList: React.FC = () => {
 
       {/* Customer Detail Modal */}
       {isModalOpen && selectedCustomer && (
-        <div className="fixed z-10 inset-0 overflow-y-auto flex items-center justify-center">
-          <div className="fixed inset-0 bg-gray-800 opacity-50" onClick={closeModal}></div>
-          <div className="bg-white rounded-lg shadow-lg p-8 relative z-20 w-full max-w-lg">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">{selectedCustomer.name}</h3>
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold text-gray-800">{selectedCustomer.name}</h3>
+              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+                <FaTimes size={24} />
+              </button>
+            </div>
             <div className="space-y-4">
-              <div className="flex">
+              <div className="flex border-b border-gray-200 py-2">
                 <span className="font-semibold text-gray-600 w-1/3">{t('email')}:</span>
                 <span className="text-gray-800">{selectedCustomer.email}</span>
               </div>
-              <div className="flex">
+              <div className="flex border-b border-gray-200 py-2">
                 <span className="font-semibold text-gray-600 w-1/3">{t('contact')}:</span>
                 <span className="text-gray-800">{selectedCustomer.contact}</span>
               </div>
-              <div className="flex">
+              <div className="flex border-b border-gray-200 py-2">
                 <span className="font-semibold text-gray-600 w-1/3">{t('billing_address')}:</span>
                 <span className="text-gray-800">{selectedCustomer.billing_address}</span>
               </div>
-              <div className="flex">
+              <div className="flex border-b border-gray-200 py-2">
                 <span className="font-semibold text-gray-600 w-1/3">{t('shipping_address')}:</span>
                 <span className="text-gray-800">{selectedCustomer.shipping_address}</span>
               </div>
-              <div className="flex">
+              <div className="flex border-b border-gray-200 py-2">
                 <span className="font-semibold text-gray-600 w-1/3">{t('customer_type')}:</span>
                 <span className="text-gray-800">{selectedCustomer.customer_type}</span>
               </div>
-              <div className="flex">
+              <div className="flex border-b border-gray-200 py-2">
                 <span className="font-semibold text-gray-600 w-1/3">{t('credit_limit')}:</span>
                 <span className="text-gray-800">{selectedCustomer.credit_limit}</span>
               </div>
-              <div className="flex">
+              <div className="flex border-b border-gray-200 py-2">
                 <span className="font-semibold text-gray-600 w-1/3">{t('current_balance')}:</span>
                 <span className="text-gray-800">{selectedCustomer.current_balance}</span>
               </div>
@@ -446,21 +464,21 @@ const CustomerList: React.FC = () => {
         </div>
       )}
 
+      {/* Add/Edit Customer Modal */}
       {formVisible && (
-        <div className="fixed z-10 inset-0 overflow-y-auto flex items-center justify-center">
-          <div className="fixed inset-0 bg-gray-800 opacity-50" onClick={() => setFormVisible(false)}></div>
-          <div className="bg-white rounded-lg shadow-lg p-8 relative z-20 w-full max-w-lg">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6 bg-gray-200 px-4 py-2 rounded-lg">
-              {editingCustomerId ? t('edit_customer') : t('add_new_customer')}
-            </h3>
-
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+          <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-bold text-gray-800">
+                {editingCustomerId ? t('edit_customer') : t('add_new_customer')}
+              </h3>
+              <button onClick={() => setFormVisible(false)} className="text-gray-500 hover:text-gray-700">
+                <FaTimes size={24} />
+              </button>
+            </div>
             <form onSubmit={handleSubmit}>
-              {errorMessages.general && (
-                <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>
-              )}
+              {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
               {success && <p className="text-green-500 mb-4">{success}</p>}
-
-              {/* Customer Name */}
               <div className="mb-4">
                 <label htmlFor="name" className="block text-gray-700">
                   {t('customer_name')} <span className="text-red-500">*</span>
@@ -471,16 +489,11 @@ const CustomerList: React.FC = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.name ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.name ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                 />
-                {errorMessages.name && (
-                  <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>
-                )}
+                {errorMessages.name && <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>}
               </div>
-
-              {/* Email */}
               <div className="mb-4">
                 <label htmlFor="email" className="block text-gray-700">
                   {t('email')} <span className="text-red-500">*</span>
@@ -491,16 +504,11 @@ const CustomerList: React.FC = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.email ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.email ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                 />
-                {errorMessages.email && (
-                  <p className="text-red-500 text-sm">{errorMessages.email[0                  ]}</p>
-                )}
+                {errorMessages.email && <p className="text-red-500 text-sm">{errorMessages.email[0]}</p>}
               </div>
-
-              {/* Contact */}
               <div className="mb-4">
                 <label htmlFor="contact" className="block text-gray-700">
                   {t('contact')} <span className="text-red-500">*</span>
@@ -511,16 +519,11 @@ const CustomerList: React.FC = () => {
                   name="contact"
                   value={formData.contact}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.contact ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.contact ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                 />
-                {errorMessages.contact && (
-                  <p className="text-red-500 text-sm">{errorMessages.contact[0]}</p>
-                )}
+                {errorMessages.contact && <p className="text-red-500 text-sm">{errorMessages.contact[0]}</p>}
               </div>
-
-              {/* Billing Address */}
               <div className="mb-4">
                 <label htmlFor="billing_address" className="block text-gray-700">
                   {t('billing_address')} <span className="text-red-500">*</span>
@@ -530,16 +533,11 @@ const CustomerList: React.FC = () => {
                   name="billing_address"
                   value={formData.billing_address}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.billing_address ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.billing_address ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                 ></textarea>
-                {errorMessages.billing_address && (
-                  <p className="text-red-500 text-sm">{errorMessages.billing_address[0]}</p>
-                )}
+                {errorMessages.billing_address && <p className="text-red-500 text-sm">{errorMessages.billing_address[0]}</p>}
               </div>
-
-              {/* Shipping Address */}
               <div className="mb-4">
                 <label htmlFor="shipping_address" className="block text-gray-700">
                   {t('shipping_address')} <span className="text-red-500">*</span>
@@ -549,16 +547,11 @@ const CustomerList: React.FC = () => {
                   name="shipping_address"
                   value={formData.shipping_address}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.shipping_address ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.shipping_address ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                 ></textarea>
-                {errorMessages.shipping_address && (
-                  <p className="text-red-500 text-sm">{errorMessages.shipping_address[0]}</p>
-                )}
+                {errorMessages.shipping_address && <p className="text-red-500 text-sm">{errorMessages.shipping_address[0]}</p>}
               </div>
-
-              {/* Customer Type */}
               <div className="mb-4">
                 <label htmlFor="customer_type" className="block text-gray-700">
                   {t('customer_type')} <span className="text-red-500">*</span>
@@ -568,20 +561,15 @@ const CustomerList: React.FC = () => {
                   name="customer_type"
                   value={formData.customer_type}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.customer_type ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.customer_type ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                 >
                   <option value="Retailer">{t('retailer')}</option>
                   <option value="Wholesaler">{t('wholesaler')}</option>
                   <option value="Distributor">{t('distributor')}</option>
                 </select>
-                {errorMessages.customer_type && (
-                  <p className="text-red-500 text-sm">{errorMessages.customer_type[0]}</p>
-                )}
+                {errorMessages.customer_type && <p className="text-red-500 text-sm">{errorMessages.customer_type[0]}</p>}
               </div>
-
-              {/* Credit Limit */}
               <div className="mb-4">
                 <label htmlFor="credit_limit" className="block text-gray-700">
                   {t('credit_limit')} <span className="text-red-500">*</span>
@@ -592,18 +580,13 @@ const CustomerList: React.FC = () => {
                   name="credit_limit"
                   value={formData.credit_limit}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.credit_limit ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.credit_limit ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                   min="0"
                   step="0.01"
                 />
-                {errorMessages.credit_limit && (
-                  <p className="text-red-500 text-sm">{errorMessages.credit_limit[0]}</p>
-                )}
+                {errorMessages.credit_limit && <p className="text-red-500 text-sm">{errorMessages.credit_limit[0]}</p>}
               </div>
-
-              {/* Current Balance */}
               <div className="mb-4">
                 <label htmlFor="current_balance" className="block text-gray-700">
                   {t('current_balance')} <span className="text-red-500">*</span>
@@ -614,18 +597,13 @@ const CustomerList: React.FC = () => {
                   name="current_balance"
                   value={formData.current_balance}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 border ${errorMessages.current_balance ? 'border-red-500' : 'border-gray-300'
-                    } rounded-lg`}
+                  className={`w-full px-4 py-2 border ${errorMessages.current_balance ? 'border-red-500' : 'border-gray-300'} rounded-lg`}
                   required
                   min="0"
                   step="0.01"
                 />
-                {errorMessages.current_balance && (
-                  <p className="text-red-500 text-sm">{errorMessages.current_balance[0]}</p>
-                )}
+                {errorMessages.current_balance && <p className="text-red-500 text-sm">{errorMessages.current_balance[0]}</p>}
               </div>
-
-              {/* Form Actions */}
               <div className="flex justify-end">
                 <button
                   type="button"
@@ -650,4 +628,3 @@ const CustomerList: React.FC = () => {
 };
 
 export default CustomerList;
-

@@ -19,7 +19,7 @@ import Stocks from './components/Stocks';
 import StatsDashboard from './components/StatsDashboard';
 import AuditLogList from './components/AuditLogList';
 import AuditLogForm from './components/AuditLogForm';
-import PurchaseOrdersPage from './components/PurchaseOrdersPage';
+import PurchaseOrderCards from './components/PurchaseOrderCards';
 import Marketplace from './components/Marketplace';
 import MarketplaceAllProducts from './components/MarketplaceAllProducts';
 import ProductPage from './components/ProductPage';
@@ -78,7 +78,7 @@ const App: React.FC = () => {
             <Route path="/audit-logs" element={<AuditLogList />} />
             <Route path="/audit-logs/new" element={<AuditLogForm />} />
             <Route path="/audit-logs/:id" element={<AuditLogForm />} />
-            <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
+            <Route path="/purchase-orders" element={<PurchaseOrderCards />} />
             <Route path="/marketplace" element={<Navigate to="/" replace />} />
             <Route path="/marketplace/all-products" element={<MarketplaceAllProducts />} />
             <Route path="/about" element={<BlogPage />} />

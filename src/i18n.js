@@ -303,6 +303,8 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         thank_you_message: "Thank you for your order!",
         grand_total: "Grand Total",
         edit_product: "Edit Product",
+        direct_sales: "Direct Sales",
+        update_customer: "Update Customer",
         
       }
         
@@ -613,6 +615,8 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         thank_you_message: "तपाईंको अर्डरको लागि धन्यवाद!",
         grand_total: "कुल राजस्व",
         edit_product: "उत्पादन संपादन गर्नुहोस्",
+        direct_sales: "प्रत्यक्ष बिक्री",
+        update_customer: "ग्राहक संपादन गर्नुहोस्",
     }    
     },
   },
