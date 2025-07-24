@@ -1,14 +1,12 @@
-import React, { useEffect } from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate,
-} from 'react-router-dom';
-import CryptoJS from 'crypto-js';
-import Login from './components/Login';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
+// Auth Components
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import PhoneLogin from './components/auth/PhoneLogin';
+import Logout from './components/auth/Logout';
+
+// Application Components
 import Home from './components/Home';
 import AddProducer from './components/AddProducer';
 import Products from './components/Products';
@@ -36,68 +34,72 @@ import Contact from './components/Contact';
 import BlogPage from './components/BlogPage';
 import BackButton from './components/BackButton';
 
-const generateHash = () => {
-  const timestamp = new Date().toISOString();
-  return CryptoJS.MD5(timestamp).toString().substring(0, 64);
-};
-const RouteWithHash: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const currentHash = window.location.search;
-    if (!currentHash) {
-      const newHash = generateHash();
-      navigate(`${location.pathname}?v=${newHash}`, { replace: true });
-    }
-  }, [location, navigate]);
 
-  return <>{children}</>;
-};
+// Protected routes that require authentication
+const protectedRoutes = [
+  { path: '/home', element: <Home /> },
+  { path: '/producers', element: <AddProducer /> },
+  { path: '/products', element: <Products /> },
+  { path: '/customers', element: <CustomerList /> },
+  { path: '/orders', element: <OrderList /> },
+  { path: '/sales', element: <SaleList /> },
+  { path: '/stocks', element: <Stocks /> },
+  { path: '/stats', element: <StatsDashboard /> },
+  { path: '/audit-logs', element: <AuditLogList /> },
+  { path: '/audit-logs/new', element: <AuditLogForm /> },
+  { path: '/audit-logs/:id', element: <AuditLogForm /> },
+  { path: '/purchase-orders', element: <PurchaseOrderCards /> },
+  { path: '/cart', element: <Cart /> },
+  { path: '/delivery-details', element: <DeliveryDetails /> },
+  { path: '/checkout', element: <CheckoutScreen /> },
+  { path: '/payment', element: <Payment /> },
+  { path: '/marketplace/user-product', element: <MarketplaceUserProduct /> },
+  { path: '/direct-sales', element: <DirectSales /> },
+];
+
+// Public routes accessible to all
+const publicRoutes = [
+  { path: '/', element: <Marketplace /> },
+  { path: '/marketplace', element: <Navigate to="/" replace /> },
+  { path: '/marketplace/all-products', element: <MarketplaceAllProducts /> },
+  { path: '/marketplace/:productId', element: <ProductPage /> },
+  { path: '/about', element: <BlogPage /> },
+  { path: '/contact', element: <Contact /> },
+  { path: '/privacy', element: <BlogPage /> },
+  { path: '/sellers', element: <SellerLanding /> },
+  { path: '/register', element: <Register /> },
+  { path: '/business-register', element: <BusinessRegister /> },
+  { path: '/blog', element: <BlogPage /> },
+  // Auth routes
+  { path: '/login', element: <PhoneLogin /> },
+  { path: '/logout', element: <Logout /> },
+];
 
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="p-4">
-        <ConditionalBackButton />
-        <Routes>
-          <Route path="/" element={<Marketplace />} />
-        </Routes>
-        <RouteWithHash>
+      <AuthProvider>
+        <div className="p-4">
+          <ConditionalBackButton />
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/producers" element={<AddProducer />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/customers" element={<CustomerList />} />
-            <Route path="/orders" element={<OrderList />} />
-            <Route path="/sales" element={<SaleList />} />
-            <Route path="/stocks" element={<Stocks />} />
-            <Route path="/stats" element={<StatsDashboard />} />
-            <Route path="/marketplace/:productId" element={<ProductPage />} />
-            <Route path="/audit-logs" element={<AuditLogList />} />
-            <Route path="/audit-logs/new" element={<AuditLogForm />} />
-            <Route path="/audit-logs/:id" element={<AuditLogForm />} />
-            <Route path="/purchase-orders" element={<PurchaseOrderCards />} />
-            <Route path="/marketplace" element={<Navigate to="/" replace />} />
-            <Route path="/marketplace/all-products" element={<MarketplaceAllProducts />} />
-            <Route path="/about" element={<BlogPage />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/privacy" element={<BlogPage />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/delivery-details" element={<DeliveryDetails />} />
-            <Route path="/checkout" element={<CheckoutScreen />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/sellers" element={<SellerLanding />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/business-register" element={<BusinessRegister />} />
-            <Route path="/marketplace/user-product" element={<MarketplaceUserProduct />} />
-            <Route path="/direct-sales" element={<DirectSales />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="*" element={<Navigate to="/marketplace" replace />} />
+            {/* Public Routes */}
+            {publicRoutes.map((route, index) => (
+              <Route key={`public-${index}`} path={route.path} element={route.element} />
+            ))}
+
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              {protectedRoutes.map((route, index) => (
+                <Route key={`protected-${index}`} path={route.path} element={route.element} />
+              ))}
+            </Route>
+
+            {/* 404 - Not Found */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </RouteWithHash>
-      </div>
+        </div>
+      </AuthProvider>
     </Router>
   );
 };

@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import {
-  useForm,
-  Controller,
-  SubmitHandler,
-} from 'react-hook-form';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import L from 'leaflet';
 import {
   MapContainer,
   TileLayer,
   Marker,
   useMapEvents,
 } from 'react-leaflet';
-import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -49,36 +44,42 @@ interface FormValues {
   latitude: number;
   longitude: number;
   businessType: 'retailer' | 'distributor';
+  registered_business_name: string;
+  registration_certificate: FileList | null;
+  pan_certificate: FileList | null;
+  profile_image: FileList | null;
 }
 
 const schema = yup.object({
   username: yup.string().required(),
   email: yup.string().email().required(),
   password: yup.string().min(6).required(),
-  password2: yup
-    .string()
+  password2: yup.string()
     .oneOf([yup.ref('password')], 'Passwords must match')
     .required(),
   firstName: yup.string().required(),
   lastName: yup.string().required(),
-  phone: yup
-    .string()
+  phone: yup.string()
     .matches(/^[0-9]{7,15}$/, 'Invalid phone')
     .required(),
   cityId: yup.number().required().min(1, 'City required'),
   latitude: yup.number().required(),
   longitude: yup.number().required(),
-  businessType: yup.string().oneOf(['retailer','distributor']).required(),
+  businessType: yup.string().oneOf(['retailer', 'distributor']).required(),
+  registered_business_name: yup.string().required('Business name is required'),
+  registration_certificate: yup.mixed().required('Registration certificate is required'),
+  pan_certificate: yup.mixed().required('PAN certificate is required'),
+  profile_image: yup.mixed().required('Profile image is required'),
 }).required();
 
 export const BusinessRegister: React.FC = () => {
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
-  const [cityError, setCityError] = useState<string|null>(null);
-  const [submitError, setSubmitError] = useState<string|null>(null);
+  const [cityError, setCityError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  const [position, setPosition] = useState<LatLngExpression>([27.7172,85.3240]);
+  // Initialize with default position
+  const [position, setPosition] = useState<[number, number]>([27.7172, 85.3240]);
 
   const {
     register,
@@ -87,12 +88,16 @@ export const BusinessRegister: React.FC = () => {
     setValue,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any, // Type assertion to fix the resolver type
     defaultValues: {
       cityId: 0,
-      latitude: (position as [number,number])[0],
-      longitude: (position as [number,number])[1],
+      latitude: 27.7172,
+      longitude: 85.3240,
       businessType: 'retailer',
+      registered_business_name: '',
+      registration_certificate: null,
+      pan_certificate: null,
+      profile_image: null,
     },
   });
 
@@ -100,7 +105,7 @@ export const BusinessRegister: React.FC = () => {
     setLoadingCities(true);
     axios
       .get<City[]>(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/cities/`, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        headers: {},
       })
       .then(res => setCities(res.data))
       .catch(() => setCityError('Failed to load cities'))
@@ -109,9 +114,10 @@ export const BusinessRegister: React.FC = () => {
 
   function LocationMarker() {
     useMapEvents({
-      click(e) {
-        const lat = e.latlng.lat, lng = e.latlng.lng;
-        setPosition([lat,lng]);
+      click(e: L.LeafletMouseEvent) {
+        const { lat, lng } = e.latlng;
+        const newPosition: [number, number] = [lat, lng];
+        setPosition(newPosition);
         setValue('latitude', lat);
         setValue('longitude', lng);
       },
@@ -119,24 +125,39 @@ export const BusinessRegister: React.FC = () => {
     return <Marker position={position} />;
   }
 
-  const onSubmit: SubmitHandler<FormValues> = async data => {
+  const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
     setSubmitError(null);
     setSubmitting(true);
+
+    const formDataToSend = new FormData();
+    formDataToSend.append('username', data.username);
+    formDataToSend.append('email', data.email);
+    formDataToSend.append('password', data.password);
+    formDataToSend.append('password2', data.password2);
+    formDataToSend.append('first_name', data.firstName);
+    formDataToSend.append('last_name', data.lastName);
+    formDataToSend.append('phone_number', data.phone);
+    formDataToSend.append('location', String(data.cityId));
+    formDataToSend.append('latitude', String(data.latitude));
+    formDataToSend.append('longitude', String(data.longitude));
+    formDataToSend.append('business_type', data.businessType);
+    formDataToSend.append('registered_business_name', data.registered_business_name);
+
+    if (data.registration_certificate && data.registration_certificate.length > 0) {
+      formDataToSend.append('registration_certificate', data.registration_certificate[0]);
+    }
+    if (data.pan_certificate && data.pan_certificate.length > 0) {
+      formDataToSend.append('pan_certificate', data.pan_certificate[0]);
+    }
+    if (data.profile_image && data.profile_image.length > 0) {
+      formDataToSend.append('profile_image', data.profile_image[0]);
+    }
+
     try {
-      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/register/business/`, {
-        username: data.username,
-        email: data.email,
-        password: data.password,
-        password2: data.password2,
-        first_name: data.firstName,
-        last_name: data.lastName,
-        phone_number: data.phone,
-        location: data.cityId,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        business_type: data.businessType,
-      }, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/register/business/`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
       alert('Business registered! Please login.');
     } catch (e: any) {
@@ -182,17 +203,15 @@ export const BusinessRegister: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Main Form */}
         <div className="w-full lg:w-1/3 p-6 bg-white shadow-lg">
           <div className="max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Business Registration</h2>
-
             {submitError && (
               <div className="mb-4 text-red-600">{submitError}</div>
             )}
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" encType="multipart/form-data">
               <div>
                 <label className="block font-medium">Username</label>
                 <input
@@ -201,7 +220,6 @@ export const BusinessRegister: React.FC = () => {
                 />
                 <p className="text-red-500 text-sm">{errors.username?.message}</p>
               </div>
-
               <div>
                 <label className="block font-medium">Email</label>
                 <input
@@ -211,7 +229,6 @@ export const BusinessRegister: React.FC = () => {
                 />
                 <p className="text-red-500 text-sm">{errors.email?.message}</p>
               </div>
-
               <div>
                 <label className="block font-medium">Password</label>
                 <input
@@ -221,7 +238,6 @@ export const BusinessRegister: React.FC = () => {
                 />
                 <p className="text-red-500 text-sm">{errors.password?.message}</p>
               </div>
-
               <div>
                 <label className="block font-medium">Confirm Password</label>
                 <input
@@ -231,7 +247,6 @@ export const BusinessRegister: React.FC = () => {
                 />
                 <p className="text-red-500 text-sm">{errors.password2?.message}</p>
               </div>
-
               <div>
                 <label className="block font-medium">First Name</label>
                 <input
@@ -240,7 +255,6 @@ export const BusinessRegister: React.FC = () => {
                 />
                 <p className="text-red-500 text-sm">{errors.firstName?.message}</p>
               </div>
-
               <div>
                 <label className="block font-medium">Last Name</label>
                 <input
@@ -249,7 +263,6 @@ export const BusinessRegister: React.FC = () => {
                 />
                 <p className="text-red-500 text-sm">{errors.lastName?.message}</p>
               </div>
-
               <div>
                 <label className="block font-medium">Phone Number</label>
                 <input
@@ -258,7 +271,6 @@ export const BusinessRegister: React.FC = () => {
                 />
                 <p className="text-red-500 text-sm">{errors.phone?.message}</p>
               </div>
-
               <div>
                 <label className="block font-medium">City</label>
                 <Controller
@@ -282,7 +294,15 @@ export const BusinessRegister: React.FC = () => {
                 <p className="text-red-500 text-sm">{errors.cityId?.message}</p>
                 {cityError && <p className="text-red-500 text-sm">{cityError}</p>}
               </div>
-
+              <div>
+                <label className="block font-medium">Registered Business Name</label>
+                <input
+                  {...register('registered_business_name')}
+                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Enter your registered business name"
+                />
+                <p className="text-red-500 text-sm">{errors.registered_business_name?.message}</p>
+              </div>
               <div>
                 <label className="block font-medium">Business Type</label>
                 <Controller
@@ -299,13 +319,39 @@ export const BusinessRegister: React.FC = () => {
                   )}
                 />
               </div>
-
+              <div>
+                <label className="block font-medium">Registration Certificate</label>
+                <input
+                  type="file"
+                  {...register('registration_certificate')}
+                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+                <p className="text-red-500 text-sm">{errors.registration_certificate?.message}</p>
+              </div>
+              <div>
+                <label className="block font-medium">PAN Certificate</label>
+                <input
+                  type="file"
+                  {...register('pan_certificate')}
+                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+                <p className="text-red-500 text-sm">{errors.pan_certificate?.message}</p>
+              </div>
+              <div>
+                <label className="block font-medium">Profile Image</label>
+                <input
+                  type="file"
+                  {...register('profile_image')}
+                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+                <p className="text-red-500 text-sm">{errors.profile_image?.message}</p>
+              </div>
               <div>
                 <label className="block font-medium mb-2">Business Location</label>
                 <MapContainer
-                  center={position}
+                  center={position || [27.7172, 85.3240]}
                   zoom={13}
-                  style={{ height: 200, width: '100%' }}
+                  style={{ height: '400px', width: '100%' }}
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <LocationMarker />
@@ -314,7 +360,7 @@ export const BusinessRegister: React.FC = () => {
                   <div className="w-full">
                     <input
                       readOnly
-                      value={(position as [number,number])[0].toFixed(6)}
+                      value={position ? position[0].toFixed(4) : 'N/A'}
                       placeholder="Latitude"
                       className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
@@ -322,7 +368,7 @@ export const BusinessRegister: React.FC = () => {
                   <div className="w-full">
                     <input
                       readOnly
-                      value={(position as [number,number])[1].toFixed(6)}
+                      value={position ? position[1].toFixed(4) : 'N/A'}
                       placeholder="Longitude"
                       className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
@@ -332,7 +378,6 @@ export const BusinessRegister: React.FC = () => {
                   <p className="text-red-500 text-sm">Please select location on map</p>
                 )}
               </div>
-
               <button
                 type="submit"
                 disabled={submitting}
@@ -343,7 +388,7 @@ export const BusinessRegister: React.FC = () => {
             </form>
           </div>
         </div>
-        
+
         {/* Right Banner */}
         <div className="hidden lg:flex lg:w-1/3 bg-gray-100 p-8">
           <div className="flex flex-col justify-center text-center">

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
   useForm,
@@ -67,7 +68,8 @@ const schema = yup.object({
   cityId: yup.number().required(),
 }).required();
 
-const Register: React.FC = () => {
+const Register = () => {
+  const navigate = useNavigate();
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
   const [errorCities, setErrorCities] = useState<string | null>(null);
@@ -93,7 +95,7 @@ const Register: React.FC = () => {
       setLoadingCities(true);
       try {
         const { data } = await axios.get<City[]>(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/cities/`, {
-          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+          headers: {},
         });
         setCities(data);
       } catch {
@@ -115,9 +117,10 @@ const Register: React.FC = () => {
         longitude: (position as [number, number])[1],
       };
       await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/register/`, payload, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        headers: {},
       });
       alert('Registration successful!');
+      navigate('/login'); 
     } catch (e: any) {
       setSubmitError(
         e.response?.data?.message || 'Failed to register'

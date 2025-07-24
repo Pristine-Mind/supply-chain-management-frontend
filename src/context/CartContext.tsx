@@ -50,7 +50,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('http://35.154.151.155:8000/api/v1/carts/', {
+      const response = await fetch('http://localhost:8000/api/v1/carts/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('http://35.154.151.155:8000/api/v1/customer/location/', {
+      const response = await fetch('http://localhost:8000/api/v1/customer/location/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('http://35.154.151.155:8000/api/v1/deliveries/', {
+      const response = await fetch('http://localhost:8000/api/v1/deliveries/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
