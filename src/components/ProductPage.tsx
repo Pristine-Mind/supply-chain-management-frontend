@@ -38,7 +38,7 @@ const ProductPage: React.FC = () => {
         {},
         {
           headers: { 
-            'Authorization': `Token ${localStorage.getItem('token')}`,
+            // 'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json',
             'X-CSRFToken': csrftoken
           },
@@ -60,9 +60,8 @@ const ProductPage: React.FC = () => {
     setLoading(true);
     setError('');
     axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-      })
+      .get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`,
+      )
       .then(res => {
         setProduct(res.data);
         // Log the product view after successfully fetching product details

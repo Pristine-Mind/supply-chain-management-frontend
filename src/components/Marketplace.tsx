@@ -16,6 +16,7 @@ import {
 import logo from '../assets/logo.png';
 import Footer from './Footer';
 import Message from './Message';
+import { AccountDialog } from './AccountDialog';
 
 interface ProductImage {
   id: number;
@@ -85,6 +86,7 @@ const Marketplace: React.FC = () => {
   const [selectedProfileType, setSelectedProfileType] = useState(PROFILE_TYPE_OPTIONS[0]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -386,8 +388,9 @@ const Marketplace: React.FC = () => {
                   </DropdownMenu.Item>
                   <DropdownMenu.Separator style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }} />
                   <DropdownMenu.Item
-                    onSelect={() => {
-                      navigate('/register');
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      setIsAccountDialogOpen(true);
                     }}
                     style={{
                       display: 'flex',
@@ -433,8 +436,8 @@ const Marketplace: React.FC = () => {
           ))}
         </div>
       </div>
-
-      <div className="container mx-auto px-4 py-6 space-y-8">
+      
+      <div className="container mx-auto px-4 py-6 space-y-8 relative z-10">
         <img
           src="https://img.lazcdn.com/us/lazgcp/3fc84778-c749-4ead-96f2-42a1093144d0_NP-1188-340.gif"
           alt="Promo"
@@ -535,6 +538,25 @@ const Marketplace: React.FC = () => {
           </button>
         )}
       </div>
+
+      {isAccountDialogOpen && (
+        <AccountDialog 
+          defaultOpen={true}
+          onSelect={(accountType) => {
+            setIsAccountDialogOpen(false);
+            if (accountType === 'buyer') {
+              navigate('/register');
+            } else if (accountType === 'seller') {
+              navigate('/business-register');
+            }
+          }}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) {
+              setIsAccountDialogOpen(false);
+            }
+          }}
+        />
+      )}
 
       <Footer />
     </div>

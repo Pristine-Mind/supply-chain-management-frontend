@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaHome, FaMapMarkerAlt } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 
-// --- Delivery type & JSON helpers in the same file ---
+
 export interface Delivery {
   id?: number;
   cartId: number;
@@ -49,7 +49,6 @@ export function deliveryToJson(delivery: Delivery): any {
     longitude: delivery.longitude,
   };
 }
-// --------------------------------------------------------
 
 interface LocationState {
   delivery?: Delivery;

@@ -62,7 +62,7 @@ export const Navbar: React.FC = () => {
             <NavigationMenu.Item>
               <Link to="/" className="flex items-center">
                 <img src={logo} alt="Logo" className="w-12 h-12" />
-                <span className="ml-2 text-xl font-bold text-orange-600">SupplyChain</span>
+                <span className="ml-2 text-xl font-bold text-orange-600">MulyaBazzar</span>
               </Link>
             </NavigationMenu.Item>
 
