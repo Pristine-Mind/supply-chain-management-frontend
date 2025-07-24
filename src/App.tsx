@@ -1,12 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-// Auth Components
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import PhoneLogin from './components/auth/PhoneLogin';
 import Logout from './components/auth/Logout';
 
-// Application Components
 import Home from './components/Home';
 import AddProducer from './components/AddProducer';
 import Products from './components/Products';
@@ -30,13 +27,18 @@ import Register from './components/Register';
 import BusinessRegister from './components/BusinessRegister';
 import MarketplaceUserProduct from './components/MarketplaceUserProduct';
 import DirectSales from './components/DirectSales';
+import FAQ from './components/FAQ';
+import ShippingAndDelivery from './components/ShippingAndDelivery';
+import ReturnsAndRefunds from './components/ReturnsAndRefunds';
+import TermsofService from './components/TermsofService';
+import Privacy from './components/Privacy';
 import Contact from './components/Contact';
 import BlogPage from './components/BlogPage';
 import BackButton from './components/BackButton';
+import AccountDialog from './components/AccountDialog';
+import Login from './components/Login';
 
 
-
-// Protected routes that require authentication
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
   { path: '/producers', element: <AddProducer /> },
@@ -58,7 +60,6 @@ const protectedRoutes = [
   { path: '/direct-sales', element: <DirectSales /> },
 ];
 
-// Public routes accessible to all
 const publicRoutes = [
   { path: '/', element: <Marketplace /> },
   { path: '/marketplace', element: <Navigate to="/" replace /> },
@@ -66,14 +67,18 @@ const publicRoutes = [
   { path: '/marketplace/:productId', element: <ProductPage /> },
   { path: '/about', element: <BlogPage /> },
   { path: '/contact', element: <Contact /> },
-  { path: '/privacy', element: <BlogPage /> },
   { path: '/sellers', element: <SellerLanding /> },
+  { path: '/account', element: <AccountDialog /> },
   { path: '/register', element: <Register /> },
   { path: '/business-register', element: <BusinessRegister /> },
   { path: '/blog', element: <BlogPage /> },
-  // Auth routes
-  { path: '/login', element: <PhoneLogin /> },
+  { path: '/shipping', element: <ShippingAndDelivery /> },
+  { path: '/login', element: <Login /> },
   { path: '/logout', element: <Logout /> },
+  { path: '/faq', element: <FAQ /> },
+  { path: '/returns', element: <ReturnsAndRefunds /> },
+  { path: '/terms', element: <TermsofService /> },
+  { path: '/privacy', element: <Privacy /> },
 ];
 
 const App: React.FC = () => {
@@ -83,19 +88,14 @@ const App: React.FC = () => {
         <div className="p-4">
           <ConditionalBackButton />
           <Routes>
-            {/* Public Routes */}
             {publicRoutes.map((route, index) => (
               <Route key={`public-${index}`} path={route.path} element={route.element} />
             ))}
-
-            {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               {protectedRoutes.map((route, index) => (
                 <Route key={`protected-${index}`} path={route.path} element={route.element} />
               ))}
             </Route>
-
-            {/* 404 - Not Found */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

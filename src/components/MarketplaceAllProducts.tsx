@@ -85,7 +85,6 @@ const MarketplaceAllProducts: React.FC = () => {
       const resp = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
         {
-          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
           params,
         }
       );
@@ -204,7 +203,7 @@ const MarketplaceAllProducts: React.FC = () => {
           ) : products.length === 0 ? (
             <div className="text-center text-gray-500 py-10">No products found.</div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.map(item => (
                 <div
                   key={item.id}
@@ -215,10 +214,10 @@ const MarketplaceAllProducts: React.FC = () => {
                     <img
                       src={item.product_details.images[0].image}
                       alt={item.product_details.name}
-                      className="w-full h-40 object-cover rounded-lg mb-4"
+                      className="w-full h-60 object-cover rounded-lg mb-4"
                     />
                   ) : (
-                    <div className="w-full h-40 bg-gray-200 rounded-lg mb-4" />
+                    <div className="w-full h-60 bg-gray-200 rounded-lg mb-4" />
                   )}
                   <h3 className="font-semibold text-lg truncate mb-1">
                     {item.product_details?.name}

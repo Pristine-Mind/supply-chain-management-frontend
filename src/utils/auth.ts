@@ -36,13 +36,15 @@ axios.interceptors.request.use(
   }
 );
 
-// Handle 401 Unauthorized responses
+// Handle 401 Unauthorized responses - temporarily disabled automatic redirect
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      removeAuthToken();
-      window.location.href = '/login';
+      console.log('Unauthorized request - redirect to login disabled for development');
+      // Temporarily disabled automatic redirect for development
+      // removeAuthToken();
+      // window.location.href = '/login';
     }
     return Promise.reject(error);
   }
