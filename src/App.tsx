@@ -37,7 +37,7 @@ import BlogPage from './components/BlogPage';
 import BackButton from './components/BackButton';
 import AccountDialog from './components/AccountDialog';
 import Login from './components/Login';
-
+import TransporterRegistration from './components/TransporterRegistration';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -71,6 +71,7 @@ const publicRoutes = [
   { path: '/account', element: <AccountDialog /> },
   { path: '/register', element: <Register /> },
   { path: '/business-register', element: <BusinessRegister /> },
+  { path: '/transporter-register', element: <TransporterRegistration /> },
   { path: '/blog', element: <BlogPage /> },
   { path: '/shipping', element: <ShippingAndDelivery /> },
   { path: '/login', element: <Login /> },
