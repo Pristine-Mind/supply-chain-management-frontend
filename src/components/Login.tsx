@@ -52,6 +52,9 @@ const Login: React.FC = () => {
         if (userInfoResponse.data.business_type) {
           localStorage.setItem('business_type', userInfoResponse.data.business_type);
         }
+        if (userInfoResponse.data.role) {
+          localStorage.setItem('role', userInfoResponse.data.role);
+        }
       }
 
       navigate('/home');
