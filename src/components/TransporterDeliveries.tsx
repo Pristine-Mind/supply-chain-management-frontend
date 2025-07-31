@@ -569,7 +569,7 @@ const TransporterDeliveries: React.FC = () => {
 
       <div className="space-y-4">
         {deliveries.map((delivery) => (
-          <Card key={delivery.id} className="overflow-hidden hover:shadow-md transition-shadow">
+          <Card key={delivery.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <CardHeader className="bg-gray-50 px-6 py-4 border-b">
               <div className="flex justify-between items-start">
                 <div>
@@ -631,17 +631,18 @@ const TransporterDeliveries: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4 text-sm">
+              <div className="mt-6 pt-6 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4 text-sm bg">
                 <div className="flex items-center text-gray-500">
                   <Calendar className="h-4 w-4 mr-2" />
                   <span>Requested for {formatDate(delivery.requested_delivery_date)}</span>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 border-l-4 border-yellow-500">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => handleViewDetails(delivery.delivery_id)}
                     disabled={isDetailsLoading}
+                    className="bg-yellow-600 hover:bg-yellow-700"
                   >
                     {isDetailsLoading ? (
                       <>
@@ -651,12 +652,12 @@ const TransporterDeliveries: React.FC = () => {
                     ) : 'View Details'}
                   </Button>
                   {delivery.status === 'pending' && (
-                    <Button size="sm">
+                    <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700">
                       Accept Delivery
                     </Button>
                   )}
                   {delivery.status === 'in_progress' && (
-                    <Button size="sm" variant="secondary">
+                    <Button size="sm" variant="secondary" className="bg-yellow-600 hover:bg-yellow-700">
                       Update Status
                     </Button>
                   )}
