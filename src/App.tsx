@@ -38,6 +38,7 @@ import BackButton from './components/BackButton';
 import AccountDialog from './components/AccountDialog';
 import Login from './components/Login';
 import TransporterRegistration from './components/TransporterRegistration';
+import TransporterProfile from './components/TransporterProfile';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -58,6 +59,7 @@ const protectedRoutes = [
   { path: '/payment', element: <Payment /> },
   { path: '/marketplace/user-product', element: <MarketplaceUserProduct /> },
   { path: '/direct-sales', element: <DirectSales /> },
+  { path: '/profile', element: <TransporterProfile /> },
 ];
 
 const publicRoutes = [

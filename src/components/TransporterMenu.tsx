@@ -40,6 +40,11 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
 
   const menuItems = [
     {
+      name: 'Profile',
+      icon: <UserIcon className="h-5 w-5 mr-3" />,
+      path: '/profile'
+    },
+    {
       name: 'Available Deliveries',
       icon: <TruckIcon className="h-5 w-5 mr-3" />,
       path: '/deliveries/available'
