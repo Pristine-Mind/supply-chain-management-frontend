@@ -67,6 +67,84 @@ export interface MarketplaceSaleBasic {
   total_amount: string;
 }
 
+export interface MarketplaceSaleBasic {
+  id: number;
+  order_id: string;
+  customer_name: string;
+  customer_phone: string;
+  total_amount: string;
+}
+
+export interface Transporter {
+  id: number;
+  user: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  license_number: string;
+  phone: string;
+  vehicle_type: string;
+  vehicle_number: string;
+  vehicle_capacity: string;
+  status: string;
+  status_display: string;
+}
+
+export interface DeliveryDetail {
+  id: number;
+  delivery_id: string;
+  marketplace_sale: MarketplaceSaleBasic;
+  tracking_number: string;
+  pickup_address: string;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
+  pickup_contact_name: string;
+  pickup_contact_phone: string;
+  pickup_instructions: string | null;
+  delivery_address: string;
+  delivery_latitude: number | null;
+  delivery_longitude: number | null;
+  delivery_contact_name: string;
+  delivery_contact_phone: string;
+  delivery_instructions: string | null;
+  package_weight: string;
+  package_dimensions: string | null;
+  package_value: string | null;
+  fragile: boolean;
+  requires_signature: boolean;
+  special_instructions: string | null;
+  transporter: Transporter | null;
+  status: string;
+  status_display: string;
+  priority: string;
+  priority_display: string;
+  requested_pickup_date: string | null;
+  requested_delivery_date: string | null;
+  assigned_at: string | null;
+  picked_up_at: string | null;
+  delivered_at: string | null;
+  cancelled_at: string | null;
+  cancellation_reason: string | null;
+  delivery_fee: string;
+  distance_km: number | null;
+  fuel_surcharge: string | null;
+  estimated_delivery_time: string | null;
+  actual_pickup_time: string | null;
+  delivery_photo: string | null;
+  signature_image: string | null;
+  delivery_notes: string | null;
+  delivery_attempts: number;
+  max_delivery_attempts: number;
+  is_overdue: boolean;
+  time_since_pickup: string | null;
+  success_rate: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Delivery {
   id: number;
   delivery_id: string;
@@ -131,7 +209,7 @@ export const getTransporterDeliveries = async (limit = 10, offset = 0): Promise<
 };
 
 export interface NearbyDelivery extends Omit<Delivery, 'distance_km'> {
-  distance: number; // in km
+  distance: number;
 }
 
 export const getNearbyDeliveries = async (radius: number = 10): Promise<NearbyDelivery[]> => {
@@ -147,6 +225,49 @@ export const getNearbyDeliveries = async (radius: number = 10): Promise<NearbyDe
   } catch (error: any) {
     console.error('Error fetching nearby deliveries:', error);
     throw error.response?.data || error.message;
+  }
+};
+
+
+export const getDeliveryDetail = async (deliveryId: string): Promise<DeliveryDetail> => {
+  try {
+    const response = await axios.get<DeliveryDetail>(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/${deliveryId}/`,
+      {
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.detail || 'Failed to fetch delivery details');
+    }
+    throw new Error('Failed to fetch delivery details. Please try again.');
+  }
+};
+
+
+export const claimDelivery = async (deliveryId: string): Promise<Delivery> => {
+  try {
+    const response = await axios.post<Delivery>(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/${deliveryId}/accept/`,
+      {},
+      {
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.detail || 'Failed to claim delivery');
+    }
+    throw new Error('Failed to claim delivery. Please try again.');
   }
 };
 
