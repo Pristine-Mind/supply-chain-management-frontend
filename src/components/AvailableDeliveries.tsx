@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Package, MapPin, Clock, DollarSign, CheckCircle, Map } from 'lucide-react';
-import { getAvailableDeliveries } from '../api/transporterApi';
+import { getAvailableDeliveries, claimDelivery } from '../api/transporterApi';
 import type { Delivery } from '../api/transporterApi';
 import { Skeleton } from './ui/skeleton';
 import { useToast } from '../hooks/use-toast';
@@ -64,16 +64,19 @@ const AvailableDeliveries: React.FC = () => {
 
   const handleClaimDelivery = async (deliveryId: string) => {
     try {
+      await claimDelivery(deliveryId);
+      
       toast({
         title: 'Success',
         description: 'Delivery claimed successfully!',
       });
+      
       loadDeliveries(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error claiming delivery:', error);
       toast({
         title: 'Error',
-        description: 'Failed to claim delivery. Please try again.',
+        description: error.message || 'Failed to claim delivery. Please try again.',
         variant: 'destructive',
       });
     }
