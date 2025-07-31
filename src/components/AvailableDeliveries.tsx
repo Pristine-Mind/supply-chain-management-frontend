@@ -157,7 +157,7 @@ const AvailableDeliveries: React.FC = () => {
 
       <div className="space-y-4">
         {deliveries.map((delivery) => (
-          <Card key={delivery.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-blue-500">
+          <Card key={delivery.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-yellow-500">
             <CardHeader className="px-6 py-4 border-b">
               <div className="flex justify-between items-start">
                 <div>
@@ -227,9 +227,9 @@ const AvailableDeliveries: React.FC = () => {
               <div className="mt-6 flex justify-end">
                 <Button 
                   onClick={() => handleClaimDelivery(delivery.delivery_id)}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-yellow-600 hover:bg-yellow-700"
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <CheckCircle className="h-4 w-4 mr-2 text-yellow-500" />
                   Claim Delivery
                 </Button>
               </div>

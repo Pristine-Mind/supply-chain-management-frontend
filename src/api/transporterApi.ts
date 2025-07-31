@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { DeliveryFilterParams } from '../types/delivery';
 
+
 export interface TransporterProfile {
   id: number;
   user: {
@@ -228,6 +229,40 @@ export const getNearbyDeliveries = async (radius: number = 10): Promise<NearbyDe
   }
 };
 
+
+export interface DeliveryHistoryResponse {
+  results: Delivery[];
+  total_earnings: number;
+  total_deliveries: number;
+  pagination: {
+    count: number;
+    next: string | null;
+    previous: string | null;
+  };
+}
+
+export const getDeliveryHistory = async (params?: {
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+}): Promise<DeliveryHistoryResponse> => {
+  const queryParams = new URLSearchParams();
+  
+  if (params?.dateFrom) queryParams.append('date_from', params.dateFrom);
+  if (params?.dateTo) queryParams.append('date_to', params.dateTo);
+  if (params?.page) queryParams.append('page', params.page.toString());
+
+  const response = await axios.get<DeliveryHistoryResponse>(
+    `${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/history/?${queryParams.toString()}`,
+    {
+      headers: {
+        Authorization: `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.data;
+};
 
 export const getDeliveryDetail = async (deliveryId: string): Promise<DeliveryDetail> => {
   try {
