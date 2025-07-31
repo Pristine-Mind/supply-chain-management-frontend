@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Logout from './components/auth/Logout';
+import { Toaster } from './components/ui/toaster';
 
 import Home from './components/Home';
 import AddProducer from './components/AddProducer';
@@ -39,6 +40,9 @@ import AccountDialog from './components/AccountDialog';
 import Login from './components/Login';
 import TransporterRegistration from './components/TransporterRegistration';
 import TransporterProfile from './components/TransporterProfile';
+import TransporterDeliveries from './components/TransporterDeliveries';
+import AvailableDeliveries from './components/AvailableDeliveries';
+import NearbyDeliveries from './components/NearbyDeliveries';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -60,6 +64,9 @@ const protectedRoutes = [
   { path: '/marketplace/user-product', element: <MarketplaceUserProduct /> },
   { path: '/direct-sales', element: <DirectSales /> },
   { path: '/profile', element: <TransporterProfile /> },
+  { path: '/deliveries/my', element: <TransporterDeliveries /> },
+  { path: '/deliveries/available', element: <AvailableDeliveries /> },
+  { path: '/deliveries/nearby', element: <NearbyDeliveries /> },
 ];
 
 const publicRoutes = [
@@ -89,6 +96,7 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <div className="p-4">
+          <Toaster />
           <ConditionalBackButton />
           <Routes>
             {publicRoutes.map((route, index) => (

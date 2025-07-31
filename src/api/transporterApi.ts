@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { DeliveryFilterParams } from '../types/delivery';
 
 export interface TransporterProfile {
   id: number;
@@ -58,6 +59,37 @@ export const registerTransporter = async (data: FormData) => {
   }
 };
 
+export interface MarketplaceSaleBasic {
+  id: number;
+  order_id: string;
+  customer_name: string;
+  customer_phone: string;
+  total_amount: string;
+}
+
+export interface Delivery {
+  id: number;
+  delivery_id: string;
+  tracking_number: string;
+  marketplace_sale: MarketplaceSaleBasic;
+  pickup_address: string;
+  delivery_address: string;
+  package_weight: string;
+  fragile: boolean;
+  status: string;
+  status_display: string;
+  priority: string;
+  priority_display: string;
+  requested_pickup_date: string;
+  requested_delivery_date: string;
+  delivery_fee: string;
+  distance_km: number;
+  is_overdue: boolean;
+  delivery_attempts: number;
+  created_at: string;
+  transporter_name: string;
+}
+
 export const getTransporterProfile = async (): Promise<TransporterProfile> => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/profile/`, {
@@ -66,9 +98,74 @@ export const getTransporterProfile = async (): Promise<TransporterProfile> => {
         'Content-Type': 'application/json',
       },
     });
-    console.log(response.data);
     return response.data;
   } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+export const getTransporterDeliveries = async (limit = 10, offset = 0): Promise<PaginatedResponse<Delivery>> => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/my/`, {
+      params: {
+        limit,
+        offset
+      },
+      headers: {
+        Authorization: `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching deliveries:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
+export interface NearbyDelivery extends Omit<Delivery, 'distance_km'> {
+  distance: number; // in km
+}
+
+export const getNearbyDeliveries = async (radius: number = 10): Promise<NearbyDelivery[]> => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/nearby/`, {
+      params: { radius },
+      headers: {
+        Authorization: `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching nearby deliveries:', error);
+    throw error.response?.data || error.message;
+  }
+};
+
+export const getAvailableDeliveries = async (filters: DeliveryFilterParams = {}): Promise<PaginatedResponse<Delivery>> => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/available/`, {
+      params: {
+        ...filters,
+        limit: filters.limit || 10,
+        offset: filters.offset || 0
+      },
+      headers: {
+        Authorization: `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Error fetching available deliveries:', error);
     throw error.response?.data || error.message;
   }
 };
