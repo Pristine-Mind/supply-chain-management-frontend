@@ -17,7 +17,7 @@ import AuditLogList from './components/AuditLogList';
 import AuditLogForm from './components/AuditLogForm';
 import PurchaseOrderCards from './components/PurchaseOrderCards';
 import Marketplace from './components/Marketplace';
-import MarketplaceAllProducts from './components/MarketplaceAllProducts';
+import MarketplaceAllProducts from './components/MarketplaceAllProducts';``
 import ProductPage from './components/ProductPage';
 import Cart from './components/Cart';
 import DeliveryDetails from './components/DeliveryDetails';
@@ -44,6 +44,7 @@ import TransporterDeliveries from './components/TransporterDeliveries';
 import AvailableDeliveries from './components/AvailableDeliveries';
 import NearbyDeliveries from './components/NearbyDeliveries';
 import DeliveryHistory from './components/DeliveryHistory';
+import TransporterEarnings from './components/TransporterEarnings';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -69,6 +70,7 @@ const protectedRoutes = [
   { path: '/deliveries/available', element: <AvailableDeliveries /> },
   { path: '/deliveries/nearby', element: <NearbyDeliveries /> },
   { path: '/deliveries/history', element: <DeliveryHistory /> },
+  { path: '/earnings', element: <TransporterEarnings /> },
 ];
 
 const publicRoutes = [
