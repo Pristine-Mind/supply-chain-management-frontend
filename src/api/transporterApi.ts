@@ -285,6 +285,42 @@ export const getDeliveryDetail = async (deliveryId: string): Promise<DeliveryDet
 };
 
 
+export interface TransporterStats {
+  total_deliveries: number;
+  successful_deliveries: number;
+  cancelled_deliveries: number;
+  success_rate: number;
+  cancellation_rate: number;
+  rating: number | null;
+  total_earnings: number;
+  commission_rate: number;
+  deliveries_this_month: number;
+  earnings_this_month: number;
+  active_deliveries: number;
+  average_delivery_time: number;
+  is_documents_expired: boolean;
+}
+
+export const getTransporterStats = async (): Promise<TransporterStats> => {
+  try {
+    const response = await axios.get<TransporterStats>(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/transporter/stats/`,
+      {
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      throw new Error(error.response.data.detail || 'Failed to fetch transporter stats');
+    }
+    throw new Error('Failed to fetch transporter stats. Please try again.');
+  }
+};
+
 export const claimDelivery = async (deliveryId: string): Promise<Delivery> => {
   try {
     const response = await axios.post<Delivery>(
