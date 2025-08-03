@@ -4,15 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import {
-  MagnifyingGlassIcon,
-  Cross2Icon,
-  ChevronDownIcon,
-  CheckIcon,
-  PersonIcon,
-  EnterIcon,
-  PlusCircledIcon,
-} from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon, Cross2Icon } from '@radix-ui/react-icons';
+import { X, ChevronDown, Check, User, LogIn, PlusCircle, ShoppingCart, Heart, Star } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+
 import logo from '../assets/logo.png';
 import Footer from './Footer';
 import Message from './Message';
@@ -22,28 +17,72 @@ interface ProductImage {
   id: number;
   image: string;
   alt_text: string | null;
+  created_at: string;
 }
 
-interface Product {
+interface ProductDetails {
   id: number;
   name: string;
   description: string;
-  images?: ProductImage[];
+  images: ProductImage[];
+  category_details: string;
+  category: string;
+  sku: string;
+  price: number;
+  cost_price: number;
+  stock: number;
+  reorder_level: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  is_marketplace_created: boolean;
+  avg_daily_demand: number;
+  stddev_daily_demand: number;
+  safety_stock: number;
+  reorder_point: number;
+  reorder_quantity: number;
+  lead_time_days: number;
+  projected_stockout_date_field: string | null;
+  producer: any;
+  user: number;
+  location: number;
 }
 
 interface MarketplaceProduct {
   id: number;
-  product: Product;
-  listed_price: string;
+  product: number;
+  product_details: ProductDetails;
+  discounted_price: number | null;
+  listed_price: number;
+  percent_off: number;
+  savings_amount: number;
+  offer_start: string | null;
+  offer_end: string | null;
+  is_offer_active: boolean | null;
+  offer_countdown: string | null;
+  estimated_delivery_days: number | null;
+  shipping_cost: string;
+  is_free_shipping: boolean;
+  recent_purchases_count: number;
   listed_date: string;
   is_available: boolean;
-  bid_end_date: string | null;
+  min_order: number | null;
+  latitude: number;
+  longitude: number;
+  bulk_price_tiers: any[];
+  variants: any[];
+  reviews: any[];
+  average_rating: number;
+  ratings_breakdown: {
+    [key: string]: number;
+  };
+  total_reviews: number;
   view_count: number;
-  recent_purchases_count: number;
+  rank_score: number;
 }
 
 const CATEGORY_OPTIONS = [
-  { code: 'All', label: 'All' },
+  { code: 'All', label: 'All Categories' },
   { code: 'FR', label: 'Fruits' },
   { code: 'VG', label: 'Vegetables' },
   { code: 'GR', label: 'Grains & Cereals' },
@@ -89,13 +128,23 @@ const Marketplace: React.FC = () => {
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [wishlist, setWishlist] = useState<number[]>([]);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { cart, addToCart, itemCount } = useCart();
+  const itemsPerPage = 10;
   const navigate = useNavigate();
 
-  const fetchMarketplaceProducts = async () => {
+  const fetchMarketplaceProducts = async (page: number = 1) => {
     setLoading(true);
     setError('');
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, any> = {
+        limit: itemsPerPage,
+        offset: (page - 1) * itemsPerPage,
+      };
       if (query) params.search = query;
       if (selectedCategory !== 'All') params.category = selectedCategory;
       if (selectedLocation !== 'All') params.city = selectedLocation;
@@ -103,13 +152,19 @@ const Marketplace: React.FC = () => {
       const { data } = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
         {
-          // headers: { Authorization: `Token ${localStorage.getItem('token')}` },
           params,
         }
       );
+      console.log('API Response:', {
+        count: data.count,
+        resultsLength: data.results.length,
+        itemsPerPage,
+        calculatedPages: Math.ceil(data.count / itemsPerPage)
+      });
       setProducts(data.results);
       setRecommendations(data.results);
       setNewArrivals(data.results.slice(0, 5));
+      setTotalCount(data.count || 0);
       setCategories([
         { key: 'Fruits', value: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80' },
         { key: 'Vegetables', value: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=400&q=80' },
@@ -131,103 +186,209 @@ const Marketplace: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchMarketplaceProducts();
+    setCurrentPage(1);
+    fetchMarketplaceProducts(1);
   }, [query, selectedCategory, selectedLocation, selectedProfileType]);
+
+  useEffect(() => {
+    fetchMarketplaceProducts(currentPage);
+  }, [currentPage]);
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const startItem = totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
+  const endItem = Math.min(currentPage * itemsPerPage, totalCount);
+
+  const wishlistProducts = products.filter(product => wishlist.includes(product.id));
+  const cartProducts = products.filter(product => 
+    cart.some(item => item.product.id === product.id)
+  );
+  
+  const handleAddToCart = (product: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    addToCart({
+      id: product.id,
+      name: product.product_details.name,
+      price: product.listed_price,
+      images: product.product_details.images,
+      product_details: product.product_details,
+      listed_price: product.listed_price,
+      stock_quantity: product.stock_quantity,
+      seller: product.seller
+    });
+  };
 
   if (error) {
     return <div className="text-center text-red-600 py-8">{error}</div>;
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="sticky top-0 z-20 bg-white border-b shadow-sm overflow-visible">
-        <div className="container mx-auto flex items-center space-x-6 px-4 py-3">
-          <div className="flex items-center flex-shrink-0">
-            <img src={logo} alt="Logo" className="w-10 h-10 mr-2" />
-            <span className="font-extrabold text-2xl text-orange-600 whitespace-nowrap">
-              MulyaBazzar
-            </span>
-          </div>
-          <Dialog.Root>
-            <Dialog.Trigger asChild>
-              <div className="flex-1 max-w-xl">
-                <button
-                  onClick={() => setShowSuggestions(true)}
-                  className="w-full flex items-center gap-3 px-4 py-2 border-2 rounded-lg hover:border-orange-500 transition-colors text-gray-600"
-                >
-                  <MagnifyingGlassIcon className="w-5 h-5" />
-                  <span className="truncate">Search products...</span>
-                </button>
-              </div>
-            </Dialog.Trigger>
-            <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[1000]" />
-              <Dialog.Content className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[95vw] max-w-lg bg-white p-6 rounded-lg shadow-lg z-[1001]">
-                <div className="relative">
-                  <input
-                    autoFocus
-                    value={query}
-                    onChange={e => {
-                      setQuery(e.target.value);
-                      setShowSuggestions(e.target.value.length >= 3);
-                    }}
-                    className="w-full h-14 pl-12 pr-12 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
-                    placeholder="Search products..."
-                  />
-                  <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
-                  <Dialog.Close asChild>
-                    <button className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <Cross2Icon className="w-6 h-6 text-gray-400 hover:text-gray-600" />
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-orange-600 text-white py-2 px-4">
+        <div className="container mx-auto text-center text-sm">
+          Welcome to MulyaBazzar - Your Premium Marketplace
+        </div>
+      </div>
+
+      <div className="bg-white shadow-md">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <img src={logo} alt="Logo" className="w-12 h-12 mr-3" />
+              <span className="font-bold text-2xl text-orange-600">MulyaBazzar</span>
+            </div>
+
+            <div className="flex-1 max-w-2xl mx-8">
+              <Dialog.Root>
+                <Dialog.Trigger asChild>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:outline-none text-gray-700"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onClick={() => setShowSuggestions(true)}
+                    />
+                    <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <button className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-orange-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-orange-700">
+                      Search
                     </button>
-                  </Dialog.Close>
-                </div>
-                {showSuggestions && recommendations.length > 0 && (
-                  <div className="mt-4 max-h-60 overflow-auto border-t pt-2">
-                    {recommendations.map(p => (
-                      <div
-                        key={p.id}
-                        onClick={() => { setShowSuggestions(false); navigate(`/marketplace/${p.id}`); }}
-                        className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
-                      >
-                        <img
-                          src={p.product.images?.[0]?.image ?? PLACEHOLDER}
-                          alt={p.product.name}
-                          className="w-8 h-8 rounded mr-2 object-cover"
-                        />
-                        <div>
-                          <div className="font-medium text-sm">{p.product.name}</div>
-                          <div className="text-xs text-gray-500">Rs.{p.listed_price}</div>
-                        </div>
+                  </div>
+                </Dialog.Trigger>
+                <Dialog.Portal>
+                  <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[1000]" />
+                  <Dialog.Content className="fixed top-1/4 left-1/2 -translate-x-1/2 w-[95vw] max-w-lg bg-white p-6 rounded-lg shadow-lg z-[1001]">
+                    <div className="relative">
+                      <input
+                        autoFocus
+                        value={query}
+                        onChange={e => {
+                          setQuery(e.target.value);
+                          setShowSuggestions(e.target.value.length >= 3);
+                        }}
+                        className="w-full h-14 pl-12 pr-12 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg"
+                        placeholder="Search products..."
+                      />
+                      <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+                      <Dialog.Close asChild>
+                        <button className="absolute right-4 top-1/2 -translate-y-1/2">
+                          <Cross2Icon className="w-6 h-6 text-gray-400 hover:text-gray-600" />
+                        </button>
+                      </Dialog.Close>
+                    </div>
+                    {showSuggestions && recommendations.length > 0 && (
+                      <div className="mt-4 max-h-60 overflow-auto border-t pt-2">
+                        {recommendations.map(p => (
+                          <div
+                            key={p.id}
+                            onClick={() => { setShowSuggestions(false); navigate(`/marketplace/${p.id}`); }}
+                            className="flex items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
+                          >
+                            <img
+                              src={p.product_details.images?.[0]?.image ?? PLACEHOLDER}
+                              alt={p.product_details.name}
+                              className="w-8 h-8 rounded mr-2 object-cover"
+                            />
+                            <div>
+                              <div className="font-medium text-sm">{p.product_details.name}</div>
+                              <div className="text-xs text-gray-500">Rs.{p.listed_price}</div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
+                  </Dialog.Content>
+                </Dialog.Portal>
+              </Dialog.Root>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <button 
+                  onClick={() => setIsWishlistOpen(!isWishlistOpen)}
+                  className="relative p-3 text-gray-600 hover:text-orange-600 transition-colors"
+                >
+                  <Heart className="w-6 h-6" />
+                  {wishlist.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </button>
+                
+                {isWishlistOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="p-4 border-b border-gray-200">
+                      <h3 className="font-semibold text-gray-800">Wishlist ({wishlist.length})</h3>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {wishlistProducts.length > 0 ? (
+                        wishlistProducts.map(product => (
+                          <div key={product.id} className="p-3 border-b border-gray-100 hover:bg-gray-50">
+                            <div className="flex items-center space-x-3">
+                              <img
+                                src={product.product_details.images?.[0]?.image ?? PLACEHOLDER}
+                                alt={product.product_details.name}
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-gray-800 truncate">
+                                  {product.product_details.name}
+                                </h4>
+                                <p className="text-orange-600 font-semibold">Rs.{product.listed_price}</p>
+                              </div>
+                              <button
+                                onClick={() => setWishlist(prev => prev.filter(id => id !== product.id))}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-gray-500">
+                          Your wishlist is empty
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog.Root>
-          <div className="hidden md:flex items-center space-x-3 overflow-visible">
-           <Select.Root 
-              value={selectedCategory} 
-              onValueChange={(value: string) => {
-                setSelectedCategory(value);
-              }}
-            >
-              <Select.Trigger
-                aria-label="Category filter"
-                className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:border-orange-500 transition-colors bg-white text-sm min-w-[120px]"
+              </div>
+
+              <div className="relative">
+                <button 
+                  onClick={() => navigate('/cart')}
+                  className="relative p-3 text-gray-600 hover:text-orange-600 transition-colors"
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {itemCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between py-3">
+            <div className="flex items-center space-x-8">
+              <Select.Root 
+                value={selectedCategory} 
+                onValueChange={(value: string) => setSelectedCategory(value)}
               >
-                <Select.Value placeholder="Category" />
-                <Select.Icon>
-                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
-                </Select.Icon>
-              </Select.Trigger>
-              <Select.Portal>
-                <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-                  <Select.Viewport className="p-2">
-                    <Select.Group>
-                      <Select.Label className="px-2 py-1 text-xs text-gray-500">
-                        Category
-                      </Select.Label>
+                <Select.Trigger className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors">
+                  <Select.Value placeholder="All Categories" />
+                  <ChevronDown className="w-4 h-4" />
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                    <Select.Viewport className="p-2">
                       {CATEGORY_OPTIONS.map((option) => (
                         <Select.Item 
                           key={option.code} 
@@ -236,308 +397,374 @@ const Marketplace: React.FC = () => {
                         >
                           <Select.ItemText>{option.label}</Select.ItemText>
                           <Select.ItemIndicator className="absolute left-2">
-                            <CheckIcon className="w-4 h-4 text-orange-600" />
+                            <Check className="w-4 h-4" /> 
                           </Select.ItemIndicator>
                         </Select.Item>
                       ))}
-                    </Select.Group>
-                  </Select.Viewport>
-                </Select.Content>
-              </Select.Portal>
-            </Select.Root>
+                    </Select.Viewport>
+                  </Select.Content>
+                </Select.Portal>
+              </Select.Root>
 
-            <Select.Root 
-              value={selectedLocation} 
-              onValueChange={(value: string) => {
-                setSelectedLocation(value);
-              }}
-            >
-              <Select.Trigger
-                aria-label="Location filter"
-                className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:border-orange-500 transition-colors bg-white text-sm min-w-[120px]"
-              >
-                <Select.Value placeholder="Location" />
-                <Select.Icon>
-                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
-                </Select.Icon>
-              </Select.Trigger>
-              <Select.Portal>
-                <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-                  <Select.Viewport className="p-2">
-                    <Select.Group>
-                      <Select.Label className="px-2 py-1 text-xs text-gray-500">
-                        Location
-                      </Select.Label>
-                      {LOCATION_OPTIONS.map((location) => (
-                        <Select.Item 
-                          key={location} 
-                          value={location}
-                          className="relative flex items-center px-8 py-2 text-sm text-gray-700 rounded-md hover:bg-orange-50 cursor-pointer outline-none"
-                        >
-                          <Select.ItemText>{location}</Select.ItemText>
-                          <Select.ItemIndicator className="absolute left-2">
-                            <CheckIcon className="w-4 h-4 text-orange-600" />
-                          </Select.ItemIndicator>
-                        </Select.Item>
-                      ))}
-                    </Select.Group>
-                  </Select.Viewport>
-                </Select.Content>
-              </Select.Portal>
-            </Select.Root>
-
-            <Select.Root 
-              value={selectedProfileType} 
-              onValueChange={(value: string) => {
-                setSelectedProfileType(value);
-              }}
-            >
-              <Select.Trigger
-                aria-label="Seller type filter"
-                className="flex items-center gap-2 px-3 py-2 border rounded-lg hover:border-orange-500 transition-colors bg-white text-sm min-w-[120px]"
-              >
-                <Select.Value placeholder="Seller" />
-                <Select.Icon>
-                  <ChevronDownIcon className="w-4 h-4 text-gray-500" />
-                </Select.Icon>
-              </Select.Trigger>
-              <Select.Portal>
-                <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-                  <Select.Viewport className="p-2">
-                    <Select.Group>
-                      <Select.Label className="px-2 py-1 text-xs text-gray-500">
-                        Seller Type
-                      </Select.Label>
-                      {PROFILE_TYPE_OPTIONS.map((type) => (
-                        <Select.Item 
-                          key={type} 
-                          value={type}
-                          className="relative flex items-center px-8 py-2 text-sm text-gray-700 rounded-md hover:bg-orange-50 cursor-pointer outline-none"
-                        >
-                          <Select.ItemText>{type}</Select.ItemText>
-                          <Select.ItemIndicator className="absolute left-2">
-                            <CheckIcon className="w-4 h-4 text-orange-600" />
-                          </Select.ItemIndicator>
-                        </Select.Item>
-                      ))}
-                    </Select.Group>
-                  </Select.Viewport>
-                </Select.Content>
-              </Select.Portal>
-            </Select.Root>
-          </div>
-          <div style={{ position: 'relative', zIndex: 1000 }}>
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <button 
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '8px 12px',
-                    fontSize: '14px',
-                    color: '#374151',
-                    backgroundColor: 'transparent',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '9999px',
-                    cursor: 'pointer',
-                    outline: 'none'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <PersonIcon style={{ width: '16px', height: '16px' }} />
-                  <span style={{ display: 'none' }} className="sm:inline">
-                    Account
-                  </span>
-                  <ChevronDownIcon style={{ width: '16px', height: '16px' }} />
-                </button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Portal>
-                <DropdownMenu.Content 
-                  sideOffset={5}
-                  style={{
-                    backgroundColor: 'white',
-                    borderRadius: '8px',
-                    padding: '4px',
-                    minWidth: '180px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                    border: '1px solid #e5e7eb',
-                    zIndex: 1000
-                  }}
-                >
-                  <DropdownMenu.Item
-                    onSelect={() => {
-                      navigate('/login');
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '8px 12px',
-                      fontSize: '14px',
-                      color: '#374151',
-                      cursor: 'pointer',
-                      borderRadius: '6px',
-                      outline: 'none'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fff7ed'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              <nav className="flex items-center space-x-6">
+                <a href="/" className="text-gray-700 hover:text-orange-600 font-medium">Home</a>
+                <a href="/blog" className="text-gray-700 hover:text-orange-600 font-medium">Blog</a>
+                <a href="/about" className="text-gray-700 hover:text-orange-600 font-medium">About</a>
+                <a href="/contact" className="text-gray-700 hover:text-orange-600 font-medium">Contact</a>
+                
+                <div className="flex items-center space-x-3 border-l border-gray-200 pl-4 ml-2">
+                  <Select.Root 
+                    value={selectedLocation} 
+                    onValueChange={(value: string) => setSelectedLocation(value)}
                   >
-                    <EnterIcon style={{ width: '16px', height: '16px', marginRight: '8px', color: '#6b7280' }} />
-                    <span>Login</span>
-                  </DropdownMenu.Item>
-                  <DropdownMenu.Separator style={{ height: '1px', backgroundColor: '#e5e7eb', margin: '4px 0' }} />
-                  <DropdownMenu.Item
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      setIsAccountDialogOpen(true);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '8px 12px',
-                      fontSize: '14px', 
-                      color: '#374151',
-                      cursor: 'pointer',
-                      borderRadius: '6px',
-                      outline: 'none'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fff7ed'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <PlusCircledIcon style={{ width: '16px', height: '16px', marginRight: '8px', color: '#6b7280' }} />
-                    <span>Register</span>
-                  </DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
-          </div>
-        </div>
-      </div>
+                    <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-gray-200 rounded-md hover:border-orange-300 transition-colors bg-white text-sm text-gray-700">
+                      <Select.Value placeholder="Location" />
+                      <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                    </Select.Trigger>
+                    <Select.Portal>
+                      <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                        <Select.Viewport className="p-2">
+                          {LOCATION_OPTIONS.map((location) => (
+                            <Select.Item 
+                              key={location} 
+                              value={location}
+                              className="relative flex items-center px-8 py-2 text-sm text-gray-700 rounded-md hover:bg-orange-50 cursor-pointer outline-none"
+                            >
+                              <Select.ItemText>{location}</Select.ItemText>
+                              <Select.ItemIndicator className="absolute left-2">
+                                <Check className="w-4 h-4" /> 
+                              </Select.ItemIndicator>
+                            </Select.Item>
+                          ))}
+                        </Select.Viewport>
+                      </Select.Content>
+                    </Select.Portal>
+                  </Select.Root>
 
-      <div className="relative border-b py-3 overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-        <div className="flex gap-4 px-4 overflow-x-auto pb-2 no-scrollbar" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
-          {categories.map(cat => (
-            <button
-              key={cat.key}
-              onClick={() => setSelectedCategory(CATEGORY_OPTIONS.find(c => c.label === cat.key)?.code || 'All')}
-              className={`flex-shrink-0 w-24 flex flex-col items-center p-1 rounded-lg transition-all ${
-                selectedCategory === cat.key ? 'bg-orange-50 ring-2 ring-orange-400' : 'hover:bg-gray-50'
-              }`}
-              style={{ scrollSnapAlign: 'start' }}
-            >
-              <div className="w-24 h-24 overflow-hidden rounded-lg mb-1">
-                <img src={cat.value} alt={cat.key} className="w-full h-full object-cover" loading="lazy" />
+                  <Select.Root 
+                    value={selectedProfileType} 
+                    onValueChange={(value: string) => setSelectedProfileType(value)}
+                  >
+                    <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-gray-200 rounded-md hover:border-orange-300 transition-colors bg-white text-sm text-gray-700">
+                      <Select.Value placeholder="Seller Type" />
+                      <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                    </Select.Trigger>
+                    <Select.Portal>
+                      <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                        <Select.Viewport className="p-2">
+                          {PROFILE_TYPE_OPTIONS.map((type) => (
+                            <Select.Item 
+                              key={type} 
+                              value={type}
+                              className="relative flex items-center px-8 py-2 text-sm text-gray-700 rounded-md hover:bg-orange-50 cursor-pointer outline-none"
+                            >
+                              <Select.ItemText>{type}</Select.ItemText>
+                              <Select.ItemIndicator className="absolute left-2">
+                                <Check className="w-4 h-4" /> 
+                              </Select.ItemIndicator>
+                            </Select.Item>
+                          ))}
+                        </Select.Viewport>
+                      </Select.Content>
+                    </Select.Portal>
+                  </Select.Root>
+                </div>
+              </nav>
+            </div>
+
+            <div className="flex items-center space-x-6">
+              <div className="text-right">
+                <div className="text-gray-600 text-sm">977 - 9767474645</div>
+                <div className="text-orange-600 font-medium text-sm">24/7 Support</div>
               </div>
-              <span className="text-xs font-medium text-gray-700 whitespace-nowrap">{cat.key}</span>
-            </button>
-          ))}
+
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-orange-600 transition-colors">
+                    <User className="w-5 h-5" />
+                    <span>Account</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content 
+                    sideOffset={5}
+                    className="bg-white rounded-lg shadow-lg border border-gray-200 p-2 min-w-[180px] z-50"
+                  >
+                    <DropdownMenu.Item
+                      onSelect={() => navigate('/login')}
+                      className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                    >
+                      <LogIn className="w-4 h-4 mr-2" />
+                      Login
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+                    <DropdownMenu.Item
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setIsAccountDialogOpen(true);
+                      }}
+                      className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                    >
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Register
+                    </DropdownMenu.Item>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            </div>
+          </div>
+
+
         </div>
       </div>
-      
-      <div className="container mx-auto px-4 py-6 space-y-8 relative z-10">
-        <img
-          src="https://img.lazcdn.com/us/lazgcp/3fc84778-c749-4ead-96f2-42a1093144d0_NP-1188-340.gif"
-          alt="Promo"
-          className="w-full h-64 object-cover rounded-lg"
-        />
 
-       {newArrivals.length > 0 && (
-          <>
-            <h2 className="font-bold text-2xl">Trending Deals</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {newArrivals.map(deal => (
-                <div
-                  key={deal.id}
-                  onClick={() => navigate(`/marketplace/${deal.id}`)}
-                  className="bg-white rounded-xl shadow p-4 text-center cursor-pointer hover:shadow-lg border-2 border-orange-400"
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-6">
+          <div className="w-64 bg-white rounded-lg shadow-sm p-6 h-fit">
+            <h3 className="font-semibold text-lg mb-4 text-gray-800">Category</h3>
+            <div className="space-y-2">
+              {categories.map(cat => (
+                <button
+                  key={cat.key}
+                  onClick={() => setSelectedCategory(CATEGORY_OPTIONS.find(c => c.label === cat.key)?.code || 'All')}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                    selectedCategory === CATEGORY_OPTIONS.find(c => c.label === cat.key)?.code 
+                      ? 'bg-orange-50 text-orange-700 font-medium' 
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
                 >
-                  <img
-                    src={deal.product_details.images?.[0]?.image ?? PLACEHOLDER}
-                    alt={deal.product_details.name}
-                    className="w-full h-28 object-cover rounded mb-2"
-                  />
-                  <div className="font-medium truncate">{deal.product_details.name}</div>
-                  <div className="text-green-700 font-bold">Rs.{deal.listed_price}</div>
-                  <div className="mt-2 pt-2 border-t border-gray-100 space-y-1 text-xs text-gray-500">
-                    <div className="flex justify-between"><span>Views:</span><span>{deal.view_count}</span></div>
-                    <div className="flex justify-between"><span>Purchases:</span><span>{deal.recent_purchases_count}</span></div>
+                  {cat.key}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-600">Showing {startItem}-{endItem} of {totalCount} results</span>
+                  <div className="flex items-center space-x-2">
+                    {selectedCategory !== 'All' && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                        {CATEGORY_OPTIONS.find(c => c.code === selectedCategory)?.label}
+                        <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => setSelectedCategory('All')} />
+                      </span>
+                    )}
+                    {selectedLocation !== 'All' && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {selectedLocation}
+                        <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => setSelectedLocation('All')} />
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">Sort by:</span>
+                  <select className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option>Default Sorting</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                    <option>Newest First</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {products.map(item => (
+                <div
+                  key={item.id}
+                  onClick={() => navigate(`/marketplace/${item.id}`)}
+                  className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden group"
+                >
+                  <div className="relative">
+                    {item.percent_off > 0 && (
+                      <div className="absolute top-3 left-3 bg-orange-500 text-white px-2 py-1 rounded-md text-xs font-medium z-10">
+                        {Math.round(item.percent_off)}% off
+                      </div>
+                    )}
+                    
+                    <div className="aspect-square overflow-hidden">
+                      <img
+                        src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
+                        alt={item.product_details.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="p-4">
+                    <div className="text-xs text-gray-500 mb-1">{item.product_details.category_details}</div>
+                    <h3 className="font-medium text-gray-800 mb-2 line-clamp-2">{item.product_details.name}</h3>
+                    
+                    <div className="flex items-center space-x-1 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i} 
+                          className={`w-3 h-3 ${
+                            i < Math.floor(item.average_rating) 
+                              ? 'text-yellow-400 fill-current' 
+                              : 'text-gray-300'
+                          }`} 
+                        />
+                      ))}
+                      <span className="text-xs text-gray-500">
+                        {item.average_rating > 0 ? item.average_rating.toFixed(1) : '0.0'}
+                      </span>
+                      <span className="text-xs text-gray-400">({item.total_reviews})</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      {item.discounted_price && item.discounted_price < item.listed_price ? (
+                        <>
+                          <span className="text-sm text-gray-400 line-through">Rs.{item.listed_price}</span>
+                          <span className="font-bold text-orange-600">Rs.{item.discounted_price}</span>
+                        </>
+                      ) : (
+                        <span className="font-bold text-orange-600">Rs.{item.listed_price}</span>
+                      )}
+                    </div>
+                    
+                    {item.is_free_shipping && (
+                      <div className="text-xs text-orange-600 mt-1">Free Shipping</div>
+                    )}
+                    
+                    <div className="text-xs text-gray-500 mt-1">
+                      {item.product_details.stock > 0 ? `${item.product_details.stock} in stock` : 'Out of stock'}
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
+                      <div className="flex space-x-4 text-xs text-gray-500">
+                        <span>Views: {item.view_count}</span>
+                        {/* <span>Sales: {item.recent_purchases_count}</span> */}
+                      </div>
+                      {/* <div className="flex space-x-2">
+                        <button 
+                          onClick={(e) => handleAddToCart(item, e)}
+                          className="p-1.5 rounded-full hover:bg-gray-100"
+                        >
+                          <ShoppingCart className="w-4 h-4 text-gray-600" />
+                        </button>
+                      </div> */}
+                    </div>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(item, e);
+                      }}
+                      className="mt-3 w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Add to Cart</span>
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
-          </>
-        )}
-
-        <h2 className="font-bold text-2xl">Recommended for you</h2>
-        {products.length === 0 ? (
-          <div className="text-center text-gray-500">No products found.</div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            {products.map(item => (
-              <div
-                key={item.id}
-                onClick={() => navigate(`/marketplace/${item.id}`)}
-                className="bg-white rounded-xl shadow p-4 text-center cursor-pointer hover:shadow-lg border-2 border-orange-400"
-              >
-                <img
-                  src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
-                  alt={item.product_details.name}
-                  className="w-full h-28 object-cover rounded mb-2"
-                />
-                <div className="font-medium truncate">{item.product_details.name}</div>
-                <div className="text-green-700 font-bold">Rs.{item.listed_price}</div>
-                <div className="mt-2 pt-2 border-t border-gray-100 space-y-1 text-xs text-gray-500">
-                  <div className="flex justify-between"><span>Views:</span><span>{item.view_count}</span></div>
-                  <div className="flex justify-between"><span>Purchases:</span><span>{item.recent_purchases_count}</span></div>
+            {totalPages > 0 && (
+              <div className="mt-8 flex justify-center">
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-2 border rounded-md ${currentPage === 1 ? 'border-gray-200 text-gray-400 cursor-not-allowed' : 'border-gray-300 hover:bg-gray-50'}`}
+                  >
+                    ←
+                  </button>
+                  
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    if (pageNum > 0 && pageNum <= totalPages) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`px-3 py-2 border rounded-md ${currentPage === pageNum ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-300 hover:bg-gray-50'}`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    }
+                    return null;
+                  })}
+                  
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <span className="px-2">...</span>
+                  )}
+                  
+                  {totalPages > 5 && currentPage < totalPages - 2 && (
+                    <button
+                      onClick={() => setCurrentPage(totalPages)}
+                      className={`px-3 py-2 border rounded-md ${currentPage === totalPages ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-300 hover:bg-gray-50'}`}
+                    >
+                      {totalPages}
+                    </button>
+                  )}
+                  
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-2 border rounded-md ${currentPage === totalPages ? 'border-gray-200 text-gray-400 cursor-not-allowed' : 'border-gray-300 hover:bg-gray-50'}`}
+                  >
+                    →
+                  </button>
                 </div>
               </div>
-            ))}
+            )}
           </div>
-        )}
-
-        <div className="flex justify-center">
-          <button
-            onClick={() => navigate('/marketplace/all-products')}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-full font-bold"
-          >
-            View More
-          </button>
         </div>
+      </div>
 
-        {isChatOpen ? (
-          <div className="fixed bottom-4 right-4 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
-            <div className="bg-orange-500 text-white p-3 flex justify-between items-center">
-              <span>Marketplace Assistant</span>
-              <button onClick={() => setIsChatOpen(false)} className="p-1">
-                <Cross2Icon className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="h-80 overflow-y-auto p-4 space-y-4">
-              <Message type="bot" message="Hello! How can I help?" timestamp={new Date().toLocaleTimeString()} />
-            </div>
-            <div className="border-t border-gray-200 p-3">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  placeholder="Type your message..."
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-lg">Send</button>
-              </div>
+      {(isWishlistOpen || isCartOpen) && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => {
+            setIsWishlistOpen(false);
+            setIsCartOpen(false);
+          }}
+        />
+      )}
+
+      {isChatOpen ? (
+        <div className="fixed bottom-4 right-4 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
+          <div className="bg-orange-600 text-white p-3 flex justify-between items-center">
+            <span>Marketplace Assistant</span>
+            <button onClick={() => setIsChatOpen(false)} className="p-1">
+              <Cross2Icon className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="h-80 overflow-y-auto p-4 space-y-4">
+            <Message type="bot" message="Hello! How can I help?" timestamp={new Date().toLocaleTimeString()} />
+          </div>
+          <div className="border-t border-gray-200 p-3">
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                placeholder="Type your message..."
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+              <button className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700">Send</button>
             </div>
           </div>
-        ) : (
-          <button
-            onClick={() => setIsChatOpen(true)}
-            className="fixed bottom-4 right-4 bg-orange-500 text-white p-3 rounded-full shadow-lg"
-          >
-            <MagnifyingGlassIcon className="w-6 h-6" />
-          </button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-4 right-4 bg-orange-600 text-white p-3 rounded-full shadow-lg hover:bg-orange-700 z-50"
+        >
+          <MagnifyingGlassIcon className="w-6 h-6" />
+        </button>
+      )}
 
       {isAccountDialogOpen && (
         <AccountDialog 
@@ -557,7 +784,6 @@ const Marketplace: React.FC = () => {
           }}
         />
       )}
-
       <Footer />
     </div>
   );
