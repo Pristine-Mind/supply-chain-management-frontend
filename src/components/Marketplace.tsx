@@ -514,8 +514,109 @@ const Marketplace: React.FC = () => {
               </DropdownMenu.Root>
             </div>
           </div>
+        </div>
+      </div>
 
+      <div className="bg-gradient-to-r from-green-600 to-green-700 py-16 relative overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <div className="text-white space-y-6">
+              <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                Feel Good Food
+              </h1>
+              <p className="text-xl text-green-100 leading-relaxed">
+                We only sell the best ingredients
+              </p>
+              <button className="bg-white text-orange-500 px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-50 transition-colors shadow-lg">
+                Shop Now
+              </button>
+            </div>
+            <div className="relative">
+              <div className="w-full h-96 relative">
+                <img 
+                  src="https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=600&h=400&fit=crop" 
+                  alt="Fresh avocado splash" 
+                  className="w-full h-full object-cover rounded-2xl shadow-2xl"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent rounded-2xl"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full translate-y-48 -translate-x-48"></div>
+      </div>
 
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-3xl p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Super Healthy</h3>
+              <p className="text-gray-600 mb-4">Premium organic products</p>
+              <button className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors">
+                Shop Now
+              </button>
+            </div>
+            <div className="absolute right-4 bottom-4 w-24 h-24">
+              <img 
+                src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=150&h=150&fit=crop" 
+                alt="Healthy food" 
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-yellow-100 to-orange-200 rounded-3xl p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Fresh Fruits</h3>
+              <p className="text-gray-600 mb-4">Seasonal & organic fruits</p>
+              <button className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors">
+                Shop Now
+              </button>
+            </div>
+            <div className="absolute right-4 bottom-4 w-24 h-24">
+              <img 
+                src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=150&h=150&fit=crop" 
+                alt="Fresh fruits" 
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-3xl p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">Fresh Vegetables</h3>
+              <p className="text-gray-600 mb-4">Farm-fresh vegetables</p>
+              <button className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors">
+                Shop Now
+              </button>
+            </div>
+            <div className="absolute right-4 bottom-4 w-24 h-24">
+              <img 
+                src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&h=150&fit=crop" 
+                alt="Fresh vegetables" 
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">100% Organic</h3>
+              <p className="text-gray-600 mb-4">Certified organic products</p>
+              <button className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors">
+                Shop Now
+              </button>
+            </div>
+            <div className="absolute right-4 bottom-4 w-24 h-24">
+              <img 
+                src="https://images.unsplash.com/photo-1621155346337-1d19476ba7d6?w=150&h=150&fit=crop" 
+                alt="Organic products" 
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -638,16 +739,7 @@ const Marketplace: React.FC = () => {
                     <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
                       <div className="flex space-x-4 text-xs text-gray-500">
                         <span>Views: {item.view_count}</span>
-                        {/* <span>Sales: {item.recent_purchases_count}</span> */}
                       </div>
-                      {/* <div className="flex space-x-2">
-                        <button 
-                          onClick={(e) => handleAddToCart(item, e)}
-                          className="p-1.5 rounded-full hover:bg-gray-100"
-                        >
-                          <ShoppingCart className="w-4 h-4 text-gray-600" />
-                        </button>
-                      </div> */}
                     </div>
                     <button 
                       onClick={(e) => {
