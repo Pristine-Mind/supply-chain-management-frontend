@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FaArrowLeft, FaCheckCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaWallet, FaMoneyBillWave } from 'react-icons/fa';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
 import { motion } from 'framer-motion';
 import Modal from 'react-modal';
 import KhaltiService from '../core/services/khaltiService';
 import { toast } from 'react-toastify';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
 export interface Delivery {
   id?: number;
@@ -76,105 +78,219 @@ const Payment: React.FC = () => {
     }
   };
 
-  return (
-    <div className="bg-white min-h-screen">
-      <header className="flex items-center p-4 shadow-md bg-white justify-center">
-        <h1 className="text-2xl font-bold text-gray-900">Payment</h1>
-      </header>
+  const paymentMethods = [
+    {
+      key: 'cod' as const,
+      title: 'Cash on Delivery',
+      desc: 'Pay when your order arrives',
+      icon: <FaMoneyBillWave className="text-green-600 text-xl" />,
+      color: 'green'
+    },
+    {
+      key: 'card' as const,
+      title: 'Credit/Debit Card',
+      desc: 'Secure card payment',
+      icon: <FaCreditCard className="text-blue-600 text-xl" />,
+      color: 'blue'
+    },
+    {
+      key: 'khalti' as const,
+      title: 'Khalti Wallet',
+      desc: 'Digital wallet payment',
+      icon: <FaWallet className="text-purple-600 text-xl" />,
+      color: 'purple'
+    }
+  ];
 
-      <main className="max-w-2xl mx-auto p-4 space-y-6">
-        <Card className="shadow-lg rounded-2xl mb-6 border-gray-500">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal:</span>
-                <span>Rs.{subTotal}</span>
+  return (
+    <>  
+    <Navbar/>
+    <div className="min-h-screen bg-gray-50 flex items-start justify-center p-4 pt-20 md:pt-10">
+      <div className="w-full max-w-lg min-h-[80vh] bg-white shadow-lg rounded-2xl overflow-hidden flex flex-col">
+        <div className="p-6 space-y-6">
+          
+          <div className="bg-gray-50 rounded-xl p-4">
+            <h2 className="font-semibold text-gray-900 mb-3">Order Summary</h2>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>Rs. {subTotal.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping:</span>
-                <span>Rs.{shipping}</span>
+              <div className="flex justify-between text-gray-600">
+                <span>Delivery Fee</span>
+                <span>Rs. {shipping.toLocaleString()}</span>
               </div>
-              <div className="border-t pt-3 mt-3 flex justify-between font-semibold text-lg">
-                <span>Total:</span>
-                <span>Rs.{cartTotal}</span>
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="flex justify-between font-semibold text-base text-gray-900">
+                  <span>Total Amount</span>
+                  <span>Rs. {cartTotal.toLocaleString()}</span>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div>
+            <h2 className="font-semibold text-gray-900 mb-4">Choose Payment Method</h2>
+            <div className="space-y-3">
+              {paymentMethods.map((option) => {
+                const isSelected = method === option.key;
+                return (
+                  <motion.div
+                    key={option.key}
+                    onClick={() => setMethod(option.key)}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className={`relative p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                      isSelected 
+                        ? 'border-orange-500 bg-orange-50 shadow-md' 
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        {option.icon}
+                        <div>
+                          <div className="font-medium text-gray-900">{option.title}</div>
+                          <div className="text-sm text-gray-500">{option.desc}</div>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center"
+                        >
+                          <FaCheckCircle className="text-white text-xs" />
+                        </motion.div>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+          {delivery && (
+            <div className="bg-blue-50 rounded-xl p-4">
+              <h2 className="font-semibold text-gray-900 mb-3">Delivery Address</h2>
+              <div className="space-y-1 text-sm">
+                <p className="font-medium text-gray-900">{delivery.customerName}</p>
+                <p className="text-gray-600">{delivery.phoneNumber}</p>
+                <p className="text-gray-600">
+                  {delivery.address}
+                </p>
+                <p className="text-gray-600">
+                  {delivery.city}, {delivery.state} {delivery.zipCode}
+                </p>
+              </div>
+            </div>
+          )}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <p className="text-xs text-green-700">
+                Your payment information is secure and encrypted
+              </p>
+            </div>
+          </div>
 
-        <div>
-          <h2 className="text-xl font-semibold mb-4 text-center">Payment Method</h2>
-          {(['cod','card','khalti'] as const).map(key => {
-            const opts = {
-              cod: { title:'Cash on Delivery', desc:'Pay on delivery' },
-              card: { title:'Credit/Debit Card', desc:'Secure card payment' },
-              khalti: { title:'Khalti Wallet', desc:'Scan & pay via Khalti' }
-            };
-            const sel = method===key;
-            return (
-              <motion.div
-                key={key}
-                onClick={()=>setMethod(key)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`p-4 mb-3 border rounded-xl cursor-pointer transition
-                  ${sel ? 'border-orange-500 bg-orange-50 shadow' : 'border-gray-500'}`}
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="font-medium text-gray-800">{opts[key].title}</div>
-                    <div className="text-sm text-gray-600">{opts[key].desc}</div>
-                  </div>
-                  {sel && <FaCheckCircle className="text-orange-500 text-xl" />}
-                </div>
-              </motion.div>
-            );
-          })}
         </div>
 
-        {delivery && (
-          <Card className="shadow-lg rounded-2xl border-gray-500">
-            <CardContent>
-              <h2 className="text-xl font-semibold mb-4">Delivery Address</h2>
-              <p className="font-medium">{delivery.customerName}</p>
-              <p className="text-sm mb-1">{delivery.phoneNumber}</p>
-              <p className="text-sm">{delivery.address}, {delivery.city}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        <Button
-          onClick={handleConfirm}
-          disabled={processing}
-          className="w-full py-4 text-lg bg-orange-500 hover:bg-orange-600"
-        >
-          {processing ? 'Processing...' : `Confirm & Pay Rs.${cartTotal}`}
-        </Button>
-      </main>
+        <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+          <Button
+            onClick={handleConfirm}
+            disabled={processing}
+            className="w-full py-3 text-base font-semibold bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white rounded-xl transition-all duration-200 shadow-sm"
+          >
+            {processing ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Processing...</span>
+              </div>
+            ) : (
+              `Confirm Payment • Rs. ${cartTotal.toLocaleString()}`
+            )}
+          </Button>
+        </div>
+      </div>
 
       <Modal
         isOpen={cardModalOpen}
-        onRequestClose={()=>{setCardModalOpen(false); setProcessing(false);}}
-        className="max-w-md mx-auto mt-32 bg-white p-6 rounded-2xl shadow-xl"
+        onRequestClose={() => {setCardModalOpen(false); setProcessing(false);}}
+        className="max-w-sm mx-auto mt-20 bg-white rounded-2xl shadow-2xl"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
       >
-        <h2 className="text-2xl font-semibold mb-4">Enter Card Details</h2>
-        <form onSubmit={e=>{ e.preventDefault(); onSuccess('Card'); setCardModalOpen(false); }}>
-          <input type="text" placeholder="Card Number" maxLength={16} required
-            className="w-full mb-3 p-3 border rounded-xl" onChange={e=>setCardInfo({...cardInfo, number:e.target.value})} />
-          <div className="flex space-x-3 mb-3">
-            <input type="text" placeholder="MM/YY" maxLength={5} required
-              className="flex-1 p-3 border rounded-xl" onChange={e=>setCardInfo({...cardInfo, expiry:e.target.value})} />
-            <input type="password" placeholder="CVV" maxLength={3} required
-              className="w-24 p-3 border rounded-xl" onChange={e=>setCardInfo({...cardInfo, cvv:e.target.value})} />
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Card Details</h2>
+            <button
+              onClick={() => {setCardModalOpen(false); setProcessing(false);}}
+              className="p-1 hover:bg-gray-100 rounded-full"
+            >
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <div className="flex justify-end space-x-4">
-            <Button variant="outline" onClick={()=>{setCardModalOpen(false); setProcessing(false);}}>Cancel</Button>
-            <Button type="submit">Pay Rs.{cartTotal}</Button>
-          </div>
-        </form>
+          
+          <form onSubmit={e => { e.preventDefault(); onSuccess('Card'); setCardModalOpen(false); }} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+              <input 
+                type="text" 
+                placeholder="1234 5678 9012 3456" 
+                maxLength={19}
+                required
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                onChange={e => setCardInfo({...cardInfo, number: e.target.value})}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+                <input 
+                  type="text" 
+                  placeholder="MM/YY" 
+                  maxLength={5}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  onChange={e => setCardInfo({...cardInfo, expiry: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                <input 
+                  type="password" 
+                  placeholder="123" 
+                  maxLength={3}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                  onChange={e => setCardInfo({...cardInfo, cvv: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-3 pt-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={() => {setCardModalOpen(false); setProcessing(false);}}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                className="flex-1 bg-orange-500 hover:bg-orange-600"
+              >
+                Pay Rs. {cartTotal.toLocaleString()}
+              </Button>
+            </div>
+          </form>
+        </div>
       </Modal>
     </div>
+    <Footer/>
+    </>
   );
 };
 

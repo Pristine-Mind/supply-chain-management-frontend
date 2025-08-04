@@ -45,6 +45,7 @@ import AvailableDeliveries from './components/AvailableDeliveries';
 import NearbyDeliveries from './components/NearbyDeliveries';
 import DeliveryHistory from './components/DeliveryHistory';
 import TransporterEarnings from './components/TransporterEarnings';
+import AboutUs from './components/AboutUs';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -78,7 +79,7 @@ const publicRoutes = [
   { path: '/marketplace', element: <Navigate to="/" replace /> },
   { path: '/marketplace/all-products', element: <MarketplaceAllProducts /> },
   { path: '/marketplace/:productId', element: <ProductPage /> },
-  { path: '/about', element: <BlogPage /> },
+  { path: '/about', element: <AboutUs /> },
   { path: '/contact', element: <Contact /> },
   { path: '/sellers', element: <SellerLanding /> },
   { path: '/account', element: <AccountDialog /> },
@@ -133,9 +134,9 @@ const ConditionalBackButton: React.FC = () => {
     '/purchase-orders',
     '/audit-logs',
     '/cart',
-    '/delivery-details',
-    '/checkout',
-    '/payment',
+    // '/delivery-details',
+    // '/checkout',
+    // '/payment',
   ];
 
   const shouldShowBackButton = backPaths.some(p => 
