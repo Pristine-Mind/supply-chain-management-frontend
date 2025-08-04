@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { FiArrowLeft, FiShoppingBag, FiEye, FiHeart, FiAlertCircle } from 'react-icons/fi';
 
 const csrftoken = Cookies.get('csrftoken');
+import ProductSearchBar from './ProductSearchBar';
 import ProductInstanceView from './ProductInstanceView';
 import RelatedProductsSection from './RelatedProductsSection';
 import Footer from './Footer';
-import ProductSearchBar from './ProductSearchBar';
 
 interface ProductDetails {
   name: string;
@@ -38,7 +39,6 @@ const ProductPage: React.FC = () => {
         {},
         {
           headers: { 
-            // 'Authorization': `Token ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json',
             'X-CSRFToken': csrftoken
           },
@@ -64,7 +64,6 @@ const ProductPage: React.FC = () => {
       )
       .then(res => {
         setProduct(res.data);
-        // Log the product view after successfully fetching product details
         logProductView(productId);
       })
       .catch(() => setError('Product not found'))
@@ -73,51 +72,109 @@ const ProductPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-gray-600 text-lg font-medium">Loading product details...</div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+        <ProductSearchBar />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-8 animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-gray-200 rounded-xl h-96"></div>
+              <div className="space-y-4">
+                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-32 bg-gray-200 rounded mt-8"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
+  
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-rose-600 text-lg font-medium">{error || 'Product not found'}</div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+        <ProductSearchBar />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm p-8 text-center">
+            <div className="flex justify-center mb-4">
+              <FiAlertCircle className="text-rose-500 w-12 h-12" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h2>
+            <p className="text-gray-600 mb-6">
+              {error || 'The product you are looking for does not exist or has been removed.'}
+            </p>
+            <Link 
+              to="/marketplace" 
+              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <FiArrowLeft className="mr-2" />
+              Back to Marketplace
+            </Link>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <ProductSearchBar />
-      <div className="flex-1 w-full mx-auto">
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="hidden lg:block w-80 mt-16">
-            <img
-              src="https://media.istockphoto.com/id/1979468745/vector/discount-coupon-vector-set-on-white-background.jpg?s=2048x2048&w=is&k=20&c=HD1MCSyYwum6ByCfP0UKBiajQS72pV8sI2cW4DnvF1E="
-              alt="Left Banner"
-              className="object-cover w-full h-[600px] rounded-xl shadow-md"
-              loading="lazy"
-            />
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="sticky top-0 z-10 bg-white shadow-sm">
+        <ProductSearchBar />
+      </div>
+      <div className="container mx-auto px-4 py-6">
+        <nav className="mb-6">
+          <ol className="flex items-center space-x-2 text-sm text-gray-600">
+            <li><Link to="/" className="hover:text-blue-600 transition-colors">Home</Link></li>
+            <li>/</li>
+            <li><Link to="/marketplace" className="hover:text-blue-600 transition-colors">Marketplace</Link></li>
+            <li>/</li>
+            <li className="font-medium text-gray-900 truncate max-w-xs" title={product.product_details?.name}>
+              {product.product_details?.name}
+            </li>
+          </ol>
+        </nav>
 
-          <div className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-0">
-            <div className="w-full max-w-4xl">
+        <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="grid md:grid-cols-12 gap-8 p-6">
+            <div className="hidden md:block md:col-span-2">
+              <div className="sticky top-24 space-y-4">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 text-center">
+                  <FiShoppingBag className="mx-auto w-8 h-8 text-blue-600 mb-3" />
+                  <p className="text-sm font-medium text-blue-700">Free Shipping on Orders Over $50</p>
+                </div>
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 text-center">
+                  <FiHeart className="mx-auto w-8 h-8 text-amber-600 mb-3" />
+                  <p className="text-sm font-medium text-amber-700">30-Day Return Policy</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-8">
               <ProductInstanceView product={product} />
             </div>
-          </div>
-
-          <div className="hidden lg:block w-80 mt-16">
-            <img
-              src="https://media.istockphoto.com/id/1979468745/vector/discount-coupon-vector-set-on-white-background.jpg?s=2048x2048&w=is&k=20&c=HD1MCSyYwum6ByCfP0UKBiajQS72pV8sI2cW4DnvF1E="
-              alt="Right Banner"
-              className="object-cover w-full h-[600px] rounded-xl shadow-md"
-              loading="lazy"
-            />
+            <div className="hidden md:block md:col-span-2">
+              <div className="sticky top-24 space-y-4">
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 text-center">
+                  <FiEye className="mx-auto w-8 h-8 text-emerald-600 mb-3" />
+                  <p className="text-2xl font-bold text-gray-800">{product.views_count}</p>
+                  <p className="text-sm text-gray-600">Views</p>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 text-center">
+                  <FiShoppingBag className="mx-auto w-8 h-8 text-purple-600 mb-3" />
+                  <p className="text-2xl font-bold text-gray-800">{product.recent_purchases_count}</p>
+                  <p className="text-sm text-gray-600">Recent Purchases</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {product.product_details?.category && (
-          <div className="mt-4 mb-8 w-full px-2 sm:px-2 lg:px-0">
+          <div className="mt-12">
             <RelatedProductsSection
               productId={product.id}
               category={product.product_details?.category}
@@ -126,7 +183,7 @@ const ProductPage: React.FC = () => {
         )}
       </div>
       <Footer />
-    </div>  
+    </div>
   );
 };
 

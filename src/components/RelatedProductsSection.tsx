@@ -19,9 +19,7 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
 
   useEffect(() => {
     if (category) {
-      axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?category=${encodeURIComponent(category)}`, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` }
-      })
+      axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?category=${encodeURIComponent(category)}`)
       .then(res => {
         const relatedProducts = (res.data.results || res.data || []).filter((p: any) => p.id !== productId);
         setRelated(relatedProducts);
@@ -33,7 +31,7 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
   if (related.length === 0) return null;
   return (
     <div className="w-full mt-12">
-      <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+      <h2 className="text-2xl font-bold mb-4">You May Also Like</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {related.slice(0, 4).map(rel => (
           <div

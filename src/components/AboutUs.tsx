@@ -1,7 +1,11 @@
 import React from 'react';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
 const AboutUs = () => {
   return (
+    <>
+    <Navbar />
     <div className="bg-gray-100 py-12">
       <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold text-center mb-8" style={{ color: "#ffbd59" }}>About Mulya Bazzar</h1>
@@ -32,7 +36,9 @@ const AboutUs = () => {
         </div>
       </div>
     </div>
-  );
+    <Footer />
+    </>
+    );
 };
 
 export default AboutUs;
