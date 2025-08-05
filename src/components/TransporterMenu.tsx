@@ -16,7 +16,7 @@ interface TransporterMenuProps {
   onNavigate?: () => void;
 }
 
-interface userData {
+interface UserData {
   id?: number;
   username?: string;
   email?: string;
@@ -27,10 +27,11 @@ interface userData {
   role?: string;
   business_type?: string;
   is_active?: boolean;
-}   
+}
+
 interface ProfileData {
   id?: number;
-  user?: userData;
+  user?: UserData;
 }
 
 const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
@@ -39,51 +40,15 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
   const [error, setError] = useState<string | null>(null);
 
   const menuItems = [
-    {
-      name: 'Profile',
-      icon: <UserIcon className="h-5 w-5 mr-3" />,
-      path: '/profile'
-    },
-    {
-      name: 'Available Deliveries',
-      icon: <TruckIcon className="h-5 w-5 mr-3" />,
-      path: '/deliveries/available'
-    },
-    {
-      name: 'My Deliveries',
-      icon: <MapIcon className="h-5 w-5 mr-3" />,
-      path: '/deliveries/my'
-    },
-    {
-      name: 'Delivery History',
-      icon: <ClockIcon className="h-5 w-5 mr-3" />,
-      path: '/deliveries/history'
-    },
-    {
-      name: 'Earnings',
-      icon: <CurrencyDollarIcon className="h-5 w-5 mr-3" />,
-      path: '/earnings'
-    },
-    {
-      name: 'Documents',
-      icon: <DocumentTextIcon className="h-5 w-5 mr-3" />,
-      path: '/documents'
-    },
-    {
-      name: 'Support',
-      icon: <UserGroupIcon className="h-5 w-5 mr-3" />,
-      path: '/support'
-    },
-    {
-      name: 'Settings',
-      icon: <CogIcon className="h-5 w-5 mr-3" />,
-      path: '/settings'
-    },
-    {
-      name: 'Logout',
-      icon: <LogoutIcon className="h-5 w-5 mr-3" />,
-      path: '/logout'
-    }
+    { name: 'Profile', icon: <UserIcon className="h-5 w-5" />, path: '/profile' },
+    { name: 'Available Deliveries', icon: <TruckIcon className="h-5 w-5" />, path: '/deliveries/available' },
+    { name: 'My Deliveries', icon: <MapIcon className="h-5 w-5" />, path: '/deliveries/my' },
+    { name: 'Delivery History', icon: <ClockIcon className="h-5 w-5" />, path: '/deliveries/history' },
+    { name: 'Earnings', icon: <CurrencyDollarIcon className="h-5 w-5" />, path: '/earnings' },
+    { name: 'Documents', icon: <DocumentTextIcon className="h-5 w-5" />, path: '/documents' },
+    { name: 'Support', icon: <UserGroupIcon className="h-5 w-5" />, path: '/support' },
+    { name: 'Settings', icon: <CogIcon className="h-5 w-5" />, path: '/settings' },
+    { name: 'Logout', icon: <LogoutIcon className="h-5 w-5" />, path: '/logout' },
   ];
 
   useEffect(() => {
@@ -91,7 +56,7 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           setError('No authentication token found');
           return;
@@ -100,13 +65,13 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
         const response = await axios.get<ProfileData>(
           `${import.meta.env.VITE_REACT_APP_API_URL}/profile/`,
           {
-            headers: { 
+            headers: {
               Authorization: `Token ${token}`,
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
             },
           }
         );
-        
+
         setProfileData(response.data);
         setError(null);
       } catch (err: any) {
@@ -127,33 +92,32 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-green-700 mb-2">
+    <div className="flex flex-col h-full bg-yellow-800 text-white">
+      <div className="p-4 border-b border-gray-700">
         {loading ? (
           <div className="flex items-center justify-center py-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
           </div>
         ) : error ? (
-          <div className="text-red-300 text-sm text-center py-2">
+          <div className="text-red-500 text-sm text-center py-2">
             Error loading profile
           </div>
         ) : profileData ? (
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <UserIcon className="h-10 w-10 text-green-300 bg-green-700 rounded-full p-2" />
+              <UserIcon className="h-10 w-10 text-white bg-orange-500 rounded-full p-2" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                {profileData?.user?.first_name && profileData?.user?.last_name 
+              <p className="text-sm font-medium truncate">
+                {profileData?.user?.first_name && profileData?.user?.last_name
                   ? `${profileData?.user?.first_name} ${profileData?.user?.last_name}`
-                  : profileData?.user?.username || 'Transporter'
-                }
+                  : profileData?.user?.username || 'Transporter'}
               </p>
-              <p className="text-xs text-green-200 truncate">
-                {profileData        ?.user?.email || 'No email provided'}
+              <p className="text-xs text-gray-400 truncate">
+                {profileData?.user?.email || 'No email provided'}
               </p>
               {profileData?.user?.phone && (
-                <p className="text-xs text-green-200 truncate">
+                <p className="text-xs text-gray-400 truncate">
                   {profileData?.user?.phone}
                 </p>
               )}
@@ -163,16 +127,16 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
       </div>
 
       <nav className="flex-1 p-4">
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.path}>
               <a
                 href={item.path}
                 onClick={(e) => handleClick(e, item.path)}
-                className="flex items-center p-3 rounded-lg text-gray-200 hover:bg-green-700 transition-colors duration-200 group"
+                className="flex items-center p-3 rounded-lg hover:bg-orange-500 transition-colors duration-200 group"
               >
                 {React.cloneElement(item.icon, {
-                  className: 'h-5 w-5 mr-3 text-green-300 group-hover:text-white transition-colors'
+                  className: 'h-5 w-5 mr-3 text-white group-hover:text-white transition-colors',
                 })}
                 <span className="text-sm font-medium">{item.name}</span>
               </a>
@@ -182,14 +146,16 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
       </nav>
 
       {profileData && (
-        <div className="p-4 border-t border-green-700 mt-auto">
-          <div className="flex items-center justify-between text-xs text-green-200">
+        <div className="p-4 border-t border-gray-700 mt-auto">
+          <div className="flex items-center justify-between text-xs text-gray-400">
             <span>Role: {profileData.user?.role || 'Transporter'}</span>
-            <span className={`px-2 py-1 rounded-full ${
-              profileData.user?.is_active 
-                ? 'bg-green-600 text-white' 
-                : 'bg-red-600 text-white'
-            }`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs ${
+                profileData.user?.is_active
+                  ? 'bg-green-600 text-white'
+                  : 'bg-red-600 text-white'
+              }`}
+            >
               {profileData.user?.is_active ? 'Active' : 'Inactive'}
             </span>
           </div>

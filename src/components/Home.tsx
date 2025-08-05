@@ -23,7 +23,6 @@ import { fetchLedgerEntries, LedgerEntry } from '../api/ledgerApi';
 import TransporterMenu from './TransporterMenu';
 import LedgerEntriesTable from './LedgerEntriesTable';
 
-// Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface SalesTrend {
@@ -91,7 +90,6 @@ const Home: React.FC = () => {
     if (!token) {
       navigate('/login');
     } else {
-      // Only fetch dashboard data and ledger entries for non-transporter roles
       if (role !== 'transporter') {
         fetchData();
         const fetchLedger = async () => {
@@ -163,14 +161,14 @@ const Home: React.FC = () => {
       </header>
 
       <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-green-900 text-white w-64 z-50`}>
-        <div className="p-4 flex items-center justify-between">
+        {/* <div className="p-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold">Menu</h2>
           <button onClick={toggleSidebar} className="md:hidden">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-        </div>
+        </div> */}
         {role === 'transporter' ? (
           <TransporterMenu />
         ) : (
@@ -206,7 +204,6 @@ const Home: React.FC = () => {
       )}
 
       <div className="flex-1 p-4 md:p-8">
-        {/* Only show main dashboard content for non-transporter roles */}
         {role !== 'transporter' ? (
           <>
             <div className="hidden md:flex justify-between items-center mb-8">
@@ -305,7 +302,6 @@ const Home: React.FC = () => {
             </div>
           </>
         ) : (
-          // Show minimal content for transporter role
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <h1 className="text-3xl font-bold text-yellow-800 mb-4">
@@ -322,7 +318,6 @@ const Home: React.FC = () => {
   );
 };
 
-// Utility components (optional, to clean up JSX)
 const InfoCard = ({ icon, title, value, darkMode }: any) => (
   <div className={`p-4 rounded-lg shadow ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
     <div className="flex items-center">
