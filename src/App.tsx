@@ -46,6 +46,7 @@ import NearbyDeliveries from './components/NearbyDeliveries';
 import DeliveryHistory from './components/DeliveryHistory';
 import TransporterEarnings from './components/TransporterEarnings';
 import AboutUs from './components/AboutUs';
+import TransporterDocuments from './components/TransporterDocuments';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -72,6 +73,7 @@ const protectedRoutes = [
   { path: '/deliveries/nearby', element: <NearbyDeliveries /> },
   { path: '/deliveries/history', element: <DeliveryHistory /> },
   { path: '/earnings', element: <TransporterEarnings /> },
+  { path: '/documents', element: <TransporterDocuments /> },
 ];
 
 const publicRoutes = [
