@@ -183,6 +183,173 @@ export const getTransporterProfile = async (): Promise<TransporterProfile> => {
   }
 };
 
+export interface UpdateTransporterProfileData {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  emergency_contact?: string;
+  business_name?: string;
+  tax_id?: string;
+  vehicle_type?: string;
+  vehicle_number?: string;
+  vehicle_capacity?: string | number;
+  service_radius?: number;
+  vehicle_image?: File | null;
+  verification_documents?: File[];
+}
+
+export interface TransporterDocument {
+  id: number;
+  transporter: number;
+  document_type: string;
+  document_type_display: string;
+  document_number: string;
+  document_file: string;
+  file_url: string;
+  file_name: string;
+  file_type?: string;
+  issue_date: string;
+  expiry_date: string;
+  is_verified: boolean;
+  verified_at: string | null;
+  notes: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateDocumentData {
+  document_type: string;
+  document_number: string;
+  document_file: File;
+  issue_date?: string;
+  expiry_date: string;
+  notes?: string;
+}
+
+export interface UpdateDocumentData extends Partial<CreateDocumentData> {
+  id: number;
+}
+
+export interface DocumentPreview {
+  file: File;
+  preview: string;
+}
+
+export const getTransporterDocuments = async (): Promise<TransporterDocument[]> => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/transporters/documents/`, {
+      headers: {
+        Authorization: `Token ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data.results || [];
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const uploadDocument = async (data: CreateDocumentData): Promise<TransporterDocument> => {
+  const formData = new FormData();
+  
+  Object.entries(data).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, value instanceof File ? value : String(value));
+    }
+  });
+
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/transporters/documents/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const updateDocument = async (data: UpdateDocumentData): Promise<TransporterDocument> => {
+  const { id, ...updateData } = data;
+  const formData = new FormData();
+  
+  Object.entries(updateData).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      formData.append(key, value instanceof File ? value : String(value));
+    }
+  });
+
+  try {
+    const response = await axios.patch(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/transporters/documents/${id}/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const deleteDocument = async (id: number): Promise<void> => {
+  try {
+    await axios.delete(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/transporters/documents/${id}/`,
+      {
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const updateTransporterProfile = async (data: UpdateTransporterProfileData): Promise<TransporterProfile> => {
+  try {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'vehicle_image' && value instanceof File) {
+        formData.append('vehicle_image', value);
+      } else if (key === 'verification_documents' && Array.isArray(value)) {
+        value.forEach((file, index) => {
+          formData.append(`verification_documents[${index}]`, file);
+        });
+      } else if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    const response = await axios.put<TransporterProfile>(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/profile/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Token ${localStorage.getItem('token')}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
 export interface PaginatedResponse<T> {
   count: number;
   next: string | null;

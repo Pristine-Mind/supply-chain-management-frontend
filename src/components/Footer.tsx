@@ -244,6 +244,7 @@ const Footer: React.FC = () => {
               <li><FooterLink to="/marketplace">Products</FooterLink></li>
               <li><FooterLink to="/sellers">Sellers</FooterLink></li>
               <li><FooterLink to="/buyers">Buyers</FooterLink></li>
+              <li><FooterLink to="/transporters">Transporters</FooterLink></li>
               <li><FooterLink to="/blog">Blog</FooterLink></li>
             </ul>
           </div>
