@@ -47,6 +47,8 @@ import DeliveryHistory from './components/DeliveryHistory';
 import TransporterEarnings from './components/TransporterEarnings';
 import AboutUs from './components/AboutUs';
 import TransporterDocuments from './components/TransporterDocuments';
+import SupportComponent from './components/SupportComponent';
+import TransporterLanding from './components/TransporterLanding';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -74,6 +76,7 @@ const protectedRoutes = [
   { path: '/deliveries/history', element: <DeliveryHistory /> },
   { path: '/earnings', element: <TransporterEarnings /> },
   { path: '/documents', element: <TransporterDocuments /> },
+  { path: '/support', element: <SupportComponent /> },
 ];
 
 const publicRoutes = [
@@ -88,6 +91,7 @@ const publicRoutes = [
   { path: '/register', element: <Register /> },
   { path: '/business-register', element: <BusinessRegister /> },
   { path: '/transporter-register', element: <TransporterRegistration /> },
+  { path: '/transporters', element: <TransporterLanding /> },
   { path: '/blog', element: <BlogPage /> },
   { path: '/shipping', element: <ShippingAndDelivery /> },
   { path: '/login', element: <Login /> },

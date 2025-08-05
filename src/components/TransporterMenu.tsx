@@ -7,10 +7,12 @@ import {
   CurrencyDollarIcon,
   DocumentTextIcon,
   UserGroupIcon,
-  CogIcon,
   UserIcon,
-  LogoutIcon
+  LogoutIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/outline';
+
+type TransporterStatus = 'active' | 'inactive' | 'suspended' | 'offline';
 
 interface TransporterMenuProps {
   onNavigate?: () => void;
@@ -38,6 +40,8 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   const menuItems = [
     { name: 'Profile', icon: <UserIcon className="h-5 w-5" />, path: '/profile' },
@@ -47,7 +51,6 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
     { name: 'Earnings', icon: <CurrencyDollarIcon className="h-5 w-5" />, path: '/earnings' },
     { name: 'Documents', icon: <DocumentTextIcon className="h-5 w-5" />, path: '/documents' },
     { name: 'Support', icon: <UserGroupIcon className="h-5 w-5" />, path: '/support' },
-    { name: 'Settings', icon: <CogIcon className="h-5 w-5" />, path: '/settings' },
     { name: 'Logout', icon: <LogoutIcon className="h-5 w-5" />, path: '/logout' },
   ];
 
@@ -91,8 +94,116 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
     window.location.href = path;
   };
 
+  const handleStatusUpdate = async (newStatus: TransporterStatus) => {
+    if (!profileData?.user?.id || isUpdatingStatus) return;
+
+    try {
+      setIsUpdatingStatus(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        setError('No authentication token found');
+        return;
+      }
+
+      await axios.patch(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/transporters/${profileData.id}/status/`,
+        { status: newStatus, notes: `Status changed to ${newStatus}` },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (profileData.user) {
+        setProfileData({
+          ...profileData,
+          user: {
+            ...profileData.user,
+            is_active: newStatus === 'active',
+          },
+        });
+      }
+      
+      setIsStatusDropdownOpen(false);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error updating status:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to update status');
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
+  const getStatusDisplay = (isActive: boolean | undefined) => {
+    if (isActive === undefined) return 'Unknown';
+    return isActive ? 'Active' : 'Inactive';
+  };
+
+  const getStatusColor = (isActive: boolean | undefined) => {
+    if (isActive === undefined) return 'bg-gray-500';
+    return isActive ? 'bg-green-600' : 'bg-red-600';
+  };
+
   return (
     <div className="flex flex-col h-full bg-yellow-800 text-white">
+      {profileData && (
+        <div className="p-4 border-b border-gray-700">
+          <div className="relative">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Status:</span>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                  className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm text-white ${getStatusColor(profileData.user?.is_active)} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-yellow-800 focus:ring-orange-500`}
+                  disabled={isUpdatingStatus}
+                >
+                  {isUpdatingStatus ? 'Updating...' : getStatusDisplay(profileData.user?.is_active)}
+                  <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </button>
+                
+                {isStatusDropdownOpen && (
+                  <div className="origin-top-right absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                    <div className="py-1">
+                      <button
+                        onClick={() => handleStatusUpdate('active')}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Active
+                      </button>
+                      <button
+                        onClick={() => handleStatusUpdate('inactive')}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Inactive
+                      </button>
+                      <button
+                        onClick={() => handleStatusUpdate('suspended')}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Suspended
+                      </button>
+                      <button
+                        onClick={() => handleStatusUpdate('offline')}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Offline
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {error && (
+              <p className="mt-1 text-xs text-red-500">{error}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="p-4 border-b border-gray-700">
         {loading ? (
           <div className="flex items-center justify-center py-4">
@@ -126,7 +237,7 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
         ) : null}
       </div>
 
-      <nav className="flex-1 p-4">
+      <nav className="flex-1 p-4 overflow-y-auto">
         <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.path}>
@@ -144,23 +255,6 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
           ))}
         </ul>
       </nav>
-
-      {profileData && (
-        <div className="p-4 border-t border-gray-700 mt-auto">
-          <div className="flex items-center justify-between text-xs text-gray-400">
-            <span>Role: {profileData.user?.role || 'Transporter'}</span>
-            <span
-              className={`px-2 py-1 rounded-full text-xs ${
-                profileData.user?.is_active
-                  ? 'bg-green-600 text-white'
-                  : 'bg-red-600 text-white'
-              }`}
-            >
-              {profileData.user?.is_active ? 'Active' : 'Inactive'}
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
