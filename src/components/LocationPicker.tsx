@@ -1,10 +1,10 @@
 import 'leaflet/dist/leaflet.css'
 import React, { useState } from 'react'
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet'
-import type { LatLng } from 'leaflet'
+import type { LatLngExpression } from 'leaflet'
 
 interface LocationPickerProps {
-  initialCenter: LatLng
+  initialCenter: { lat: number; lng: number }
   zoom?: number
   onSelect: (lat: number, lng: number) => void
 }
@@ -14,7 +14,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   zoom = 13,
   onSelect,
 }) => {
-  const [position, setPosition] = useState<LatLng | null>(null)
+  const [position, setPosition] = useState<LatLngExpression | null>(null)
 
   const MapClickHandler = () => {
     const map = useMap()
@@ -27,7 +27,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
   return (
     <MapContainer
-      center={initialCenter}
+      center={[initialCenter.lat, initialCenter.lng]}
       zoom={zoom}
       style={{ height: '100%', width: '100%' }}
     >

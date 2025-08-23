@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { CartContext } from '../context/CartContext'
 import LocationPicker from '../components/LocationPicker'
-import type { LatLng } from 'leaflet'
+// LatLng type from leaflet not required here; we maintain simple {lat,lng}
 import Navbar from './Navbar'
 import Footer from './Footer'
+import { useAuth } from '../context/AuthContext'
+import LoginModal from './auth/LoginModal'
 
 interface FormValues {
   name: string
@@ -32,17 +34,20 @@ const DeliveryDetails: React.FC = () => {
   const navigate = useNavigate()
   const cartContext = useContext(CartContext)
   if (!cartContext) throw new Error('Must be inside CartProvider')
-  const { state: cartState, createCartOnBackend, updateCustomerLatLng, createDelivery } = cartContext
+  const { state: cartState, createCartOnBackend, createDelivery } = cartContext
+  const { isAuthenticated } = useAuth()
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
     defaultValues: { name: '', phone: '', address: '', city: '', region: '', zip: '' }
   })
 
-  const [latLng, setLatLng] = useState<LatLng>({ lat: 27.7172, lng: 85.3240 })
+  const [latLng, setLatLng] = useState<{ lat: number; lng: number }>({ lat: 27.7172, lng: 85.3240 })
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [storedFormData, setStoredFormData] = useState<FormValues | null>(null)
 
-  const onSubmit = async (data: FormValues) => {
+  const processDelivery = async (data: FormValues) => {
     if (!latLng) {
       setError('Please select a location on the map.')
       return
@@ -50,17 +55,13 @@ const DeliveryDetails: React.FC = () => {
     setLoading(true)
     setError(null)
     try {
-      if (!cartState.cartId) {
-        await createCartOnBackend()
-        if (!cartState.cartId) throw new Error('Failed to create cart')
-      }
-
-      if (!cartState.cartId) {
-        throw new Error('Cart ID is missing')
+      let cartId = cartState.cartId
+      if (!cartId) {
+        cartId = await createCartOnBackend()
       }
 
       const delivery: Delivery = {
-        cart: cartState.cartId,
+        cart: cartId,
         customer_name: data.name,
         phone_number: data.phone,
         address: data.address,
@@ -78,6 +79,16 @@ const DeliveryDetails: React.FC = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const onSubmit = async (data: FormValues) => {
+    if (!isAuthenticated) {
+      setError('Please log in to continue to checkout.')
+      setStoredFormData(data)
+      setShowLoginModal(true)
+      return
+    }
+    await processDelivery(data)
   }
 
   return (
@@ -295,6 +306,18 @@ const DeliveryDetails: React.FC = () => {
       </div>
     </div>
     <Footer />
+
+    <LoginModal
+      isOpen={showLoginModal}
+      onClose={() => setShowLoginModal(false)}
+      onSuccess={async () => {
+        setShowLoginModal(false)
+        if (storedFormData) {
+          await processDelivery(storedFormData)
+          setStoredFormData(null)
+        }
+      }}
+    />
     </>
 
 )
