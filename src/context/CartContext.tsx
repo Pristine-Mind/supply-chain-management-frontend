@@ -21,7 +21,7 @@ interface CartContextType {
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
-  createCartOnBackend: () => Promise<void>;
+  createCartOnBackend: () => Promise<number>;
   updateCustomerLatLng: (lat: number, lng: number) => Promise<void>;
   createDelivery: (delivery: any) => Promise<void>;
   itemCount: number;
@@ -45,7 +45,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return [];
   });
 
-  const createCartOnBackend = async (): Promise<void> => {
+  const createCartOnBackend = async (): Promise<number> => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
@@ -66,7 +66,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const responseData = await response.json();
       setState(prev => ({ ...prev, cartId: responseData.id }));
-      return responseData;
+      return responseData.id;
     } catch (error) {
       console.error('Cart creation failed:', error);
       throw error;
