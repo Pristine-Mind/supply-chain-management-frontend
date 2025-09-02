@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { FaTrash, FaPlus, FaMinus, FaShoppingCart, FaArrowLeft } from 'react-icons/fa';
+import { FaTrash, FaPlus, FaMinus, FaShoppingCart } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
 import logo from '../assets/logo.png';
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loading, setLoading] = useState<{ [key: number]: boolean }>({});
   const {
     cart,
     removeFromCart,
@@ -16,7 +21,40 @@ const Cart: React.FC = () => {
     total,
   } = useCart();
 
+  const handleRemoveFromCart = async (productId: number) => {
+    setLoading(prev => ({ ...prev, [productId]: true }));
+    try {
+      await removeFromCart(productId);
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+      alert('Failed to remove item from cart. Please try again.');
+    } finally {
+      setLoading(prev => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const handleUpdateQuantity = async (productId: number, quantity: number) => {
+    setLoading(prev => ({ ...prev, [productId]: true }));
+    try {
+      await updateQuantity(productId, quantity);
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+      alert('Failed to update quantity. Please try again.');
+    } finally {
+      setLoading(prev => ({ ...prev, [productId]: false }));
+    }
+  };
+
   const handleCheckout = () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+    navigate('/delivery-details');
+  };
+
+  const handleLoginSuccess = () => {
+    setShowLoginModal(false);
     navigate('/delivery-details');
   };
 
@@ -138,10 +176,12 @@ const Cart: React.FC = () => {
                     <div>
                       <h3 className="font-medium text-gray-900">{item.name}</h3>
                       <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-rose-600 text-sm hover:text-rose-800 flex items-center mt-1"
+                        onClick={() => handleRemoveFromCart(item.id)}
+                        disabled={loading[item.id]}
+                        className="text-rose-600 text-sm hover:text-rose-800 flex items-center mt-1 disabled:opacity-50"
                       >
-                        <FaTrash className="mr-1" size={12} /> Remove
+                        <FaTrash className="mr-1" size={12} /> 
+                        {loading[item.id] ? 'Removing...' : 'Remove'}
                       </button>
                     </div>
                   </div>
@@ -151,15 +191,17 @@ const Cart: React.FC = () => {
                   <div className="col-span-2">
                     <div className="flex items-center justify-center">
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1 text-gray-500 hover:text-gray-700"
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                        disabled={loading[item.id]}
+                        className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
                       >
                         <FaMinus size={12} />
                       </button>
                       <span className="mx-3 w-8 text-center">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 text-gray-500 hover:text-gray-700"
+                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                        disabled={loading[item.id]}
+                        className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
                       >
                         <FaPlus size={12} />
                       </button>
@@ -198,6 +240,11 @@ const Cart: React.FC = () => {
         </div>
       </div>
       <Footer/>
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={handleLoginSuccess}
+      />
     </div>
   );
 };

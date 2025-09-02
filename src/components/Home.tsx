@@ -5,6 +5,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FaSignOutAlt, FaFirstOrder } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 import {
   ShoppingBagIcon,
   ChartBarIcon,
@@ -43,12 +44,17 @@ interface DashboardData {
 const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   const [data, setData] = useState<DashboardData>({
@@ -61,8 +67,8 @@ const Home: React.FC = () => {
     totalRevenue: 0,
   });
 
-  const businessType = localStorage.getItem('business_type') || 'producer';
-  const role = localStorage.getItem('role') || 'producer';
+  const businessType = user?.businessType || localStorage.getItem('business_type') || 'producer';
+  const role = user?.role || localStorage.getItem('role') || 'producer';
 
   const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
   const [ledgerCount, setLedgerCount] = useState(0);
@@ -86,29 +92,46 @@ const Home: React.FC = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!isAuthenticated) {
       navigate('/login');
     } else {
-      if (role !== 'transporter') {
-        fetchData();
-        const fetchLedger = async () => {
-          setLedgerLoading(true);
-          try {
-            const offset = (ledgerPage - 1) * ledgerPageSize;
-            const res = await fetchLedgerEntries(token, ledgerPageSize, offset);
-            setLedgerEntries(res.results);
-            setLedgerCount(res.count);
-          } catch (e: any) {
-            setLedgerError(e.message);
-          } finally {
-            setLedgerLoading(false);
-          }
-        };
-        fetchLedger();
+      // Check if user has access to business dashboard
+      if (user && user.hasAccessToMarketplace === false && user.businessType === null) {
+        // General user - redirect to marketplace home
+        navigate('/');
+        return;
+      }
+      
+      // Check role-based access
+      const token = localStorage.getItem('token');
+      if (!role && !businessType) {
+        // No role or business type - redirect general users
+        navigate('/');
+        return;
+      }
+      
+      // Valid business user - load dashboard data
+      if (token) {
+        if (role !== 'transporter') {
+          fetchData();
+          const fetchLedger = async () => {
+            setLedgerLoading(true);
+            try {
+              const offset = (ledgerPage - 1) * ledgerPageSize;
+              const res = await fetchLedgerEntries(token, ledgerPageSize, offset);
+              setLedgerEntries(res.results);
+              setLedgerCount(res.count);
+            } catch (e: any) {
+              setLedgerError(e.message);
+            } finally {
+              setLedgerLoading(false);
+            }
+          };
+          fetchLedger();
+        }
       }
     }
-  }, [navigate, ledgerPage, ledgerPageSize, role]);
+  }, [isAuthenticated, user, navigate, ledgerPage, ledgerPageSize, role, businessType]);
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -181,6 +204,18 @@ const Home: React.FC = () => {
                   <li><a href="/sales" className="flex items-center p-2 rounded hover:bg-green-700"><CurrencyDollarIcon className="h-5 w-5 mr-3" />Direct Sales</a></li>
                   <li><a href="/stocks" className="flex items-center p-2 rounded hover:bg-green-700"><ScaleIcon className="h-5 w-5 mr-3" />{t('stock_management')}</a></li>
                 </>
+              ) : businessType === 'distributor' ? (
+                <>
+                  <li><a href="/producers" className="flex items-center p-2 rounded hover:bg-green-700"><OfficeBuildingIcon className="h-5 w-5 mr-3" />{t('producer_management')}</a></li>
+                  <li><a href="/retailers" className="flex items-center p-2 rounded hover:bg-green-700"><UserGroupIcon className="h-5 w-5 mr-3" />Retailer Management</a></li>
+                  <li><a href="/products" className="flex items-center p-2 rounded hover:bg-green-700"><ShoppingBagIcon className="h-5 w-5 mr-3" />{t('product_management')}</a></li>
+                  <li><a href="/orders" className="flex items-center p-2 rounded hover:bg-green-700"><FaFirstOrder className="h-5 w-5 mr-3" />{t('order_management')}</a></li>
+                  <li><a href="/purchase-orders" className="flex items-center p-2 rounded hover:bg-green-700"><ClipboardListIcon className="h-5 w-5 mr-3" />Purchase Order Management</a></li>
+                  <li><a href="/distribution" className="flex items-center p-2 rounded hover:bg-green-700"><ScaleIcon className="h-5 w-5 mr-3" />Distribution Management</a></li>
+                  <li><a href="/sales" className="flex items-center p-2 rounded hover:bg-green-700"><CurrencyDollarIcon className="h-5 w-5 mr-3" />{t('sales_management')}</a></li>
+                  <li><a href="/stocks" className="flex items-center p-2 rounded hover:bg-green-700"><ScaleIcon className="h-5 w-5 mr-3" />{t('stock_management')}</a></li>
+                  <li><a href="/stats" className="flex items-center p-2 rounded hover:bg-green-700"><ChartSquareBarIcon className="h-5 w-5 mr-3" />{t('stats_and_analytics')}</a></li>
+                </>
               ) : (
                 <>
                   <li><a href="/producers" className="flex items-center p-2 rounded hover:bg-green-700"><OfficeBuildingIcon className="h-5 w-5 mr-3" />{t('producer_management')}</a></li>
@@ -208,7 +243,7 @@ const Home: React.FC = () => {
           <>
             <div className="hidden md:flex justify-between items-center mb-8">
               <h1 className="text-3xl font-bold text-yellow-800">
-                Welcome, {localStorage.getItem('username') || 'User'}
+                Welcome, {user?.name || user?.email || 'User'}
               </h1>
               <div className="flex items-center space-x-4">
                 <button
@@ -305,7 +340,7 @@ const Home: React.FC = () => {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <h1 className="text-3xl font-bold text-yellow-800 mb-4">
-                Welcome, {localStorage.getItem('username') || 'Transporter'}
+                Welcome, {user?.name || user?.email || 'Transporter'}
               </h1>
               <p className="text-lg text-gray-600">
                 Use the menu to access your transporter features.

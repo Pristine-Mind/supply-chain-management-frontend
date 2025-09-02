@@ -9,6 +9,7 @@ export interface User {
   phone?: string;
   hasAccessToMarketplace: boolean;
   businessType?: string;
+  role?: string;
   shopId?: string;
   isActive?: boolean;
   dateJoined?: string;

@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { MagnifyingGlassIcon, Cross2Icon, HamburgerMenuIcon } from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { X, ChevronDown, Check, User, LogIn, PlusCircle, ShoppingCart, Heart, Star, Menu, Filter } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -115,6 +116,7 @@ const PROFILE_TYPE_OPTIONS = ['All', 'Retailer', 'Distributor'] as const;
 const PLACEHOLDER = 'https://via.placeholder.com/150';
 
 const Marketplace: React.FC = () => {
+  const { isAuthenticated, user, logout } = useAuth();
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [recommendations, setRecommendations] = useState<MarketplaceProduct[]>([]);
   const [newArrivals, setNewArrivals] = useState<MarketplaceProduct[]>([]);
@@ -206,18 +208,27 @@ const Marketplace: React.FC = () => {
     cart.some(item => item.product.id === product.id)
   );
   
-  const handleAddToCart = (product: any, e: React.MouseEvent) => {
+  const handleAddToCart = async (product: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    addToCart({
-      id: product.id,
-      name: product.product_details.name,
-      price: product.listed_price,
-      images: product.product_details.images,
-      product_details: product.product_details,
-      listed_price: product.listed_price,
-      stock_quantity: product.stock_quantity,
-      seller: product.seller
-    });
+    try {
+      await addToCart({
+        id: product.id,
+        name: product.product_details.name,
+        price: product.listed_price,
+        images: product.product_details.images,
+        product_details: product.product_details,
+        listed_price: product.listed_price,
+        stock_quantity: product.stock_quantity,
+        seller: product.seller
+      });
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      if (error instanceof Error && error.message.includes('login')) {
+        alert('Please login to add items to cart');
+      } else {
+        alert('Failed to add item to cart. Please try again.');
+      }
+    }
   };
 
   if (error) {
@@ -432,40 +443,90 @@ const Marketplace: React.FC = () => {
               </div>
 
               <div className="hidden sm:block">
-                <DropdownMenu.Root>
-                  <DropdownMenu.Trigger asChild>
-                    <button className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-orange-600 transition-colors">
-                      <User className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span className="hidden lg:inline">Account</span>
-                      <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
-                    </button>
-                  </DropdownMenu.Trigger>
-                  <DropdownMenu.Portal>
-                    <DropdownMenu.Content 
-                      sideOffset={5}
-                      className="bg-white rounded-lg shadow-lg border border-gray-200 p-2 min-w-[180px] z-50"
-                    >
-                      <DropdownMenu.Item
-                        onSelect={() => navigate('/login')}
-                        className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                {isAuthenticated ? (
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-orange-600 transition-colors">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold text-sm">
+                          {user?.name ? user.name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <span className="hidden lg:inline">{user?.name || user?.email || 'Account'}</span>
+                        <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content 
+                        sideOffset={5}
+                        className="bg-white rounded-lg shadow-lg border border-gray-200 p-2 min-w-[180px] z-50"
                       >
-                        <LogIn className="w-4 h-4 mr-2" />
-                        Login
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
-                      <DropdownMenu.Item
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          setIsAccountDialogOpen(true);
-                        }}
-                        className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                        <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                          <p className="text-sm font-medium text-gray-900">{user?.name || 'User'}</p>
+                          <p className="text-xs text-gray-500">{user?.email}</p>
+                        </div>
+                        <DropdownMenu.Item
+                          onSelect={() => navigate('/profile')}
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                        >
+                          <User className="w-4 h-4 mr-2" />
+                          Profile
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item
+                          onSelect={() => navigate('/orders')}
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          My Orders
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+                        <DropdownMenu.Item
+                          onSelect={async () => {
+                            await logout();
+                            navigate('/');
+                          }}
+                          className="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer outline-none"
+                        >
+                          <LogIn className="w-4 h-4 mr-2" />
+                          Sign out
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
+                ) : (
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-orange-600 transition-colors">
+                        <User className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="hidden lg:inline">Account</span>
+                        <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content 
+                        sideOffset={5}
+                        className="bg-white rounded-lg shadow-lg border border-gray-200 p-2 min-w-[180px] z-50"
                       >
-                        <PlusCircle className="w-4 h-4 mr-2" />
-                        Register
-                      </DropdownMenu.Item>
-                    </DropdownMenu.Content>
-                  </DropdownMenu.Portal>
-                </DropdownMenu.Root>
+                        <DropdownMenu.Item
+                          onSelect={() => navigate('/login')}
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                        >
+                          <LogIn className="w-4 h-4 mr-2" />
+                          Login
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+                        <DropdownMenu.Item
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            setIsAccountDialogOpen(true);
+                          }}
+                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
+                        >
+                          <PlusCircle className="w-4 h-4 mr-2" />
+                          Register
+                        </DropdownMenu.Item>
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
+                )}
               </div>
             </div>
           </div>
@@ -489,18 +550,56 @@ const Marketplace: React.FC = () => {
               <a href="/contact" className="block py-2 text-gray-700 hover:text-orange-600">Contact</a>
               
               <div className="pt-4 border-t border-gray-200">
-                <button 
-                  onClick={() => navigate('/login')}
-                  className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
-                >
-                  Login
-                </button>
-                <button 
-                  onClick={() => setIsAccountDialogOpen(true)}
-                  className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
-                >
-                  Register
-                </button>
+                {isAuthenticated ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 px-3 py-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold text-sm">
+                        {user?.name ? user.name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{user?.name || 'User'}</p>
+                        <p className="text-xs text-gray-500">{user?.email}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => navigate('/profile')}
+                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                    >
+                      Profile
+                    </button>
+                    <button 
+                      onClick={() => navigate('/orders')}
+                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                    >
+                      My Orders
+                    </button>
+                    <button 
+                      onClick={async () => {
+                        await logout();
+                        navigate('/');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full text-left py-2 text-red-600 hover:text-red-700"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <button 
+                      onClick={() => navigate('/login')}
+                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                    >
+                      Login
+                    </button>
+                    <button 
+                      onClick={() => setIsAccountDialogOpen(true)}
+                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                    >
+                      Register
+                    </button>
+                  </div>
+                )}
               </div>
               
               <div className="pt-4 border-t border-gray-200">

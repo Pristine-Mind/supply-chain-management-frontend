@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { CartContext } from '../context/CartContext'
 import LocationPicker from '../components/LocationPicker'
-// LatLng type from leaflet not required here; we maintain simple {lat,lng}
 import Navbar from './Navbar'
 import Footer from './Footer'
 import { useAuth } from '../context/AuthContext'
@@ -13,6 +12,7 @@ interface FormValues {
   name: string
   phone: string
   address: string
+  email: string
   city: string
   region: string
   zip: string
@@ -22,6 +22,7 @@ interface Delivery {
   cart: number
   customer_name: string
   phone_number: string
+  email: string
   address: string
   city: string
   state: string
@@ -64,6 +65,7 @@ const DeliveryDetails: React.FC = () => {
         cart: cartId,
         customer_name: data.name,
         phone_number: data.phone,
+        email: data.email,
         address: data.address,
         city: data.city,
         state: data.region,
@@ -94,233 +96,257 @@ const DeliveryDetails: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto bg-white shadow-sm">
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
-              {error}
-            </div>
-          )}
+      <div className="bg-gray-50 py-6">
+        <div className="w-4/5 mx-auto bg-white shadow-sm">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
+                {error}
+              </div>
+            )}
 
-          <div className="space-y-4 ">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-              Personal Information
-            </h2>
-            
-            <Controller
-              name="name"
-              control={control}
-              rules={{ required: 'Full name is required' }}
-              render={({ field }) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <input 
-                    {...field} 
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="Enter your full name"
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  Personal Information
+                </h2>
+                
+                <Controller
+                  name="name"
+                  control={control}
+                  rules={{ required: 'Full name is required' }}
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Name
+                      </label>
+                      <input 
+                        {...field} 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                        placeholder="Enter your full name"
+                      />
+                      {errors.name && (
+                        <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-            />
+                />
 
-            <Controller
-              name="phone"
-              control={control}
-              rules={{
-                required: 'Phone number is required',
-                minLength: { value: 10, message: 'Phone number must be at least 10 digits' }
-              }}
-              render={({ field }) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone Number
-                  </label>
-                  <input 
-                    {...field} 
-                    type="tel" 
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="Your phone number"
-                  />
-                  {errors.phone && (
-                    <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
-                  )}
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-              Address Information
-            </h2>
-
-            <Controller
-              name="address"
-              control={control}
-              rules={{ required: 'Address is required' }}
-              render={({ field }) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Street Address
-                  </label>
-                  <textarea 
-                    {...field} 
-                    rows={2} 
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none"
-                    placeholder="Enter your street address"
-                  />
-                  {errors.address && (
-                    <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
-                  )}
-                </div>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <Controller
-                name="city"
-                control={control}
-                rules={{ required: 'City is required' }}
-                render={({ field }) => (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      City
-                    </label>
-                    <input 
-                      {...field} 
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="City"
-                    />
-                    {errors.city && (
-                      <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>
-                    )}
-                  </div>
-                )}
-              />
-
-              <Controller
-                name="region"
-                control={control}
-                rules={{ required: 'State is required' }}
-                render={({ field }) => (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      State
-                    </label>
-                    <input 
-                      {...field} 
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="State"
-                    />
-                    {errors.region && (
-                      <p className="text-red-500 text-xs mt-1">{errors.region.message}</p>
-                    )}
-                  </div>
-                )}
-              />
-            </div>
-
-            <Controller
-              name="zip"
-              control={control}
-              rules={{
-                required: 'ZIP code is required',
-                minLength: { value: 5, message: 'ZIP code must be at least 5 digits' }
-              }}
-              render={({ field }) => (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ZIP Code
-                  </label>
-                  <input 
-                    {...field} 
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="ZIP code"
-                  />
-                  {errors.zip && (
-                    <p className="text-red-500 text-xs mt-1">{errors.zip.message}</p>
-                  )}
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-              Delivery Location
-            </h2>
-            
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
-              <div className="h-48 w-full">
-                <LocationPicker
-                  initialCenter={latLng}
-                  zoom={13}
-                  onSelect={(lat, lng) => {
-                    setLatLng({ lat, lng })
-                    console.log('Picked:', lat, lng)
+                <Controller
+                  name="phone"
+                  control={control}
+                  rules={{
+                    required: 'Phone number is required',
+                    minLength: { value: 10, message: 'Phone number must be at least 10 digits' }
                   }}
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone Number
+                      </label>
+                      <input 
+                        {...field} 
+                        type="tel" 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                        placeholder="Your phone number"
+                      />
+                      {errors.phone && (
+                        <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+                      )}
+                    </div>
+                  )}
                 />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Latitude
-                </label>
-                <input
-                  readOnly
-                  value={latLng?.lat.toFixed(6) || ''}
-                  className="w-full border border-gray-200 rounded-md px-2 py-1.5 text-xs bg-gray-50 text-gray-600"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Longitude
-                </label>
-                <input
-                  readOnly
-                  value={latLng?.lng.toFixed(6) || ''}
-                  className="w-full border border-gray-200 rounded-md px-2 py-1.5 text-xs bg-gray-50 text-gray-600"
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-lg transition-colors duration-200 shadow-sm"
-            >
-              {loading ? 'Processing...' : 'Continue to Checkout'}
-            </button>
-          </div>
-        </form>
+                <Controller
+                  name="email"
+                  control={control}
+                  rules={{
+                    required: 'Email is required',
+                  }}
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
+                      <input 
+                        {...field} 
+                        type="email" 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                        placeholder="Your email address"
+                      />
+                      {errors.email  && (
+                        <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  Address Information
+                </h2>
+
+                <Controller
+                  name="address"
+                  control={control}
+                  rules={{ required: 'Address is required' }}
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Street Address
+                      </label>
+                      <textarea 
+                        {...field} 
+                        rows={2} 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none"
+                        placeholder="Enter your street address"
+                      />
+                      {errors.address && (
+                        <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
+                      )}
+                    </div>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Controller
+                    name="city"
+                    control={control}
+                    rules={{ required: 'City is required' }}
+                    render={({ field }) => (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          City
+                        </label>
+                        <input 
+                          {...field} 
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                          placeholder="City"
+                        />
+                        {errors.city && (
+                          <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+
+                  <Controller
+                    name="region"
+                    control={control}
+                    rules={{ required: 'State is required' }}
+                    render={({ field }) => (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          State
+                        </label>
+                        <input 
+                          {...field} 
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                          placeholder="State"
+                        />
+                        {errors.region && (
+                          <p className="text-red-500 text-xs mt-1">{errors.region.message}</p>
+                        )}
+                      </div>
+                    )}
+                  />
+                </div>
+
+                <Controller
+                  name="zip"
+                  control={control}
+                  rules={{
+                    required: 'ZIP code is required',
+                    minLength: { value: 5, message: 'ZIP code must be at least 5 digits' }
+                  }}
+                  render={({ field }) => (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        ZIP Code
+                      </label>
+                      <input 
+                        {...field} 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                        placeholder="ZIP code"
+                      />
+                      {errors.zip && (
+                        <p className="text-red-500 text-xs mt-1">{errors.zip.message}</p>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                Delivery Location
+              </h2>
+              
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="h-72 w-full">
+                  <LocationPicker
+                    initialCenter={latLng}
+                    zoom={13}
+                    onSelect={(lat, lng) => {
+                      setLatLng({ lat, lng })
+                    }}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Latitude
+                  </label>
+                  <input
+                    readOnly
+                    value={latLng?.lat.toFixed(6) || ''}
+                    className="w-full border border-gray-200 rounded-md px-2 py-1.5 text-xs bg-gray-50 text-gray-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Longitude
+                  </label>
+                  <input
+                    readOnly
+                    value={latLng?.lng.toFixed(6) || ''}
+                    className="w-full border border-gray-200 rounded-md px-2 py-1.5 text-xs bg-gray-50 text-gray-600"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-lg transition-colors duration-200 shadow-sm"
+              >
+                {loading ? 'Processing...' : 'Continue to Checkout'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-    <Footer />
+      <Footer />
 
-    <LoginModal
-      isOpen={showLoginModal}
-      onClose={() => setShowLoginModal(false)}
-      onSuccess={async () => {
-        setShowLoginModal(false)
-        if (storedFormData) {
-          await processDelivery(storedFormData)
-          setStoredFormData(null)
-        }
-      }}
-    />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={async () => {
+          setShowLoginModal(false)
+          if (storedFormData) {
+            await processDelivery(storedFormData)
+            setStoredFormData(null)
+          }
+        }}
+      />
     </>
-
-)
+  )
 }
 
 export default DeliveryDetails
