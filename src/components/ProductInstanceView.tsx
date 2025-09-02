@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { MarketplaceProduct } from '../types/marketplace';
+import { useAuth } from '../context/AuthContext';
 import {
   FaCartPlus,
   FaShoppingCart,
@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fa';
 import ChatTab from './ChatTab';
 import { PopularityScore } from '../components/ui/PopularityScore';
+import LoginModal from './auth/LoginModal';
 
 interface ProductImage {
   id: number;
@@ -98,8 +99,9 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   const [currentImage, setCurrentImage] = useState(0);
   const [quantity] = useState(1);
   const [tab, setTab] = useState(0);
-  const { addToCart, itemCount } = useCart();
-  const isAuthenticated = !!localStorage.getItem('token');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { addToCart, itemCount, refreshCart } = useCart();
+  const { isAuthenticated } = useAuth();
   const reviews = product.reviews || [];
   const reviewsLoading = false;
 
@@ -109,6 +111,17 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const handleLoginSuccess = async () => {
+    setShowLoginModal(false);
+    // Hydrate cart from backend after login
+    try {
+      await refreshCart();
+    } catch (e) {
+      // non-blocking
+      console.error('Failed to refresh cart after login', e);
+    }
   };
 
   const buildStars = (rating: number) => (
@@ -248,35 +261,35 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
               <div className="mt-8 space-y-4">
                 <div className="flex gap-4">
                   <button
-                    onClick={() => {
-                      const cartProduct = {
-                        id: product.id,
-                        product: {
+                    onClick={async () => {
+                      if (!isAuthenticated) {
+                        setShowLoginModal(true);
+                        return;
+                      }
+
+                      try {
+                        const cartProduct = {
                           id: product.id,
-                          name: product.product_details?.name || 'Product',
-                          description: product.product_details?.description || '',
-                          images: product.product_details?.images || [],
-                          stock: product.product_details?.stock || 0,
-                        },
-                        product_details: {
-                          id: product.product_details?.id || 0,
-                          name: product.product_details?.name || 'Product',
-                          description: product.product_details?.description || '',
-                          images: product.product_details?.images || [],
-                          stock: product.product_details?.stock || 0,
-                          category_details: 'Uncategorized',
-                        },
-                        listed_price: product.listed_price.toString(),
-                        listed_date: product.listed_date || new Date().toISOString(),
-                        is_available: true,
-                        bid_end_date: null,
-                        reviews: [],
-                        average_rating: product.average_rating || 0,
-                        ratings_breakdown: {},
-                        total_reviews: 0,
-                      } as unknown as MarketplaceProduct;
-                      
-                      addToCart(cartProduct, quantity);
+                          product_details: product.product_details,
+                          listed_price: product.listed_price,
+                          discounted_price: product.discounted_price,
+                          stock_quantity: 1, // Default fallback
+                          seller: { id: 1, name: 'Seller' }, // Default fallback
+                          category: 'General', // Default fallback
+                          listed_date: product.listed_date || new Date().toISOString(),
+                          is_available: true,
+                          bid_end_date: null,
+                          reviews: [],
+                          average_rating: product.average_rating || 0,
+                          ratings_breakdown: {},
+                          total_reviews: 0,
+                        };
+                        
+                        await addToCart(cartProduct, quantity);
+                      } catch (error) {
+                        console.error('Failed to add to cart:', error);
+                        alert('Failed to add item to cart. Please try again.');
+                      }
                     }}
                     className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-3.5 rounded-lg hover:bg-emerald-700 transition-all shadow-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                     aria-label="Add to cart"
@@ -373,6 +386,13 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
           </div>
         </div>
       </div>
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={handleLoginSuccess}
+      />
     </div>
   );
 };

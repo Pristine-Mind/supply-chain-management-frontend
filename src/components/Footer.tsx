@@ -303,7 +303,7 @@ const Footer: React.FC = () => {
         <div className="border-t border-gray-200 pt-8">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
             <p className="text-gray-500 text-sm text-center lg:text-left">
-              &copy; {currentYear} MulyaBazzar. All rights reserved. Made with ❤️ in Nepal
+              &copy; {currentYear} MulyaBazzar. All rights reserved. Made by Pristine Minds Nepal Pvt Ltd
             </p>
             
             <div className="flex flex-wrap justify-center lg:justify-end items-center gap-3">

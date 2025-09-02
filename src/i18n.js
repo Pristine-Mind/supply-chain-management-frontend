@@ -307,6 +307,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         update_customer: "Update Customer",
         pending_orders_revenue: "Pending Orders Revenue",
         rows_per_page: "Rows per page",
+        update_stock: "Update Stock",
         
       }
         

@@ -3,6 +3,7 @@ import logo from '../assets/logo.png';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginFormData {
   username: string;
@@ -11,6 +12,7 @@ interface LoginFormData {
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({ username: '', password: '' });
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
@@ -33,7 +35,6 @@ const Login: React.FC = () => {
       );
       
       const { token } = loginResponse.data;
-      localStorage.setItem('token', token);
 
       const userInfoResponse = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-info/`,
@@ -44,6 +45,20 @@ const Login: React.FC = () => {
         }
       );
       
+      // Create user data object for AuthContext
+      const userData = {
+        email: userInfoResponse.data.email || '',
+        name: userInfoResponse.data.username || '',
+        hasAccessToMarketplace: !!userInfoResponse.data.has_access_to_marketplace,
+        businessType: userInfoResponse.data.business_type,
+        role: userInfoResponse.data.role,
+        shopId: userInfoResponse.data.shop_id,
+      };
+
+      // Update AuthContext with login data
+      login(token, userData);
+
+      // Store additional data in localStorage for backward compatibility
       if (userInfoResponse.data && userInfoResponse.data.username) {
         localStorage.setItem('username', userInfoResponse.data.username);
         if (userInfoResponse.data.email) {
@@ -57,7 +72,14 @@ const Login: React.FC = () => {
         }
       }
 
-      navigate('/home');
+      // Check user type and redirect accordingly
+      if (userInfoResponse.data.has_access_to_marketplace === false && userInfoResponse.data.business_type === null) {
+        // General user - redirect to home screen
+        navigate('/');
+      } else {
+        // Business user - redirect to dashboard
+        navigate('/home');
+      }
     } catch (error) {
       console.error('Login error:', error);
       setErrorMessage(t('invalid_credentials'));
