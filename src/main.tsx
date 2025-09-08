@@ -12,3 +12,23 @@ createRoot(document.getElementById('root')!).render(
     </CartProvider>
   </StrictMode>,
 )
+
+// On hard refresh, clear any map tile caches and unregister SW so tiles don't persist
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    } catch (e) {
+      console.warn('Failed to unregister service workers:', e);
+    }
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.filter(k => k.startsWith('map-cache-')).map(k => caches.delete(k)));
+      }
+    } catch (e) {
+      console.warn('Failed to clear map caches:', e);
+    }
+  });
+}

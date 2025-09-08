@@ -31,15 +31,20 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target;
+    const target = e.target as HTMLInputElement | HTMLSelectElement;
+    const { name, value } = target;
+
+    let nextValue: string | number | boolean = value;
+    if (name === 'debit') {
+      // Select control maps to boolean
+      nextValue = value === 'debit';
+    } else if ((target as HTMLInputElement).type === 'checkbox') {
+      nextValue = (target as HTMLInputElement).checked;
+    }
+
     setFormData(prev => ({
       ...prev,
-      [name]:
-        name === 'debit'
-          ? value === 'debit'
-          : type === 'checkbox'
-          ? checked
-          : value,
+      [name]: nextValue,
     }));
   };
 

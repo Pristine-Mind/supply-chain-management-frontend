@@ -3,29 +3,8 @@ import axios from 'axios';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import L from 'leaflet';
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-} from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import LocationPicker from './LocationPicker';
 
-const DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface City {
   id: number;
@@ -112,18 +91,12 @@ export const BusinessRegister: React.FC = () => {
       .finally(() => setLoadingCities(false));
   }, []);
 
-  function LocationMarker() {
-    useMapEvents({
-      click(e: L.LeafletMouseEvent) {
-        const { lat, lng } = e.latlng;
-        const newPosition: [number, number] = [lat, lng];
-        setPosition(newPosition);
-        setValue('latitude', lat);
-        setValue('longitude', lng);
-      },
-    });
-    return <Marker position={position} />;
-  }
+  const handleLocationSelect = (lat: number, lng: number) => {
+    const newPosition: [number, number] = [lat, lng];
+    setPosition(newPosition);
+    setValue('latitude', lat);
+    setValue('longitude', lng);
+  };
 
   const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
     setSubmitError(null);
@@ -348,14 +321,13 @@ export const BusinessRegister: React.FC = () => {
               </div>
               <div>
                 <label className="block font-medium mb-2">Business Location</label>
-                <MapContainer
-                  center={position || [27.7172, 85.3240]}
-                  zoom={13}
-                  style={{ height: '400px', width: '100%' }}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <LocationMarker />
-                </MapContainer>
+                <div style={{ height: '400px', width: '100%' }}>
+                  <LocationPicker
+                    initialCenter={{ lat: position[0], lng: position[1] }}
+                    zoom={13}
+                    onSelect={handleLocationSelect}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 w-full">
                   <div className="w-full">
                     <input
