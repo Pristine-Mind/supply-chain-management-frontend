@@ -123,7 +123,7 @@ const OrderList: React.FC = () => {
   const handleExport = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/export/orders/`,
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/export/orders/`,
         {
           responseType: 'blob',
           headers: {

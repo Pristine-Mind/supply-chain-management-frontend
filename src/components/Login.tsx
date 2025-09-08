@@ -30,7 +30,7 @@ const Login: React.FC = () => {
 
     try {
       const loginResponse = await axios.post<{ token: string }>(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/login/`,
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/login/`,
         formData
       );
       

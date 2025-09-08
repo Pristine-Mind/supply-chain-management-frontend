@@ -151,7 +151,7 @@ const Products: React.FC = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/export/products/`, {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/export/products/`, {
         responseType: 'blob',
         headers: { Authorization: `Token ${localStorage.getItem('token')}` },
       });

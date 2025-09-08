@@ -335,7 +335,7 @@ export const updateTransporterProfile = async (data: UpdateTransporterProfileDat
     });
 
     const response = await axios.put<TransporterProfile>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/profile/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/profile/`,
       formData,
       {
         headers: {
@@ -359,7 +359,7 @@ export interface PaginatedResponse<T> {
 
 export const getTransporterDeliveries = async (limit = 10, offset = 0): Promise<PaginatedResponse<Delivery>> => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/my/`, {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/deliveries/my/`, {
       params: {
         limit,
         offset
@@ -382,7 +382,7 @@ export interface NearbyDelivery extends Omit<Delivery, 'distance_km'> {
 
 export const getNearbyDeliveries = async (radius: number = 10): Promise<NearbyDelivery[]> => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/nearby/`, {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/deliveries/nearby/`, {
       params: { radius },
       headers: {
         Authorization: `Token ${localStorage.getItem('token')}`,
@@ -420,7 +420,7 @@ export const getDeliveryHistory = async (params?: {
   if (params?.page) queryParams.append('page', params.page.toString());
 
   const response = await axios.get<DeliveryHistoryResponse>(
-    `${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/history/?${queryParams.toString()}`,
+    `${import.meta.env.VITE_REACT_APP_API_URL}/api/deliveries/history/?${queryParams.toString()}`,
     {
       headers: {
         Authorization: `Token ${localStorage.getItem('token')}`,
@@ -434,7 +434,7 @@ export const getDeliveryHistory = async (params?: {
 export const getDeliveryDetail = async (deliveryId: string): Promise<DeliveryDetail> => {
   try {
     const response = await axios.get<DeliveryDetail>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/${deliveryId}/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/deliveries/${deliveryId}/`,
       {
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,
@@ -471,7 +471,7 @@ export interface TransporterStats {
 export const getTransporterStats = async (): Promise<TransporterStats> => {
   try {
     const response = await axios.get<TransporterStats>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/transporter/stats/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/transporter/stats/`,
       {
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,
@@ -491,7 +491,7 @@ export const getTransporterStats = async (): Promise<TransporterStats> => {
 export const claimDelivery = async (deliveryId: string): Promise<Delivery> => {
   try {
     const response = await axios.post<Delivery>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/${deliveryId}/accept/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/deliveries/${deliveryId}/accept/`,
       {},
       {
         headers: {
@@ -511,7 +511,7 @@ export const claimDelivery = async (deliveryId: string): Promise<Delivery> => {
 
 export const getAvailableDeliveries = async (filters: DeliveryFilterParams = {}): Promise<PaginatedResponse<Delivery>> => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/available/`, {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/deliveries/available/`, {
       params: {
         ...filters,
         limit: filters.limit || 10,

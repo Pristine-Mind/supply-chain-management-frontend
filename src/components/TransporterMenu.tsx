@@ -107,7 +107,7 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
       }
 
       await axios.patch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/transporters/${profileData.id}/status/`,
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/transporters/${profileData.id}/status/`,
         { status: newStatus, notes: `Status changed to ${newStatus}` },
         {
           headers: {

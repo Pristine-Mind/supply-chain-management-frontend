@@ -224,7 +224,7 @@ const CustomerList: React.FC = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/export/customers/`, {
+      const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/export/customers/`, {
         responseType: 'blob',
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,
