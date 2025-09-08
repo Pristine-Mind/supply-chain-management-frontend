@@ -265,7 +265,6 @@ const MarketplaceAllProducts: React.FC = () => {
           </div>
         </main>
 
-        {/* Right Promo */}
         <aside className="hidden lg:block w-72 space-y-6">
           <img
             src={banner}

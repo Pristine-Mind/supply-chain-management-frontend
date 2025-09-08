@@ -67,8 +67,6 @@ const PhoneLogin: React.FC = () => {
   // Watch for form changes to trigger validation
   watch(['phone_number', 'otp']);
 
-
-
   const requestOTP = async (phoneNumber: string): Promise<void> => {
     try {
       setIsLoading(true);

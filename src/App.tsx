@@ -35,6 +35,7 @@ import TermsofService from './components/TermsofService';
 import Privacy from './components/Privacy';
 import Contact from './components/Contact';
 import BlogPage from './components/BlogPage';
+import BlogDetail from './components/BlogDetail';
 import BackButton from './components/BackButton';
 import AccountDialog from './components/AccountDialog';
 import Login from './components/Login';
@@ -93,6 +94,7 @@ const publicRoutes = [
   { path: '/transporter-register', element: <TransporterRegistration /> },
   { path: '/transporters', element: <TransporterLanding /> },
   { path: '/blog', element: <BlogPage /> },
+  { path: '/blog/:id', element: <BlogDetail /> },
   { path: '/shipping', element: <ShippingAndDelivery /> },
   { path: '/login', element: <Login /> },
   { path: '/logout', element: <Logout /> },

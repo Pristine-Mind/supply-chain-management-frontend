@@ -100,7 +100,6 @@ const Payment: React.FC = () => {
       } catch (err: any) {
         console.error('Error fetching payment gateways:', err);
         setError(err.message);
-        // Fallback to default payment methods
         const fallbackGateways: PaymentGateway[] = [
           { slug: 'COD', name: 'Cash on Delivery', logo: '', items: [] },
           { slug: 'KHALTI', name: 'Khalti Wallet', logo: 'https://khalti-static.s3.ap-south-1.amazonaws.com/media/kpg/wallet.svg', items: [] }
@@ -117,7 +116,7 @@ const Payment: React.FC = () => {
   const delay = (ms:number) => new Promise(res=>setTimeout(res,ms));
 
   const onSuccess = (m: string) => {
-    toast.success(`🎉 Payment successful with ${m}!`);
+    toast.success(`Payment successful with ${m}!`);
     clearCart();
     navigate('/marketplace', { replace: true });
   };
@@ -125,7 +124,6 @@ const Payment: React.FC = () => {
   const handleConfirm = async () => {
     setProcessing(true);
     try {
-      // Ensure cart exists on backend
       let backendCartId = cartId;
       if (!backendCartId) {
         try {
@@ -137,7 +135,6 @@ const Payment: React.FC = () => {
         }
       }
 
-      // Prepare payment data in the required format
       const gateway = method.includes('_') ? method.split('_')[0] : method;
       const bank = method.includes('_') ? method.split('_')[1] : null;
       
