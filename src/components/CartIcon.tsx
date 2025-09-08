@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 
 const CartIcon: React.FC = () => {
   const navigate = useNavigate();
-  const { itemCount } = useCart();
+  const { distinctItemCount } = useCart();
 
   return (
     <div className="relative">
@@ -15,9 +15,9 @@ const CartIcon: React.FC = () => {
         aria-label="Shopping cart"
       >
         <FaShoppingCart className="text-xl" />
-        {itemCount > 0 && (
+        {distinctItemCount > 0 && (
           <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {itemCount > 9 ? '9+' : itemCount}
+            {distinctItemCount > 9 ? '9+' : distinctItemCount}
           </span>
         )}
       </button>
