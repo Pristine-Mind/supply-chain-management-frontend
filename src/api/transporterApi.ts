@@ -171,7 +171,7 @@ export interface Delivery {
 
 export const getTransporterProfile = async (): Promise<TransporterProfile> => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/profile/`, {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/profile/`, {
       headers: {
         Authorization: `Token ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json',
@@ -471,7 +471,7 @@ export interface TransporterStats {
 export const getTransporterStats = async (): Promise<TransporterStats> => {
   try {
     const response = await axios.get<TransporterStats>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/transporter/stats/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/transporters/stats/`,
       {
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,

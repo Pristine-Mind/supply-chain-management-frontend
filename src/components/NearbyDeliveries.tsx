@@ -36,7 +36,7 @@ const getNearbyDeliveries = async (radius = 10) => {
   try {
     const token = localStorage.getItem('token');
     
-    const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/deliveries/nearby/?radius=${radius}`, {
+    const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/deliveries/nearby/?radius=${radius}`, {
       method: 'GET',
       headers: {
         'Authorization': `Token ${token}`,

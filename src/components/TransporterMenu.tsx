@@ -66,7 +66,7 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
         }
 
         const response = await axios.get<ProfileData>(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/profile/`,
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/profile/`,
           {
             headers: {
               Authorization: `Token ${token}`,
