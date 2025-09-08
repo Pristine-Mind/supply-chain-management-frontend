@@ -29,6 +29,7 @@ interface CartContextType {
   updateCustomerLatLng: (lat: number, lng: number) => Promise<void>;
   createDelivery: (delivery: any) => Promise<void>;
   refreshCart: () => Promise<void>;
+  distinctItemCount: number;
   itemCount: number;
   subTotal: number;
   shipping: number;
@@ -93,7 +94,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           'Authorization': `Token ${token}`
         }
       });
-
       if (!response.ok) {
         setCart([]);
         setBackendTotals(null);
@@ -103,15 +103,51 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const data = await response.json();
       setState(prev => ({ ...prev, cartId: data.id }));
 
-      const mapped: CartItem[] = (data.items || []).map((it: any) => ({
-        id: it.product,
-        backendItemId: it.id,
-        product: (it.product_details || {}) as MarketplaceProduct,
-        quantity: it.quantity,
-        price: parseFloat(String(it.unit_price)),
-        image: it.product_details?.images?.[0]?.image || '',
-        name: it.product_details?.name || 'Product',
-      }));
+      const mapped: CartItem[] = (data.items || []).map((it: any) => {
+        const listingId = Number(it.product);
+        const pd = it.product_details?.product_details ?? it.product_details ?? {};
+
+        const marketplaceProduct = {
+          id: listingId,
+          product: Number(pd.id ?? listingId),
+          product_details: pd,
+          listed_price: Number(it.unit_price ?? pd.price ?? 0),
+          discounted_price: it.discounted_price ?? null,
+          percent_off: it.percent_off ?? 0,
+          savings_amount: it.savings_amount ?? 0,
+          offer_start: it.offer_start ?? null,
+          offer_end: it.offer_end ?? null,
+          is_offer_active: it.is_offer_active ?? null,
+          offer_countdown: it.offer_countdown ?? null,
+          estimated_delivery_days: it.estimated_delivery_days ?? null,
+          shipping_cost: String(it.shipping_cost ?? '0'),
+          is_free_shipping: Boolean(it.is_free_shipping ?? false),
+          recent_purchases_count: Number(it.recent_purchases_count ?? 0),
+          listed_date: it.listed_date ?? new Date().toISOString(),
+          is_available: Boolean(it.is_available ?? true),
+          min_order: it.min_order ?? null,
+          latitude: Number(it.latitude ?? 0),
+          longitude: Number(it.longitude ?? 0),
+          bulk_price_tiers: it.bulk_price_tiers ?? [],
+          variants: it.variants ?? [],
+          reviews: it.reviews ?? [],
+          average_rating: Number(it.average_rating ?? 0),
+          ratings_breakdown: it.ratings_breakdown ?? {},
+          total_reviews: Number(it.total_reviews ?? 0),
+          view_count: Number(it.view_count ?? 0),
+          rank_score: Number(it.rank_score ?? 0),
+        } as unknown as MarketplaceProduct;
+
+        return {
+          id: listingId,
+          backendItemId: Number(it.id),
+          product: marketplaceProduct,
+          quantity: Number(it.quantity ?? 1),
+          price: parseFloat(String(it.unit_price ?? marketplaceProduct.listed_price ?? 0)),
+          image: pd?.images?.[0]?.image || '',
+          name: pd?.name || 'Product',
+        };
+      });
       setCart(mapped);
 
       setBackendTotals({
@@ -134,21 +170,27 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         backendCartId = await createCartOnBackend();
       }
 
-      const response = await fetch(`http://3.110.179.122:8000/api/v1/carts/${backendCartId}/items/`, {
+      const url = `http://3.110.179.122:8000/api/v1/carts/${backendCartId}/items/`;
+      console.debug('[Cart] addItemToBackendCart', { productId, quantity, url });
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Token ${token}`
         },
         body: JSON.stringify({
-          product_id: productId,
-          quantity: quantity
+          cart: backendCartId,
+          product: productId,
+          quantity: quantity,
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || 'Failed to add item to cart');
+        const text = await response.text().catch(() => '');
+        console.error('[Cart] addItemToBackendCart failed', response.status, text);
+        let detail = '';
+        try { detail = (JSON.parse(text) || {}).detail || text; } catch { detail = text; }
+        throw new Error(detail || `Failed to add item to cart (HTTP ${response.status})`);
       }
 
       const data = await response.json();
@@ -275,7 +317,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (token) {
       fetchMyCart();
     } else {
-      // If logged out, clear local cart and backend totals
       setCart([]);
       setBackendTotals(null);
       setState(prev => ({ ...prev, cartId: null }));
@@ -290,7 +331,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      const backendItemId = await addItemToBackendCart(product.id, quantity);
+      const productIdForBackend = product.id;
+      if (productIdForBackend == null || Number.isNaN(Number(productIdForBackend))) {
+        console.error('[Cart] Invalid product id for backend', { product });
+        throw new Error('Invalid product reference');
+      }
+      const backendItemId = await addItemToBackendCart(productIdForBackend, quantity);
 
       setCart(prevCart => {
         const existingItem = prevCart.find(item => item.id === product.id);
@@ -375,6 +421,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCart([]);
   };
 
+  const distinctItemCount = cart.length;
   const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
   const computedSubTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const subTotal = backendTotals?.subtotal ?? computedSubTotal;
@@ -395,6 +442,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateCustomerLatLng,
     createDelivery,
     refreshCart: fetchMyCart,
+    distinctItemCount,
     itemCount,
     subTotal,
     shipping,

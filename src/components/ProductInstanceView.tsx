@@ -100,7 +100,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   const [quantity] = useState(1);
   const [tab, setTab] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const { addToCart, itemCount, refreshCart } = useCart();
+  const { addToCart, distinctItemCount, refreshCart } = useCart();
   const { isAuthenticated } = useAuth();
   const reviews = product.reviews || [];
   const reviewsLoading = false;
@@ -311,9 +311,9 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 >
                   <FaShoppingCart className="text-gray-600" />
                   View Cart
-                  {itemCount > 0 && (
+                  {distinctItemCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {itemCount}
+                      {distinctItemCount}
                     </span>
                   )}
                 </button>

@@ -8,6 +8,7 @@ import { MagnifyingGlassIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { X, ChevronDown, Check, User, LogIn, PlusCircle, ShoppingCart, Heart, Star, Menu, Filter } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import LoginModal from './auth/LoginModal';
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -138,7 +139,9 @@ const Marketplace: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const { cart, addToCart, itemCount } = useCart();
+  const { cart, addToCart, distinctItemCount } = useCart();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingProduct, setPendingProduct] = useState<MarketplaceProduct | null>(null);
   const itemsPerPage = 10;
   const navigate = useNavigate();
 
@@ -211,23 +214,15 @@ const Marketplace: React.FC = () => {
   const handleAddToCart = async (product: any, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await addToCart({
-        id: product.id,
-        name: product.product_details.name,
-        price: product.listed_price,
-        images: product.product_details.images,
-        product_details: product.product_details,
-        listed_price: product.listed_price,
-        stock_quantity: product.stock_quantity,
-        seller: product.seller
-      });
+      if (!isAuthenticated) {
+        setPendingProduct(product);
+        setShowLoginModal(true);
+        return;
+      }
+      await addToCart(product);
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      if (error instanceof Error && error.message.includes('login')) {
-        alert('Please login to add items to cart');
-      } else {
-        alert('Failed to add item to cart. Please try again.');
-      }
+      alert('Failed to add item to cart. Please try again.');
     }
   };
 
@@ -237,6 +232,27 @@ const Marketplace: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {showLoginModal && (
+        <LoginModal
+          isOpen={showLoginModal}
+          onClose={() => {
+            setShowLoginModal(false);
+            setPendingProduct(null);
+          }}
+          onSuccess={async () => {
+            setShowLoginModal(false);
+            if (pendingProduct) {
+              try {
+                await addToCart(pendingProduct);
+              } catch (e) {
+                console.error('Add to cart after login failed:', e);
+              } finally {
+                setPendingProduct(null);
+              }
+            }
+          }}
+        />
+      )}
       <div className="bg-orange-600 text-white py-2 px-4">
         <div className="container mx-auto text-center text-xs sm:text-sm">
           Welcome to MulyaBazzar - Your Premium Marketplace
@@ -434,9 +450,9 @@ const Marketplace: React.FC = () => {
                   className="relative p-2 sm:p-3 text-gray-600 hover:text-orange-600 transition-colors"
                 >
                   <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
-                  {itemCount > 0 && (
+                  {distinctItemCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
-                      {itemCount}
+                      {distinctItemCount}
                     </span>
                   )}
                 </button>

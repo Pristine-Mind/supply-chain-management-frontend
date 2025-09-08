@@ -36,6 +36,7 @@ import Privacy from './components/Privacy';
 import Contact from './components/Contact';
 import BlogPage from './components/BlogPage';
 import BlogDetail from './components/BlogDetail';
+import BuyerRegister from './components/BuyerRegister';
 import BackButton from './components/BackButton';
 import AccountDialog from './components/AccountDialog';
 import Login from './components/Login';
@@ -95,6 +96,7 @@ const publicRoutes = [
   { path: '/transporters', element: <TransporterLanding /> },
   { path: '/blog', element: <BlogPage /> },
   { path: '/blog/:id', element: <BlogDetail /> },
+  { path: '/buyer/register', element: <BuyerRegister /> },
   { path: '/shipping', element: <ShippingAndDelivery /> },
   { path: '/login', element: <Login /> },
   { path: '/logout', element: <Logout /> },
