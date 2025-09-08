@@ -62,7 +62,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('http://appmulyabazzar.com/api/v1/carts/', {
+      const response = await fetch('https://appmulyabazzar.com/api/v1/carts/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('http://appmulyabazzar.com/api/v1/my-cart/', {
+      const response = await fetch('https://appmulyabazzar.com/api/v1/my-cart/', {
         headers: {
           'Authorization': `Token ${token}`
         }
@@ -170,7 +170,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         backendCartId = await createCartOnBackend();
       }
 
-      const url = `http://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/`;
+      const url = `https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/`;
       console.debug('[Cart] addItemToBackendCart', { productId, quantity, url });
       const response = await fetch(url, {
         method: 'POST',
@@ -209,7 +209,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const backendCartId = state.cartId;
       if (!backendCartId) throw new Error('Cart not found');
 
-      const response = await fetch(`http://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
+      const response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -236,7 +236,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const backendCartId = state.cartId;
       if (!backendCartId) throw new Error('Cart not found');
 
-      const response = await fetch(`http://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
+      const response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Token ${token}`
@@ -258,7 +258,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('http://appmulyabazzar.com/api/v1/customer/location/', {
+      const response = await fetch('https://appmulyabazzar.com/api/v1/customer/location/', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -284,7 +284,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('http://appmulyabazzar.com/api/v1/deliveries/', {
+      const response = await fetch('https://appmulyabazzar.com/api/v1/deliveries/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

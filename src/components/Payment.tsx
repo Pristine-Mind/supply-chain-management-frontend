@@ -77,7 +77,7 @@ const Payment: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch('http://appmulyabazzar.com/api/v1/payments/gateways/');
+        const response = await fetch('https://appmulyabazzar.com/api/v1/payments/gateways/');
         
         if (!response.ok) {
           throw new Error('Failed to fetch payment gateways');
@@ -151,7 +151,7 @@ const Payment: React.FC = () => {
       };
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://appmulyabazzar.com/api/v1/payments/initiate/', {
+      const response = await fetch('https://appmulyabazzar.com/api/v1/payments/initiate/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
