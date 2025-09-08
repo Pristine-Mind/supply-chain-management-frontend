@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as Separator from '@radix-ui/react-separator';
 import * as Tabs from '@radix-ui/react-tabs';
@@ -11,27 +11,86 @@ interface Post {
   id: number;
   title: string;
   excerpt: string;
+  content?: string;
   image: string;
   date: string;
   author: string;
+  category?: string;
 }
 
-const fetchPosts = async (): Promise<Post[]> => [
-  { id: 1, title: 'How to Sell Fresh Produce on MulyaBazzar', excerpt: 'Learn best listing practices for fruits and vegetables.', image: logo, date: 'Jul 10, 2025', author: 'Admin' },
-  { id: 2, title: 'Understanding Marketplace Fees', excerpt: 'Breakdown of fees and profit tips.', image: logo, date: 'Jul 08, 2025', author: 'Finance Team' },
-  { id: 3, title: 'Tips for Packaging Deliveries', excerpt: 'Keep produce fresh with these strategies.', image: logo, date: 'Jul 05, 2025', author: 'Logistics' },
-];
+const fetchPosts = async (): Promise<Post[]> => {
+  const api = import.meta.env.VITE_REACT_APP_API_URL;
+  if (api) {
+    try {
+      const res = await fetch(`${api}/blog/posts/`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        return data.map((p: any, i: number) => ({
+          id: Number(p.id ?? i + 1),
+          title: String(p.title ?? 'Untitled'),
+          excerpt: String(p.excerpt ?? p.summary ?? ''),
+          content: typeof p.content === 'string' ? p.content : String(p.content ?? ''),
+          image: p.image || p.thumbnail || logo,
+          date: String(p.date ?? p.published_at ?? ''),
+          author: String(p.author ?? 'Admin'),
+          category: String((p.category ?? (Array.isArray(p.categories) ? p.categories[0] : '')) || ''),
+        })) as Post[];
+      }
+    } catch (e) {
+    }
+  }
+  return [
+    { id: 1, title: 'How to Sell Fresh Produce on MulyaBazzar', excerpt: 'Learn best listing practices for fruits and vegetables.', content: 'Full guide on listing best practices...', image: logo, date: 'Jul 10, 2025', author: 'Admin', category: 'Farming Tips' },
+    { id: 2, title: 'Understanding Marketplace Fees', excerpt: 'Breakdown of fees and profit tips.', content: 'We walk through fee structures...', image: logo, date: 'Jul 08, 2025', author: 'Finance Team', category: 'Finance' },
+    { id: 3, title: 'Tips for Packaging Deliveries', excerpt: 'Keep produce fresh with these strategies.', content: 'Packaging tactics for freshness...', image: logo, date: 'Jul 05, 2025', author: 'Logistics', category: 'Packaging' },
+  ];
+};
 
 export const BlogPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    fetchPosts().then(data => {
-      setPosts(data);
-      setLoading(false);
-    });
+    (async () => {
+      try {
+        const data = await fetchPosts();
+        setPosts(data);
+      } catch (e: any) {
+        setError(e?.message || 'Failed to load blog posts');
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    posts.forEach(p => { if (p.category) set.add(p.category); });
+    return ['All', ...Array.from(set)];
+  }, [posts]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return posts.filter(p => {
+      const categoryPass = selectedCategory === 'All' || (p.category || '') === selectedCategory;
+      if (!q) return categoryPass;
+      const hay = `${p.title} ${p.excerpt} ${p.content ?? ''}`.toLowerCase();
+      return categoryPass && hay.includes(q);
+    });
+  }, [posts, search, selectedCategory]);
+
+  const toggleExpand = (id: number) => {
+    setExpanded(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen">
@@ -48,9 +107,11 @@ export const BlogPage: React.FC = () => {
           <div className="lg:col-span-2 flex justify-center items-center">
             <span>Loading...</span>
           </div>
+        ) : error ? (
+          <div className="lg:col-span-2 text-red-600">{error}</div>
         ) : (
           <section className="lg:col-span-2 space-y-12">
-            {posts.map(post => (
+            {filtered.map(post => (
               <article key={post.id} className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg overflow-hidden">
                 <img src={post.image} alt={post.title} className="h-48 md:h-auto md:w-48 object-cover" />
                 <div className="p-6 flex flex-col justify-between">
@@ -59,11 +120,21 @@ export const BlogPage: React.FC = () => {
                     <h2 className="text-2xl font-semibold mb-2 hover:text-orange-600">
                       <Link to={`/blog/${post.id}`}>{post.title}</Link>
                     </h2>
-                    <p className="text-gray-700 mb-4">{post.excerpt}</p>
+                    <p className="text-gray-700 mb-4">
+                      {expanded.has(post.id) ? (post.content || post.excerpt) : post.excerpt}
+                    </p>
                   </div>
-                  <button className="text-orange-600 font-medium hover:underline">
-                      Read More →
+                  <div className="flex items-center gap-4">
+                    <button
+                      className="text-orange-600 font-medium hover:underline"
+                      onClick={() => toggleExpand(post.id)}
+                    >
+                      {expanded.has(post.id) ? 'Read Less ←' : 'Read More →'}
                     </button>
+                    <Link to={`/blog/${post.id}`} className="text-gray-600 hover:text-gray-900">
+                      Open Post
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))}
@@ -78,6 +149,8 @@ export const BlogPage: React.FC = () => {
                 type="text"
                 placeholder="Search..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
@@ -86,20 +159,15 @@ export const BlogPage: React.FC = () => {
 
           <div>
             <h3 className="text-xl font-semibold mb-4">Categories</h3>
-            <Tabs.Root defaultValue="farming" className="flex flex-col space-y-2">
-              <Tabs.List className="space-y-1">
-                {[
-                  ['farming', 'Farming Tips'],
-                  ['packaging', 'Packaging'],
-                  ['finance', 'Finance'],
-                  ['trends', 'Market Trends'],
-                ].map(([value, label]) => (
+            <Tabs.Root value={selectedCategory} onValueChange={setSelectedCategory} className="flex flex-col space-y-2">
+              <Tabs.List className="grid grid-cols-2 gap-2 sm:flex sm:flex-col sm:space-y-1">
+                {categories.map((cat) => (
                   <Tabs.Trigger
-                    key={value}
-                    value={value}
-                    className="px-3 py-1 text-gray-700 rounded-md hover:bg-gray-100 focus:shadow-outline"
+                    key={cat}
+                    value={cat}
+                    className={`px-3 py-1 rounded-md text-sm ${selectedCategory === cat ? 'bg-orange-100 text-orange-700' : 'text-gray-700 hover:bg-gray-100'}`}
                   >
-                    {label}
+                    {cat}
                   </Tabs.Trigger>
                 ))}
               </Tabs.List>
