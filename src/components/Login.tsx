@@ -45,7 +45,6 @@ const Login: React.FC = () => {
         }
       );
       
-      // Create user data object for AuthContext
       const userData = {
         email: userInfoResponse.data.email || '',
         name: userInfoResponse.data.username || '',
@@ -55,10 +54,8 @@ const Login: React.FC = () => {
         shopId: userInfoResponse.data.shop_id,
       };
 
-      // Update AuthContext with login data
       login(token, userData);
 
-      // Store additional data in localStorage for backward compatibility
       if (userInfoResponse.data && userInfoResponse.data.username) {
         localStorage.setItem('username', userInfoResponse.data.username);
         if (userInfoResponse.data.email) {
@@ -72,12 +69,15 @@ const Login: React.FC = () => {
         }
       }
 
-      // Check user type and redirect accordingly
-      if (userInfoResponse.data.has_access_to_marketplace === false && userInfoResponse.data.business_type === null) {
-        // General user - redirect to home screen
+      const roleLower = (userInfoResponse.data.role || '').toLowerCase();
+      if (roleLower === 'transporter') {
+        navigate('/home');
+      } else if (
+        userInfoResponse.data.has_access_to_marketplace === false &&
+        userInfoResponse.data.business_type === null
+      ) {
         navigate('/');
       } else {
-        // Business user - redirect to dashboard
         navigate('/home');
       }
     } catch (error) {

@@ -8,32 +8,11 @@ import {
 } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-} from 'react-leaflet';
-import L, { LatLngExpression } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import LocationPicker from './LocationPicker';
 import Footer from './Footer';
 import Navbar from './Navbar';
 
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-const DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
 
 interface City {
   id: number;
@@ -76,7 +55,7 @@ const Register = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [position, setPosition] = useState<LatLngExpression>([27.7172, 85.3240]);
+  const [position, setPosition] = useState<[number, number]>([27.7172, 85.3240]);
 
   const {
     register,
@@ -113,8 +92,8 @@ const Register = () => {
     try {
       const payload = {
         ...vals,
-        latitude: (position as [number, number])[0],
-        longitude: (position as [number, number])[1],
+        latitude: position[0],
+        longitude: position[1],
       };
       await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/register/`, payload, {
         headers: {},
@@ -130,14 +109,9 @@ const Register = () => {
     }
   };
 
-  function LocationMarker() {
-    useMapEvents({
-      click(e) {
-        setPosition([e.latlng.lat, e.latlng.lng]);
-      },
-    });
-    return position ? <Marker position={position} /> : null;
-  }
+  const handleSelect = (lat: number, lng: number) => {
+    setPosition([lat, lng]);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -278,19 +252,18 @@ const Register = () => {
 
               <div>
                 <label className="block font-medium mb-2">Select Location</label>
-                <MapContainer
-                  center={position}
-                  zoom={13}
-                  style={{ height: 200, width: '100%' }}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <LocationMarker />
-                </MapContainer>
+                <div style={{ height: 200, width: '100%' }}>
+                  <LocationPicker
+                    initialCenter={{ lat: position[0], lng: position[1] }}
+                    zoom={13}
+                    onSelect={handleSelect}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 w-full">
                   <div className="w-full">
                     <input
                       readOnly
-                      value={(position as [number, number])[0].toFixed(6)}
+                      value={position[0].toFixed(6)}
                       placeholder="Latitude"
                       className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
@@ -298,7 +271,7 @@ const Register = () => {
                   <div className="w-full">
                     <input
                       readOnly
-                      value={(position as [number, number])[1].toFixed(6)}
+                      value={position[1].toFixed(6)}
                       placeholder="Longitude"
                       className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     />
