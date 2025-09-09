@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaArrowLeft } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 
 const BackButton: React.FC = () => {
@@ -10,9 +9,22 @@ const BackButton: React.FC = () => {
   return (
     <button
       onClick={() => navigate(-1)}
-      className="flex items-center px-4 py-2 text-lg font-semibold text-white transition-all duration-300 transform bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-700 hover:shadow-xl hover:-translate-y-1 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
+      className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 transition-colors"
     >
-      <FaArrowLeft className="mr-3 text-white" /> {t('back')}
+      <svg 
+        className="w-4 h-4" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M15 19l-7-7 7-7" 
+        />
+      </svg>
+      {t('back')}
     </button>
   );
 };
