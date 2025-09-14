@@ -2,9 +2,12 @@ const VERSION = 'v1';
 const MAP_CACHE = `map-cache-${VERSION}`;
 
 const CACHE_URL_PATTERNS = [
-  'https://maps.geoapify.com/',
-  'https://tile.geoapify.com/',
-  'https://vector.geoapify.com/',
+  // Map tiles/style (MapLibre demo)
+  'https://demotiles.maplibre.org/',
+  // Galli APIs (routing, search, reverse, distance)
+  'https://route-init.gallimap.com/',
+  // Galli plugin static assets
+  'https://gallimap.com/static/',
 ];
 
 self.addEventListener('install', (event) => {
