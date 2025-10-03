@@ -12,6 +12,7 @@ const Cart: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loading, setLoading] = useState<{ [key: number]: boolean }>({});
+  const [clearingCart, setClearingCart] = useState(false);
   const {
     cart,
     removeFromCart,
@@ -42,6 +43,18 @@ const Cart: React.FC = () => {
       alert('Failed to update quantity. Please try again.');
     } finally {
       setLoading(prev => ({ ...prev, [productId]: false }));
+    }
+  };
+
+  const handleClearCart = async () => {
+    setClearingCart(true);
+    try {
+      await clearCart();
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+      alert('Failed to clear cart. Please try again.');
+    } finally {
+      setClearingCart(false);
     }
   };
 
@@ -144,10 +157,11 @@ const Cart: React.FC = () => {
           </div>
           <div className="flex items-center space-x-4">
             <button
-              onClick={clearCart}
-              className="text-gray-600 hover:text-orange-600"
+              onClick={handleClearCart}
+              disabled={clearingCart}
+              className="text-gray-600 hover:text-orange-600 disabled:opacity-50"
             >
-              Clear Cart
+              {clearingCart ? 'Clearing...' : 'Clear Cart'}
             </button>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Your Cart ({itemCount})</h1>
@@ -218,10 +232,11 @@ const Cart: React.FC = () => {
           <div className="p-6 bg-gray-50 border-t">
             <div className="flex justify-between items-center mb-6">
               <button
-                onClick={clearCart}
-                className="text-rose-600 hover:text-rose-800 text-sm font-medium"
+                onClick={handleClearCart}
+                disabled={clearingCart}
+                className="text-rose-600 hover:text-rose-800 text-sm font-medium disabled:opacity-50"
               >
-                Clear Cart
+                {clearingCart ? 'Clearing...' : 'Clear Cart'}
               </button>
               <div className="text-right">
                 <div className="text-lg font-bold">
