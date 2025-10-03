@@ -1,5 +1,72 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { MarketplaceProduct } from '../types/marketplace';
+
+interface ProductImage {
+  id: number;
+  image: string;
+  alt_text: string | null;
+  created_at: string;
+}
+
+interface ProductDetails {
+  id: number;
+  name: string;
+  description: string;
+  images: ProductImage[];
+  category_details: string;
+  category: string;
+  sku: string;
+  price: number;
+  cost_price: number;
+  stock: number;
+  reorder_level: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  is_marketplace_created: boolean;
+  avg_daily_demand: number;
+  stddev_daily_demand: number;
+  safety_stock: number;
+  reorder_point: number;
+  reorder_quantity: number;
+  lead_time_days: number;
+  projected_stockout_date_field: string | null;
+  producer: any;
+  user: number;
+  location: number;
+}
+
+interface MarketplaceProduct {
+  id: number;
+  product: number;
+  product_details: ProductDetails;
+  discounted_price: number | null;
+  listed_price: number;
+  percent_off: number;
+  savings_amount: number;
+  offer_start: string | null;
+  offer_end: string | null;
+  is_offer_active: boolean | null;
+  offer_countdown: string | null;
+  estimated_delivery_days: number | null;
+  shipping_cost: string;
+  is_free_shipping: boolean;
+  recent_purchases_count: number;
+  listed_date: string;
+  is_available: boolean;
+  min_order: number | null;
+  latitude: number;
+  longitude: number;
+  bulk_price_tiers: any[];
+  variants: any[];
+  reviews: any[];
+  average_rating: number;
+  ratings_breakdown: {
+    [key: string]: number;
+  };
+  total_reviews: number;
+  view_count: number;
+  rank_score: number;
+}
 
 interface CartItem {
   id: number;
@@ -21,7 +88,7 @@ interface CartContextType {
   addToCart: (product: MarketplaceProduct, quantity?: number) => Promise<void>;
   removeFromCart: (productId: number) => Promise<void>;
   updateQuantity: (productId: number, quantity: number) => Promise<void>;
-  clearCart: () => void;
+  clearCart: () => Promise<void>;
   createCartOnBackend: () => Promise<number>;
   addItemToBackendCart: (productId: number, quantity: number) => Promise<number>;
   updateCartItem: (backendItemId: number, quantity: number) => Promise<void>;
@@ -354,7 +421,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             backendItemId,
             product,
             quantity,
-            price: parseFloat(product.discounted_price || product.listed_price),
+            price: product.discounted_price || product.listed_price,
             image: product.product_details?.images?.[0]?.image || '',
             name: product.product_details?.name || 'Product',
           },
@@ -417,8 +484,40 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const clearCart = () => {
-    setCart([]);
+  const clearCart = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // If not authenticated, just clear local cart
+        setCart([]);
+        return;
+      }
+
+      // Clear all items from backend cart
+      const currentCart = [...cart];
+      for (const item of currentCart) {
+        if (item.backendItemId) {
+          try {
+            await deleteCartItem(item.backendItemId);
+          } catch (error) {
+            console.error(`Failed to delete item ${item.backendItemId}:`, error);
+          }
+        }
+      }
+
+      // Clear local cart
+      setCart([]);
+      
+      // Reset backend totals
+      setBackendTotals(null);
+      
+      // Refresh cart to ensure sync
+      await fetchMyCart();
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+      // Still clear local cart even if backend fails
+      setCart([]);
+    }
   };
 
   const distinctItemCount = cart.length;
