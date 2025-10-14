@@ -136,7 +136,7 @@ const Payment: React.FC = () => {
       }
 
       const gateway = method;
-      const paymentData = {
+      let paymentData: any = {
         cart_id: backendCartId,
         gateway: gateway,
         customer_name: delivery?.customer_name || "Customer",
@@ -146,6 +146,10 @@ const Payment: React.FC = () => {
         shipping_cost: 0,
         return_url: `${window.location.origin}/payment/success/`,
       };
+      // Only send bank for MOBILE_BANKING and EBANKING, use selectedBank from the list
+      if ((method.startsWith('MOBILE_BANKING') || method.startsWith('EBANKING')) && selectedBank) {
+        paymentData.bank = selectedBank.idx;
+      }
 
       const token = localStorage.getItem('token');
       const response = await fetch('https://appmulyabazzar.com/api/v1/payments/initiate/', {
