@@ -32,7 +32,6 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         supply_chain_management: "Supply Chain Management",
         farmers_list: "Farmers List",
         search_by_name: "Search by name...",
-        // add_producer: "Add Producer",
         producer_name: "Producer Name",
         contact: "Contact",
         email: "Email",
@@ -308,7 +307,11 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         pending_orders_revenue: "Pending Orders Revenue",
         rows_per_page: "Rows per page",
         update_stock: "Update Stock",
-        
+        sale_invoice: "Sale Invoice",
+        print_invoice: "Print Invoice",
+        sale_id: "Sale ID",
+        unit_price: "Unit Price",
+        total: "Total",
       }
         
     },
@@ -622,6 +625,11 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         update_customer: "ग्राहक संपादन गर्नुहोस्",
         pending_orders_revenue: "पेन्डिङ अर्डरहरूको राजस्व",
         rows_per_page: "पृष्ठभन्दा लागि राख्नुहोस्",
+        sale_invoice: "बिक्री रसिद",
+        print_invoice: "रसिद प्रिन्ट गर्नुहोस्",
+        sale_id: "बिक्री ID",
+        unit_price: "किनारी मूल्य",
+        total: "कुल",
     }    
     },
   },

@@ -20,6 +20,9 @@ const Cart: React.FC = () => {
     clearCart,
     itemCount,
     total,
+    isLoading: cartLoading,
+    error: cartError,
+    clearError,
   } = useCart();
 
   const handleRemoveFromCart = async (productId: number) => {
@@ -47,9 +50,23 @@ const Cart: React.FC = () => {
   };
 
   const handleClearCart = async () => {
+    // Confirmation dialog
+    const confirmed = window.confirm(
+      `Are you sure you want to clear all ${itemCount} item(s) from your cart? This action cannot be undone.`
+    );
+    
+    if (!confirmed) return;
+
     setClearingCart(true);
     try {
-      await clearCart();
+      const result = await clearCart();
+      if (!result.success) {
+        if (result.failedItems && result.failedItems.length > 0) {
+          alert(`Failed to remove ${result.failedItems.length} item(s). Please try again.`);
+        } else {
+          alert('Failed to clear cart. Please try again.');
+        }
+      }
     } catch (error) {
       console.error('Failed to clear cart:', error);
       alert('Failed to clear cart. Please try again.');
@@ -147,18 +164,12 @@ const Cart: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
-            {/* <button
-              onClick={() => navigate(-1)}
-              className="p-2 rounded-full hover:bg-gray-100 mr-4"
-            >
-              <FaArrowLeft className="text-gray-600" />
-            </button> */}
             <h1 className="text-2xl font-bold text-gray-900">Shopping Cart</h1>
           </div>
           <div className="flex items-center space-x-4">
             <button
               onClick={handleClearCart}
-              disabled={clearingCart}
+              disabled={clearingCart || cartLoading}
               className="text-gray-600 hover:text-orange-600 disabled:opacity-50"
             >
               {clearingCart ? 'Clearing...' : 'Clear Cart'}
@@ -166,6 +177,28 @@ const Cart: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Your Cart ({itemCount})</h1>
         </div>
+
+        {/* Error Display */}
+        {cartError && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <p className="text-red-800">{cartError}</p>
+              <button
+                onClick={clearError}
+                className="text-red-600 hover:text-red-800"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading Overlay */}
+        {cartLoading && (
+          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800">Updating cart...</p>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="p-4 border-b">
@@ -205,17 +238,19 @@ const Cart: React.FC = () => {
                   <div className="col-span-2">
                     <div className="flex items-center justify-center">
                       <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                        disabled={loading[item.id]}
+                        onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                        disabled={loading[item.id] || cartLoading || item.quantity <= 1}
                         className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                        title={item.quantity <= 1 ? "Use remove button to delete item" : "Decrease quantity"}
                       >
                         <FaMinus size={12} />
                       </button>
-                      <span className="mx-3 w-8 text-center">{item.quantity}</span>
+                      <span className="mx-3 w-8 text-center font-medium">{item.quantity}</span>
                       <button
                         onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                        disabled={loading[item.id]}
+                        disabled={loading[item.id] || cartLoading}
                         className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                        title="Increase quantity"
                       >
                         <FaPlus size={12} />
                       </button>
@@ -247,9 +282,10 @@ const Cart: React.FC = () => {
             </div>
             <button
               onClick={handleCheckout}
-              className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+              disabled={cartLoading || clearingCart || cart.length === 0}
+              className="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Proceed to Checkout
+              {cartLoading ? 'Updating...' : clearingCart ? 'Clearing...' : 'Proceed to Checkout'}
             </button>
           </div>
         </div>

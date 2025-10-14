@@ -85,10 +85,12 @@ export interface CartState {
 interface CartContextType {
   cart: CartItem[];
   state: CartState;
+  isLoading: boolean;
+  error: string | null;
   addToCart: (product: MarketplaceProduct, quantity?: number) => Promise<void>;
   removeFromCart: (productId: number) => Promise<void>;
   updateQuantity: (productId: number, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
+  clearCart: () => Promise<{ success: boolean; failedItems?: number[] }>;
   createCartOnBackend: () => Promise<number>;
   addItemToBackendCart: (productId: number, quantity: number) => Promise<number>;
   updateCartItem: (backendItemId: number, quantity: number) => Promise<void>;
@@ -96,6 +98,7 @@ interface CartContextType {
   updateCustomerLatLng: (lat: number, lng: number) => Promise<void>;
   createDelivery: (delivery: any) => Promise<void>;
   refreshCart: () => Promise<void>;
+  clearError: () => void;
   distinctItemCount: number;
   itemCount: number;
   subTotal: number;
@@ -113,7 +116,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [cart, setCart] = useState<CartItem[]>(() => {
     if (typeof window !== 'undefined') {
       const savedCart = localStorage.getItem('cart');
-      return savedCart ? JSON.parse(savedCart) : [];
+      try {
+        return savedCart ? JSON.parse(savedCart) : [];
+      } catch {
+        localStorage.removeItem('cart');
+        return [];
+      }
     }
     return [];
   });
@@ -123,6 +131,25 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     shipping: number;
     total: number;
   } | null>(null);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const clearError = () => setError(null);
+
+  const handleApiError = (error: any, operation: string) => {
+    console.error(`${operation} failed:`, error);
+    if (error.message?.includes('Authentication') || error.message?.includes('401')) {
+      setError('Please login again to continue');
+      // Clear cart on auth error
+      setCart([]);
+      setState(prev => ({ ...prev, cartId: null }));
+    } else if (error.message?.includes('Network') || !navigator.onLine) {
+      setError('Network error. Please check your connection and try again.');
+    } else {
+      setError(error.message || `Failed to ${operation.toLowerCase()}`);
+    }
+  };
 
   const createCartOnBackend = async (): Promise<number> => {
     try {
@@ -170,7 +197,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const data = await response.json();
       setState(prev => ({ ...prev, cartId: data.id }));
 
-      const mapped: CartItem[] = (data.items || []).map((it: any) => {
+      const mapped: CartItem[] = (data.items || [])
+        .filter((it: any) => Number(it.quantity ?? 1) > 0)
+        .map((it: any) => {
         const listingId = Number(it.product);
         const pd = it.product_details?.product_details ?? it.product_details ?? {};
 
@@ -303,12 +332,24 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const backendCartId = state.cartId;
       if (!backendCartId) throw new Error('Cart not found');
 
-      const response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
+      let response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Token ${token}`
         }
       });
+
+      if (!response.ok && response.status === 405) {
+        console.log('DELETE method not allowed, trying PATCH with quantity 0');
+        response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`
+          },
+          body: JSON.stringify({ quantity: 0 })
+        });
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -379,6 +420,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [cart]);
 
+  // Clean up cart items with zero quantity
+  useEffect(() => {
+    setCart(prevCart => prevCart.filter(item => item.quantity > 0));
+  }, []);
+
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (token) {
@@ -392,45 +438,84 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const addToCart = async (product: MarketplaceProduct, quantity: number = 1) => {
+    setError(null);
+    
     const token = localStorage.getItem('token');
     if (!token) {
-      throw new Error('Please login to add items to cart');
+      const error = new Error('Please login to add items to cart');
+      handleApiError(error, 'Add to cart');
+      throw error;
     }
 
-    try {
-      const productIdForBackend = product.id;
-      if (productIdForBackend == null || Number.isNaN(Number(productIdForBackend))) {
-        console.error('[Cart] Invalid product id for backend', { product });
-        throw new Error('Invalid product reference');
-      }
-      const backendItemId = await addItemToBackendCart(productIdForBackend, quantity);
+    // Validate inputs
+    if (!product || quantity <= 0) {
+      const error = new Error('Invalid product or quantity');
+      setError(error.message);
+      throw error;
+    }
 
+    const productIdForBackend = product.id;
+    if (productIdForBackend == null || Number.isNaN(Number(productIdForBackend))) {
+      console.error('[Cart] Invalid product id for backend', { product });
+      const error = new Error('Invalid product reference');
+      setError(error.message);
+      throw error;
+    }
+
+    // Optimistic update
+    const tempId = Date.now();
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      }
+      return [
+        ...prevCart,
+        {
+          id: product.id,
+          backendItemId: tempId, // Temporary ID
+          product,
+          quantity,
+          price: product.discounted_price || product.listed_price,
+          image: product.product_details?.images?.[0]?.image || '',
+          name: product.product_details?.name || 'Product',
+        },
+      ];
+    });
+
+    try {
+      const backendItemId = await addItemToBackendCart(productIdForBackend, quantity);
+      
+      // Update with real backend ID
+      setCart(prevCart => 
+        prevCart.map(item => 
+          item.backendItemId === tempId 
+            ? { ...item, backendItemId }
+            : item
+        )
+      );
+
+      // Refresh cart data
+      fetchMyCart().catch(console.error);
+    } catch (error) {
+      // Rollback optimistic update
       setCart(prevCart => {
         const existingItem = prevCart.find(item => item.id === product.id);
-        if (existingItem) {
+        if (existingItem && existingItem.quantity > quantity) {
           return prevCart.map(item =>
             item.id === product.id
-              ? { ...item, quantity: item.quantity + quantity }
+              ? { ...item, quantity: item.quantity - quantity }
               : item
           );
         }
-        return [
-          ...prevCart,
-          {
-            id: product.id,
-            backendItemId,
-            product,
-            quantity,
-            price: product.discounted_price || product.listed_price,
-            image: product.product_details?.images?.[0]?.image || '',
-            name: product.product_details?.name || 'Product',
-          },
-        ];
+        return prevCart.filter(item => item.backendItemId !== tempId);
       });
-
-      fetchMyCart();
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
+      
+      handleApiError(error, 'Add to cart');
       throw error;
     }
   };
@@ -484,45 +569,80 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const clearCart = async () => {
+  const clearCart = async (): Promise<{ success: boolean; failedItems?: number[] }> => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         // If not authenticated, just clear local cart
         setCart([]);
-        return;
+        localStorage.removeItem('cart');
+        setIsLoading(false);
+        return { success: true };
       }
 
-      // Clear all items from backend cart
+      // Clear all items from backend cart with detailed error tracking
       const currentCart = [...cart];
-      for (const item of currentCart) {
+      const failedItems: number[] = [];
+      const deletePromises = currentCart.map(async (item) => {
         if (item.backendItemId) {
           try {
             await deleteCartItem(item.backendItemId);
+            return { success: true, itemId: item.id };
           } catch (error) {
             console.error(`Failed to delete item ${item.backendItemId}:`, error);
+            failedItems.push(item.id);
+            return { success: false, itemId: item.id, error };
           }
         }
+        return { success: true, itemId: item.id };
+      });
+
+      // Wait for all delete operations to complete
+      const results = await Promise.allSettled(deletePromises);
+      
+      // Check for any failed operations
+      const hasFailures = results.some(result => 
+        result.status === 'rejected' || 
+        (result.status === 'fulfilled' && !result.value.success)
+      );
+
+      if (hasFailures && failedItems.length > 0) {
+        // Partial failure - only clear successfully deleted items
+        setCart(prevCart => prevCart.filter(item => failedItems.includes(item.id)));
+        setError(`Failed to remove ${failedItems.length} item(s). Please try again.`);
+        setIsLoading(false);
+        return { success: false, failedItems };
       }
 
-      // Clear local cart
+      // All items cleared successfully
       setCart([]);
-      
-      // Reset backend totals
       setBackendTotals(null);
+      localStorage.removeItem('cart');
       
-      // Refresh cart to ensure sync
-      await fetchMyCart();
+      // Refresh cart to ensure sync (but don't wait for it to complete)
+      fetchMyCart().catch(error => {
+        console.error('Failed to refresh cart after clearing:', error);
+      });
+      
+      setIsLoading(false);
+      return { success: true };
+      
     } catch (error) {
-      console.error('Failed to clear cart:', error);
-      // Still clear local cart even if backend fails
+      handleApiError(error, 'Clear cart');
+      // Still clear local cart even if backend fails completely
       setCart([]);
+      localStorage.removeItem('cart');
+      setIsLoading(false);
+      return { success: false };
     }
   };
 
-  const distinctItemCount = cart.length;
-  const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
-  const computedSubTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const distinctItemCount = cart.filter(item => item.quantity > 0).length;
+  const itemCount = cart.filter(item => item.quantity > 0).reduce((count, item) => count + item.quantity, 0);
+  const computedSubTotal = cart.filter(item => item.quantity > 0).reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const subTotal = backendTotals?.subtotal ?? computedSubTotal;
   const shipping = backendTotals?.shipping ?? (subTotal > 0 ? 100 : 0);
   const total = backendTotals?.total ?? (subTotal + shipping);
@@ -530,6 +650,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const value: CartContextType = {
     cart,
     state,
+    isLoading,
+    error,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -541,6 +663,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateCustomerLatLng,
     createDelivery,
     refreshCart: fetchMyCart,
+    clearError,
     distinctItemCount,
     itemCount,
     subTotal,

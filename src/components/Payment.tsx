@@ -135,7 +135,7 @@ const Payment: React.FC = () => {
         }
       }
 
-      const gateway = method.includes('_') ? method.split('_')[0] : method;
+      const gateway = method
       const bank = method.includes('_') ? method.split('_')[1] : null;
       
       const paymentData = {

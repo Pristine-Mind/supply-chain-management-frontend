@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios, { isAxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
-import { FaPlus, FaDownload, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaDownload, FaTimes, FaPrint } from 'react-icons/fa';
 
 // Define payment status options
 const paymentStatusOptions = [
@@ -12,9 +12,31 @@ const paymentStatusOptions = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
+interface Customer {
+  id: number;
+  name: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
 interface Order {
   id: number;
   order_number: string;
+}
+
+interface OrderDetails {
+  id: number;
+  order_number: string;
+  customer_details: Customer;
+  product_details: Product;
+  quantity: number;
+  total_price: number;
+  status: string;
+  order_date: string;
 }
 
 interface Sale {
@@ -25,6 +47,7 @@ interface Sale {
   payment_status_display: string | null;
   payment_due_date: string | null;
   order: number | null;
+  order_details?: OrderDetails;
 }
 
 const SaleList: React.FC = () => {
@@ -108,6 +131,118 @@ const SaleList: React.FC = () => {
       }
     }
   };
+  const handlePrintSale = (sale: Sale) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${t('sale_invoice')} #${sale.id}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            margin: 0 !important;
+          }
+          .header { text-align: center; margin-bottom: 20px; }
+          .sale-info { margin-bottom: 20px; }
+          .sale-items {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            page-break-inside: avoid;
+          }
+          .sale-items th, .sale-items td {
+            border: 1px solid #000 !important;
+            padding: 8px !important;
+          }
+          .sale-items th {
+            background-color: #f2f2f2 !important;
+          }
+          .text-right { text-align: right; }
+          .mt-20 { margin-top: 20px; }
+          @media print {
+            body { padding: 10px !important; }
+            .sale-items { max-width: 100% !important; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${t('sale_invoice')}</h1>
+          <p>${new Date().toLocaleDateString()}</p>
+        </div>
+
+        <div class="sale-info">
+          <p><strong>${t('sale_id')}:</strong> ${sale.id}</p>
+          ${sale.order_details ?
+            '<p><strong>' + t('order_number') + ':</strong> ' + sale.order_details.order_number + '</p>' +
+            '<p><strong>' + t('customer') + ':</strong> ' + sale.order_details.customer_details.name + '</p>' +
+            '<p><strong>' + t('product') + ':</strong> ' + sale.order_details.product_details.name + '</p>' +
+            '<p><strong>' + t('order_date') + ':</strong> ' + new Date(sale.order_details.order_date).toLocaleDateString() + '</p>'
+            :
+            '<p><strong>' + t('order') + ':</strong> ' + sale.order + '</p>'
+          }
+          <p><strong>${t('payment_status')}:</strong> ${sale.payment_status_display}</p>
+          ${sale.payment_due_date ? '<p><strong>' + t('payment_due_date') + ':</strong> ' + new Date(sale.payment_due_date).toLocaleDateString() + '</p>' : ''}
+        </div>
+
+        <table class="sale-items">
+          <thead>
+            <tr>
+              <th>${t('description')}</th>
+              <th>${t('quantity')}</th>
+              <th class="text-right">${t('unit_price')}</th>
+              <th class="text-right">${t('total')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${sale.order_details ? sale.order_details.product_details.name : t('sale_item')}</td>
+              <td>${sale.quantity || 0}</td>
+              <td class="text-right">NPR ${(sale.sale_price || 0).toFixed(2)}</td>
+              <td class="text-right">NPR ${((sale.quantity || 0) * (sale.sale_price || 0)).toFixed(2)}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right"><strong>${t('grand_total')}:</strong></td>
+              <td class="text-right"><strong>NPR ${((sale.quantity || 0) * (sale.sale_price || 0)).toFixed(2)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="mt-20">
+          <p>${t('thank_you_message')}</p>
+        </div>
+
+        <div class="no-print" style="margin-top: 20px; text-align: center;">
+          <button onclick="window.print()" style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ${t('print_invoice')}
+          </button>
+          <button onclick="window.close()" style="margin-left: 10px; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            ${t('close')}
+          </button>
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,6 +301,7 @@ const SaleList: React.FC = () => {
               <th className="py-3 px-6">{t('sale_price')}</th>
               <th className="py-3 px-6">{t('payment_status')}</th>
               <th className="py-3 px-6">{t('payment_due_date')}</th>
+              <th className="py-3 px-6">{t('actions')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -193,11 +329,23 @@ const SaleList: React.FC = () => {
                     </span>
                   </td>
                   <td className="py-4 px-6">{sale.payment_due_date}</td>
+                  <td className="py-4 px-6">
+                    <div className="flex flex-col space-y-2">
+                      <button
+                        onClick={() => handlePrintSale(sale)}
+                        className="px-2 py-1 text-xs rounded bg-gray-500 hover:bg-gray-600 text-white flex items-center"
+                        aria-label={t('print')}
+                      >
+                        <FaPrint className="mr-1" size={12} />
+                        {t('print')}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-4">
+                <td colSpan={6} className="text-center py-4">
                   {t('no_sales_found')}
                 </td>
               </tr>

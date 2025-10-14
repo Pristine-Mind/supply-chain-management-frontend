@@ -91,11 +91,18 @@ const Register = () => {
     setSubmitting(true);
     try {
       const payload = {
-        ...vals,
+        username: vals.username,
+        email: vals.email,
+        password: vals.password,
+        password2: vals.password2,
+        first_name: vals.firstName,
+        last_name: vals.lastName,
+        phone: vals.phone,
+        city_id: vals.cityId,
         latitude: position[0],
         longitude: position[1],
       };
-      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/register/`, payload, {
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/register/user/`, payload, {
         headers: {},
       });
       alert('Registration successful!');
