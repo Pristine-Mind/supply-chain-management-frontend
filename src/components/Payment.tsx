@@ -138,7 +138,7 @@ const Payment: React.FC = () => {
       // For MOBILE_BANKING and EBANKING, gateway should be just the base method
       let gateway = method;
       if ((method.startsWith('MOBILE_BANKING') || method.startsWith('EBANKING')) && selectedBank) {
-        gateway = method.split('_')[0];
+        gateway = method.substring(0, method.indexOf('_')) || method;
       }
       let paymentData: any = {
         cart_id: backendCartId,
