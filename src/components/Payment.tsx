@@ -135,13 +135,10 @@ const Payment: React.FC = () => {
         }
       }
 
-      const gateway = method
-      const bank = method.includes('_') ? method.split('_')[1] : null;
-      
+      const gateway = method;
       const paymentData = {
         cart_id: backendCartId,
         gateway: gateway,
-        bank: bank,
         customer_name: delivery?.customer_name || "Customer",
         customer_email: delivery?.email || "customer@example.com",
         customer_phone: delivery?.phone_number || "9800000001",
