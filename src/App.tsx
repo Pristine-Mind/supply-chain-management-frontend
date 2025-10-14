@@ -38,6 +38,7 @@ import BlogPage from './components/BlogPage';
 import BlogDetail from './components/BlogDetail';
 import BuyerRegister from './components/BuyerRegister';
 import BackButton from './components/BackButton';
+import PaymentSuccess from './components/PaymentSuccess';
 import AccountDialog from './components/AccountDialog';
 import Login from './components/Login';
 import TransporterRegistration from './components/TransporterRegistration';
@@ -104,6 +105,7 @@ const publicRoutes = [
   { path: '/returns', element: <ReturnsAndRefunds /> },
   { path: '/terms', element: <TermsofService /> },
   { path: '/privacy', element: <Privacy /> },
+  { path: '/payment/success', element: <PaymentSuccess /> },
 ];
 
 const App: React.FC = () => {
