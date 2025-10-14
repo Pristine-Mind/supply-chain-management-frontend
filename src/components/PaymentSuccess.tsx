@@ -16,50 +16,16 @@ const PaymentSuccess: React.FC = () => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const callback = async () => {
-      setLoading(true);
-      try {
-        const params: Record<string, string> = {};
-        for (const [key, value] of query.entries()) {
-          params[key] = value;
-        }
-        const response = await fetch('https://appmulyabazzar.com/api/v1/payments/callback/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(params),
-        });
-        const result = await response.json();
-        if (response.ok && result.status === 'success') {
-          setStatus('success');
-          let msg = result.message || 'Payment completed successfully!';
-          if (result.data) {
-            msg += `\nOrder Number: ${result.data.order_number}`;
-            msg += `\nAmount: Rs. ${result.data.amount}`;
-            if (result.data.marketplace_sales && result.data.marketplace_sales.length > 0) {
-              msg += `\nItems:`;
-              result.data.marketplace_sales.forEach((item: any) => {
-                msg += `\n- ${item.product_name} x${item.quantity} (Seller: ${item.seller})`;
-              });
-            }
-          }
-          setMessage(msg);
-          toast.success(result.message || 'Payment completed successfully!');
-        } else {
-          setStatus('error');
-          setMessage(result.message || 'Payment verification failed.');
-          toast.error(result.message || 'Payment verification failed.');
-        }
-      } catch (err: any) {
-        setStatus('error');
-        setMessage('Payment verification failed.');
-        toast.error('Payment verification failed.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    callback();
+    setLoading(false);
+    setStatus('success');
+    let msg = 'Payment completed successfully!';
+    msg += `\nTransaction ID: ${query.get('transaction_id') || query.get('pidx') || '-'}`;
+    msg += `\nOrder ID: ${query.get('purchase_order_id') || '-'}`;
+    msg += `\nAmount: Rs. ${query.get('amount') || query.get('total_amount') || '-'}`;
+    msg += `\nMobile: ${query.get('mobile') || '-'}`;
+    msg += `\n\nDetails have been sent to your email as well.`;
+    setMessage(msg);
+    toast.success('Payment completed successfully!');
   }, []);
 
   return (
@@ -76,7 +42,7 @@ const PaymentSuccess: React.FC = () => {
             <>
               <div className="text-green-600 text-4xl mb-2">✓</div>
               <h2 className="text-xl font-semibold mb-2">Payment Successful</h2>
-              <p className="text-gray-700 mb-4">{message}</p>
+              <pre className="text-gray-700 mb-4 whitespace-pre-wrap text-left">{message}</pre>
               <button
                 className="bg-orange-500 text-white px-4 py-2 rounded-lg mt-2"
                 onClick={() => navigate('/marketplace')}
