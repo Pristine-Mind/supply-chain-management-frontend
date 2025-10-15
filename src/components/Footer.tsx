@@ -272,7 +272,7 @@ const Footer: React.FC = () => {
               <MapPinIcon className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-gray-900 text-sm">Address</p>
-                <p className="text-gray-600 text-sm">Baluwatar, Kathmandu, Nepal</p>
+                <p className="text-gray-600 text-sm">Panipokhari, Kathmandu, Nepal</p>
               </div>
             </div>
             
