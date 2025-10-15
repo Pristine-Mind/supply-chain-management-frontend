@@ -644,7 +644,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const itemCount = cart.filter(item => item.quantity > 0).reduce((count, item) => count + item.quantity, 0);
   const computedSubTotal = cart.filter(item => item.quantity > 0).reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const subTotal = backendTotals?.subtotal ?? computedSubTotal;
-  const shipping = backendTotals?.shipping ?? (subTotal > 0 ? 100 : 0);
+  const shipping = backendTotals?.shipping ?? 0;
   const total = backendTotals?.total ?? (subTotal + shipping);
 
   const value: CartContextType = {
