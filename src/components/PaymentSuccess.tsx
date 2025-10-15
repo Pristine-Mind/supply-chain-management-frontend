@@ -21,12 +21,17 @@ const PaymentSuccess: React.FC = () => {
     let msg = 'Payment completed successfully!';
     msg += `\nTransaction ID: ${query.get('transaction_id') || query.get('pidx') || '-'}`;
     msg += `\nOrder ID: ${query.get('purchase_order_id') || '-'}`;
-    msg += `\nAmount: Rs. ${query.get('amount') || query.get('total_amount') || '-'}`;
+    
+    // Divide amount by 100
+    const amount = query.get('amount') || query.get('total_amount');
+    const formattedAmount = amount ? `Rs. ${(parseFloat(amount) / 100).toFixed(2)}` : '-';
+    msg += `\nAmount: ${formattedAmount}`;
+    
     msg += `\nMobile: ${query.get('mobile') || '-'}`;
     msg += `\n\nDetails have been sent to your email as well.`;
     setMessage(msg);
     toast.success('Payment completed successfully!');
-  }, []);
+    }, []);
 
   return (
     <>
