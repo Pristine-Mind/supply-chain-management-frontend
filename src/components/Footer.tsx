@@ -210,7 +210,7 @@ const Footer: React.FC = () => {
               <p className="text-sm font-semibold text-gray-900 mb-3">Download Our App</p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a 
-                  href="https://play.google.com/store/apps/your-app-id" 
+                  href="https://play.google.com/store/apps/details?id=com.pristineminds.supply_chain_mobile" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:scale-105 transition-transform duration-200"
@@ -222,7 +222,7 @@ const Footer: React.FC = () => {
                   />
                 </a>
                 <a 
-                  href="https://apps.apple.com/us/app/your-app-id" 
+                  href="https://apps.apple.com/np/app/mulyabazar/id6749258559" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:scale-105 transition-transform duration-200"
@@ -272,7 +272,7 @@ const Footer: React.FC = () => {
               <MapPinIcon className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-gray-900 text-sm">Address</p>
-                <p className="text-gray-600 text-sm">Baluwatar, Kathmandu, Nepal</p>
+                <p className="text-gray-600 text-sm">Panipokhari, Kathmandu, Nepal</p>
               </div>
             </div>
             

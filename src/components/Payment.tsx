@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FaArrowLeft, FaCheckCircle, FaCreditCard, FaWallet, FaMoneyBillWave } from 'react-icons/fa';
-import { Card, CardContent } from './ui/card';
+import { FaCheckCircle, FaCreditCard, FaWallet, FaMoneyBillWave } from 'react-icons/fa';
 import { Button } from './ui/button';
 import { motion } from 'framer-motion';
 import Modal from 'react-modal';
-import KhaltiService from '../core/services/khaltiService';
 import { toast } from 'react-toastify';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -71,7 +69,6 @@ const Payment: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch payment gateways on component mount
   useEffect(() => {
     const fetchPaymentGateways = async () => {
       try {
@@ -86,14 +83,7 @@ const Payment: React.FC = () => {
         const data: PaymentGatewayResponse = await response.json();
         
         if (data.status === 'success') {
-          const codGateway: PaymentGateway = {
-            slug: 'COD',
-            name: 'Cash on Delivery',
-            logo: '',
-            items: []
-          };
-          console.log('Fetched payment gateways:', data.data);
-          setPaymentGateways([codGateway, ...data.data]);
+          setPaymentGateways(data.data);
         } else {
           throw new Error('Invalid response format');
         }
@@ -101,7 +91,6 @@ const Payment: React.FC = () => {
         console.error('Error fetching payment gateways:', err);
         setError(err.message);
         const fallbackGateways: PaymentGateway[] = [
-          { slug: 'COD', name: 'Cash on Delivery', logo: '', items: [] },
           { slug: 'KHALTI', name: 'Khalti Wallet', logo: 'https://khalti-static.s3.ap-south-1.amazonaws.com/media/kpg/wallet.svg', items: [] }
         ];
         setPaymentGateways(fallbackGateways);
@@ -221,8 +210,6 @@ const Payment: React.FC = () => {
 
   const getPaymentIcon = (slug: string) => {
     switch (slug) {
-      case 'COD':
-        return <FaMoneyBillWave className="text-green-600 text-xl" />;
       case 'KHALTI':
         return <FaWallet className="text-purple-600 text-xl" />;
       case 'SCT':
@@ -240,8 +227,6 @@ const Payment: React.FC = () => {
     const bankCount = gateway?.items?.length || 0;
     
     switch (slug) {
-      case 'COD':
-        return 'Pay when your order arrives';
       case 'KHALTI':
         return 'Digital wallet payment';
       case 'SCT':

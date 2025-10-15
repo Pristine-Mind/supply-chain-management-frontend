@@ -52,6 +52,7 @@ import AboutUs from './components/AboutUs';
 import TransporterDocuments from './components/TransporterDocuments';
 import SupportComponent from './components/SupportComponent';
 import TransporterLanding from './components/TransporterLanding';
+import MyOrders from './components/MyOrders';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -80,6 +81,7 @@ const protectedRoutes = [
   { path: '/earnings', element: <TransporterEarnings /> },
   { path: '/documents', element: <TransporterDocuments /> },
   { path: '/support', element: <SupportComponent /> },
+  { path: '/my-orders', element: <MyOrders /> },
 ];
 
 const publicRoutes = [
