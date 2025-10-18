@@ -12,16 +12,13 @@ import Footer from './Footer';
 
 const CATEGORY_OPTIONS = [
   { code: 'All', label: 'All' },
-  { code: 'FR', label: 'Fruits' },
-  { code: 'VG', label: 'Vegetables' },
-  { code: 'GR', label: 'Grains & Cereals' },
-  { code: 'PL', label: 'Pulses & Legumes' },
-  { code: 'SP', label: 'Spices & Herbs' },
-  { code: 'NT', label: 'Nuts & Seeds' },
-  { code: 'DF', label: 'Animal Products' },
-  { code: 'FM', label: 'Fodder & Forage' },
-  { code: 'FL', label: 'Ornamental Plants' },
-  { code: 'HR', label: 'Medicinal Plants' },
+  { code: 'FA', label: 'Fashion & Apparel' },
+  { code: 'EG', label: 'Electronics & Gadgets' },
+  { code: 'GE', label: 'Groceries & Essentials' },
+  { code: 'HB', label: 'Health & Beauty' },
+  { code: 'HL', label: 'Home & Living' },
+  { code: 'TT', label: 'Travel & Tourism' },
+  { code: 'IS', label: 'Industrial Supplies' },
   { code: 'OT', label: 'Other' },
 ] as const;
 

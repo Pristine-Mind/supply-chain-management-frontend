@@ -35,16 +35,13 @@ interface StatsResponse {
 }
 
 const categoryOptions = [
-  { value: 'FR', label: 'Fruits' },
-  { value: 'VG', label: 'Vegetables' },
-  { value: 'GR', label: 'Grains & Cereals' },
-  { value: 'PL', label: 'Pulses & Legumes' },
-  { value: 'SP', label: 'Spices & Herbs' },
-  { value: 'NT', label: 'Nuts & Seeds' },
-  { value: 'DF', label: 'Dairy & Animal Products' },
-  { value: 'FM', label: 'Fodder & Forage' },
-  { value: 'FL', label: 'Flowers & Ornamental Plants' },
-  { value: 'HR', label: 'Herbs & Medicinal Plants' },
+  { value: 'FA', label: 'Fashion & Apparel' },
+  { value: 'EG', label: 'Electronics & Gadgets' },
+  { value: 'GE', label: 'Groceries & Essentials' },
+  { value: 'HB', label: 'Health & Beauty' },
+  { value: 'HL', label: 'Home & Living' },
+  { value: 'TT', label: 'Travel & Tourism' },
+  { value: 'IS', label: 'Industrial Supplies' },
   { value: 'OT', label: 'Other' },
 ];
 

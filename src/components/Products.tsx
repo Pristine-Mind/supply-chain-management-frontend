@@ -95,16 +95,13 @@ const Products: React.FC = () => {
   const producerSearchRef = useRef<HTMLDivElement>(null);
 
   const categoryOptions: Category[] = [
-    { value: 'FR', label: t('fruits') },
-    { value: 'VG', label: t('vegetables') },
-    { value: 'GR', label: t('grains_cereals') },
-    { value: 'PL', label: t('pulses_legumes') },
-    { value: 'SP', label: t('spices_herbs') },
-    { value: 'NT', label: t('nuts_seeds') },
-    { value: 'DF', label: t('dairy_animal_products') },
-    { value: 'FM', label: t('fodder_forage') },
-    { value: 'FL', label: t('flowers_ornamental_plants') },
-    { value: 'HR', label: t('herbs_medicinal_plants') },
+    { value: 'FA', label: t('fashion_apparel') },
+    { value: 'EG', label: t('electronics_gadgets') },
+    { value: 'GE', label: t('groceries_essentials') },
+    { value: 'HB', label: t('health_beauty') },
+    { value: 'HL', label: t('home_living') },
+    { value: 'TT', label: t('travel_tourism') },
+    { value: 'IS', label: t('industrial_supplies') },
     { value: 'OT', label: t('other') },
   ];
 

@@ -85,16 +85,13 @@ interface MarketplaceProduct {
 
 const CATEGORY_OPTIONS = [
   { code: 'All', label: 'All Categories' },
-  { code: 'FR', label: 'Fruits' },
-  { code: 'VG', label: 'Vegetables' },
-  { code: 'GR', label: 'Grains & Cereals' },
-  { code: 'PL', label: 'Pulses & Legumes' },
-  { code: 'SP', label: 'Spices & Herbs' },
-  { code: 'NT', label: 'Nuts & Seeds' },
-  { code: 'DF', label: 'Animal Products' },
-  { code: 'FM', label: 'Fodder & Forage' },
-  { code: 'FL', label: 'Ornamental Plants' },
-  { code: 'HR', label: 'Medicinal Plants' },
+  { code: 'FA', label: 'Fashion & Apparel' },
+  { code: 'EG', label: 'Electronics & Gadgets' },
+  { code: 'GE', label: 'Groceries & Essentials' },
+  { code: 'HB', label: 'Health & Beauty' },
+  { code: 'HL', label: 'Home & Living' },
+  { code: 'TT', label: 'Travel & Tourism' },
+  { code: 'IS', label: 'Industrial Supplies' },
   { code: 'OT', label: 'Other' },
 ] as const;
 
@@ -123,7 +120,7 @@ const Marketplace: React.FC = () => {
   const [newArrivals, setNewArrivals] = useState<MarketplaceProduct[]>([]);
   const [categories, setCategories] = useState<{ key: string; value: string }[]>([]);
   const [query, setQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(CATEGORY_OPTIONS[0].code);
+  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_OPTIONS[0].code);
   const [selectedLocation, setSelectedLocation] = useState(LOCATION_OPTIONS[0]);
   const [selectedProfileType, setSelectedProfileType] = useState(PROFILE_TYPE_OPTIONS[0]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -174,16 +171,13 @@ const Marketplace: React.FC = () => {
       setNewArrivals(data.results.slice(0, 5));
       setTotalCount(data.count || 0);
       setCategories([
-        { key: 'Fruits', value: 'https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80' },
-        { key: 'Vegetables', value: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=400&q=80' },
-        { key: 'Grains & Cereals', value: 'https://t4.ftcdn.net/jpg/02/44/16/79/360_F_244167973_E7aRgY9NHX9qW0QWOaZNwmG8NBJaa1rf.jpg' },
-        { key: 'Pulses & Legumes', value: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-        { key: 'Spices & Herbs', value: 'https://media.istockphoto.com/id/1412875469/photo/herbs-and-spices.webp?s=2048x2048&w=is&k=20&c=YRunD3et5VG3SbJrXJJ9r-eo78BnY6OAl4eJdNkDM3Y=' },
-        { key: 'Nuts & Seeds', value: 'https://media.istockphoto.com/id/2032503128/photo/nuts-mixed-in-wooden-bowl-with-spoon-on-blue-background-top-view.webp?s=2048x2048&w=is&k=20&c=i8sranJcrZOEK9yZsYXYRNyEhgqBbkT5-VR_97ObZnE=' },
-        { key: 'Animal Products', value: 'https://images.unsplash.com/photo-1683314573422-649a3c6ad784?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2hlZXNlfGVufDB8fDB8fHww' },
-        { key: 'Fodder & Forage', value: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80' },
-        { key: 'Ornamental Plants', value: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' },
-        { key: 'Medicinal Plants', value: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80' },
+        { key: 'Fashion & Apparel', value: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=400&q=80' },
+        { key: 'Electronics & Gadgets', value: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=400&q=80' },
+        { key: 'Groceries & Essentials', value: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80' },
+        { key: 'Health & Beauty', value: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400&q=80' },
+        { key: 'Home & Living', value: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=400&q=80' },
+        { key: 'Travel & Tourism', value: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=400&q=80' },
+        { key: 'Industrial Supplies', value: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=400&q=80' },
         { key: 'Other', value: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80' },
       ]);
     } catch {
