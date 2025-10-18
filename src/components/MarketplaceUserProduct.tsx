@@ -201,16 +201,13 @@ const MarketplaceUserProduct: React.FC = () => {
               <label className="block mb-2 text-lg font-medium">Category</label>
               <select {...register("category")} className="w-full bg-gray-100 border border-gray-300 p-3 rounded-lg text-base h-12">
                 <option value="">Select a category</option>
-                <option value="FR">Fruits</option>
-                <option value="VG">Vegetables</option>
-                <option value="GR">Grains & Cereals</option>
-                <option value="PL">Pulses & Legumes</option>
-                <option value="SP">Spices & Herbs</option>
-                <option value="NT">Nuts & Seeds</option>
-                <option value="DF">Dairy & Animal Products</option>
-                <option value="FM">Fodder & Forage</option>
-                <option value="FL">Flowers & Plants</option>
-                <option value="HR">Herbs & Medicinal Plants</option>
+                <option value="FA">Fashion & Apparel</option>
+                <option value="EG">Electronics & Gadgets</option>
+                <option value="GE">Groceries & Essentials</option>
+                <option value="HB">Health & Beauty</option>
+                <option value="HL">Home & Living</option>
+                <option value="TT">Travel & Tourism</option>
+                <option value="IS">Industrial Supplies</option>
                 <option value="OT">Other</option>
               </select>
               {errors.category && <p className="text-red-500 mt-1">{errors.category.message}</p>}
