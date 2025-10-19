@@ -142,7 +142,7 @@ export const fetchMarketplaceOrders = async (filters: OrderFilters = {}): Promis
     }
 
     const response = await axios.get<MarketplaceOrdersResponse>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/orders/my-orders/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}api/v1/marketplace/orders/my-orders/`,
       {
         headers: {
           Authorization: `Token ${token}`,
@@ -166,7 +166,7 @@ export const fetchMarketplaceOrderById = async (orderId: number): Promise<Market
     }
 
     const response = await axios.get<MarketplaceOrder>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/orders/${orderId}/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}api/v1/marketplace/orders/${orderId}/`,
       {
         headers: {
           Authorization: `Token ${token}`,
@@ -189,7 +189,7 @@ export const cancelMarketplaceOrder = async (orderId: number, reason?: string): 
     }
 
     const response = await axios.post<MarketplaceOrder>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/orders/${orderId}/cancel/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}api/v1/marketplace/orders/${orderId}/cancel/`,
       {
         cancellation_reason: reason,
       },
@@ -216,7 +216,7 @@ export const reorderMarketplaceOrder = async (orderId: number): Promise<{ succes
     }
 
     const response = await axios.post<{ success: boolean; message: string }>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/orders/${orderId}/reorder/`,
+      `${import.meta.env.VITE_REACT_APP_API_URL}api/v1/marketplace/orders/${orderId}/reorder/`,
       {},
       {
         headers: {
