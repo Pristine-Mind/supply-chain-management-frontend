@@ -52,6 +52,8 @@ import AboutUs from './components/AboutUs';
 import TransporterDocuments from './components/TransporterDocuments';
 import SupportComponent from './components/SupportComponent';
 import TransporterLanding from './components/TransporterLanding';
+import MyOrders from './components/MyOrders';
+import UserProfile from './components/UserProfile';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -67,6 +69,7 @@ const protectedRoutes = [
   { path: '/audit-logs/:id', element: <AuditLogForm /> },
   { path: '/purchase-orders', element: <PurchaseOrderCards /> },
   { path: '/cart', element: <Cart /> },
+  { path: '/my-orders', element: <MyOrders /> },
   { path: '/delivery-details', element: <DeliveryDetails /> },
   { path: '/checkout', element: <CheckoutScreen /> },
   { path: '/payment', element: <Payment /> },
@@ -106,6 +109,8 @@ const publicRoutes = [
   { path: '/terms', element: <TermsofService /> },
   { path: '/privacy', element: <Privacy /> },
   { path: '/payment/success', element: <PaymentSuccess /> },
+  { path: '/my-orders', element: <MyOrders /> },
+  { path: '/user-profile', element: <UserProfile /> },
 ];
 
 const App: React.FC = () => {

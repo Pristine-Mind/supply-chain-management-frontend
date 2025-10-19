@@ -222,7 +222,7 @@ export const Navbar: React.FC = () => {
                         
                         <div className="mt-2 space-y-1">
                           <Link
-                            to="/profile"
+                            to="/user-profile"
                             onClick={closeMenus}
                             className="flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                           >
@@ -230,7 +230,7 @@ export const Navbar: React.FC = () => {
                             Profile
                           </Link>
                           <Link
-                            to="/orders"
+                            to="/my-orders"
                             onClick={closeMenus}
                             className="flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                           >
@@ -322,7 +322,7 @@ export const Navbar: React.FC = () => {
                     
                     <div className="space-y-1">
                       <Link
-                        to="/profile"
+                        to="/user-profile"
                         onClick={closeMenus}
                         className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >
@@ -330,7 +330,7 @@ export const Navbar: React.FC = () => {
                         Profile
                       </Link>
                       <Link
-                        to="/orders"
+                        to="/my-orders"
                         onClick={closeMenus}
                         className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                       >

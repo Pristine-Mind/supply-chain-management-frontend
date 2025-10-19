@@ -474,14 +474,14 @@ const Marketplace: React.FC = () => {
                           <p className="text-xs text-gray-500">{user?.email}</p>
                         </div>
                         <DropdownMenu.Item
-                          onSelect={() => navigate('/profile')}
+                          onSelect={() => navigate('/user-profile')}
                           className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
                         >
                           <User className="w-4 h-4 mr-2" />
                           Profile
                         </DropdownMenu.Item>
                         <DropdownMenu.Item
-                          onSelect={() => navigate('/orders')}
+                          onSelect={() => navigate('/my-orders')}
                           className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 rounded-md cursor-pointer outline-none"
                         >
                           <ShoppingCart className="w-4 h-4 mr-2" />
@@ -578,7 +578,7 @@ const Marketplace: React.FC = () => {
                       Profile
                     </button>
                     <button 
-                      onClick={() => navigate('/orders')}
+                      onClick={() => navigate('/my-orders')}
                       className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
                     >
                       My Orders
