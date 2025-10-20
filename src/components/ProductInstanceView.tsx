@@ -297,7 +297,13 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     <FaCartPlus className="text-lg" /> Add to Cart
                   </button>
                   <button
-                    onClick={() => navigate('/delivery-details')}
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        setShowLoginModal(true);
+                        return;
+                      }
+                      navigate('/delivery-details');
+                    }}
                     className="flex-1 flex items-center justify-center gap-2 bg-orange-600 text-white py-3.5 rounded-lg hover:bg-orange-700 transition-all shadow-md text-base font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                     aria-label="Buy now"
                   >
