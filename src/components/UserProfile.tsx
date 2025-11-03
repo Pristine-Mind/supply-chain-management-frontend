@@ -127,7 +127,7 @@ const UserProfile: React.FC = () => {
       });
 
       setContactForm({
-        phone: profileData.phone || '',
+        phone: profileData.phone || profileData.phone_number || '',
         address: profileData.address || '',
         city: profileData.city || '',
         state: profileData.state || '',
@@ -145,7 +145,6 @@ const UserProfile: React.FC = () => {
       setShippingAddresses(profileData.shipping_addresses || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load profile');
-      console.error('Error loading profile:', err);
     } finally {
       setLoading(false);
     }
@@ -224,15 +223,21 @@ const UserProfile: React.FC = () => {
 
     try {
       setSaveLoading(true);
-      await changePassword(passwordForm);
+      const result = await changePassword(passwordForm);
+      console.log('🔓 Password change result:', result);
+      
       setPasswordForm({
         current_password: '',
         new_password: '',
         confirm_password: ''
       });
       setEditMode(prev => ({ ...prev, password: false }));
-      showSuccess('Password changed successfully!');
+      
+      // Use the message from the API response if available, otherwise use default message
+      const successMsg = result.message || 'Password changed successfully!';
+      showSuccess(successMsg);
     } catch (err) {
+      console.error('❌ Password change error:', err);
       setError('Failed to change password. Please check your current password.');
     } finally {
       setSaveLoading(false);

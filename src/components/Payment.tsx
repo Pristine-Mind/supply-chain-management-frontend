@@ -10,6 +10,7 @@ import KhaltiService from '../core/services/khaltiService';
 import { toast } from 'react-toastify';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { createOrder, CreateOrderRequest, DeliveryInfoRequest, OrderResponse } from '../api/orderApi';
 
 export interface Delivery {
   id?: number;
@@ -56,9 +57,13 @@ const Payment: React.FC = () => {
   const delivery = locState?.delivery;
   const total = locState?.total ?? 0;
 
-  const { subTotal, shipping, total: cartTotal, clearCart, state, createCartOnBackend } = useCart();
+    const { cart, state, clearCart, createCartOnBackend } = useCart();
   const cartId = state.cartId;
-  console.log(cartId);
+
+  // Calculate totals
+  const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const shipping = 100; // Fixed shipping cost
+  const cartTotal = subTotal + shipping;
 
   const [method, setMethod] = useState<string>('COD');
   const [processing, setProcessing] = useState(false);
@@ -115,16 +120,71 @@ const Payment: React.FC = () => {
 
   const delay = (ms:number) => new Promise(res=>setTimeout(res,ms));
 
-  const onSuccess = (m: string) => {
-    toast.success(`Payment successful with ${m}!`);
-    clearCart();
-    navigate('/marketplace', { replace: true });
+  const onSuccess = async (paymentMethod: string) => {
+    try {
+      if (!delivery) {
+        toast.error('Delivery information not found');
+        return;
+      }
+
+      // Check if cart has items
+      if (!cart || cart.length === 0) {
+        toast.error('Your cart is empty. Please add items before placing an order.');
+        return;
+      }
+
+      // Use cart ID from delivery info or fallback to cart state
+      const orderCartId = delivery.cartId || cartId;
+      
+      if (!orderCartId) {
+        toast.error('Cart not found. Please refresh and try again.');
+        return;
+      }
+
+      // Create order using the API
+      const deliveryInfo: DeliveryInfoRequest = {
+        customer_name: delivery.customer_name,
+        customer_email: delivery.email || '',
+        phone_number: delivery.phone_number,
+        address: delivery.address,
+        city: delivery.city,
+        state: delivery.state,
+        zip_code: delivery.zip_code,
+        latitude: delivery.latitude || 0,
+        longitude: delivery.longitude || 0,
+      };
+
+      const orderRequest: CreateOrderRequest = {
+        cart_id: orderCartId,
+        delivery_info: deliveryInfo,
+        payment_method: paymentMethod,
+      };
+
+      const order: OrderResponse = await createOrder(orderRequest);
+      
+      toast.success(`Order created successfully! Order #${order.order_number}`);
+      clearCart();
+      
+      // Navigate to order success page with order details
+      navigate('/payment-success', { 
+        state: { 
+          order,
+          paymentMethod 
+        }, 
+        replace: true 
+      });
+      
+    } catch (error: any) {
+      console.error('Order creation failed:', error);
+      toast.error(error.message || 'Failed to create order. Please try again.');
+    }
   };
 
   const handleConfirm = async () => {
     setProcessing(true);
     try {
       let backendCartId = cartId;
+      
       if (!backendCartId) {
         try {
           backendCartId = await createCartOnBackend();
@@ -135,6 +195,14 @@ const Payment: React.FC = () => {
         }
       }
 
+      // Handle COD payment directly through order creation
+      if (method === 'COD') {
+        await onSuccess('Cash on Delivery');
+        setProcessing(false);
+        return;
+      }
+
+      // For other payment methods, continue with the existing payment gateway flow
       // For MOBILE_BANKING and EBANKING, gateway should be just the base method
       let gateway = method;
       if (method.startsWith('MOBILE_BANKING_')) {
@@ -142,6 +210,7 @@ const Payment: React.FC = () => {
       } else if (method.startsWith('EBANKING_')) {
         gateway = 'EBANKING';
       }
+      
       let paymentData: any = {
         cart_id: backendCartId,
         gateway: gateway,
@@ -149,9 +218,10 @@ const Payment: React.FC = () => {
         customer_email: delivery?.email || "customer@example.com",
         customer_phone: delivery?.phone_number || "9800000001",
         tax_amount: 0,
-        shipping_cost: 0,
+        shipping_cost: 100, //hardcoded for now
         return_url: `${window.location.origin}/payment/success/`,
       };
+      
       // Only send bank for MOBILE_BANKING and EBANKING, use selectedBank from the list
       if ((method.startsWith('MOBILE_BANKING') || method.startsWith('EBANKING')) && selectedBank) {
         paymentData.bank = selectedBank.idx;
@@ -176,7 +246,7 @@ const Payment: React.FC = () => {
       if (result.payment_url) {
         window.location.href = result.payment_url;
       } else if (result.success) {
-        onSuccess(paymentData.gateway);
+        await onSuccess(paymentData.gateway);
       } else {
         throw new Error(result.message || 'Payment initiation failed');
       }
@@ -286,7 +356,6 @@ const Payment: React.FC = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log('Payment method clicked:', gateway.slug);
                       
                       if ((gateway.slug === 'MOBILE_BANKING' || gateway.slug === 'EBANKING') && gateway.items && gateway.items.length > 0) {
                         if (expandedGateway === gateway.slug) {

@@ -7,7 +7,11 @@ import {
   FaShoppingCart,
   FaStar,
   FaStarHalfAlt,
-  FaRegStar
+  FaRegStar,
+  FaTimes,
+  FaChevronLeft,
+  FaChevronRight,
+  FaExpand
 } from 'react-icons/fa';
 import ChatTab from './ChatTab';
 import { PopularityScore } from '../components/ui/PopularityScore';
@@ -100,6 +104,8 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   const [quantity] = useState(1);
   const [tab, setTab] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isFullScreenOpen, setIsFullScreenOpen] = useState(false);
+  const [fullScreenImageIndex, setFullScreenImageIndex] = useState(0);
   const { addToCart, distinctItemCount, refreshCart } = useCart();
   const { isAuthenticated } = useAuth();
   const reviews = product.reviews || [];
@@ -135,6 +141,50 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   );
 
   const images = product.product_details?.images || [];
+
+  const openFullScreen = (imageIndex: number) => {
+    setFullScreenImageIndex(imageIndex);
+    setIsFullScreenOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeFullScreen = () => {
+    setIsFullScreenOpen(false);
+    document.body.style.overflow = 'unset';
+  };
+
+  const nextFullScreenImage = () => {
+    setFullScreenImageIndex((prev) => 
+      prev < images.length - 1 ? prev + 1 : 0
+    );
+  };
+
+  const prevFullScreenImage = () => {
+    setFullScreenImageIndex((prev) => 
+      prev > 0 ? prev - 1 : images.length - 1
+    );
+  };
+
+  // Handle keyboard navigation in full screen
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isFullScreenOpen) return;
+      
+      if (e.key === 'Escape') {
+        closeFullScreen();
+      } else if (e.key === 'ArrowLeft') {
+        prevFullScreenImage();
+      } else if (e.key === 'ArrowRight') {
+        nextFullScreenImage();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isFullScreenOpen, images.length]);
 
   const showOffer = product.is_offer_active && product.discounted_price < product.listed_price;
   const priceDisplay = showOffer ? (
@@ -192,13 +242,22 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   Popularity Score: <PopularityScore score={product.rank_score} size="lg" showLabel={true} />
                 </div>
               </div>
-              <div className="relative aspect-[4/3] bg-gray-100 rounded-xl overflow-hidden">
+              <div className="relative aspect-[4/3] bg-gray-100 rounded-xl overflow-hidden group cursor-pointer">
                 <img
                   src={images[currentImage]?.image || ''}
                   alt={product.product_details?.name}
                   className="w-full h-full max-h-[600px] object-contain transition-transform duration-300 hover:scale-105"
                   loading="lazy"
+                  onClick={() => openFullScreen(currentImage)}
                 />
+                {/* Expand icon overlay */}
+                <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <FaExpand className="w-4 h-4" />
+                </div>
+                {/* Click hint */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  Click to enlarge
+                </div>
               </div>
               {images.length > 1 && (
                 <div className="flex items-center justify-center gap-3">
@@ -213,12 +272,17 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     <button
                       key={idx}
                       onClick={() => setCurrentImage(idx)}
-                      className={`w-20 h-20 rounded-lg border overflow-hidden transition-all ${
+                      onDoubleClick={() => openFullScreen(idx)}
+                      className={`w-20 h-20 rounded-lg border overflow-hidden transition-all group relative ${
                         idx === currentImage ? 'ring-2 ring-rose-500' : 'border-gray-200'
                       }`}
                       aria-label={`View image ${idx + 1}`}
+                      title="Click to select, double-click to enlarge"
                     >
                       <img src={img.image} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                        <FaExpand className="w-3 h-3 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </div>
                     </button>
                   ))}
                   <button
@@ -252,8 +316,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
               <div className="mt-4">
                 <span className="text-gray-500 text-lg">Price: {priceDisplay}</span>
               </div>
-
-              <div className="mt-2 text-sm">{shippingDisplay}</div>
 
               {bulkPricing}
               {ratingsBreakdown}
@@ -399,6 +461,89 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
         onClose={() => setShowLoginModal(false)}
         onSuccess={handleLoginSuccess}
       />
+
+      {/* Full Screen Image Modal */}
+      {isFullScreenOpen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex items-center justify-center">
+          {/* Close button */}
+          <button
+            onClick={closeFullScreen}
+            className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all"
+            aria-label="Close full screen"
+          >
+            <FaTimes className="w-6 h-6" />
+          </button>
+
+          {/* Image counter */}
+          <div className="absolute top-4 left-4 z-10 bg-black bg-opacity-50 text-white px-4 py-2 rounded-full">
+            {fullScreenImageIndex + 1} / {images.length}
+          </div>
+
+          {/* Previous button */}
+          {images.length > 1 && (
+            <button
+              onClick={prevFullScreenImage}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all"
+              aria-label="Previous image"
+            >
+              <FaChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Next button */}
+          {images.length > 1 && (
+            <button
+              onClick={nextFullScreenImage}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition-all"
+              aria-label="Next image"
+            >
+              <FaChevronRight className="w-6 h-6" />
+            </button>
+          )}
+
+          {/* Main image */}
+          <div className="max-w-7xl max-h-full mx-4 flex items-center justify-center">
+            <img
+              src={images[fullScreenImageIndex]?.image || ''}
+              alt={`${product.product_details?.name} - Image ${fullScreenImageIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+              style={{ maxHeight: '90vh' }}
+            />
+          </div>
+
+          {/* Image thumbnails at bottom */}
+          {images.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+              <div className="flex items-center gap-2 bg-black bg-opacity-50 p-2 rounded-full max-w-md overflow-x-auto">
+                {images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setFullScreenImageIndex(idx)}
+                    className={`w-12 h-12 rounded-lg border overflow-hidden transition-all flex-shrink-0 ${
+                      idx === fullScreenImageIndex ? 'ring-2 ring-white' : 'border-gray-400 opacity-70 hover:opacity-100'
+                    }`}
+                    aria-label={`Go to image ${idx + 1}`}
+                  >
+                    <img src={img.image} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Instructions */}
+          <div className="absolute bottom-4 right-4 z-10 bg-black bg-opacity-50 text-white px-3 py-2 rounded-full text-sm">
+            Press ESC to close • Use arrow keys to navigate
+          </div>
+
+          {/* Click to close overlay */}
+          <div
+            className="absolute inset-0 cursor-pointer"
+            onClick={closeFullScreen}
+            aria-label="Click to close"
+          />
+        </div>
+      )}
     </div>
   );
 };

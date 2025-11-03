@@ -52,7 +52,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
     setError(null)
     try {
       const loginResponse = await axios.post<{ token: string }>(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/login/`,
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/login/`,
         { username, password }
       )
       const { token } = loginResponse.data

@@ -19,7 +19,7 @@ interface FormValues {
 }
 
 interface Delivery {
-  cart: number
+  cartId: number
   customer_name: string
   phone_number: string
   email: string
@@ -35,7 +35,7 @@ const DeliveryDetails: React.FC = () => {
   const navigate = useNavigate()
   const cartContext = useContext(CartContext)
   if (!cartContext) throw new Error('Must be inside CartProvider')
-  const { state: cartState, createCartOnBackend, createDelivery } = cartContext
+  const { state: cartState, createCartOnBackend } = cartContext
   const { isAuthenticated } = useAuth()
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
@@ -61,8 +61,9 @@ const DeliveryDetails: React.FC = () => {
         cartId = await createCartOnBackend()
       }
 
+      // Prepare delivery data for the new order flow
       const delivery: Delivery = {
-        cart: cartId,
+        cartId: cartId,
         customer_name: data.name,
         phone_number: data.phone,
         email: data.email,
@@ -73,8 +74,10 @@ const DeliveryDetails: React.FC = () => {
         latitude: latLng.lat,
         longitude: latLng.lng,
       }
-      await createDelivery(delivery)
-      navigate('/checkout', { state: { delivery } })
+
+      // Skip the old createDelivery API call and go directly to payment
+      // The delivery info will be used in the order creation API
+      navigate('/payment', { state: { delivery } })
     } catch (err) {
       console.error(err)
       setError('Failed to process delivery. Please try again.')

@@ -1,15 +1,16 @@
 import axios from 'axios';
 
 export interface UserProfile {
-  id: number;
+  id?: number;
   username: string;
   email: string;
   first_name: string;
   last_name: string;
   phone?: string;
+  phone_number?: string;
   date_joined: string;
   last_login?: string;
-  is_active: boolean;
+  is_active?: boolean;
   business_type?: string;
   role?: string;
   shop_id?: string;
@@ -80,7 +81,7 @@ export const fetchUserProfile = async (): Promise<UserProfile> => {
     }
 
     const response = await axios.get<UserProfile>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-profile/`,
+      'https://appmulyabazzar.com/api/v1/user-profile/',
       {
         headers: {
           Authorization: `Token ${token}`,
@@ -88,9 +89,14 @@ export const fetchUserProfile = async (): Promise<UserProfile> => {
       }
     );
 
+
+    // Check if the response has a nested data structure
+    if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+      return (response.data as any).data as UserProfile;
+    }
+    
     return response.data;
   } catch (error) {
-    console.error('Error fetching user profile:', error);
     throw error;
   }
 };
@@ -103,7 +109,7 @@ export const updateUserProfile = async (data: UpdateProfileData): Promise<UserPr
     }
 
     const response = await axios.patch<UserProfile>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-profile/`,
+      'https://appmulyabazzar.com/api/v1/user-profile/',
       data,
       {
         headers: {
@@ -131,7 +137,7 @@ export const uploadProfilePicture = async (file: File): Promise<{ profile_pictur
     formData.append('profile_picture', file);
 
     const response = await axios.post<{ profile_picture: string }>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-profile/upload-picture/`,
+      'https://appmulyabazzar.com/api/v1/user-profile/upload-picture/',
       formData,
       {
         headers: {
@@ -156,7 +162,7 @@ export const changePassword = async (data: ChangePasswordData): Promise<{ succes
     }
 
     const response = await axios.post<{ success: boolean; message: string }>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-profile/change-password/`,
+      'https://appmulyabazzar.com/api/v1/user/change-password/',
       data,
       {
         headers: {
@@ -181,7 +187,7 @@ export const addShippingAddress = async (address: Omit<ShippingAddress, 'id' | '
     }
 
     const response = await axios.post<ShippingAddress>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-profile/shipping-addresses/`,
+      'https://appmulyabazzar.com/api/v1/user-profile/shipping-addresses/',
       address,
       {
         headers: {
@@ -209,7 +215,7 @@ export const updateShippingAddress = async (
     }
 
     const response = await axios.patch<ShippingAddress>(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-profile/shipping-addresses/${id}/`,
+      `https://appmulyabazzar.com/api/v1/user-profile/shipping-addresses/${id}/`,
       address,
       {
         headers: {
@@ -234,7 +240,7 @@ export const deleteShippingAddress = async (id: number): Promise<void> => {
     }
 
     await axios.delete(
-      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user-profile/shipping-addresses/${id}/`,
+      `https://appmulyabazzar.com/api/v1/user-profile/shipping-addresses/${id}/`,
       {
         headers: {
           Authorization: `Token ${token}`,

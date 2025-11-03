@@ -4,7 +4,6 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
 
 const BENEFITS = [
   { title: '0% Commission', subtitle: 'Only pay when you sell.' },
-  { title: 'Free Shipping', subtitle: 'We handle delivery for you.' },
   { title: 'Nationwide Reach', subtitle: 'Sell across the country.' },
   { title: 'Dedicated Support', subtitle: 'Expert help 24/7.' },
   { title: 'Marketing Tools', subtitle: 'Boost your visibility.' },
