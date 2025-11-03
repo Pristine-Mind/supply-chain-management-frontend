@@ -428,26 +428,26 @@ const MyOrders: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {orders.map((order) => (
-                <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex-1">
+                <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex-1 lg:pr-6">
                       {/* Order Header */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
                             Order #{order.order_number}
                           </h3>
                           <p className="text-sm text-gray-500">
                             Placed on {formatDate(order.created_at)}
                           </p>
                         </div>
-                        <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.order_status)}`}>
+                        <div className="flex items-center space-x-2 mt-3 sm:mt-0">
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.order_status)}`}>
                             {order.order_status_display}
                           </span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.payment_status)}`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(order.payment_status)}`}>
                             {order.payment_status_display}
                           </span>
                         </div>
@@ -455,24 +455,29 @@ const MyOrders: React.FC = () => {
 
                       {/* Order Items */}
                       <div className="mb-4">
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {order.items.slice(0, 3).map((item, index) => (
-                            <div key={index} className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
-                              {item.product.product_details.images?.[0] && (
+                            <div key={index} className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3">
+                              {/* {item.product.product_details.images?.[0] && (
                                 <img
                                   src={item.product.product_details.images[0].image}
                                   alt={item.product.product_details.name}
-                                  className="h-8 w-8 rounded object-cover"
+                                  className="h-12 w-12 rounded-lg object-cover flex-shrink-0"
                                 />
-                              )}
-                              <span className="text-sm text-gray-700">
-                                {item.product.product_details.name} × {item.quantity}
-                              </span>
+                              )} */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {item.product.product_details.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Qty: {item.quantity}
+                                </p>
+                              </div>
                             </div>
                           ))}
                           {order.items.length > 3 && (
-                            <div className="flex items-center justify-center bg-gray-100 rounded-lg px-3 py-2">
-                              <span className="text-sm text-gray-500">
+                            <div className="flex items-center justify-center bg-gray-100 rounded-lg p-3 border-2 border-dashed border-gray-300">
+                              <span className="text-sm font-medium text-gray-600">
                                 +{order.items.length - 3} more items
                               </span>
                             </div>
@@ -481,38 +486,38 @@ const MyOrders: React.FC = () => {
                       </div>
 
                       {/* Order Summary */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-600">
-                        <div className="flex items-center space-x-4">
-                          <span className="flex items-center">
-                            <Package className="h-4 w-4 mr-1" />
-                            {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-50 rounded-lg p-4 text-sm">
+                        <div className="flex items-center space-x-6">
+                          <span className="flex items-center text-gray-600">
+                            <Package className="h-4 w-4 mr-2" />
+                            <span className="font-medium">{order.items.length}</span> item{order.items.length !== 1 ? 's' : ''}
                           </span>
-                          <span className="flex items-center">
-                            <CreditCard className="h-4 w-4 mr-1" />
-                            NPR {parseFloat(order.total_amount).toFixed(2)}
+                          <span className="flex items-center text-gray-900">
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            <span className="font-semibold">NPR {parseFloat(order.total_amount).toLocaleString()}</span>
                           </span>
                           {order.tracking_number && (
-                            <span className="flex items-center">
-                              <Truck className="h-4 w-4 mr-1" />
-                              {order.tracking_number}
+                            <span className="flex items-center text-gray-600">
+                              <Truck className="h-4 w-4 mr-2" />
+                              <span className="font-mono text-xs">{order.tracking_number}</span>
                             </span>
                           )}
                         </div>
                         {order.estimated_delivery_date && (
-                          <span className="flex items-center mt-2 sm:mt-0">
-                            <Clock className="h-4 w-4 mr-1" />
-                            Est. delivery: {formatDate(order.estimated_delivery_date)}
+                          <span className="flex items-center mt-3 sm:mt-0 text-gray-600">
+                            <Clock className="h-4 w-4 mr-2" />
+                            Est. delivery: <span className="font-medium ml-1">{formatDate(order.estimated_delivery_date)}</span>
                           </span>
                         )}
                       </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center space-x-2 mt-4 lg:mt-0 lg:ml-6">
+                    <div className="flex items-center space-x-2 mt-6 lg:mt-0 lg:ml-6 lg:flex-col lg:space-x-0 lg:space-y-2">
                       <button
                         onClick={() => handleViewDetails(order.id)}
                         disabled={actionLoading[order.id]}
-                        className="flex items-center px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+                        className="flex items-center justify-center px-4 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 w-full lg:w-24"
                       >
                         {actionLoading[order.id] ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-700 mr-2"></div>
@@ -526,7 +531,7 @@ const MyOrders: React.FC = () => {
                         <button
                           onClick={() => handleCancelOrder(order.id)}
                           disabled={actionLoading[order.id]}
-                          className="flex items-center px-3 py-2 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+                          className="flex items-center justify-center px-4 py-2 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 w-full lg:w-24"
                         >
                           {actionLoading[order.id] ? (
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
@@ -540,7 +545,7 @@ const MyOrders: React.FC = () => {
                       <button
                         onClick={() => handleReorder(order.id)}
                         disabled={actionLoading[order.id]}
-                        className="flex items-center px-3 py-2 text-sm text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors disabled:opacity-50"
+                        className="flex items-center justify-center px-4 py-2 text-sm text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors disabled:opacity-50 w-full lg:w-24"
                       >
                         {actionLoading[order.id] ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600 mr-2"></div>
@@ -632,13 +637,13 @@ const MyOrders: React.FC = () => {
                 <div className="space-y-4">
                   {selectedOrder.items.map((item, index) => (
                     <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-                      {item.product.product_details.images?.[0] && (
+                      {/* {item.product.product_details.images?.[0] && (
                         <img
                           src={item.product.product_details.images[0].image}
                           alt={item.product.product_details.name}
                           className="h-16 w-16 rounded-lg object-cover"
                         />
-                      )}
+                      )} */}
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900">{item.product.product_details.name}</h4>
                         <p className="text-sm text-gray-500">{item.product.product_details.category_details}</p>

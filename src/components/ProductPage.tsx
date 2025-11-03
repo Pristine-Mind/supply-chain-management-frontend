@@ -144,7 +144,7 @@ const ProductPage: React.FC = () => {
               <div className="sticky top-24 space-y-4">
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 text-center">
                   <FiShoppingBag className="mx-auto w-8 h-8 text-blue-600 mb-3" />
-                  <p className="text-sm font-medium text-blue-700">Free Shipping on Orders Over $50</p>
+                  <p className="text-sm font-medium text-blue-700">Free Shipping on Orders Over Rs.2500</p>
                 </div>
                 <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 text-center">
                   <FiHeart className="mx-auto w-8 h-8 text-amber-600 mb-3" />
