@@ -358,7 +358,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   >
                     <FaCartPlus className="text-lg" /> Add to Cart
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => {
                       if (!isAuthenticated) {
                         setShowLoginModal(true);
@@ -370,7 +370,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     aria-label="Buy now"
                   >
                     <FaShoppingCart className="text-lg" /> Buy Now
-                  </button>
+                  </button> */}
                 </div>
                 
                 <button 

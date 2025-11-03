@@ -417,7 +417,7 @@ const Marketplace: React.FC = () => {
               </Dialog.Root>
 
                 <div className="relative">
-                <button 
+                {/* <button 
                   onClick={() => setIsWishlistOpen(!isWishlistOpen)}
                   className="relative p-2 sm:p-3 text-gray-600 hover:text-orange-600 transition-colors"
                 >
@@ -427,7 +427,7 @@ const Marketplace: React.FC = () => {
                       {wishlist.length}
                     </span>
                   )}
-                </button>
+                </button> */}
                 
                 {isWishlistOpen && (
                   <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
@@ -998,7 +998,10 @@ const Marketplace: React.FC = () => {
             <div className="relative z-10">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Home Decor</h3>
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Stylish home accessories</p>
-              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+              <button 
+                onClick={() => navigate('/marketplace/all-products')}
+                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+              >
                 Shop Now
               </button>
             </div>
@@ -1015,7 +1018,10 @@ const Marketplace: React.FC = () => {
             <div className="relative z-10">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Kitchenware</h3>
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Premium kitchen essentials</p>
-              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+              <button 
+                onClick={() => navigate('/marketplace/all-products')}
+                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+              >
                 Shop Now
               </button>
             </div>
@@ -1032,7 +1038,10 @@ const Marketplace: React.FC = () => {
             <div className="relative z-10">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Bath & Body</h3>
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Luxury self-care products</p>
-              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+              <button 
+                onClick={() => navigate('/marketplace/all-products')}
+                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+              >
                 Shop Now
               </button>
             </div>
@@ -1049,7 +1058,10 @@ const Marketplace: React.FC = () => {
             <div className="relative z-10">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Clothing</h3>
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Trendy fashion apparel</p>
-              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+              <button 
+                onClick={() => navigate('/marketplace/all-products')}
+                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+              >
                 Shop Now
               </button>
             </div>
@@ -1199,7 +1211,7 @@ const Marketplace: React.FC = () => {
                 </div>
 
                 {totalPages > 0 && (
-                  <div className="mt-6 sm:mt-8 flex justify-center">
+                  <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
                     <div className="flex items-center space-x-1 sm:space-x-2">
                       <button 
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -1254,6 +1266,14 @@ const Marketplace: React.FC = () => {
                         →
                       </button>
                     </div>
+                    
+                    {/* View All Products Link */}
+                    <button
+                      onClick={() => navigate('/marketplace/all-products')}
+                      className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm sm:text-base font-medium"
+                    >
+                      View All Products
+                    </button>
                   </div>
                 )}
               </>
@@ -1463,7 +1483,7 @@ const Marketplace: React.FC = () => {
         </div>
       </div>
 
-      {(isWishlistOpen || isCartOpen) && (
+      {/* {(isWishlistOpen || isCartOpen) && (
         <div 
           className="fixed inset-0 z-40" 
           onClick={() => {
@@ -1471,7 +1491,7 @@ const Marketplace: React.FC = () => {
             setIsCartOpen(false);
           }}
         />
-      )}
+      )} */}
 
       {isChatOpen ? (
         <div className="fixed bottom-4 right-4 w-72 sm:w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
