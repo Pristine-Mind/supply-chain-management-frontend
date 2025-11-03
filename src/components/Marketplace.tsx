@@ -966,23 +966,23 @@ const Marketplace: React.FC = () => {
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center">
             <div className="text-white space-y-4 lg:space-y-6 text-center lg:text-left">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
-                Feel Good Food
+                Premium Home Essentials
               </h1>
-              <p className="text-lg sm:text-xl text-green-100 leading-relaxed">
-                We only sell the best ingredients
+              <p className="text-lg sm:text-xl text-blue-100 leading-relaxed">
+                Elevate your everyday with quality products you'll love
               </p>
-              <button className="bg-white text-orange-500 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg hover:bg-orange-50 transition-colors shadow-lg">
-                Shop Now
+              <button className="bg-white text-orange-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg hover:bg-blue-50 transition-colors shadow-lg">
+                Shop Collection
               </button>
             </div>
             <div className="relative">
               <div className="w-full h-64 sm:h-80 lg:h-96 relative">
                 <img 
-                  src="https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=600&h=400&fit=crop" 
-                  alt="Fresh avocado splash" 
+                  src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=400&fit=crop" 
+                  alt="Modern home goods and decor" 
                   className="w-full h-full object-cover rounded-2xl shadow-2xl"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-green-900/20 to-transparent rounded-2xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent rounded-2xl"></div>
               </div>
             </div>
           </div>
@@ -994,69 +994,69 @@ const Marketplace: React.FC = () => {
 
       <div className="container mx-auto px-4 py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
-            <div className="relative z-10">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Super Healthy</h3>
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">Premium organic products</p>
-              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
-                Shop Now
-              </button>
-            </div>
-            <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24">
-              <img 
-                src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=150&h=150&fit=crop" 
-                alt="Healthy food" 
-                className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
-              />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-yellow-100 to-orange-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
-            <div className="relative z-10">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Fresh Fruits</h3>
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">Seasonal & organic fruits</p>
-              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
-                Shop Now
-              </button>
-            </div>
-            <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24">
-              <img 
-                src="https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=150&h=150&fit=crop" 
-                alt="Fresh fruits" 
-                className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
-              />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-100 to-green-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
-            <div className="relative z-10">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Fresh Vegetables</h3>
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">Farm-fresh vegetables</p>
-              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
-                Shop Now
-              </button>
-            </div>
-            <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24">
-              <img 
-                src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&h=150&fit=crop" 
-                alt="Fresh vegetables" 
-                className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
-              />
-            </div>
-          </div>
-
           <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
             <div className="relative z-10">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">100% Organic</h3>
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">Certified organic products</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Home Decor</h3>
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">Stylish home accessories</p>
               <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
                 Shop Now
               </button>
             </div>
             <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24">
               <img 
-                src="https://images.unsplash.com/photo-1621155346337-1d19476ba7d6?w=150&h=150&fit=crop" 
-                alt="Organic products" 
+                src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=150&h=150&fit=crop" 
+                alt="Home decor" 
+                className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
+              />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div className="relative z-10">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Kitchenware</h3>
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">Premium kitchen essentials</p>
+              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+                Shop Now
+              </button>
+            </div>
+            <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24">
+              <img 
+                src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=150&h=150&fit=crop" 
+                alt="Kitchenware" 
+                className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
+              />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-teal-100 to-teal-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div className="relative z-10">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Bath & Body</h3>
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">Luxury self-care products</p>
+              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+                Shop Now
+              </button>
+            </div>
+            <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24">
+              <img 
+                src="https://images.unsplash.com/photo-1514066359479-47a54d1a48d4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632" 
+                alt="Bath products" 
+                className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
+              />
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div className="relative z-10">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Clothing</h3>
+              <p className="text-gray-600 mb-4 text-sm sm:text-base">Trendy fashion apparel</p>
+              <button className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base">
+                Shop Now
+              </button>
+            </div>
+            <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24">
+              <img 
+                src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=150&h=150&fit=crop" 
+                alt="Clothing fashion" 
                 className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
               />
             </div>

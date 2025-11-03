@@ -83,6 +83,7 @@ const protectedRoutes = [
   { path: '/earnings', element: <TransporterEarnings /> },
   { path: '/documents', element: <TransporterDocuments /> },
   { path: '/support', element: <SupportComponent /> },
+  { path: '/my-orders', element: <MyOrders /> },
 ];
 
 const publicRoutes = [
