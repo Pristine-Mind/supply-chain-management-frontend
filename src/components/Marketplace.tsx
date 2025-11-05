@@ -1413,7 +1413,7 @@ const Marketplace: React.FC = () => {
                           </div>
                           
                           {/* Wishlist Button */}
-                          <button
+                          {/* <button
                             onClick={(e) => {
                               e.stopPropagation();
                               // Add wishlist functionality here
@@ -1421,7 +1421,7 @@ const Marketplace: React.FC = () => {
                             className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-sm z-10"
                           >
                             <Heart className="w-4 h-4 text-neutral-400 hover:text-accent-error-500 transition-colors" />
-                          </button>
+                          </button> */}
                           
                           <img
                             src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
@@ -1443,11 +1443,11 @@ const Marketplace: React.FC = () => {
                             <span className="inline-block bg-neutral-100 text-neutral-600 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
                               {item.product_details.category_details}
                             </span>
-                            <div className="flex items-center gap-1">
+                            {/* <div className="flex items-center gap-1">
                               <div className="text-xs bg-accent-error-100 text-accent-error-600 px-2 py-1 rounded-full font-medium">
                                 {(item as any).trending_score?.toFixed(1)} Score
                               </div>
-                            </div>
+                            </div> */}
                           </div>
                           
                           {/* Product Title */}
