@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const BENEFITS = [
   { title: 'Competitive Rates', subtitle: 'Earn what you deserve with our transparent pricing.' },
@@ -56,13 +56,13 @@ const TransporterLanding: React.FC = () => {
 
   return (
     <div className="space-y-24">
-      <section className="relative bg-blue-50 overflow-hidden">
-        <div className="container mx-auto flex flex-col md:flex-row items-center py-20">
-          <div className="md:w-1/2 text-center md:text-left space-y-4 px-4">
-            <h1 className="text-4xl font-bold text-gray-800">Grow Your Transport Business with MulyaBazzar!</h1>
-            <p className="text-gray-600">Connect with businesses needing reliable transport services across the country.</p>
+      <section className="bg-gradient-to-br from-primary-50 to-primary-100 py-16">
+        <div className="container mx-auto flex flex-col md:flex-row items-center py-16 space-y-8 md:space-y-0">
+          <div className="md:w-1/2 text-center md:text-left space-y-6 px-4">
+            <h1 className="text-h1 font-bold text-neutral-900">Grow Your Transport Business with MulyaBazzar!</h1>
+            <p className="text-body text-neutral-700">Connect with businesses needing reliable transport services across the country.</p>
             <Link to="/transporter-register" className="inline-block">   
-              <button className="mt-4 px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600">
+              <button className="mt-4 px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors shadow-elevation-md">
                 Join as a Transporter
               </button>
             </Link>
@@ -77,31 +77,31 @@ const TransporterLanding: React.FC = () => {
         </div>
       </section>
 
-      <section className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-center mb-8">Why Partner With Us?</h2>
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-h2 font-bold text-center mb-12 text-neutral-900">Why Partner With Us?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {BENEFITS.map((b, i) => (
-            <div key={b.title} className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
-              <div className="h-12 w-12 mb-4 bg-orange-100 flex items-center justify-center rounded-full">
-                <span className="text-orange-500 font-bold">{i + 1}</span>
+            <div key={b.title} className="bg-white p-6 rounded-xl shadow-elevation-md hover:shadow-elevation-lg transition-shadow border border-neutral-200">
+              <div className="h-12 w-12 mb-4 bg-primary-100 flex items-center justify-center rounded-full">
+                <span className="text-primary-600 font-bold">{i + 1}</span>
               </div>
-              <h3 className="font-semibold text-lg">{b.title}</h3>
-              <p className="text-gray-600 mt-1">{b.subtitle}</p>
+              <h3 className="text-h3 font-semibold text-neutral-900">{b.title}</h3>
+              <p className="text-body text-neutral-600 mt-2">{b.subtitle}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-gray-50 py-16">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-start">
+            <section className="bg-neutral-50 py-16">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-start space-y-8 md:space-y-0">
           <div className="md:w-1/2 pr-8">
-            <h2 className="text-2xl font-bold mb-4">Get Started in 4 Simple Steps</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-h2 font-bold mb-6 text-neutral-900">Get Started in 4 Simple Steps</h2>
+            <p className="text-body text-neutral-600 mb-6">
               Join our network of trusted transporters and start growing your business today.
             </p>
-            <Link to="/transporter-register" className="inline-block">   
-              <button className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600">
-                Sign Up Now
+            <Link to="/transporter-register">
+              <button className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-elevation-md">
+                Start Your Journey
               </button>
             </Link>
           </div>
@@ -114,9 +114,9 @@ const TransporterLanding: React.FC = () => {
                 >
                   <span>{`${i + 1}. ${step}`}</span>
                   {openSteps === i ? (
-                    <ChevronUpIcon className="h-5 w-5" />
+                    <ChevronUp className="h-5 w-5" />
                   ) : (
-                    <ChevronDownIcon className="h-5 w-5" />
+                    <ChevronDown className="h-5 w-5" />
                   )}
                 </button>
                 {openSteps === i && (
@@ -143,24 +143,24 @@ const TransporterLanding: React.FC = () => {
         </div>
       </section>
 
-      <section className="container mx-auto px-4 pb-16">
-        <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-h2 font-bold text-center mb-12 text-neutral-900">Frequently Asked Questions</h2>
         <div className="max-w-3xl mx-auto space-y-4">
           {FAQS.map((faq, i) => (
-            <div key={i} className="bg-white rounded-lg shadow overflow-hidden">
+            <div key={i} className="bg-white rounded-lg shadow-elevation-md overflow-hidden border border-neutral-200">
               <button
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full flex justify-between items-center p-4 text-left font-medium text-gray-800 hover:bg-gray-50"
+                className="w-full flex justify-between items-center p-6 text-left font-medium text-neutral-900 hover:bg-neutral-50 transition-colors"
               >
-                <span>{faq.q}</span>
+                <span className="text-body font-medium">{faq.q}</span>
                 {openFaq === i ? (
-                  <ChevronUpIcon className="h-5 w-5" />
+                  <ChevronUp className="h-5 w-5 text-primary-600" />
                 ) : (
-                  <ChevronDownIcon className="h-5 w-5" />
+                  <ChevronDown className="h-5 w-5 text-neutral-400" />
                 )}
               </button>
               {openFaq === i && (
-                <div className="p-4 pt-0 text-gray-600 border-t">
+                <div className="p-6 pt-0 text-body text-neutral-600 border-t border-neutral-200">
                   {faq.a}
                 </div>
               )}
@@ -169,12 +169,12 @@ const TransporterLanding: React.FC = () => {
         </div>
       </section>
 
-      <section className="bg-orange-600 text-white py-16">
+      <section className="bg-primary-600 text-white py-16">
         <div className="container mx-auto text-center px-4">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto">Join our network of professional transporters and grow your business with MulyaBazzar.</p>
+          <h2 className="text-h2 font-bold mb-6">Ready to Get Started?</h2>
+          <p className="text-body mb-8 max-w-2xl mx-auto">Join our network of professional transporters and grow your business with MulyaBazzar.</p>
           <Link to="/transporter-register" className="inline-block">
-            <button className="px-8 py-3 bg-white text-orange-600 font-semibold rounded-lg hover:bg-orange-100">
+            <button className="px-8 py-3 bg-white text-primary-600 font-semibold rounded-lg hover:bg-neutral-50 transition-colors shadow-elevation-md">
               Sign Up Now - It's Free
             </button>
           </Link>

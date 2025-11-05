@@ -28,7 +28,6 @@ import Footer from './Footer';
 
 import logo from '../assets/logo.png';
 
-// Types
 interface ProductImage {
   id: number;
   image: string;
@@ -325,103 +324,121 @@ const MarketplaceAllProducts: React.FC = () => {
     const hasOffer = product.is_offer_active && product.percent_off > 0;
 
     return (
-      <div className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 group overflow-hidden border border-gray-100">
-        {/* Image Container */}
-        <div className="relative overflow-hidden">
+      <div className="bg-white rounded-xl shadow-elevation-sm hover:shadow-elevation-md transition-all duration-300 group overflow-hidden border border-neutral-200">
+        {/* Image Container - Full Width */}
+        <div className="relative overflow-hidden aspect-square">
           <img
             src={mainImage}
             alt={product.product_details.name}
-            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             onError={(e) => {
               e.currentTarget.src = '/api/placeholder/300/300';
             }}
           />
           
-          {/* Offer Badge */}
-          {hasOffer && (
-            <div className="absolute top-3 left-3 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-              {product.percent_off}% OFF
-            </div>
-          )}
+          {/* Top Left Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-2">
+            {hasOffer && (
+              <div className="bg-accent-error-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+                {product.percent_off}% OFF
+              </div>
+            )}
+            {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
+              <div className="bg-accent-warning-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow-sm">
+                Only {product.product_details.stock} left
+              </div>
+            )}
+          </div>
 
-          {/* Stock Badge */}
-          {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
-            <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-              Only {product.product_details.stock} left
-            </div>
-          )}
+          {/* Top Right Wishlist Button */}
+          <button
+            onClick={() => toggleWishlist(product.id)}
+            className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-sm"
+          >
+            <Heart 
+              className={`w-4 h-4 transition-colors ${isWishlisted ? 'fill-accent-error-500 text-accent-error-500' : 'text-neutral-400 hover:text-accent-error-500'}`} 
+            />
+          </button>
 
-          {/* Quick Actions Overlay */}
+          {/* Quick View Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button
               onClick={() => navigate(`/marketplace/${product.id}`)}
-              className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+              className="bg-white text-neutral-900 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors shadow-sm"
             >
-              View Details
+              Quick View
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          {/* Category */}
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
-            {product.product_details.category_details}
-          </p>
+        {/* Content Section */}
+        <div className="p-4 space-y-3">
+          {/* Category Tag */}
+          <div className="flex items-center justify-between">
+            <span className="inline-block bg-neutral-100 text-neutral-600 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
+              {product.product_details.category_details}
+            </span>
+            {product.average_rating > 0 && (
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 fill-accent-warning-400 text-accent-warning-400" />
+                <span className="text-sm font-medium text-neutral-700">
+                  {product.average_rating.toFixed(1)}
+                </span>
+                <span className="text-xs text-neutral-500">
+                  ({product.total_reviews})
+                </span>
+              </div>
+            )}
+          </div>
 
-          {/* Title */}
-          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
+          {/* Product Title */}
+          <h3 className="font-semibold text-neutral-900 line-clamp-2 text-body group-hover:text-primary-600 transition-colors leading-tight">
             {product.product_details.name}
           </h3>
 
-          {/* Rating */}
-          {product.average_rating > 0 && (
-            <div className="flex items-center gap-1 mb-2">
-              <div className="flex items-center">
-                {renderStars(product.average_rating)}
-              </div>
-              <span className="text-sm text-gray-600">
-                ({product.total_reviews})
+          {/* Price Section */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-h3 font-bold text-primary-600">
+                Rs.{hasOffer ? product.discounted_price?.toFixed(2) : product.listed_price.toFixed(2)}
               </span>
+              {hasOffer && (
+                <span className="text-body text-neutral-500 line-through">
+                  Rs.{product.listed_price.toFixed(2)}
+                </span>
+              )}
             </div>
-          )}
-
-          {/* Price */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg font-bold text-orange-600">
-              Rs.{hasOffer ? product.discounted_price?.toFixed(2) : product.listed_price.toFixed(2)}
-            </span>
             {hasOffer && (
-              <span className="text-sm text-gray-500 line-through">
-                Rs.{product.listed_price.toFixed(2)}
-              </span>
+              <div className="text-xs text-accent-success-600 font-medium">
+                You save Rs.{(product.listed_price - (product.discounted_price || 0)).toFixed(2)}
+              </div>
             )}
           </div>
 
           {/* Stock and Delivery Info */}
-          <div className="flex items-center gap-4 text-xs text-gray-600 mb-3">
+          <div className="flex items-center justify-between text-xs text-neutral-600">
             <div className="flex items-center gap-1">
-              <span className="font-medium">Stock:</span>
-              <span className={`${product.product_details.stock <= 5 ? 'text-red-500' : 'text-green-600'}`}>
-                {product.product_details.stock} units
+              <div className={`w-2 h-2 rounded-full ${product.product_details.stock > 10 ? 'bg-accent-success-500' : product.product_details.stock > 0 ? 'bg-accent-warning-500' : 'bg-accent-error-500'}`}></div>
+              <span className="font-medium">
+                {product.product_details.stock > 0 ? `${product.product_details.stock} in stock` : 'Out of stock'}
               </span>
             </div>
             {product.estimated_delivery_days && (
               <div className="flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                <span>{product.estimated_delivery_days} days</span>
+                <span>{product.estimated_delivery_days} days delivery</span>
               </div>
             )}
           </div>
 
-          {/* Add to Cart Button */}
+          {/* Action Button */}
           <button
             onClick={() => handleAddToCart(product)}
             disabled={product.product_details.stock === 0}
-            className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+            className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
               product.product_details.stock === 0
-                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                : 'bg-orange-600 text-white hover:bg-orange-700 hover:shadow-md'
+                ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
+                : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md'
             }`}
           >
             <ShoppingCart className="w-4 h-4" />
@@ -433,36 +450,36 @@ const MarketplaceAllProducts: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Orange Header Bar */}
-      <div className="bg-orange-600 text-white py-2 px-4">
-        <div className="max-w-7xl mx-auto text-center text-xs sm:text-sm">
+    <div className="min-h-screen bg-neutral-50">
+      {/* Header Banner */}
+      <div className="bg-primary-500 text-white py-2 px-4">
+        <div className="max-w-7xl mx-auto text-center text-caption">
           Welcome to MulyaBazzar - Your Premium Marketplace
         </div>
       </div>
 
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-elevation-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Header */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigate('/')}
-                className="flex items-center gap-2 text-gray-600 hover:text-orange-600 transition-colors"
+                className="flex items-center gap-2 text-neutral-600 hover:text-primary-500 transition-colors"
               >
                 <ChevronLeft className="w-5 h-5" />
                 <span className="hidden sm:inline">Back to Home</span>
               </button>
-              <div className="h-6 w-px bg-gray-300 hidden sm:block" />
+              <div className="h-6 w-px bg-neutral-300 hidden sm:block" />
               <div className="flex items-center">
                 <img src={logo} alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 mr-2 sm:mr-3" />
                 <div className="flex flex-col">
-                  <h1 className="text-xl sm:text-2xl font-bold text-orange-600">
+                  <h1 className="text-h2 sm:text-h1 font-bold text-primary-500">
                     All Products
                   </h1>
                   {selectedCategory !== 'All' && (
-                    <span className="text-sm text-gray-600">
+                    <span className="text-body text-neutral-600">
                       in {CATEGORY_OPTIONS.find(cat => cat.code === selectedCategory)?.label}
                     </span>
                   )}
@@ -473,19 +490,19 @@ const MarketplaceAllProducts: React.FC = () => {
             {/* Desktop Search and Cart */}
             <div className="hidden md:flex items-center gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-10 pr-4 py-2 w-80 border-2 border-gray-200 rounded-lg focus:border-orange-500 focus:outline-none"
+                  className="input-field pl-10 pr-4 w-80 focus:border-primary-500 focus:ring-primary-200"
                 />
               </div>
               <button
                 onClick={handleSearch}
-                className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                className="btn-primary"
               >
                 Search
               </button>
@@ -493,11 +510,11 @@ const MarketplaceAllProducts: React.FC = () => {
               {/* Cart Icon */}
               <button
                 onClick={() => navigate('/cart')}
-                className="relative p-2 sm:p-3 text-gray-600 hover:text-orange-600 transition-colors"
+                className="relative p-2 sm:p-3 text-neutral-600 hover:text-primary-500 transition-colors"
               >
                 <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
                 {distinctItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                  <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-caption rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center font-medium">
                     {distinctItemCount}
                   </span>
                 )}
@@ -508,18 +525,18 @@ const MarketplaceAllProducts: React.FC = () => {
             <div className="md:hidden flex items-center gap-2">
               <button
                 onClick={() => navigate('/cart')}
-                className="relative p-2 text-gray-600 hover:text-orange-600 transition-colors"
+                className="relative p-2 text-neutral-600 hover:text-primary-500 transition-colors"
               >
                 <ShoppingCart className="w-6 h-6" />
                 {distinctItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                  <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-caption rounded-full w-4 h-4 flex items-center justify-center font-medium">
                     {distinctItemCount}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setShowMobileSearch(true)}
-                className="p-2 text-gray-600 hover:text-orange-600"
+                className="p-2 text-neutral-600 hover:text-primary-500"
               >
                 <Search className="w-6 h-6" />
               </button>

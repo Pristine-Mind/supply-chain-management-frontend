@@ -276,16 +276,16 @@ const SaleList: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">{t('sale_list')}</h2>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <button
             onClick={() => setFormVisible(true)}
-            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
           >
             <FaPlus className="mr-2" /> {t('add_sale')}
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+            className="flex items-center bg-accent-success-600 text-white px-4 py-2 rounded-lg hover:bg-accent-success-700 transition-colors font-medium"
           >
             <FaDownload className="mr-2" /> {t('export')}
           </button>

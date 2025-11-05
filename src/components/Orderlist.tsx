@@ -379,17 +379,17 @@ const OrderList: React.FC = () => {
     <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('order_list')}</h2>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <button
             onClick={() => setFormVisible(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300 flex items-center"
+            className="px-4 py-2 bg-primary-600 text-white rounded-lg w-full sm:w-auto hover:bg-primary-700 transition-colors flex items-center font-medium"
             aria-label={t('add_order')}
           >
             <FaPlus className="mr-2" /> {t('add_order')}
           </button>
           <button
             onClick={handleExport}
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300 flex items-center"
+            className="px-4 py-2 bg-accent-success-600 text-white rounded-lg hover:bg-accent-success-700 transition-colors flex items-center font-medium"
             aria-label={t('export_orders')}
           >
             <FaDownload className="mr-2" /> {t('export')}

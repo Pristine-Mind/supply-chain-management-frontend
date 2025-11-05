@@ -127,10 +127,10 @@ const Stocks: React.FC = () => {
                   <button
                     onClick={() => handlePushToMarketplace(item.product)}
                     disabled={pushedProducts.includes(item.product)}
-                    className={`px-4 py-2 rounded-full text-white transition-colors duration-300 ${
+                    className={`px-4 py-2 rounded-lg text-white transition-colors font-medium ${
                       pushedProducts.includes(item.product)
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-green-500 hover:bg-green-600'
+                        ? 'bg-neutral-400 cursor-not-allowed'
+                        : 'bg-accent-success-600 hover:bg-accent-success-700'
                     }`}
                   >
                     {pushedProducts.includes(item.product) ? t('pushed') : t('push_to_marketplace')}
@@ -145,24 +145,24 @@ const Stocks: React.FC = () => {
         <button
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
-          className={`px-4 py-2 rounded-full transition-colors duration-300 ${
+          className={`px-4 py-2 rounded-lg transition-colors font-medium ${
             currentPage === 1
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
+              ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+              : 'bg-primary-600 hover:bg-primary-700 text-white'
           }`}
         >
           {t('previous')}
         </button>
-        <span className="text-gray-700 font-semibold">
+        <span className="text-neutral-700 font-medium">
           {t('page')} {currentPage} {t('of')} {totalPages}
         </span>
         <button
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
-          className={`px-4 py-2 rounded-full transition-colors duration-300 ${
+          className={`px-4 py-2 rounded-lg transition-colors font-medium ${
             currentPage === totalPages
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
+              ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+              : 'bg-primary-600 hover:bg-primary-700 text-white'
           }`}
         >
           {t('next')}

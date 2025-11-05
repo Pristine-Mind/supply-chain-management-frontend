@@ -207,28 +207,28 @@ const StatsDashboard: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center bg-gradient-to-r from-orange-600 to-orange-500 text-transparent bg-clip-text">
+    <div className="container mx-auto px-4 py-8 bg-neutral-50 min-h-screen">
+      <h1 className="text-h1 font-bold text-neutral-900 mb-8 text-center">
         {t('sales_statistics_dashboard')}
       </h1>
 
-      <div className="mb-8 bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">{t('filters')}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="mb-8 bg-white rounded-xl shadow-elevation-lg p-6 border border-neutral-200">
+        <h2 className="text-h2 font-semibold text-neutral-800 mb-6">{t('filters')}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">{t('location')}</label>
+            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('location')}</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder={t('enter_location')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">{t('category')}</label>
+            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('category')}</label>
             <select
-              className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -241,43 +241,43 @@ const StatsDashboard: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">{t('start_date')}</label>
+            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('start_date')}</label>
             <input
               type="date"
-              className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">{t('end_date')}</label>
+            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('end_date')}</label>
             <input
               type="date"
-              className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
         </div>
-        <div className="mt-4 text-right">
+        <div className="mt-6 text-right">
           <button
             onClick={handleApplyFilters}
-            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-lg shadow-md hover:from-blue-700 hover:to-teal-600 transition-all text-sm"
+            className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow-elevation-md hover:bg-primary-700 transition-colors text-body font-medium"
           >
             {t('apply_filters')}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform">
-          <h3 className="text-lg font-medium mb-2">{t('total_products_sold')}</h3>
-          <p className="text-3xl font-bold">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-8 text-white shadow-elevation-lg hover:shadow-elevation-xl transition-shadow">
+          <h3 className="text-h3 font-medium mb-3">{t('total_products_sold')}</h3>
+          <p className="text-h1 font-bold">
             {total_products_sold !== null ? total_products_sold.toLocaleString() : t('na')}
           </p>
         </div>
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg transform hover:scale-105 transition-transform">
-          <h3 className="text-lg font-medium mb-2">{t('total_revenue')}</h3>
+        <div className="bg-gradient-to-br from-accent-success-500 to-accent-success-600 rounded-xl p-8 text-white shadow-elevation-lg hover:shadow-elevation-xl transition-shadow">
+          <h3 className="text-h3 font-medium mb-3">{t('total_revenue')}</h3>
           <p className="text-3xl font-bold">
             {total_revenue !== null ? `$${total_revenue.toFixed(2)}` : t('na')}
           </p>

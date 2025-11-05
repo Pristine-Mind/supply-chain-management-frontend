@@ -321,14 +321,14 @@ const CustomerList: React.FC = () => {
                 });
                 setEditingCustomerId(null);
               }}
-              className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg w-full sm:w-auto hover:bg-blue-600 transition duration-300"
+              className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg w-full sm:w-auto hover:bg-primary-700 transition-colors font-medium"
             >
               <FaPlus className="mr-2" />
               {t('add_customer')}
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+              className="flex items-center bg-accent-success-600 text-white px-4 py-2 rounded-lg hover:bg-accent-success-700 transition-colors font-medium"
             >
               <FaDownload className="mr-2" /> {t('export')}
             </button>
@@ -367,13 +367,13 @@ const CustomerList: React.FC = () => {
                   <td className="py-4 px-6 flex space-x-2">
                     <button
                       onClick={() => handleEditClick(customer)}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 flex items-center justify-center"
+                      className="bg-accent-warning-600 text-white px-3 py-1 rounded-lg hover:bg-accent-warning-700 transition-colors flex items-center justify-center"
                     >
                       <FaEdit />
                     </button>
                     <button
                       onClick={() => handleCustomerClick(customer)}
-                      className="bg-gray-500 text-white px-3 py-1 rounded-lg hover:bg-gray-600 transition duration-300 flex items-center justify-center"
+                      className="bg-primary-600 text-white px-3 py-1 rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
                     >
                       <FaEye />
                     </button>

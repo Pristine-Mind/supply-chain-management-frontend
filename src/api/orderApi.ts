@@ -41,9 +41,7 @@ export interface OrderItem {
 
 // API service for order creation
 export const createOrder = async (orderData: CreateOrderRequest): Promise<OrderResponse> => {
-  try {
-    console.log('🔍 Creating order with data:', orderData);
-    
+  try {    
     // Get authentication token
     const token = localStorage.getItem('token');
     if (!token) {
@@ -99,7 +97,6 @@ export const createOrder = async (orderData: CreateOrderRequest): Promise<OrderR
       }
     );
 
-    console.log('✅ Order created successfully:', response.data);
     return response.data;
   } catch (error: any) {
     console.error('❌ Order creation failed:', error);

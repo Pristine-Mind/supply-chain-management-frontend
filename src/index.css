@@ -5,18 +5,141 @@
 @tailwind utilities;
 @import '~leaflet/dist/leaflet.css';
 
-
 @layer base {
   html {
     font-family: 'Poppins', sans-serif;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply text-body text-neutral-800 bg-neutral-50;
+    line-height: 1.75;
+  }
+  
+  /* Typography consistency */
+  h1 {
+    @apply text-h1 md:text-h1 text-h1-mobile;
+  }
+  
+  h2 {
+    @apply text-h2 md:text-h2 text-h2-mobile;
+  }
+  
+  h3 {
+    @apply text-h3 md:text-h3 text-h3-mobile;
+  }
+  
+  p {
+    @apply text-body;
+  }
+  
+  small, .caption {
+    @apply text-caption;
   }
 }
 
-/* hide scrollbar in all browsers */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+@layer components {
+  /* Button variants */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-body font-medium text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 rounded-lg transition-all duration-200 shadow-soft hover:shadow-medium;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-body font-medium text-primary-600 bg-white hover:bg-primary-50 border border-primary-200 hover:border-primary-300 focus:ring-4 focus:ring-primary-200 rounded-lg transition-all duration-200 shadow-soft;
+  }
+  
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-6 py-3 text-body font-medium text-neutral-700 hover:text-primary-600 hover:bg-neutral-100 focus:ring-4 focus:ring-neutral-200 rounded-lg transition-all duration-200;
+  }
+  
+  /* Card components */
+  .card {
+    @apply bg-white rounded-lg shadow-soft border border-neutral-200 p-6;
+  }
+  
+  .card-elevated {
+    @apply bg-white rounded-xl shadow-medium border border-neutral-200 p-8;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-medium hover:border-primary-200;
+  }
+  
+  /* Input components */
+  .input-field {
+    @apply w-full px-4 py-3 text-body border border-neutral-300 rounded-lg focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 placeholder:text-neutral-400;
+  }
+  
+  /* Layout utilities */
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .section-spacing {
+    @apply py-16 md:py-24;
+  }
+  
+  .content-spacing {
+    @apply space-y-6;
+  }
+  
+  /* Status indicators */
+  .status-success {
+    @apply bg-accent-success-50 text-accent-success-600 border border-accent-success-200;
+  }
+  
+  .status-warning {
+    @apply bg-accent-warning-50 text-accent-warning-600 border border-accent-warning-200;
+  }
+  
+  .status-error {
+    @apply bg-accent-error-50 text-accent-error-600 border border-accent-error-200;
+  }
+  
+  /* Loading states */
+  .loading-skeleton {
+    @apply animate-pulse bg-neutral-200 rounded;
+  }
+  
+  /* Typography utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-pretty {
+    text-wrap: pretty;
+  }
 }
-.no-scrollbar {
-  -ms-overflow-style: none;  /* IE & Edge */
-  scrollbar-width: none;     /* Firefox */
+
+@layer utilities {
+  /* 8pt grid spacing utilities */
+  .space-grid-1 { @apply space-y-2; }
+  .space-grid-2 { @apply space-y-4; }
+  .space-grid-3 { @apply space-y-6; }
+  .space-grid-4 { @apply space-y-8; }
+  .space-grid-5 { @apply space-y-12; }
+  .space-grid-6 { @apply space-y-16; }
+  
+  /* Hide scrollbar in all browsers */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE & Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+  
+  /* Focus states */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-4 focus:ring-primary-200 focus:border-primary-500;
+  }
+  
+  /* Gradient backgrounds */
+  .bg-brand-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-primary-700;
+  }
+  
+  .bg-soft-gradient {
+    @apply bg-gradient-to-b from-neutral-50 to-white;
+  }
 }

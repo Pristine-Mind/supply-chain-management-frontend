@@ -157,20 +157,20 @@ const AddProducer: React.FC = () => {
           />
           <FaSearch className="absolute left-3 top-2.5 text-gray-400" />
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <button
             onClick={() => {
               setFormVisible(true);
               setFormData({ name: '', contact: '', email: '', address: '', registration_number: '' });
               setEditingProducerId(null);
             }}
-            className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+            className="flex items-center bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors font-medium"
           >
             <FaPlus className="mr-2" /> {t('add_producer')}
           </button>
           <button
             onClick={handleExport}
-            className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+            className="flex items-center bg-accent-success-600 text-white px-4 py-2 rounded-lg hover:bg-accent-success-700 transition-colors font-medium"
           >
             <FaDownload className="mr-2" /> {t('export')}
           </button>
@@ -205,7 +205,7 @@ const AddProducer: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEditClick(producer)}
-                      className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                      className="text-primary-600 hover:text-primary-700 flex items-center font-medium transition-colors"
                     >
                       <FaEdit className="mr-1" /> {t('edit')}
                     </button>
@@ -221,21 +221,21 @@ const AddProducer: React.FC = () => {
         </table>
       </div>
 
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex justify-between items-center mt-6">
         <button
           disabled={offset === 0}
           onClick={() => handlePageChange(offset - limit)}
-          className={`px-4 py-2 rounded-lg ${offset === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${offset === 0 ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 text-white'}`}
         >
           {t('previous')}
         </button>
-        <span className="text-sm text-gray-700">
+        <span className="text-body text-neutral-600">
           {t('page')} {Math.floor(offset / limit) + 1} {t('of')} {totalPages}
         </span>
         <button
           disabled={offset + limit >= totalCount}
           onClick={() => handlePageChange(offset + limit)}
-          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${offset + limit >= totalCount ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 text-white'}`}
         >
           {t('next')}
         </button>
@@ -322,20 +322,20 @@ const AddProducer: React.FC = () => {
                 />
                 {errorMessages.registration_number && <p className="mt-2 text-sm text-red-600">{errorMessages.registration_number[0]}</p>}
               </div>
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end space-x-3 pt-6 border-t border-neutral-200">
                 <button
                   type="button"
                   onClick={() => {
                     setFormVisible(false);
                     setEditingProducerId(null);
                   }}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                  className="px-6 py-3 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 text-body font-medium transition-colors"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-body font-medium transition-colors"
                 >
                   {editingProducerId ? t('update_producer') : t('add_producer')}
                 </button>
