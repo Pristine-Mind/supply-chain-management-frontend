@@ -110,7 +110,7 @@ const DeliveryDetails: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h2 className="text-h3 font-semibold text-gray-700 uppercase tracking-wide">
+                <h2 className="text-h3 font-semibold text-neutral-700 uppercase tracking-wide">
                   Personal Information
                 </h2>
                 
@@ -120,12 +120,12 @@ const DeliveryDetails: React.FC = () => {
                   rules={{ required: 'Full name is required' }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-body font-medium text-gray-700 mb-1">
+                      <label className="block text-body font-medium text-neutral-700 mb-1">
                         Full Name
                       </label>
                       <input 
                         {...field} 
-                        className="input-field w-full focus:ring-primary-200 focus:border-primary-500"
+                        className="input-field w-full focus-ring"
                         placeholder="Enter your full name"
                       />
                       {errors.name && (
@@ -202,7 +202,7 @@ const DeliveryDetails: React.FC = () => {
                       <textarea 
                         {...field} 
                         rows={2} 
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none"
+                        className="input-field w-full focus-ring resize-none"
                         placeholder="Enter your street address"
                       />
                       {errors.address && (
@@ -219,12 +219,12 @@ const DeliveryDetails: React.FC = () => {
                     rules={{ required: 'City is required' }}
                     render={({ field }) => (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-caption font-medium text-neutral-700 mb-1">
                           City
                         </label>
                         <input 
                           {...field} 
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                          className="input-field w-full focus-ring"
                           placeholder="City"
                         />
                         {errors.city && (

@@ -295,11 +295,11 @@ const UserProfile: React.FC = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
             <p className="text-gray-600 mb-6">You need to be logged in to view your profile.</p>
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                        <button
+              onClick={() => navigate('/login')}
+              className="btn-primary"
             >
-              Log In
+              Login to Continue
             </button>
           </div>
         </div>
@@ -312,10 +312,10 @@ const UserProfile: React.FC = () => {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-soft-gradient flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your profile...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+            <p className="text-neutral-600">Loading your profile...</p>
           </div>
         </div>
         <Footer />
@@ -347,8 +347,8 @@ const UserProfile: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-soft-gradient section-spacing">
+        <div className="max-w-4xl mx-auto container-padding">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
@@ -377,7 +377,7 @@ const UserProfile: React.FC = () => {
 
           <div className="space-y-6">
             {/* Profile Picture & Basic Info */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="card-elevated">
               <div className="flex items-center space-x-6">
                 <div className="relative">
                   <div className="h-24 w-24 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
@@ -394,7 +394,7 @@ const UserProfile: React.FC = () => {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploadLoading}
-                    className="absolute bottom-0 right-0 bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600 transition-colors disabled:opacity-50"
+                    className="absolute bottom-0 right-0 bg-primary-500 text-white p-2 rounded-full hover:bg-primary-600 transition-colors disabled:opacity-50"
                   >
                     {uploadLoading ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -428,7 +428,7 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Personal Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="card-elevated">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center">
                   <User className="h-5 w-5 mr-2" />
@@ -436,7 +436,7 @@ const UserProfile: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => handleEditToggle('personal')}
-                  className="text-orange-600 hover:text-orange-700 transition-colors"
+                  className="text-primary-600 hover:text-primary-700 transition-colors"
                 >
                   {editMode.personal ? <X className="h-5 w-5" /> : <Edit3 className="h-5 w-5" />}
                 </button>
@@ -452,7 +452,7 @@ const UserProfile: React.FC = () => {
                       type="text"
                       value={personalForm.first_name}
                       onChange={(e) => setPersonalForm(prev => ({ ...prev, first_name: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      className="input-field focus-ring"
                     />
                   </div>
                   <div>
@@ -463,7 +463,7 @@ const UserProfile: React.FC = () => {
                       type="text"
                       value={personalForm.last_name}
                       onChange={(e) => setPersonalForm(prev => ({ ...prev, last_name: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      className="input-field focus-ring"
                     />
                   </div>
                   <div className="md:col-span-2">
@@ -474,7 +474,7 @@ const UserProfile: React.FC = () => {
                       value={personalForm.bio}
                       onChange={(e) => setPersonalForm(prev => ({ ...prev, bio: e.target.value }))}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      className="input-field focus-ring"
                       placeholder="Tell us about yourself..."
                     />
                   </div>
@@ -486,7 +486,7 @@ const UserProfile: React.FC = () => {
                       type="date"
                       value={personalForm.date_of_birth}
                       onChange={(e) => setPersonalForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      className="input-field focus-ring"
                     />
                   </div>
                   <div>
@@ -496,7 +496,7 @@ const UserProfile: React.FC = () => {
                     <select
                       value={personalForm.gender}
                       onChange={(e) => setPersonalForm(prev => ({ ...prev, gender: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      className="input-field focus-ring"
                     >
                       <option value="">Select Gender</option>
                       <option value="male">Male</option>
@@ -509,7 +509,7 @@ const UserProfile: React.FC = () => {
                     <button
                       onClick={handleSavePersonal}
                       disabled={saveLoading}
-                      className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                      className="btn-primary disabled:opacity-50"
                     >
                       {saveLoading ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -553,7 +553,7 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Contact Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="card-elevated">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center">
                   <Mail className="h-5 w-5 mr-2" />
@@ -561,7 +561,7 @@ const UserProfile: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => handleEditToggle('contact')}
-                  className="text-orange-600 hover:text-orange-700 transition-colors"
+                  className="text-primary-600 hover:text-primary-700 transition-colors"
                 >
                   {editMode.contact ? <X className="h-5 w-5" /> : <Edit3 className="h-5 w-5" />}
                 </button>
@@ -589,7 +589,7 @@ const UserProfile: React.FC = () => {
                       type="tel"
                       value={contactForm.phone}
                       onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      className="input-field focus-ring"
                     />
                   </div>
                   <div>
@@ -600,7 +600,7 @@ const UserProfile: React.FC = () => {
                       type="text"
                       value={contactForm.address}
                       onChange={(e) => setContactForm(prev => ({ ...prev, address: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      className="input-field focus-ring"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -608,11 +608,11 @@ const UserProfile: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         City
                       </label>
-                      <input
+                        <input
                         type="text"
                         value={contactForm.city}
                         onChange={(e) => setContactForm(prev => ({ ...prev, city: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="input-field focus-ring"
                       />
                     </div>
                     <div>
@@ -623,7 +623,7 @@ const UserProfile: React.FC = () => {
                         type="text"
                         value={contactForm.state}
                         onChange={(e) => setContactForm(prev => ({ ...prev, state: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="input-field focus-ring"
                       />
                     </div>
                   </div>
@@ -636,7 +636,7 @@ const UserProfile: React.FC = () => {
                         type="text"
                         value={contactForm.zip_code}
                         onChange={(e) => setContactForm(prev => ({ ...prev, zip_code: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="input-field focus-ring"
                       />
                     </div>
                     <div>
@@ -647,7 +647,7 @@ const UserProfile: React.FC = () => {
                         type="text"
                         value={contactForm.country}
                         onChange={(e) => setContactForm(prev => ({ ...prev, country: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="input-field focus-ring"
                       />
                     </div>
                   </div>
@@ -655,7 +655,7 @@ const UserProfile: React.FC = () => {
                     <button
                       onClick={handleSaveContact}
                       disabled={saveLoading}
-                      className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                      className="btn-primary disabled:opacity-50"
                     >
                       {saveLoading ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -695,7 +695,7 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Notification Preferences */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="card-elevated">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center">
                   <Bell className="h-5 w-5 mr-2" />
@@ -703,7 +703,7 @@ const UserProfile: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => handleEditToggle('notifications')}
-                  className="text-orange-600 hover:text-orange-700 transition-colors"
+                  className="text-primary-600 hover:text-primary-700 transition-colors"
                 >
                   {editMode.notifications ? <X className="h-5 w-5" /> : <Edit3 className="h-5 w-5" />}
                 </button>
@@ -720,7 +720,7 @@ const UserProfile: React.FC = () => {
                       type="checkbox"
                       checked={notificationForm.email_notifications}
                       onChange={(e) => setNotificationForm(prev => ({ ...prev, email_notifications: e.target.checked }))}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -732,7 +732,7 @@ const UserProfile: React.FC = () => {
                       type="checkbox"
                       checked={notificationForm.sms_notifications}
                       onChange={(e) => setNotificationForm(prev => ({ ...prev, sms_notifications: e.target.checked }))}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -744,7 +744,7 @@ const UserProfile: React.FC = () => {
                       type="checkbox"
                       checked={notificationForm.marketing_emails}
                       onChange={(e) => setNotificationForm(prev => ({ ...prev, marketing_emails: e.target.checked }))}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
                   </div>
                   <div className="flex items-center justify-between">
@@ -756,14 +756,14 @@ const UserProfile: React.FC = () => {
                       type="checkbox"
                       checked={notificationForm.order_updates}
                       onChange={(e) => setNotificationForm(prev => ({ ...prev, order_updates: e.target.checked }))}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
                     />
                   </div>
                   <div className="flex space-x-3 pt-4">
                     <button
                       onClick={handleSaveNotifications}
                       disabled={saveLoading}
-                      className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                      className="btn-primary disabled:opacity-50"
                     >
                       {saveLoading ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -827,7 +827,7 @@ const UserProfile: React.FC = () => {
             </div>
 
             {/* Change Password */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="card-elevated">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900 flex items-center">
                   <Shield className="h-5 w-5 mr-2" />
@@ -835,7 +835,7 @@ const UserProfile: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => handleEditToggle('password')}
-                  className="text-orange-600 hover:text-orange-700 transition-colors"
+                  className="text-primary-600 hover:text-primary-700 transition-colors"
                 >
                   {editMode.password ? <X className="h-5 w-5" /> : <Edit3 className="h-5 w-5" />}
                 </button>
@@ -852,7 +852,7 @@ const UserProfile: React.FC = () => {
                         type={showPasswords.current ? 'text' : 'password'}
                         value={passwordForm.current_password}
                         onChange={(e) => setPasswordForm(prev => ({ ...prev, current_password: e.target.value }))}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="w-full px-3 py-2 pr-10 input-field focus-ring"
                       />
                       <button
                         type="button"
@@ -872,7 +872,7 @@ const UserProfile: React.FC = () => {
                         type={showPasswords.new ? 'text' : 'password'}
                         value={passwordForm.new_password}
                         onChange={(e) => setPasswordForm(prev => ({ ...prev, new_password: e.target.value }))}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="w-full px-3 py-2 pr-10 input-field focus-ring"
                       />
                       <button
                         type="button"
@@ -892,7 +892,7 @@ const UserProfile: React.FC = () => {
                         type={showPasswords.confirm ? 'text' : 'password'}
                         value={passwordForm.confirm_password}
                         onChange={(e) => setPasswordForm(prev => ({ ...prev, confirm_password: e.target.value }))}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="w-full px-3 py-2 pr-10 input-field focus-ring"
                       />
                       <button
                         type="button"
@@ -907,7 +907,7 @@ const UserProfile: React.FC = () => {
                     <button
                       onClick={handleChangePassword}
                       disabled={saveLoading || !passwordForm.current_password || !passwordForm.new_password || !passwordForm.confirm_password}
-                      className="flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
+                      className="btn-primary disabled:opacity-50"
                     >
                       {saveLoading ? (
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

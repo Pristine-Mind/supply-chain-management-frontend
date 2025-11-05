@@ -339,19 +339,19 @@ const ProductSearchBar: React.FC = () => {
     if (!hasQuery && !hasHistory && !hasTrending) return null;
 
     return (
-      <div className="absolute left-0 right-0 bg-white border rounded-lg shadow-lg max-h-96 overflow-hidden mt-1 z-30">
+      <div className="absolute left-0 right-0 bg-white border rounded-lg shadow-elevation-lg max-h-96 overflow-hidden mt-1 z-30">
         {hasQuery && (
           <div className="border-b">
             {isLoading ? (
-              <div className="px-4 py-3 text-gray-500 text-sm">
+              <div className="px-4 py-3 text-neutral-500 text-sm">
                 <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 mr-2"></div>
                   Searching...
                 </div>
               </div>
             ) : hasRecommendations ? (
               <>
-                <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-b bg-gray-50">
+                <div className="px-4 py-2 text-xs font-semibold text-neutral-500 uppercase border-b bg-neutral-50">
                   Products ({recommendations.length})
                 </div>
                 <div className="max-h-64 overflow-y-auto">
@@ -423,7 +423,7 @@ const ProductSearchBar: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="px-4 py-3 text-gray-500 text-sm">
+              <div className="px-4 py-3 text-neutral-500 text-sm">
                 No products found for "{query}"
               </div>
             )}
@@ -503,7 +503,7 @@ const ProductSearchBar: React.FC = () => {
               <input
                 ref={searchInputRef}
                 type="text"
-                className="w-full rounded-lg border-2 border-gray-200 px-4 py-2.5 pl-12 pr-24 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+                className="input-field w-full pl-12 pr-24 focus-ring"
                 placeholder="Search for products, brands, categories..."
                 value={query}
                 onChange={(e) => {
@@ -514,7 +514,7 @@ const ProductSearchBar: React.FC = () => {
                 onKeyDown={handleKeyDown}
               />
               
-              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
               
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
                 {query && (
@@ -524,9 +524,9 @@ const ProductSearchBar: React.FC = () => {
                       setShowSuggestions(false);
                       searchInputRef.current?.focus();
                     }}
-                    className="p-1 hover:bg-gray-200 rounded-full transition-colors"
+                    className="p-1 hover:bg-neutral-200 rounded-full transition-colors"
                   >
-                    <FiX className="w-4 h-4 text-gray-400" />
+                    <FiX className="w-4 h-4 text-neutral-400" />
                   </button>
                 )}
               </div>

@@ -143,22 +143,22 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
   };
 
   const getStatusColor = (isActive: boolean | undefined) => {
-    if (isActive === undefined) return 'bg-gray-500';
-    return isActive ? 'bg-green-600' : 'bg-red-600';
+    if (isActive === undefined) return 'bg-neutral-500';
+    return isActive ? 'bg-status-success' : 'bg-status-error';
   };
 
   return (
-    <div className="flex flex-col h-full bg-yellow-800 text-white">
+    <div className="flex flex-col h-full bg-primary-800 text-white">
       {profileData && (
-        <div className="p-4 border-b border-gray-700">
+        <div className="container-padding border-b border-primary-700">
           <div className="relative">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Status:</span>
+              <span className="text-body font-medium">Status:</span>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                  className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm text-white ${getStatusColor(profileData.user?.is_active)} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-yellow-800 focus:ring-orange-500`}
+                  className={`inline-flex items-center px-4 py-1.5 rounded-full text-caption text-white ${getStatusColor(profileData.user?.is_active)} hover:opacity-90 focus:outline-none focus-ring`}
                   disabled={isUpdatingStatus}
                 >
                   {isUpdatingStatus ? 'Updating...' : getStatusDisplay(profileData.user?.is_active)}
@@ -166,29 +166,29 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
                 </button>
                 
                 {isStatusDropdownOpen && (
-                  <div className="origin-top-right absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                  <div className="origin-top-right absolute right-0 mt-2 w-36 card shadow-elevation-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                     <div className="py-1">
                       <button
                         onClick={() => handleStatusUpdate('active')}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left container-padding text-caption text-neutral-700 hover:bg-neutral-100"
                       >
                         Active
                       </button>
                       <button
                         onClick={() => handleStatusUpdate('inactive')}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left container-padding text-caption text-neutral-700 hover:bg-neutral-100"
                       >
                         Inactive
                       </button>
                       <button
                         onClick={() => handleStatusUpdate('suspended')}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left container-padding text-caption text-neutral-700 hover:bg-neutral-100"
                       >
                         Suspended
                       </button>
                       <button
                         onClick={() => handleStatusUpdate('offline')}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full text-left container-padding text-caption text-neutral-700 hover:bg-neutral-100"
                       >
                         Offline
                       </button>
@@ -198,37 +198,37 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
               </div>
             </div>
             {error && (
-              <p className="mt-1 text-xs text-red-500">{error}</p>
+              <p className="mt-1 text-caption text-status-error">{error}</p>
             )}
           </div>
         </div>
       )}
 
-      <div className="p-4 border-b border-gray-700">
+      <div className="container-padding border-b border-primary-700">
         {loading ? (
           <div className="flex items-center justify-center py-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
           </div>
         ) : error ? (
-          <div className="text-red-500 text-sm text-center py-2">
+          <div className="text-status-error text-caption text-center py-2">
             Error loading profile
           </div>
         ) : profileData ? (
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <UserIcon className="h-10 w-10 text-white bg-orange-500 rounded-full p-2" />
+              <UserIcon className="h-10 w-10 text-white bg-primary-500 rounded-full p-2" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="text-body font-medium truncate">
                 {profileData?.user?.first_name && profileData?.user?.last_name
                   ? `${profileData?.user?.first_name} ${profileData?.user?.last_name}`
                   : profileData?.user?.username || 'Transporter'}
               </p>
-              <p className="text-xs text-gray-400 truncate">
+              <p className="text-caption text-neutral-400 truncate">
                 {profileData?.user?.email || 'No email provided'}
               </p>
               {profileData?.user?.phone && (
-                <p className="text-xs text-gray-400 truncate">
+                <p className="text-caption text-neutral-400 truncate">
                   {profileData?.user?.phone}
                 </p>
               )}
@@ -237,19 +237,19 @@ const TransporterMenu: React.FC<TransporterMenuProps> = ({ onNavigate }) => {
         ) : null}
       </div>
 
-      <nav className="flex-1 p-4 overflow-y-auto">
+      <nav className="flex-1 container-padding overflow-y-auto">
         <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.path}>
               <a
                 href={item.path}
                 onClick={(e) => handleClick(e, item.path)}
-                className="flex items-center p-3 rounded-lg hover:bg-orange-500 transition-colors duration-200 group"
+                className="flex items-center p-3 rounded-lg hover:bg-primary-500 transition-colors duration-200 group"
               >
                 {React.cloneElement(item.icon, {
                   className: 'h-5 w-5 mr-3 text-white group-hover:text-white transition-colors',
                 })}
-                <span className="text-sm font-medium">{item.name}</span>
+                <span className="text-body font-medium">{item.name}</span>
               </a>
             </li>
           ))}

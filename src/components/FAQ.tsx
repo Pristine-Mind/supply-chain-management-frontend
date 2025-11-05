@@ -45,15 +45,15 @@ const FAQ: React.FC = () => {
   return (
     <>
     <Navbar />
-    <div className="bg-white py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="bg-white section-spacing">
+      <div className="max-w-4xl mx-auto container-padding">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+          <h2 className="text-h1 font-extrabold text-neutral-900">
             Frequently Asked Questions
           </h2>
-          <p className="mt-4 text-xl text-gray-600">
+          <p className="mt-4 text-h3 text-neutral-600">
             Can't find the answer you're looking for? Reach out to our
-            <a href="/contact" className="ml-1 font-medium text-orange-600 hover:text-orange-500">
+            <a href="/contact" className="ml-1 font-medium text-primary-600 hover:text-primary-500">
               customer support
             </a>
             .
@@ -64,40 +64,40 @@ const FAQ: React.FC = () => {
           {faqItems.map((item, index) => (
             <div
               key={index}
-              className="border border-gray-200 rounded-lg overflow-hidden"
+              className="border border-neutral-200 card overflow-hidden"
             >
               <button
-                className={`w-full px-6 py-4 text-left focus:outline-none flex justify-between items-center ${
-                  activeIndex === index ? 'bg-orange-50' : 'bg-white hover:bg-gray-50'
+                className={`w-full container-padding text-left focus:outline-none flex justify-between items-center ${
+                  activeIndex === index ? 'bg-primary-50' : 'bg-white hover:bg-neutral-50'
                 }`}
                 onClick={() => toggleAccordion(index)}
               >
-                <span className="text-lg font-medium text-gray-900">
+                <span className="text-h4 font-medium text-neutral-900">
                   {item.question}
                 </span>
                 {activeIndex === index ? (
-                  <FiChevronUp className="h-5 w-5 text-gray-500" />
+                  <FiChevronUp className="h-5 w-5 text-neutral-500" />
                 ) : (
-                  <FiChevronDown className="h-5 w-5 text-gray-500" />
+                  <FiChevronDown className="h-5 w-5 text-neutral-500" />
                 )}
               </button>
               {activeIndex === index && (
                 <div className="px-6 pb-4 pt-2 bg-white">
-                  <p className="text-gray-600">{item.answer}</p>
+                  <p className="text-body text-neutral-600">{item.answer}</p>
                 </div>
               )}
             </div>
           ))}
         </div>
 
-        <div className="mt-12 bg-orange-50 rounded-lg p-6 text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Still have questions?</h3>
-          <p className="text-gray-600 mb-4">
+        <div className="mt-12 card-elevated bg-primary-50 container-padding text-center">
+          <h3 className="text-h4 font-medium text-neutral-900 mb-2">Still have questions?</h3>
+          <p className="text-body text-neutral-600 mb-4">
             Can't find the answer you're looking for? Our support team is here to help.
           </p>
           <a
             href="/contact"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            className="btn-primary"
           >
             Contact Support
           </a>

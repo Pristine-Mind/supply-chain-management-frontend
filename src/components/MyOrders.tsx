@@ -202,7 +202,7 @@ const MyOrders: React.FC = () => {
       case 'failed':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-neutral-100 text-neutral-800';
     }
   };
 
@@ -210,14 +210,14 @@ const MyOrders: React.FC = () => {
     switch (status.toLowerCase()) {
       case 'paid':
       case 'completed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-status-success bg-opacity-20 text-status-success';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-status-warning bg-opacity-20 text-status-warning';
       case 'failed':
       case 'cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-status-error bg-opacity-20 text-status-error';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-neutral-100 text-neutral-800';
     }
   };
 
@@ -243,13 +243,13 @@ const MyOrders: React.FC = () => {
           onClose={() => setShowLoginModal(false)} 
           onSuccess={() => setShowLoginModal(false)}
         />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Please Log In</h1>
-            <p className="text-gray-600 mb-6">You need to be logged in to view your orders.</p>
+            <h1 className="text-h2 font-bold text-neutral-900 mb-4">Please Log In</h1>
+            <p className="text-body text-neutral-600 mb-6">You need to be logged in to view your orders.</p>
             <button
               onClick={() => setShowLoginModal(true)}
-              className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+              className="btn-primary"
             >
               Log In
             </button>
@@ -264,10 +264,10 @@ const MyOrders: React.FC = () => {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your orders...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+            <p className="text-body text-neutral-600">Loading your orders...</p>
           </div>
         </div>
         <Footer />
@@ -278,28 +278,28 @@ const MyOrders: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-neutral-50 section-spacing">
+        <div className="max-w-7xl mx-auto container-padding">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-            <p className="text-gray-600">Track and manage your marketplace orders</p>
+            <h1 className="text-h1 font-bold text-neutral-900 mb-2">My Orders</h1>
+            <p className="text-body text-neutral-600">Track and manage your marketplace orders</p>
           </div>
 
           {/* Filters */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white card shadow-elevation-sm border border-neutral-200 container-padding mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               {/* Search */}
               <div className="flex-1 max-w-md">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 h-5 w-5" />
                   <input
                     type="text"
                     placeholder="Search orders by number, product..."
                     value={filters.searchTerm}
                     onChange={(e) => handleFilterChange('searchTerm', e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && applyFilters()}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="input-field w-full pl-10 focus-ring"
                   />
                 </div>
               </div>
@@ -308,14 +308,14 @@ const MyOrders: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="btn-secondary flex items-center"
                 >
                   <Filter className="h-5 w-5 mr-2" />
                   Filters
                 </button>
                 <button
                   onClick={applyFilters}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  className="btn-primary"
                 >
                   Search
                 </button>

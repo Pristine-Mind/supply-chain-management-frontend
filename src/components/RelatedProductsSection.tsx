@@ -31,12 +31,12 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
   if (related.length === 0) return null;
   return (
     <div className="w-full mt-12">
-      <h2 className="text-2xl font-bold mb-4">You May Also Like</h2>
+      <h2 className="text-h2 font-bold mb-4">You May Also Like</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {related.slice(0, 4).map(rel => (
           <div
             key={rel.id}
-            className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition cursor-pointer flex flex-col"
+            className="bg-white card-elevated shadow-soft hover:shadow-elevation-md transition cursor-pointer flex flex-col"
             onClick={() => navigate(`/marketplace/${rel.id}`)}
           >
             <img
@@ -44,9 +44,9 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
               alt={rel.product_details?.name}
               className="w-full h-32 object-cover rounded mb-3"
             />
-            <div className="font-semibold text-gray-800 truncate mb-1">{rel.product_details?.name}</div>
-            <div className="text-orange-600 font-bold mb-2">Rs.{rel.listed_price.toFixed(2)}</div>
-            <div className="text-xs text-gray-500 truncate">{rel.product_details?.category_details || ''}</div>
+            <div className="font-semibold text-neutral-800 truncate mb-1">{rel.product_details?.name}</div>
+            <div className="text-primary-600 font-bold mb-2">Rs.{rel.listed_price.toFixed(2)}</div>
+            <div className="text-caption text-neutral-500 truncate">{rel.product_details?.category_details || ''}</div>
           </div>
         ))}
       </div>
