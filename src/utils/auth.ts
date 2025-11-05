@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 export const isAuthenticated = (): boolean => {
   return !!localStorage.getItem('token');
@@ -41,7 +42,7 @@ axios.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.log('Unauthorized request - redirect to login disabled for development');
+      toast('Unauthorized request');
     }
     return Promise.reject(error);
   }

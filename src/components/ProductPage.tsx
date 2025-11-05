@@ -72,18 +72,18 @@ const ProductPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-neutral-50">
         <ProductSearchBar />
         <div className="container mx-auto px-4 py-16">
-          <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-8 animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="max-w-7xl mx-auto card-elevated bg-white p-8 animate-pulse">
+            <div className="h-8 bg-neutral-200 rounded w-1/4 mb-6"></div>
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-gray-200 rounded-xl h-96"></div>
+              <div className="bg-neutral-200 rounded-xl h-96"></div>
               <div className="space-y-4">
-                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-32 bg-gray-200 rounded mt-8"></div>
+                <div className="h-8 bg-neutral-200 rounded w-3/4"></div>
+                <div className="h-6 bg-neutral-200 rounded w-1/2"></div>
+                <div className="h-4 bg-neutral-200 rounded w-1/3"></div>
+                <div className="h-32 bg-neutral-200 rounded mt-8"></div>
               </div>
             </div>
           </div>
@@ -95,20 +95,20 @@ const ProductPage: React.FC = () => {
   
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-neutral-50">
         <ProductSearchBar />
         <div className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm p-8 text-center">
+          <div className="max-w-4xl mx-auto card-elevated bg-white p-8 text-center">
             <div className="flex justify-center mb-4">
-              <FiAlertCircle className="text-rose-500 w-12 h-12" />
+              <FiAlertCircle className="text-accent-error-500 w-12 h-12" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h2>
-            <p className="text-gray-600 mb-6">
+            <h2 className="text-h2 font-bold text-gray-800 mb-2">Product Not Found</h2>
+            <p className="text-body text-neutral-600 mb-6">
               {error || 'The product you are looking for does not exist or has been removed.'}
             </p>
             <Link 
               to="/marketplace" 
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn-primary inline-flex items-center"
             >
               <FiArrowLeft className="mr-2" />
               Back to Marketplace
@@ -121,16 +121,17 @@ const ProductPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="sticky top-0 z-10 bg-white shadow-sm">
+    <div className="min-h-screen bg-neutral-50">
+      <div className="sticky top-0 z-10 bg-white shadow-elevation-sm">
         <ProductSearchBar />
       </div>
       <div className="container mx-auto px-4 py-6">
+        {/* Breadcrumb Navigation */}
         <nav className="mb-6">
-          <ol className="flex items-center space-x-2 text-sm text-gray-600">
-            <li><Link to="/" className="hover:text-blue-600 transition-colors">Home</Link></li>
+          <ol className="flex items-center space-x-2 text-body text-neutral-600">
+            <li><Link to="/" className="hover:text-primary-500 transition-colors">Home</Link></li>
             <li>/</li>
-            <li><Link to="/marketplace" className="hover:text-blue-600 transition-colors">Marketplace</Link></li>
+            <li><Link to="/marketplace" className="hover:text-primary-500 transition-colors">Marketplace</Link></li>
             <li>/</li>
             <li className="font-medium text-gray-900 truncate max-w-xs" title={product.product_details?.name}>
               {product.product_details?.name}
@@ -138,41 +139,47 @@ const ProductPage: React.FC = () => {
           </ol>
         </nav>
 
-        <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Main Product Layout - F Pattern */}
+        <div className="max-w-7xl mx-auto card-elevated bg-white overflow-hidden">
           <div className="grid md:grid-cols-12 gap-8 p-6">
+            {/* Left Sidebar - Trust & Features */}
             <div className="hidden md:block md:col-span-2">
               <div className="sticky top-24 space-y-4">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 text-center">
-                  <FiShoppingBag className="mx-auto w-8 h-8 text-blue-600 mb-3" />
-                  <p className="text-sm font-medium text-blue-700">Free Shipping on Orders Over Rs.2500</p>
+                <div className="card-soft bg-accent-info-50 text-center">
+                  <FiShoppingBag className="mx-auto w-8 h-8 text-accent-info-600 mb-3" />
+                  <p className="text-body font-medium text-accent-info-700">Free Shipping on Orders Over Rs.2500</p>
                 </div>
-                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 text-center">
-                  <FiHeart className="mx-auto w-8 h-8 text-amber-600 mb-3" />
-                  <p className="text-sm font-medium text-amber-700">30-Day Return Policy</p>
+                <div className="card-soft bg-accent-warning-50 text-center">
+                  <FiHeart className="mx-auto w-8 h-8 text-accent-warning-600 mb-3" />
+                  <p className="text-body font-medium text-accent-warning-700">30-Day Return Policy</p>
                 </div>
               </div>
             </div>
 
+            {/* Main Content - Product Details */}
             <div className="md:col-span-8">
               <ProductInstanceView product={product} />
             </div>
+            
+            {/* Right Sidebar - Social Proof */}
             <div className="hidden md:block md:col-span-2">
               <div className="sticky top-24 space-y-4">
-                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 text-center">
-                  <FiEye className="mx-auto w-8 h-8 text-emerald-600 mb-3" />
-                  <p className="text-2xl font-bold text-gray-800">{product.views_count}</p>
-                  <p className="text-sm text-gray-600">Views</p>
+                <div className="card-soft bg-accent-success-50 text-center">
+                  <FiEye className="mx-auto w-8 h-8 text-accent-success-600 mb-3" />
+                  <p className="text-h2 font-bold text-gray-800">{product.views_count}</p>
+                  <p className="text-body text-neutral-600">Views</p>
                 </div>
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 text-center">
-                  <FiShoppingBag className="mx-auto w-8 h-8 text-purple-600 mb-3" />
-                  <p className="text-2xl font-bold text-gray-800">{product.recent_purchases_count}</p>
-                  <p className="text-sm text-gray-600">Recent Purchases</p>
+                <div className="card-soft bg-primary-50 text-center">
+                  <FiShoppingBag className="mx-auto w-8 h-8 text-primary-600 mb-3" />
+                  <p className="text-h2 font-bold text-gray-800">{product.recent_purchases_count}</p>
+                  <p className="text-body text-neutral-600">Recent Purchases</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Related Products Section */}
         {product.product_details?.category && (
           <div className="mt-12">
             <RelatedProductsSection

@@ -267,9 +267,6 @@ const Payment: React.FC = () => {
       const selectedGateway = paymentGateways.find(gateway => gateway.slug === method);
       const gatewayName = selectedGateway?.name || method;
       
-      console.log('Selected bank:', bank);
-      console.log('Payment method:', method);
-      
       await delay(1500);
       return onSuccess(`${gatewayName} - ${bank.name}`);
     } catch (err: any) {
@@ -424,7 +421,6 @@ const Payment: React.FC = () => {
                               e.stopPropagation();
                               setMethod(`${gateway.slug}_${bank.idx}`);
                               setSelectedBank(bank);
-                              console.log('Bank selected:', bank.name);
                             }}
                             className={`flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-all duration-200 ${
                               method === `${gateway.slug}_${bank.idx}`

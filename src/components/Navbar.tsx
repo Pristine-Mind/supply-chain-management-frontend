@@ -49,28 +49,28 @@ const NavLink: React.FC<NavLinkProps> = ({ to, children, onClick, className = ""
       to={to}
       onClick={onClick}
       className={`
-        relative px-3 py-2 text-sm font-medium transition-all duration-200
+        relative px-4 py-2 text-body font-medium transition-all duration-200
         ${isActive 
-          ? 'text-orange-600' 
-          : 'text-gray-700 hover:text-orange-600'
+          ? 'text-primary-600' 
+          : 'text-neutral-700 hover:text-primary-600'
         }
         ${className}
-        group
+        group focus-ring rounded-lg
       `}
     >
       {children}
       {isActive && (
-        <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-orange-600 rounded-full" />
+        <span className="absolute inset-x-2 -bottom-1 h-0.5 bg-primary-600 rounded-full" />
       )}
-      <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-orange-600 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200" />
+      <span className="absolute inset-x-2 -bottom-1 h-0.5 bg-primary-600 rounded-full scale-x-0 group-hover:scale-x-100 transition-transform duration-200" />
     </Link>
   );
 };
 
 const UserAvatar: React.FC<{ user: any; size?: 'sm' | 'md' }> = ({ user, size = 'md' }) => {
   const sizeClasses = {
-    sm: 'w-6 h-6 text-xs',
-    md: 'w-8 h-8 text-sm'
+    sm: 'w-6 h-6 text-caption',
+    md: 'w-8 h-8 text-body-sm'
   };
 
   const initial = user?.name 
@@ -82,9 +82,9 @@ const UserAvatar: React.FC<{ user: any; size?: 'sm' | 'md' }> = ({ user, size = 
   return (
     <div className={`
       ${sizeClasses[size]} 
-      rounded-full bg-gradient-to-br from-orange-400 to-orange-600 
+      rounded-full bg-brand-gradient
       flex items-center justify-center text-white font-semibold
-      shadow-sm ring-2 ring-white/20
+      shadow-soft ring-2 ring-white/20
     `}>
       {initial}
     </div>
@@ -163,24 +163,24 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="bg-white/95 backdrop-blur-md shadow-soft border-b border-neutral-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto container-padding">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center space-x-3 group">
+            <Link to="/" className="flex items-center space-x-3 group focus-ring rounded-lg p-2 -ml-2">
               <div className="relative">
                 <img 
                   src={logo} 
                   alt="MulyaBazzar Logo" 
                   className="w-10 h-10 transition-transform group-hover:scale-105" 
                 />
-                <div className="absolute inset-0 bg-orange-500/20 rounded-full scale-0 group-hover:scale-110 transition-transform duration-300" />
+                <div className="absolute inset-0 bg-primary-500/20 rounded-full scale-0 group-hover:scale-110 transition-transform duration-300" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
+              <span className="text-h3 font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
                 MulyaBazzar
               </span>
             </Link>
 
-            <div className="hidden md:flex items-center space-x-1">
+            <div className="hidden md:flex items-center space-x-2">
               {navItems.map((item) => (
                 <NavLink key={item.path} to={item.path}>
                   {item.label}
@@ -193,12 +193,12 @@ export const Navbar: React.FC = () => {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200"
+                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-neutral-700 hover:bg-neutral-50 focus-ring transition-all duration-200"
                     aria-expanded={isUserMenuOpen}
                     aria-haspopup="true"
                   >
                     <UserAvatar user={user} />
-                    <span className="text-sm font-medium">
+                    <span className="text-body font-medium">
                       {user?.name || 'My Account'}
                     </span>
                     <ChevronDownIcon 
@@ -209,13 +209,13 @@ export const Navbar: React.FC = () => {
                   </button>
 
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none animate-in slide-in-from-top-2 duration-200">
+                    <div className="absolute right-0 top-full mt-2 w-56 card-elevated animate-slide-in">
                       <div className="p-2">
-                        <div className="px-3 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="px-3 py-2 border-b border-neutral-200">
+                          <p className="text-body-sm font-medium text-neutral-900">
                             {user?.name || 'User'}
                           </p>
-                          <p className="text-xs text-gray-500 truncate">
+                          <p className="text-caption text-neutral-500 truncate">
                             {user?.email}
                           </p>
                         </div>
@@ -224,7 +224,7 @@ export const Navbar: React.FC = () => {
                           <Link
                             to="/user-profile"
                             onClick={closeMenus}
-                            className="flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center px-3 py-2 text-body-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors"
                           >
                             <UserIcon className="w-4 h-4 mr-3" />
                             Profile
@@ -232,7 +232,7 @@ export const Navbar: React.FC = () => {
                           <Link
                             to="/my-orders"
                             onClick={closeMenus}
-                            className="flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center px-3 py-2 text-body-sm text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors"
                           >
                             <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -241,7 +241,7 @@ export const Navbar: React.FC = () => {
                           </Link>
                           <button
                             onClick={handleLogout}
-                            className="flex items-center w-full px-3 py-2 text-sm text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                            className="flex items-center w-full px-3 py-2 text-body-sm text-accent-error-600 rounded-lg hover:bg-accent-error-50 transition-colors"
                           >
                             <LogoutIcon className="w-4 h-4 mr-3" />
                             Sign out
@@ -255,13 +255,13 @@ export const Navbar: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <Link
                     to="/login"
-                    className="px-4 py-2 text-sm font-medium text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-50 hover:border-orange-300 transition-all duration-200"
+                    className="btn-secondary"
                   >
                     Log in
                   </Link>
                   <Link
                     to="/register"
-                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-orange-600 to-orange-700 rounded-lg hover:from-orange-700 hover:to-orange-800 shadow-sm hover:shadow transition-all duration-200"
+                    className="btn-primary"
                   >
                     Sign up
                   </Link>
@@ -271,7 +271,7 @@ export const Navbar: React.FC = () => {
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors"
+              className="md:hidden p-2 rounded-lg text-neutral-700 hover:bg-neutral-50 focus-ring transition-colors"
               aria-expanded={isMobileMenuOpen}
             >
               {isMobileMenuOpen ? (
@@ -289,32 +289,32 @@ export const Navbar: React.FC = () => {
           <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" />
           <div 
             ref={mobileMenuRef}
-            className="fixed top-16 left-0 right-0 bg-white shadow-lg animate-in slide-in-from-top-4 duration-200"
+            className="fixed top-16 left-0 right-0 bg-white shadow-medium animate-slide-in"
           >
-            <div className="px-4 py-6 space-y-4">
+            <div className="container-padding py-6 content-spacing">
               <div className="space-y-2">
                 {navItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={closeMenus}
-                    className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                    className="block px-3 py-2 text-body font-medium text-neutral-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
                   >
                     {item.label}
                   </Link>
                 ))}
               </div>
 
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-neutral-200">
                 {isAuthenticated ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div className="flex items-center space-x-3 px-3 py-2">
                       <UserAvatar user={user} />
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-body-sm font-medium text-neutral-900">
                           {user?.name || 'User'}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-caption text-neutral-500">
                           {user?.email}
                         </p>
                       </div>
@@ -324,7 +324,7 @@ export const Navbar: React.FC = () => {
                       <Link
                         to="/user-profile"
                         onClick={closeMenus}
-                        className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                        className="flex items-center px-3 py-2 text-body-sm text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors"
                       >
                         <UserIcon className="w-4 h-4 mr-3" />
                         Profile
@@ -332,7 +332,7 @@ export const Navbar: React.FC = () => {
                       <Link
                         to="/my-orders"
                         onClick={closeMenus}
-                        className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                        className="flex items-center px-3 py-2 text-body-sm text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors"
                       >
                         <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -341,7 +341,7 @@ export const Navbar: React.FC = () => {
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="flex items-center w-full px-3 py-2 text-body-sm text-accent-error-600 hover:bg-accent-error-50 rounded-lg transition-colors"
                       >
                         <LogoutIcon className="w-4 h-4 mr-3" />
                         Sign out
@@ -353,14 +353,14 @@ export const Navbar: React.FC = () => {
                     <Link
                       to="/login"
                       onClick={closeMenus}
-                      className="block w-full px-4 py-2 text-center text-sm font-medium text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-50 transition-colors"
+                      className="btn-secondary w-full text-center"
                     >
                       Log in
                     </Link>
                     <Link
                       to="/register"
                       onClick={closeMenus}
-                      className="block w-full px-4 py-2 text-center text-sm font-medium text-white bg-gradient-to-r from-orange-600 to-orange-700 rounded-lg hover:from-orange-700 hover:to-orange-800 transition-colors"
+                      className="btn-primary w-full text-center"
                     >
                       Sign up
                     </Link>

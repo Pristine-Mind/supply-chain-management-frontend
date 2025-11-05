@@ -6,14 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import {
-  ShoppingBagIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  ShoppingCartIcon,
-  MoonIcon,
-  SunIcon,
-} from '@heroicons/react/solid';
+import { 
+  ShoppingBag, 
+  BarChart3, 
+  Users, 
+  ShoppingCart
+} from 'lucide-react';
 
 import { fetchLedgerEntries, LedgerEntry } from '../api/ledgerApi';
 import { getTransporterStats, type TransporterStats } from '../api/transporterApi';
@@ -44,7 +42,7 @@ const Home: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, user, logout, loading } = useAuth();
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -187,30 +185,31 @@ const Home: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-500"></div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen flex flex-col md:flex-row ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+    <div className={`min-h-screen flex flex-col md:flex-row ${darkMode ? 'bg-gray-900 text-white' : 'bg-neutral-50 text-gray-900'}`}>
+      {/* Mobile Header */}
       <header className="flex justify-between items-center p-4 md:hidden">
         <button onClick={toggleSidebar}>
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <h1 className="text-2xl font-bold">{t('dashboard')}</h1>
+        <h1 className="text-h2 font-bold">{t('dashboard')}</h1>
         <div className="flex items-center space-x-4">
           <button
             onClick={() => i18n.changeLanguage(i18n.language === 'ne' ? 'en' : 'ne')}
-            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg bg-transparent hover:bg-red-600 hover:text-white focus:outline-none transition duration-300"
+            className="btn-secondary border-accent-error-600 text-accent-error-600 hover:bg-accent-error-600 hover:text-white"
           >
             {i18n.language === 'ne' ? 'Switch to English' : 'नेपालीमा स्विच गर्नुहोस्'}
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors duration-200"
+            className="flex items-center p-2 rounded-full bg-accent-error-600 text-white hover:bg-accent-error-700 transition-colors duration-200"
             title={t('logout')}
           >
             <FaSignOutAlt className="h-5 w-5" />
@@ -218,15 +217,8 @@ const Home: React.FC = () => {
         </div>
       </header>
 
-      <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-green-900 text-white w-64 z-50`}>
-        {/* <div className="p-4 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Menu</h2>
-          <button onClick={toggleSidebar} className="md:hidden">
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div> */}
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 transition-transform duration-200 ease-in-out bg-accent-success-800 text-white w-64 z-50`}>
         {role === 'transporter' ? (
           <TransporterMenu />
         ) : (
@@ -238,11 +230,12 @@ const Home: React.FC = () => {
         <div className="fixed inset-0 bg-black opacity-50 z-40 md:hidden" onClick={toggleSidebar}></div>
       )}
 
+      {/* Main Content */}
       <div className="flex-1 p-4 md:p-8">
         {role !== 'transporter' ? (
           <>
             <div className="hidden md:flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold text-yellow-800">
+              <h1 className="text-h1 font-bold text-primary-600">
                 Welcome, {user?.name || user?.email || 'User'}
               </h1>
               <div className="flex items-center space-x-4">
@@ -263,10 +256,10 @@ const Home: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <InfoCard icon={<ShoppingBagIcon className="h-6 w-6 text-blue-600 mr-3" />} title={t('products')} value={data.totalProducts} darkMode={darkMode} />
-              <InfoCard icon={<ShoppingCartIcon className="h-6 w-6 text-green-600 mr-3" />} title={t('orders')} value={data.totalOrders} darkMode={darkMode} />
-              <InfoCard icon={<ChartBarIcon className="h-6 w-6 text-red-600 mr-3" />} title={t('sales')} value={data.totalSales} darkMode={darkMode} />
-              <InfoCard icon={<UserGroupIcon className="h-6 w-6 text-purple-600 mr-3" />} title={t('customers')} value={data.totalCustomers} darkMode={darkMode} />
+              <InfoCard icon={<ShoppingBag className="h-6 w-6 text-blue-600 mr-3" />} title={t('products')} value={data.totalProducts} darkMode={darkMode} />
+              <InfoCard icon={<ShoppingCart className="h-6 w-6 text-green-600 mr-3" />} title={t('orders')} value={data.totalOrders} darkMode={darkMode} />
+              <InfoCard icon={<BarChart3 className="h-6 w-6 text-red-600 mr-3" />} title={t('sales')} value={data.totalSales} darkMode={darkMode} />
+              <InfoCard icon={<Users className="h-6 w-6 text-purple-600 mr-3" />} title={t('customers')} value={data.totalCustomers} darkMode={darkMode} />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8">
@@ -279,8 +272,8 @@ const Home: React.FC = () => {
               <div className={`p-4 rounded-lg shadow ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                 <h2 className="text-lg font-bold mb-4">{t('pending_orders_revenue')}</h2>
                 <div className="flex flex-col space-y-4">
-                  <InfoRow icon={<ShoppingCartIcon className="h-6 w-6 text-yellow-600 mr-3" />} label={t('pending_orders')} value={data.pendingOrders} />
-                  <InfoRow icon={<ChartBarIcon className="h-6 w-6 text-green-600 mr-3" />} label={t('total_revenue')} value={`NPR ${data.totalRevenue}`} />
+                  <InfoRow icon={<ShoppingCart className="h-6 w-6 text-yellow-600 mr-3" />} label={t('pending_orders')} value={data.pendingOrders} />
+                  <InfoRow icon={<BarChart3 className="h-6 w-6 text-green-600 mr-3" />} label={t('total_revenue')} value={`NPR ${data.totalRevenue}`} />
                 </div>
               </div>
             </div>

@@ -224,7 +224,6 @@ const UserProfile: React.FC = () => {
     try {
       setSaveLoading(true);
       const result = await changePassword(passwordForm);
-      console.log('🔓 Password change result:', result);
       
       setPasswordForm({
         current_password: '',

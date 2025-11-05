@@ -30,7 +30,6 @@ const Contact: React.FC = () => {
     
     try {
       const response = await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/contact/`, formData);
-      console.log("Form submitted successfully:", response.data);
       setStatus({ success: true, error: false });
       setShowModal(true);
       setFormData({
@@ -53,35 +52,59 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-gray-50">
+    <div className="w-full bg-soft-gradient">
       <Navbar />
       
-        <div className="relative h-80 bg-gradient-to-r from-orange-500 to-yellow-500 overflow-hidden mt-6">
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white px-4">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-center">Get In Touch</h1>
-          <p className="text-xl md:text-2xl text-center max-w-3xl opacity-90">
-            Have a question or need assistance? We're here to help you every step of the way.
-          </p>
+      {/* Hero Section with F-pattern layout */}
+      <div className="relative section-spacing bg-brand-gradient overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-16 -translate-y-16"></div>
+        <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/10 rounded-full translate-x-24 translate-y-24"></div>
+        
+        <div className="relative container-padding">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <h1 className="text-h1 font-bold mb-6 text-balance">
+              Get In Touch
+            </h1>
+            <p className="text-body-lg opacity-90 mb-8 text-pretty max-w-2xl mx-auto">
+              Have questions or need assistance? Our dedicated support team is here to help you succeed on your journey.
+            </p>
+            
+            {/* Quick contact info */}
+            <div className="flex flex-wrap justify-center gap-6 text-body-sm">
+              <div className="flex items-center gap-2">
+                <FaPhone className="w-4 h-4" />
+                <span>+977 9767474645</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaEnvelope className="w-4 h-4" />
+                <span>mulyabazzar@gmail.com</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent"></div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="max-w-7xl mx-auto container-padding section-spacing">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
+          {/* Contact Form - Primary focus (F-pattern) */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-10">
+            <div className="card-elevated">
               <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Send us a message</h2>
-                <p className="text-gray-600">Fill out the form below and we'll get back to you as soon as possible.</p>
+                <h2 className="text-h2 font-bold text-neutral-900 mb-2">Send us a message</h2>
+                <p className="text-body text-neutral-600">
+                  Fill out the form below and we'll get back to you within 24 hours.
+                </p>
               </div>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="content-spacing">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Your Name
+                    <label htmlFor="name" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                      Your Name *
                     </label>
                     <input
                       type="text"
@@ -90,13 +113,13 @@ const Contact: React.FC = () => {
                       onChange={handleChange}
                       id="name"
                       placeholder="Enter your full name"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                      className="input-field"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Email Address
+                    <label htmlFor="email" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                      Email Address *
                     </label>
                     <input
                       type="email"
@@ -105,15 +128,15 @@ const Contact: React.FC = () => {
                       onChange={handleChange}
                       id="email"
                       placeholder="your.email@example.com"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                      className="input-field"
                       required
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Subject
+                  <label htmlFor="subject" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                    Subject *
                   </label>
                   <input
                     type="text"
@@ -122,14 +145,17 @@ const Contact: React.FC = () => {
                     onChange={handleChange}
                     id="subject"
                     placeholder="What is this regarding?"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    className="input-field"
                     required
                   />
+                  <p className="text-caption text-neutral-500 mt-1">
+                    Brief description of your inquiry
+                  </p>
                 </div>
                 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Message
+                  <label htmlFor="message" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                    Message *
                   </label>
                   <textarea
                     name="message"
@@ -138,20 +164,23 @@ const Contact: React.FC = () => {
                     id="message"
                     rows={6}
                     placeholder="Tell us more about your inquiry..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-none"
+                    className="input-field resize-none"
                     required
                   ></textarea>
+                  <p className="text-caption text-neutral-500 mt-1">
+                    Minimum 10 characters
+                  </p>
                 </div>
                 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="btn-primary w-full py-4 relative"
                 >
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-2"></div>
-                      Sending...
+                      Sending your message...
                     </>
                   ) : (
                     <>
@@ -160,55 +189,61 @@ const Contact: React.FC = () => {
                     </>
                   )}
                 </button>
+                
+                <p className="text-caption text-neutral-500 text-center">
+                  We typically respond within 24 hours during business days
+                </p>
               </form>
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-white rounded-2xl shadow-xl p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-              <div className="space-y-6">
+          {/* Contact Information Sidebar */}
+          <div className="content-spacing">
+            <div className="card-elevated">
+              <h2 className="text-h3 font-bold text-neutral-900 mb-6">Contact Information</h2>
+              <div className="content-spacing">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FaEnvelope className="text-orange-600 text-lg" />
+                  <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FaEnvelope className="text-primary-600 text-lg" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Email</p>
-                    <p className="text-gray-600">mulyabazzar@gmail.com</p>
-                    <p className="text-sm text-gray-500 mt-1">We typically respond within 24 hours</p>
+                    <p className="font-semibold text-neutral-900">Email</p>
+                    <p className="text-neutral-600">mulyabazzar@gmail.com</p>
+                    <p className="text-caption text-neutral-500 mt-1">We typically respond within 24 hours</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FaPhone className="text-green-600 text-lg" />
+                  <div className="w-12 h-12 bg-accent-success-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FaPhone className="text-accent-success-600 text-lg" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Phone</p>
-                    <p className="text-gray-600">+977-9767474645</p>
-                    <p className="text-sm text-gray-500 mt-1">Mon-Fri, 9 AM - 6 PM NPT</p>
+                    <p className="font-semibold text-neutral-900">Phone</p>
+                    <p className="text-neutral-600">+977-9767474645</p>
+                    <p className="text-caption text-neutral-500 mt-1">Mon-Fri, 9 AM - 6 PM NPT</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <FaMapMarkerAlt className="text-blue-600 text-lg" />
+                  <div className="w-12 h-12 bg-secondary-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <FaMapMarkerAlt className="text-secondary-600 text-lg" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">Address</p>
-                    <p className="text-gray-600">Baluwatar, Kathmandu</p>
-                    <p className="text-gray-600">Nepal</p>
+                    <p className="font-semibold text-neutral-900">Address</p>
+                    <p className="text-neutral-600">Baluwatar, Kathmandu</p>
+                    <p className="text-neutral-600">Nepal</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-500 to-yellow-500 rounded-2xl shadow-xl p-8 text-white">
-              <h3 className="text-xl font-bold mb-4">Need Quick Help?</h3>
-              <p className="text-orange-100 mb-4">
-                Check out our FAQ section for instant answers to common questions.
+            {/* Quick Help CTA */}
+            <div className="card bg-brand-gradient text-white">
+              <h3 className="text-h3 font-bold mb-4">Need Quick Help?</h3>
+              <p className="text-body mb-6 opacity-90">
+                Check out our FAQ section for instant answers to common questions about orders, shipping, and more.
               </p>
-              <button className="bg-white text-orange-600 px-6 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-colors">
+              <button className="btn-secondary bg-white text-primary-600 hover:bg-primary-50 border-white hover:border-primary-200">
                 View FAQ
               </button>
             </div>
@@ -216,8 +251,9 @@ const Contact: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="rounded-2xl overflow-hidden shadow-2xl">
+      {/* Banner Section */}
+      <div className="max-w-7xl mx-auto container-padding pb-16">
+        <div className="rounded-xl overflow-hidden shadow-medium">
           <img 
             src={banner}
             alt="Contact Us Banner"
@@ -226,34 +262,35 @@ const Contact: React.FC = () => {
         </div>
       </div>
 
+      {/* Success/Error Modal */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4">
+          <div className="card-elevated max-w-md w-full transform animate-slide-in">
             <div className="text-center">
               {status.success ? (
                 <>
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaCheckCircle className="text-green-600 text-2xl" />
+                  <div className="w-16 h-16 bg-accent-success-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <FaCheckCircle className="text-accent-success-600 text-2xl" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Message Sent!</h3>
-                  <p className="text-gray-600 mb-6">
-                    Thank you for contacting us. We'll get back to you soon!
+                  <h3 className="text-h3 font-bold text-neutral-900 mb-2">Message Sent!</h3>
+                  <p className="text-body text-neutral-600 mb-8">
+                    Thank you for contacting us. We'll get back to you within 24 hours.
                   </p>
                 </>
               ) : (
                 <>
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaExclamationTriangle className="text-red-600 text-2xl" />
+                  <div className="w-16 h-16 bg-accent-error-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <FaExclamationTriangle className="text-accent-error-600 text-2xl" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Oops!</h3>
-                  <p className="text-gray-600 mb-6">
-                    There was an error sending your message. Please try again.
+                  <h3 className="text-h3 font-bold text-neutral-900 mb-2">Oops!</h3>
+                  <p className="text-body text-neutral-600 mb-8">
+                    There was an error sending your message. Please try again or contact us directly.
                   </p>
                 </>
               )}
               <button
                 onClick={closeModal}
-                className="w-full px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-200"
+                className="btn-primary w-full"
               >
                 Close
               </button>

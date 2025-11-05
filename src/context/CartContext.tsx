@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useToast } from './ToastContext';
 
 interface ProductImage {
   id: number;
@@ -109,6 +110,15 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Import at the module level and create a safe wrapper
+  let toast: any = null;
+  try {
+    toast = useToast();
+  } catch (error) {
+    // Toast context not available, we'll use console logging as fallback
+    console.warn('Toast context not available in CartProvider');
+  }
+  
   const [state, setState] = useState<CartState>({
     cartId: null,
   });
@@ -340,7 +350,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       if (!response.ok && response.status === 405) {
-        console.log('DELETE method not allowed, trying PATCH with quantity 0');
         response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
           method: 'PATCH',
           headers: {
@@ -499,6 +508,21 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         )
       );
 
+      // Show success toast
+      if (toast) {
+        toast.showCartSuccess(
+          'Added to cart!',
+          `${product.product_details?.name} (${quantity}) has been added to your cart.`,
+          {
+            label: 'View Cart',
+            onClick: () => {
+              // This will be handled by the component calling addToCart
+              window.location.href = '/cart';
+            }
+          }
+        );
+      }
+
       // Refresh cart data
       fetchMyCart().catch(console.error);
     } catch (error) {
@@ -514,6 +538,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
         return prevCart.filter(item => item.backendItemId !== tempId);
       });
+      
+      // Show error toast
+      if (toast) {
+        toast.showError(
+          'Failed to add to cart',
+          error instanceof Error ? error.message : 'Please try again.'
+        );
+      }
       
       handleApiError(error, 'Add to cart');
       throw error;
@@ -533,10 +565,26 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
+      const removedItem = cart.find(item => item.id === productId);
       setCart(prevCart => prevCart.filter(item => item.id !== productId));
+      
+      // Show removal toast
+      if (removedItem && toast) {
+        toast.showInfo(
+          'Removed from cart',
+          `${removedItem.name} has been removed from your cart.`
+        );
+      }
+      
       fetchMyCart();
     } catch (error) {
       console.error('Failed to remove from cart:', error);
+      if (toast) {
+        toast.showError(
+          'Error',
+          'Failed to remove item from cart. Please try again.'
+        );
+      }
       throw error;
     }
   };
@@ -621,6 +669,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCart([]);
       setBackendTotals(null);
       localStorage.removeItem('cart');
+      
+      // Show success toast
+      if (toast) {
+        toast.showSuccess(
+          'Cart cleared',
+          'All items have been removed from your cart.'
+        );
+      }
       
       // Refresh cart to ensure sync (but don't wait for it to complete)
       fetchMyCart().catch(error => {

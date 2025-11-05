@@ -87,21 +87,34 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-      <img src={logo} alt="Logo" className="w-64 h-64 mb-4" />
-      <div className="bg-gray-100 shadow-md rounded-lg px-8 py-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-soft-gradient">
+      {/* Brand Logo */}
+      <div className="mb-8 text-center">
+        <img src={logo} alt="MulyaBazzar Logo" className="w-24 h-24 mx-auto mb-4 rounded-xl shadow-soft" />
+        <h1 className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
+          MulyaBazzar
+        </h1>
+        <p className="text-body text-neutral-600 mt-2">
+          Welcome back! Sign in to your account
+        </p>
+      </div>
+
+      {/* Login Form */}
+      <div className="card-elevated w-full max-w-md">
+        <h2 className="text-h3 font-bold text-center mb-6 text-neutral-900">
           {t('login')}
         </h2>
 
         {errorMessage && (
-          <p className="text-red-500 text-center mb-4">{errorMessage}</p>
+          <div className="status-error mb-6 p-4 rounded-lg">
+            <p className="text-body-sm font-medium">{errorMessage}</p>
+          </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700">
-              {t('username')}
+        <form onSubmit={handleSubmit} className="content-spacing">
+          <div>
+            <label htmlFor="username" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+              {t('username')} *
             </label>
             <input
               type="text"
@@ -109,14 +122,15 @@ const Login: React.FC = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+              className="input-field"
+              placeholder="Enter your username or email"
               required
             />
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700">
-              {t('password')}
+          <div>
+            <label htmlFor="password" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+              {t('password')} *
             </label>
             <input
               type="password"
@@ -124,17 +138,30 @@ const Login: React.FC = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+              className="input-field"
+              placeholder="Enter your password"
               required
             />
+            <p className="text-caption text-neutral-500 mt-1">
+              Forgot your password? <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">Reset here</a>
+            </p>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-orange-500 text-white px-4 py-2 rounded-lg transition"
+            className="btn-primary w-full py-4"
           >
             {t('login')}
           </button>
+
+          <div className="text-center">
+            <p className="text-body-sm text-neutral-600">
+              Don't have an account?{' '}
+              <a href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+                Sign up now
+              </a>
+            </p>
+          </div>
         </form>
       </div>
     </div>

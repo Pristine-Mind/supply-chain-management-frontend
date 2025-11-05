@@ -57,7 +57,7 @@ interface FooterLinkProps {
 }
 
 const FooterLink: React.FC<FooterLinkProps> = ({ to, children, external = false }) => {
-  const baseClasses = "text-gray-600 hover:text-orange-500 transition-all duration-200 hover:translate-x-1 inline-block group";
+  const baseClasses = "text-neutral-600 hover:text-primary-600 transition-all duration-200 hover:translate-x-1 inline-block group text-body-sm";
   
   if (external) {
     return (
@@ -86,18 +86,18 @@ const SocialLink: React.FC<{ href: string; icon: React.ReactNode; label: string 
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="group relative p-3 bg-gray-100 hover:bg-gradient-to-br hover:from-orange-400 hover:to-orange-600 rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-lg"
+    className="group relative p-3 bg-neutral-100 hover:bg-brand-gradient rounded-xl transition-all duration-300 hover:scale-110 hover:shadow-colored focus-ring"
     aria-label={label}
   >
-    <div className="text-gray-600 group-hover:text-white transition-colors duration-300">
+    <div className="text-neutral-600 group-hover:text-white transition-colors duration-300">
       {icon}
     </div>
-    <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
+    <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent-success-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
   </a>
 );
 
 const PaymentBadge: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = "" }) => (
-  <div className={`flex items-center bg-white hover:bg-gray-50 px-4 py-2.5 rounded-xl border border-gray-200 hover:border-orange-300 shadow-sm hover:shadow-md transition-all duration-200 ${className}`}>
+  <div className={`flex items-center bg-white hover:bg-neutral-50 px-4 py-2.5 rounded-xl border border-neutral-200 hover:border-primary-300 shadow-soft hover:shadow-medium transition-all duration-200 ${className}`}>
     {children}
   </div>
 );
@@ -167,26 +167,29 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative bg-gradient-to-b from-gray-50 to-white border-t border-gray-200">
+    <footer className="relative bg-soft-gradient border-t border-neutral-200">
+      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-100 rounded-full opacity-20 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-100 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-100 rounded-full opacity-20 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary-100 rounded-full opacity-20 blur-3xl" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+      <div className="relative max-w-7xl mx-auto container-padding section-spacing">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-12">
-          <div className="lg:col-span-4 space-y-6">
+          
+          {/* Brand Section */}
+          <div className="lg:col-span-4 content-spacing">
             <div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent mb-2">
+              <h3 className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mb-3">
                 MulyaBazzar
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-body text-neutral-600 leading-relaxed">
                 Connecting you to quality products with trusted sellers across Nepal. Your satisfaction is our priority.
               </p>
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-900 mb-3">Follow Us</p>
+              <p className="text-body-sm font-semibold text-neutral-900 mb-4">Follow Us</p>
               <div className="flex space-x-3">
                 <SocialLink
                   href="https://www.facebook.com/profile.php?id=61571097347345"

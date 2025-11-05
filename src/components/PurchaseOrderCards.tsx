@@ -84,17 +84,17 @@ const PurchaseOrderCards: React.FC<PurchaseOrderCardsProps> = ({ pageSize = 6 })
       {/* Pagination Controls */}
       <div className="flex justify-center items-center mt-6 space-x-4">
         <button
-          className={`px-4 py-2 rounded-lg ${page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'} transition-colors duration-300`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${page === 1 ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 text-white'}`}
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
         >
           Previous
         </button>
-        <span className="text-gray-700 font-semibold">
+        <span className="text-neutral-700 font-medium">
           Page {page} of {Math.ceil(count / pageSize) || 1}
         </span>
         <button
-          className={`px-4 py-2 rounded-lg ${page >= Math.ceil(count / pageSize) ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'} transition-colors duration-300`}
+          className={`px-4 py-2 rounded-lg font-medium transition-colors ${page >= Math.ceil(count / pageSize) ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 text-white'}`}
           onClick={() => setPage((p) => p + 1)}
           disabled={page >= Math.ceil(count / pageSize)}
         >

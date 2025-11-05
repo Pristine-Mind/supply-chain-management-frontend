@@ -380,9 +380,9 @@ const Products: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('products_list')}</h2>
+    <div className="min-h-screen bg-neutral-50 p-4 sm:p-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+        <h2 className="text-h1 font-bold mb-4 sm:mb-0 text-neutral-900">{t('products_list')}</h2>
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
           <div className="relative w-full sm:w-64">
             <input
@@ -390,14 +390,14 @@ const Products: React.FC = () => {
               placeholder={t('search_products')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border rounded-lg w-full"
+              className="pl-10 pr-4 py-3 border border-neutral-300 rounded-lg w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
             />
-            <FaSearch className="absolute left-3 top-2.5 text-gray-400" />
+            <FaSearch className="absolute left-3 top-3.5 text-neutral-400" />
           </div>
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 border rounded-lg w-full sm:w-auto"
+            className="px-4 py-3 border border-neutral-300 rounded-lg w-full sm:w-auto focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
           >
             <option value="">{t('all_categories')}</option>
             {categories.map((category) => (
@@ -406,19 +406,19 @@ const Products: React.FC = () => {
               </option>
             ))}
           </select>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button
               onClick={() => {
                 resetForm();
                 setFormVisible(true);
               }}
-              className="flex items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+              className="flex items-center bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors shadow-elevation-md text-body font-medium"
             >
               <FaPlus className="mr-2" /> {t('add_new_product')}
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+              className="flex items-center bg-accent-success-600 text-white px-6 py-3 rounded-lg hover:bg-accent-success-700 transition-colors shadow-elevation-md text-body font-medium"
             >
               <FaDownload className="mr-2" /> {t('export')}
             </button>
@@ -426,35 +426,34 @@ const Products: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-lg shadow-lg p-4 transition-transform transform hover:scale-105">
-            <h3 className="text-lg font-bold text-gray-800">{product.name}</h3>
-            <p className="text-gray-600 mt-2" dangerouslySetInnerHTML={{ __html: product.description }} />
-            <div className="flex justify-between items-center mt-4">
+          <div key={product.id} className="bg-white rounded-lg shadow-elevation-md border border-neutral-200 p-6 transition-all hover:shadow-elevation-lg hover:-translate-y-1">
+            <h3 className="text-h3 font-semibold text-neutral-900 mb-3">{product.name}</h3>
+            <p className="text-body text-neutral-600 mb-4 line-clamp-3" dangerouslySetInnerHTML={{ __html: product.description }} />
+            <div className="flex justify-between items-center mb-4">
               <button
                 onClick={() => handleView(product)}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                className="bg-accent-info-600 hover:bg-accent-info-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-caption"
               >
                 {t('view')}
               </button>
               <button
                 onClick={() => handleEdit(product)}
-                className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded transition duration-300"
+                className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-caption flex items-center"
               >
-                <FaEdit className="mr-1" /> {t('edit')}
+                <FaEdit className="mr-2" /> {t('edit')}
               </button>
             </div>
-            <div className="mt-2 flex justify-between">
+                        <div className="flex justify-between items-center pt-4 border-t border-neutral-200">
               {quickUpdateStock.id === product.id ? (
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
                     value={quickUpdateStock.value}
                     onChange={(e) => setQuickUpdateStock({ ...quickUpdateStock, value: e.target.value })}
-                    className="w-20 px-2 py-1 border rounded"
-                    min="0"
-                    step="1"
+                    className="w-20 px-2 py-1 border border-neutral-300 rounded-md text-caption focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                    placeholder={t('new_stock')}
                   />
                   <button
                     onClick={() => {
@@ -462,13 +461,13 @@ const Products: React.FC = () => {
                       setQuickUpdateStock({ id: null, value: '' });
                     }}
                     disabled={isUpdatingStock}
-                    className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs whitespace-nowrap transition duration-300"
+                    className="px-3 py-1 bg-accent-success-600 text-white rounded hover:bg-accent-success-700 text-caption whitespace-nowrap transition-colors"
                   >
                     {isUpdatingStock ? 'Updating...' : <FaCheck />}
                   </button>
                   <button
                     onClick={() => setQuickUpdateStock({ id: null, value: '' })}
-                    className="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-xs transition duration-300"
+                    className="px-3 py-1 bg-neutral-200 text-neutral-700 rounded hover:bg-neutral-300 text-caption transition-colors"
                   >
                     <FaTimes />
                   </button>
@@ -476,7 +475,7 @@ const Products: React.FC = () => {
               ) : (
                 <button
                   onClick={() => handleQuickUpdateStock(product)}
-                  className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-3 rounded text-xs whitespace-nowrap transition duration-300"
+                  className="bg-accent-warning-600 hover:bg-accent-warning-700 text-white font-medium py-2 px-3 rounded text-caption whitespace-nowrap transition-colors"
                 >
                   {t('update_stock')}
                 </button>
@@ -484,7 +483,7 @@ const Products: React.FC = () => {
               <button
                 onClick={() => handleExportStats(product.id)}
                 disabled={exportingProductId === product.id}
-                className="flex items-center justify-center bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-3 rounded text-xs whitespace-nowrap transition duration-300"
+                className="flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-3 rounded text-caption whitespace-nowrap transition-colors"
               >
                 {exportingProductId === product.id ? (
                   <>
@@ -507,106 +506,133 @@ const Products: React.FC = () => {
       </div>
 
       {viewingProductId && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">{viewingProductId.name}</h3>
-              <button onClick={handleCloseModal} className="text-gray-500 hover:text-gray-700">
+        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-16">
+          <div className="relative mx-auto p-6 border-0 w-full max-w-2xl shadow-elevation-lg rounded-lg bg-white">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-h2 font-semibold text-neutral-900">{viewingProductId.name}</h3>
+              <button onClick={handleCloseModal} className="text-neutral-400 hover:text-neutral-600 transition-colors">
                 <FaTimes size={20} />
               </button>
             </div>
-            <div className="space-y-4">
-              <p><strong>{t('producer')}:</strong> {viewingProductId.producer}</p>
-              <p><strong>{t('category')}:</strong> {viewingProductId.category_details}</p>
-              <p><strong>{t('description')}:</strong> <span dangerouslySetInnerHTML={{ __html: viewingProductId.description }} /></p>
-              <p><strong>{t('sku')}:</strong> {viewingProductId.sku}</p>
-              <p><strong>{t('price')}:</strong> Rs. {viewingProductId.price.toFixed(2)}</p>
-              <p><strong>{t('cost_price')}:</strong> NPR {viewingProductId.cost_price.toFixed(2)}</p>
-              <div className="flex items-center space-x-2">
-                <strong>{t('stock_quantity')}:</strong>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-caption font-medium text-neutral-500">{t('producer')}</span>
+                  <p className="text-body text-neutral-900 mt-1">{viewingProductId.producer}</p>
+                </div>
+                <div>
+                  <span className="text-caption font-medium text-neutral-500">{t('category')}</span>
+                  <p className="text-body text-neutral-900 mt-1">{viewingProductId.category_details}</p>
+                </div>
+                <div>
+                  <span className="text-caption font-medium text-neutral-500">{t('sku')}</span>
+                  <p className="text-body text-neutral-900 mt-1">{viewingProductId.sku}</p>
+                </div>
+                <div>
+                  <span className="text-caption font-medium text-neutral-500">{t('price')}</span>
+                  <p className="text-body text-neutral-900 mt-1">Rs. {viewingProductId.price.toFixed(2)}</p>
+                </div>
+                <div>
+                  <span className="text-caption font-medium text-neutral-500">{t('cost_price')}</span>
+                  <p className="text-body text-neutral-900 mt-1">NPR {viewingProductId.cost_price.toFixed(2)}</p>
+                </div>
+                <div>
+                  <span className="text-caption font-medium text-neutral-500">{t('reorder_level')}</span>
+                  <p className="text-body text-neutral-900 mt-1">{viewingProductId.reorder_level}</p>
+                </div>
+              </div>
+              
+              <div>
+                <span className="text-caption font-medium text-neutral-500">{t('description')}</span>
+                <div className="text-body text-neutral-900 mt-1" dangerouslySetInnerHTML={{ __html: viewingProductId.description }} />
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <span className="text-caption font-medium text-neutral-500">{t('stock_quantity')}:</span>
                 {editingStock.id === viewingProductId.id ? (
                   <div className="flex items-center space-x-2">
                     <input
                       type="number"
                       value={editingStock.value}
                       onChange={(e) => setEditingStock({ ...editingStock, value: e.target.value })}
-                      className="w-20 px-2 py-1 border rounded"
+                      className="w-24 px-3 py-2 border border-neutral-300 rounded-md text-body focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                       min="0"
                       step="1"
                     />
                     <button
                       onClick={() => handleUpdateStock(viewingProductId.id)}
                       disabled={isUpdatingStock}
-                      className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm disabled:opacity-50 transition duration-300"
+                      className="px-3 py-2 bg-accent-success-600 text-white rounded-md hover:bg-accent-success-700 text-caption disabled:opacity-50 transition-colors flex items-center"
                     >
                       {isUpdatingStock ? t('updating') : <FaCheck />}
                     </button>
                     <button
                       onClick={() => setEditingStock({ id: null, value: '' })}
-                      className="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm transition duration-300"
+                      className="px-3 py-2 bg-neutral-200 text-neutral-700 rounded-md hover:bg-neutral-300 text-caption transition-colors"
                     >
                       <FaTimes />
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-2">
-                    <span>{viewingProductId.stock}</span>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-body text-neutral-900">{viewingProductId.stock}</span>
                     <button
                       onClick={() => setEditingStock({ id: viewingProductId.id, value: viewingProductId.stock.toString() })}
-                      className="ml-2 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded text-gray-700 transition duration-300"
+                      className="px-3 py-1 text-caption bg-neutral-100 hover:bg-neutral-200 rounded-md text-neutral-700 transition-colors"
                     >
                       {t('update')}
                     </button>
                   </div>
                 )}
               </div>
-              {stockUpdateError && <p className="text-red-500 text-sm mt-1">{stockUpdateError}</p>}
-              {stockUpdateSuccess && <p className="text-green-500 text-sm mt-1">{stockUpdateSuccess}</p>}
-              <p><strong>{t('reorder_level')}:</strong> {viewingProductId.reorder_level}</p>
-              <div className="mt-4 border-t border-gray-200 pt-4">
-                <h4 className="text-md font-medium text-gray-900 mb-2 flex items-center">
-                  <FaImage className="mr-2" />
+              {stockUpdateError && <p className="text-accent-error-600 text-caption mt-2">{stockUpdateError}</p>}
+              {stockUpdateSuccess && <p className="text-accent-success-600 text-caption mt-2">{stockUpdateSuccess}</p>}
+              
+              <div className="pt-6 border-t border-neutral-200">
+                <h4 className="text-h3 font-medium text-neutral-900 mb-4 flex items-center">
+                  <FaImage className="mr-2 text-primary-600" />
                   {t('inventory_metrics')}
                 </h4>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500">{t('avg_daily_demand')}</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-caption font-medium text-neutral-500">{t('avg_daily_demand')}</p>
+                    <p className="text-body font-medium text-neutral-900">
                       {viewingProductId.avg_daily_demand ? viewingProductId.avg_daily_demand.toFixed(2) : 'N/A'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500">{t('safety_stock')}</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-caption font-medium text-neutral-500">{t('safety_stock')}</p>
+                    <p className="text-body font-medium text-neutral-900">
                       {viewingProductId.safety_stock || 'N/A'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500">{t('reorder_point')}</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-caption font-medium text-neutral-500">{t('reorder_point')}</p>
+                    <p className="text-body font-medium text-neutral-900">
                       {viewingProductId.reorder_point || 'N/A'}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500">{t('reorder_quantity')}</p>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-caption font-medium text-neutral-500">{t('reorder_quantity')}</p>
+                    <p className="text-body font-medium text-neutral-900">
                       {viewingProductId.reorder_quantity || 'N/A'}
                     </p>
                   </div>
                 </div>
               </div>
-              <p>
-                <strong>{t('active_status')}:</strong>
-                <span className={`ml-2 px-2 py-1 rounded-md text-sm ${viewingProductId.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              
+              <div>
+                <span className="text-caption font-medium text-neutral-500">{t('active_status')}</span>
+                <span className={`ml-3 px-3 py-1 rounded-full text-caption font-medium ${viewingProductId.is_active ? 'bg-accent-success-100 text-accent-success-800' : 'bg-accent-error-100 text-accent-error-800'}`}>
                   {viewingProductId.is_active ? t('active') : t('inactive')}
                 </span>
-              </p>
+              </div>
               {viewingProductId.images && viewingProductId.images.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-md font-medium text-gray-900 mb-2">{t('product_images')}</h4>
-                  <div className="grid grid-cols-3 gap-3">
+                <div className="pt-6 border-t border-neutral-200">
+                  <h4 className="text-h3 font-medium text-neutral-900 mb-4">{t('product_images')}</h4>
+                  <div className="grid grid-cols-3 gap-4">
                     {viewingProductId.images.map((image) => (
-                      <div key={image.id} className="overflow-hidden rounded-lg shadow-lg">
+                      <div key={image.id} className="overflow-hidden rounded-lg shadow-elevation-md">
                         <img src={image.image} alt={image.alt_text || 'Product Image'} className="w-full h-24 object-cover" />
                       </div>
                     ))}
@@ -619,22 +645,26 @@ const Products: React.FC = () => {
       )}
 
       {formVisible && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
+        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-8">
+          <div className="relative mx-auto p-6 border-0 w-full max-w-2xl shadow-elevation-lg rounded-lg bg-white max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-h2 font-semibold text-neutral-900">
                 {editingProductId ? t('edit_product') : t('add_new_product')}
               </h3>
-              <button onClick={() => { setFormVisible(false); resetForm(); }} className="text-gray-500 hover:text-gray-700">
+              <button onClick={() => { setFormVisible(false); resetForm(); }} className="text-neutral-400 hover:text-neutral-600 transition-colors">
                 <FaTimes size={20} />
               </button>
             </div>
-            <form onSubmit={handleSubmit} encType="multipart/form-data">
-              {errorMessages.general && <p className="text-red-500 mb-4">{errorMessages.general[0]}</p>}
-              {success && <p className="text-green-500 mb-4">{success}</p>}
-              <div className="mb-4 relative" ref={producerSearchRef}>
-                <label htmlFor="producer" className="block text-gray-700">
-                  {t('producer')} <span className="text-red-500">*</span>
+            <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
+              {errorMessages.general && <div className="p-4 bg-accent-error-50 border border-accent-error-200 rounded-lg">
+                <p className="text-accent-error-700 text-body">{errorMessages.general[0]}</p>
+              </div>}
+              {success && <div className="p-4 bg-accent-success-50 border border-accent-success-200 rounded-lg">
+                <p className="text-accent-success-700 text-body">{success}</p>
+              </div>}
+              <div className="relative" ref={producerSearchRef}>
+                <label htmlFor="producer" className="block text-body font-medium text-neutral-700 mb-2">
+                  {t('producer')} <span className="text-accent-error-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -646,12 +676,12 @@ const Products: React.FC = () => {
                     setShowProducerList(true);
                   }}
                   onFocus={() => setShowProducerList(true)}
-                  className={`w-full px-4 py-2 border rounded-lg ${errorMessages.producer ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.producer ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                   placeholder={t('search_farmer')}
                   required
                 />
                 {showProducerList && (
-                  <ul className="absolute z-10 bg-white border rounded-lg w-full max-h-48 overflow-y-auto mt-1">
+                  <ul className="absolute z-10 bg-white border border-neutral-200 rounded-lg w-full max-h-48 overflow-y-auto mt-1 shadow-elevation-md">
                     {producers
                       .filter((producer) =>
                         producer.name.toLowerCase().includes(producerSearchTerm.toLowerCase())
@@ -664,7 +694,7 @@ const Products: React.FC = () => {
                             setProducerSearchTerm(producer.name);
                             setShowProducerList(false);
                           }}
-                          className="px-4 py-2 hover:bg-gray-200 cursor-pointer transition duration-300"
+                          className="px-4 py-3 hover:bg-neutral-50 cursor-pointer transition-colors text-body border-b border-neutral-100 last:border-b-0"
                         >
                           {producer.name}
                         </li>
@@ -672,15 +702,16 @@ const Products: React.FC = () => {
                     {producers.filter((producer) =>
                       producer.name.toLowerCase().includes(producerSearchTerm.toLowerCase())
                     ).length === 0 && (
-                      <li className="px-4 py-2">{t('no_producers_found')}</li>
+                      <li className="px-4 py-3 text-body text-neutral-500">{t('no_producers_found')}</li>
                     )}
                   </ul>
                 )}
-                {errorMessages.producer && <p className="text-red-500 text-sm">{errorMessages.producer[0]}</p>}
+                {errorMessages.producer && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.producer[0]}</p>}
               </div>
-              <div className="mb-4">
-                <label htmlFor="name" className="block text-gray-700">
-                  {t('product_name')} <span className="text-red-500">*</span>
+              
+              <div>
+                <label htmlFor="name" className="block text-body font-medium text-neutral-700 mb-2">
+                  {t('product_name')} <span className="text-accent-error-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -688,21 +719,21 @@ const Products: React.FC = () => {
                   name="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`w-full px-4 py-2 border rounded-lg ${errorMessages.name ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.name ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                   required
                 />
-                {errorMessages.name && <p className="text-red-500 text-sm">{errorMessages.name[0]}</p>}
+                {errorMessages.name && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.name[0]}</p>}
               </div>
-              <div className="mb-4">
-                <label htmlFor="category" className="block text-gray-700">
-                  {t('category')} <span className="text-red-500">*</span>
+              <div>
+                <label htmlFor="category" className="block text-body font-medium text-neutral-700 mb-2">
+                  {t('category')} <span className="text-accent-error-500">*</span>
                 </label>
                 <select
                   id="category"
                   name="category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className={`w-full px-4 py-2 border rounded-lg ${errorMessages.category ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.category ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                   required
                 >
                   <option value="">{t('select_category')}</option>
@@ -712,22 +743,24 @@ const Products: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                {errorMessages.category && <p className="text-red-500 text-sm">{errorMessages.category[0]}</p>}
+                {errorMessages.category && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.category[0]}</p>}
               </div>
-              <div className="mb-4">
-                <label htmlFor="description" className="block text-gray-700">
-                  {t('description')} <span className="text-red-500">*</span>
+              
+              <div>
+                <label htmlFor="description" className="block text-body font-medium text-neutral-700 mb-2">
+                  {t('description')} <span className="text-accent-error-500">*</span>
                 </label>
                 <ReactQuill
                   theme="snow"
                   value={formData.description}
                   onChange={(value) => setFormData({ ...formData, description: value })}
-                  className="mb-2 bg-white"
+                  className="mb-2 bg-white rounded-lg border border-neutral-300"
                 />
-                {errorMessages.description && <p className="text-red-500 text-sm">{errorMessages.description[0]}</p>}
+                {errorMessages.description && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.description[0]}</p>}
               </div>
-              <div className="mb-4">
-                <label htmlFor="sku" className="block text-gray-700">
+              
+              <div>
+                <label htmlFor="sku" className="block text-body font-medium text-neutral-700 mb-2">
                   {t('sku')}
                 </label>
                 <input
@@ -736,14 +769,14 @@ const Products: React.FC = () => {
                   name="sku"
                   value={formData.sku}
                   onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                  className={`w-full px-4 py-2 border rounded-lg ${errorMessages.sku ? 'border-red-500' : ''}`}
+                  className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.sku ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                 />
-                {errorMessages.sku && <p className="text-red-500 text-sm">{errorMessages.sku[0]}</p>}
+                {errorMessages.sku && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.sku[0]}</p>}
               </div>
-              <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="price" className="block text-gray-700">
-                    {t('price')} <span className="text-red-500">*</span>
+                  <label htmlFor="price" className="block text-body font-medium text-neutral-700 mb-2">
+                    {t('price')} <span className="text-accent-error-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -752,14 +785,14 @@ const Products: React.FC = () => {
                     name="price"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.price ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.price ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                     required
                   />
-                  {errorMessages.price && <p className="text-red-500 text-sm">{errorMessages.price[0]}</p>}
+                  {errorMessages.price && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.price[0]}</p>}
                 </div>
                 <div>
-                  <label htmlFor="cost_price" className="block text-gray-700">
-                    {t('cost_price')} <span className="text-red-500">*</span>
+                  <label htmlFor="cost_price" className="block text-body font-medium text-neutral-700 mb-2">
+                    {t('cost_price')} <span className="text-accent-error-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -768,16 +801,17 @@ const Products: React.FC = () => {
                     name="cost_price"
                     value={formData.cost_price}
                     onChange={(e) => setFormData({ ...formData, cost_price: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.cost_price ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.cost_price ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                     required
                   />
-                  {errorMessages.cost_price && <p className="text-red-500 text-sm">{errorMessages.cost_price[0]}</p>}
+                  {errorMessages.cost_price && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.cost_price[0]}</p>}
                 </div>
               </div>
-              <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="stock" className="block text-gray-700">
-                    {t('stock_quantity')} <span className="text-red-500">*</span>
+                  <label htmlFor="stock" className="block text-body font-medium text-neutral-700 mb-2">
+                    {t('stock_quantity')} <span className="text-accent-error-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -785,13 +819,13 @@ const Products: React.FC = () => {
                     name="stock"
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.stock ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.stock ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                     required
                   />
-                  {errorMessages.stock && <p className="text-red-500 text-sm">{errorMessages.stock[0]}</p>}
+                  {errorMessages.stock && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.stock[0]}</p>}
                 </div>
                 <div>
-                  <label htmlFor="reorder_level" className="block text-gray-700">
+                  <label htmlFor="reorder_level" className="block text-body font-medium text-neutral-700 mb-2">
                     {t('reorder_level')}
                   </label>
                   <input
@@ -800,13 +834,13 @@ const Products: React.FC = () => {
                     name="reorder_level"
                     value={formData.reorder_level}
                     onChange={(e) => setFormData({ ...formData, reorder_level: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg ${errorMessages.reorder_level ? 'border-red-500' : ''}`}
+                    className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.reorder_level ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
                   />
-                  {errorMessages.reorder_level && <p className="text-red-500 text-sm">{errorMessages.reorder_level[0]}</p>}
+                  {errorMessages.reorder_level && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.reorder_level[0]}</p>}
                 </div>
               </div>
-              <div className="mb-4">
-                <label htmlFor="is_active" className="block text-gray-700">
+              <div>
+                <label className="block text-body font-medium text-neutral-700 mb-3">
                   {t('active_status')}
                 </label>
                 <div className="flex items-center">
@@ -816,36 +850,38 @@ const Products: React.FC = () => {
                     name="is_active"
                     checked={formData.is_active}
                     onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                    className="mr-2 leading-tight"
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
                   />
-                  <span className="text-gray-700">{t('is_active')}</span>
+                  <label htmlFor="is_active" className="ml-3 text-body text-neutral-700">{t('is_active')}</label>
                 </div>
               </div>
+              
               {existingImages.length > 0 && (
-                <div className="mb-4">
-                  <label className="block text-gray-700">{t('existing_images')}</label>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
+                <div>
+                  <label className="block text-body font-medium text-neutral-700 mb-3">{t('existing_images')}</label>
+                  <div className="grid grid-cols-3 gap-4">
                     {existingImages.map((image) => (
-                      <div key={image.id} className="relative">
+                      <div key={image.id} className="relative group">
                         <img
                           src={image.image}
                           alt={image.alt_text || 'Product Image'}
-                          className="w-full h-20 object-cover rounded"
+                          className="w-full h-24 object-cover rounded-lg shadow-elevation-sm"
                         />
                         <button
                           type="button"
                           onClick={() => handleDeleteExistingImage(image.id)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 transition duration-300"
+                          className="absolute -top-2 -right-2 bg-accent-error-500 text-white rounded-full p-1 shadow-elevation-sm hover:bg-accent-error-600 transition-colors opacity-0 group-hover:opacity-100"
                         >
-                          <FaTimes />
+                          <FaTimes size={12} />
                         </button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-              <div className="mb-4">
-                <label htmlFor="images" className="block text-gray-700">
+              
+              <div>
+                <label htmlFor="images" className="block text-body font-medium text-neutral-700 mb-2">
                   {t('upload_new_images')}
                 </label>
                 <input
@@ -854,23 +890,23 @@ const Products: React.FC = () => {
                   name="images"
                   multiple
                   onChange={handleImageChange}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-body file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-caption file:font-medium file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 transition-colors"
                 />
               </div>
-              <div className="flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4 pt-6 border-t border-neutral-200">
                 <button
                   type="button"
                   onClick={() => {
                     setFormVisible(false);
                     resetForm();
                   }}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-lg transition duration-300"
+                  className="px-6 py-3 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 text-body font-medium transition-colors"
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg transition duration-300"
+                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-body font-medium transition-colors"
                 >
                   {editingProductId ? t('update_product') : t('add_product')}
                 </button>

@@ -121,118 +121,185 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-soft-gradient">
       <Navbar />
       <div className="flex flex-col lg:flex-row mt-4">
-        <div className="hidden lg:flex lg:w-1/3 bg-gradient-to-br from-orange-500 to-yellow-400 p-8 text-white">
-          <div className="flex flex-col justify-center">
-            <h2 className="text-3xl font-bold mb-4">Join Our Community</h2>
-            <p className="mb-6">Create an account to access exclusive features and start your journey with us.</p>
-            <div className="space-y-4">
+        {/* Left Sidebar - Benefits */}
+        <div className="hidden lg:flex lg:w-1/3 bg-brand-gradient p-8 text-white">
+          <div className="flex flex-col justify-center content-spacing">
+            <h2 className="text-h2 font-bold mb-4">Join Our Community</h2>
+            <p className="text-body mb-8 opacity-90">
+              Create an account to access exclusive features and start your journey with us.
+            </p>
+            
+            <div className="content-spacing">
               <div className="flex items-center">
-                <div className="bg-white/20 p-2 rounded-full mr-3">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <span>Easy Registration</span>
+                <div>
+                  <h4 className="font-semibold">Easy Registration</h4>
+                  <p className="text-body-sm opacity-80">Quick setup process</p>
+                </div>
               </div>
+              
               <div className="flex items-center">
-                <div className="bg-white/20 p-2 rounded-full mr-3">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <span>Secure & Private</span>
+                <div>
+                  <h4 className="font-semibold">Secure & Private</h4>
+                  <p className="text-body-sm opacity-80">Your data is protected</p>
+                </div>
               </div>
+              
               <div className="flex items-center">
-                <div className="bg-white/20 p-2 rounded-full mr-3">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 109.75 9.75M15.91 11.669a2.25 2.25 0 01-1.81 3.83l-1.11.956a3.359 3.359 0 01-4.91 0l-1.11-.956a2.25 2.25 0 01-1.81-3.83L12 8.25l3.91 3.419z" />
                   </svg>
                 </div>
-                <span>24/7 Support</span>
+                <div>
+                  <h4 className="font-semibold">24/7 Support</h4>
+                  <p className="text-body-sm opacity-80">We're here to help</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="w-full lg:w-1/3 p-6 bg-white shadow-lg">
+
+        {/* Registration Form */}
+        <div className="w-full lg:w-1/3 p-8 bg-white shadow-medium">
           <div className="max-w-md mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Create an Account</h2>
+            <h2 className="text-h2 font-bold mb-2 text-center text-neutral-900">Create Account</h2>
+            <p className="text-body text-neutral-600 text-center mb-8">
+              Fill in your details to get started
+            </p>
 
             {submitError && (
-              <div className="mb-4 text-red-600">{submitError}</div>
+              <div className="status-error mb-6 p-4 rounded-lg">
+                <p className="text-body-sm font-medium">{submitError}</p>
+              </div>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="content-spacing">
               <div>
-                <label className="block font-medium">Username</label>
+                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                  Username *
+                </label>
                 <input
                   {...register('username')}
-                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="input-field"
+                  placeholder="Choose a username"
                 />
-                <p className="text-red-500 text-sm">{errors.username?.message}</p>
+                {errors.username && (
+                  <p className="text-caption text-accent-error-600 mt-1">{errors.username?.message}</p>
+                )}
               </div>
 
               <div>
-                <label className="block font-medium">Email</label>
+                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                  Email Address *
+                </label>
                 <input
                   {...register('email')}
                   type="email"
-                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="input-field"
+                  placeholder="your.email@example.com"
                 />
-                <p className="text-red-500 text-sm">{errors.email?.message}</p>
-        </div>
+                {errors.email && (
+                  <p className="text-caption text-accent-error-600 mt-1">{errors.email?.message}</p>
+                )}
+              </div>
 
-        <div>
-          <label className="block font-medium">Password</label>
-          <input
-            {...register('password')}
-            type="password"
-            className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          />
-          <p className="text-red-500 text-sm">{errors.password?.message}</p>
-        </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                    First Name *
+                  </label>
+                  <input
+                    {...register('firstName')}
+                    className="input-field"
+                    placeholder="First name"
+                  />
+                  {errors.firstName && (
+                    <p className="text-caption text-accent-error-600 mt-1">{errors.firstName?.message}</p>
+                  )}
+                </div>
 
-        <div>
-          <label className="block font-medium">Confirm Password</label>
-          <input
-            {...register('password2')}
-            type="password"
-            className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-          />
-          <p className="text-red-500 text-sm">{errors.password2?.message}</p>
-        </div>
-
-              <div>
-                <label className="block font-medium">First Name</label>
-                <input
-                  {...register('firstName')}
-                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-                <p className="text-red-500 text-sm">{errors.firstName?.message}</p>
+                <div>
+                  <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                    Last Name *
+                  </label>
+                  <input
+                    {...register('lastName')}
+                    className="input-field"
+                    placeholder="Last name"
+                  />
+                  {errors.lastName && (
+                    <p className="text-caption text-accent-error-600 mt-1">{errors.lastName?.message}</p>
+                  )}
+                </div>
               </div>
 
               <div>
-                <label className="block font-medium">Last Name</label>
-                <input
-                  {...register('lastName')}
-                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-                <p className="text-red-500 text-sm">{errors.lastName?.message}</p>
-              </div>
-
-              <div>
-                <label className="block font-medium">Phone Number</label>
+                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                  Phone Number *
+                </label>
                 <input
                   {...register('phone')}
-                  className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="input-field"
+                  placeholder="+977 98xxxxxxxx"
                 />
-                <p className="text-red-500 text-sm">{errors.phone?.message}</p>
+                {errors.phone && (
+                  <p className="text-caption text-accent-error-600 mt-1">{errors.phone?.message}</p>
+                )}
+                <p className="text-caption text-neutral-500 mt-1">
+                  We'll use this for important account updates
+                </p>
               </div>
 
               <div>
-                <label className="block font-medium">City</label>
+                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                  Password *
+                </label>
+                <input
+                  {...register('password')}
+                  type="password"
+                  className="input-field"
+                  placeholder="Create a strong password"
+                />
+                {errors.password && (
+                  <p className="text-caption text-accent-error-600 mt-1">{errors.password?.message}</p>
+                )}
+                <p className="text-caption text-neutral-500 mt-1">
+                  Minimum 6 characters
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                  Confirm Password *
+                </label>
+                <input
+                  {...register('password2')}
+                  type="password"
+                  className="input-field"
+                  placeholder="Confirm your password"
+                />
+                {errors.password2 && (
+                  <p className="text-caption text-accent-error-600 mt-1">{errors.password2?.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                  City *
+                </label>
                 <Controller
                   name="cityId"
                   control={control}
@@ -240,9 +307,9 @@ const Register = () => {
                     <select
                       {...field}
                       disabled={loadingCities}
-                      className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="input-field"
                     >
-                      <option value={0}>Select city</option>
+                      <option value={0}>Select your city</option>
                       {cities.map(c => (
                         <option key={c.id} value={c.id}>
                           {c.name}
@@ -251,66 +318,85 @@ const Register = () => {
                     </select>
                   )}
                 />
-                <p className="text-red-500 text-sm">{errors.cityId?.message}</p>
+                {errors.cityId && (
+                  <p className="text-caption text-accent-error-600 mt-1">{errors.cityId?.message}</p>
+                )}
                 {errorCities && (
-                  <p className="text-red-500 text-sm">{errorCities}</p>
+                  <p className="text-caption text-accent-error-600 mt-1">{errorCities}</p>
                 )}
               </div>
 
               <div>
-                <label className="block font-medium mb-2">Select Location</label>
-                <div style={{ height: 200, width: '100%' }}>
+                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
+                  Select Location
+                </label>
+                <div className="rounded-lg overflow-hidden border border-neutral-300" style={{ height: 200 }}>
                   <LocationPicker
                     initialCenter={{ lat: position[0], lng: position[1] }}
                     zoom={13}
                     onSelect={handleSelect}
                   />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 w-full">
-                  <div className="w-full">
-                    <input
-                      readOnly
-                      value={position[0].toFixed(6)}
-                      placeholder="Latitude"
-                      className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div className="w-full">
-                    <input
-                      readOnly
-                      value={position[1].toFixed(6)}
-                      placeholder="Longitude"
-                      className="w-full border px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <input
+                    readOnly
+                    value={position[0].toFixed(6)}
+                    placeholder="Latitude"
+                    className="input-field text-center"
+                  />
+                  <input
+                    readOnly
+                    value={position[1].toFixed(6)}
+                    placeholder="Longitude"
+                    className="input-field text-center"
+                  />
                 </div>
+                <p className="text-caption text-neutral-500 mt-1">
+                  Click on the map to select your precise location
+                </p>
               </div>
+
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 disabled:opacity-50"
+                className="btn-primary w-full py-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitting ? 'Registering...' : 'Register'}
+                {submitting ? 'Creating Account...' : 'Create Account'}
               </button>
+
+              <div className="text-center">
+                <p className="text-body-sm text-neutral-600">
+                  Already have an account?{' '}
+                  <a href="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+                    Sign in here
+                  </a>
+                </p>
+              </div>
             </form>
           </div>
         </div>
         
-        <div className="hidden lg:flex lg:w-1/3 bg-gray-100 p-8">
-          <div className="flex flex-col justify-center text-center">
-            <div className="mb-6">
-              <div className="bg-orange-100 p-4 rounded-full inline-block mb-4">
-                <svg className="w-10 h-10 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        {/* Right Sidebar - Security */}
+        <div className="hidden lg:flex lg:w-1/3 bg-neutral-100 p-8">
+          <div className="flex flex-col justify-center text-center content-spacing">
+            <div>
+              <div className="bg-primary-100 p-6 rounded-full inline-block mb-6">
+                <svg className="w-12 h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Secure & Private</h3>
-              <p className="text-gray-600">Your information is protected with industry-standard security measures.</p>
+              <h3 className="text-h3 font-semibold mb-3">Secure Registration</h3>
+              <p className="text-body text-neutral-600 mb-8">
+                Your information is protected with industry-standard security measures and encryption.
+              </p>
             </div>
-            <div className="pt-6 border-t border-gray-200">
-              <p className="text-gray-700 mb-4">Already have an account?</p>
-              <a href="/login" className="inline-block w-full px-4 py-2 text-orange-500 font-medium border border-orange-500 rounded-md hover:bg-orange-50 transition-colors">
-                Sign In
+            
+            <div className="pt-6 border-t border-neutral-200">
+              <p className="text-body text-neutral-700 mb-4">
+                Need help with registration?
+              </p>
+              <a href="/contact" className="btn-secondary w-full text-center">
+                Contact Support
               </a>
             </div>
           </div>

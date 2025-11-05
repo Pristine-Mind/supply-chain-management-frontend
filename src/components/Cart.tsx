@@ -101,31 +101,31 @@ const Cart: React.FC = () => {
   // Empty Cart State
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Orange Header Bar */}
-        <div className="bg-orange-600 text-white py-2 px-4">
-          <div className="max-w-7xl mx-auto text-center text-xs sm:text-sm">
+      <div className="min-h-screen bg-soft-gradient">
+        {/* Brand Header Bar */}
+        <div className="bg-primary-600 text-white py-2 px-4">
+          <div className="max-w-7xl mx-auto text-center text-body-sm">
             Welcome to MulyaBazzar - Your Premium Marketplace
           </div>
         </div>
 
         {/* Header */}
-        <nav className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="bg-white shadow-soft">
+          <div className="max-w-7xl mx-auto container-padding">
             <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-3">
-                <Link to="/" className="flex items-center">
-                  <img className="h-8 w-auto" src={logo} alt="Logo" />
+              <div className="flex items-center space-x-4">
+                <Link to="/" className="flex items-center focus-ring rounded-lg p-2 -ml-2">
+                  <img className="h-8 w-auto" src={logo} alt="MulyaBazzar Logo" />
                 </Link>
-                <Link to="/marketplace" className="text-black hover:text-orange-600 font-bold text-lg">
+                <Link to="/marketplace" className="text-neutral-900 hover:text-primary-600 font-bold text-h3 transition-colors">
                   MulyaBazzar
                 </Link>
               </div>
               <div className="flex items-center space-x-4">
-                <Link to="/cart" className="relative p-2 text-orange-600">
-                  <ShoppingCart className="w-6 h-6 text-gray-700 hover:text-orange-600" />
+                <Link to="/cart" className="relative p-2 text-primary-600 focus-ring rounded-lg">
+                  <ShoppingCart className="w-6 h-6" />
                   {itemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                    <span className="absolute -top-1 -right-1 bg-primary-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-caption-bold">
                       {itemCount}
                     </span>
                   )}
@@ -136,30 +136,59 @@ const Cart: React.FC = () => {
         </nav>
 
         {/* Empty Cart Content */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
+        <div className="max-w-4xl mx-auto container-padding section-spacing">
+          <div className="text-center content-spacing">
             <div className="flex justify-center mb-8">
-              <div className="bg-gray-100 rounded-full p-8">
-                <ShoppingBag className="w-16 h-16 text-gray-400" />
+              <div className="bg-neutral-100 rounded-2xl p-12">
+                <ShoppingBag className="w-20 h-20 text-neutral-400" />
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Discover amazing products and start adding them to your cart to get started with your shopping journey.
+            
+            <h2 className="text-h1 font-bold text-neutral-900 mb-4">Your cart is empty</h2>
+            <p className="text-body text-neutral-600 mb-8 max-w-md mx-auto">
+              Discover amazing products from trusted sellers across Nepal. Start your shopping journey today!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
               <button
                 onClick={() => navigate('/marketplace')}
-                className="bg-orange-600 text-white px-8 py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+                className="btn-primary flex-1"
               >
                 Browse Products
               </button>
               <button
                 onClick={() => navigate('/marketplace/all-products')}
-                className="border border-orange-600 text-orange-600 px-8 py-3 rounded-lg hover:bg-orange-50 transition-colors font-medium"
+                className="btn-secondary flex-1"
               >
                 View All Products
               </button>
+            </div>
+            
+            {/* Trust Indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 max-w-2xl mx-auto">
+              <div className="text-center">
+                <div className="bg-accent-success-100 rounded-full p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                  <Package className="w-8 h-8 text-accent-success-600" />
+                </div>
+                <h4 className="text-body font-semibold text-neutral-900 mb-2">Free Shipping</h4>
+                <p className="text-body-sm text-neutral-600">On orders over NPR 2500</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="bg-primary-100 rounded-full p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                  <CreditCard className="w-8 h-8 text-primary-600" />
+                </div>
+                <h4 className="text-body font-semibold text-neutral-900 mb-2">Secure Payment</h4>
+                <p className="text-body-sm text-neutral-600">Multiple payment options</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="bg-secondary-100 rounded-full p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                  <Truck className="w-8 h-8 text-secondary-600" />
+                </div>
+                <h4 className="text-body font-semibold text-neutral-900 mb-2">Fast Delivery</h4>
+                <p className="text-body-sm text-neutral-600">Same day delivery available</p>
+              </div>
             </div>
           </div>
         </div>
@@ -170,39 +199,39 @@ const Cart: React.FC = () => {
 
   // Cart with Items
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-neutral-50">
       {/* Orange Header Bar */}
-      <div className="bg-orange-600 text-white py-2 px-4">
-        <div className="max-w-7xl mx-auto text-center text-xs sm:text-sm">
+      <div className="bg-primary-500 text-white py-2 px-4">
+        <div className="max-w-7xl mx-auto text-center text-caption">
           Welcome to MulyaBazzar - Your Premium Marketplace
         </div>
       </div>
 
       {/* Header */}
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-white shadow-elevation-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <Link to="/" className="flex items-center">
                 <img className="h-8 w-auto" src={logo} alt="Logo" />
               </Link>
-              <Link to="/marketplace" className="text-black hover:text-orange-600 font-bold text-lg">
+              <Link to="/marketplace" className="text-gray-900 hover:text-primary-500 font-semibold text-h3 transition-colors">
                 MulyaBazzar
               </Link>
-              <div className="h-6 w-px bg-gray-300 hidden sm:block" />
+              <div className="h-6 w-px bg-neutral-200 hidden sm:block" />
               <button
                 onClick={() => navigate('/marketplace')}
-                className="flex items-center gap-2 text-gray-600 hover:text-orange-600 transition-colors"
+                className="flex items-center gap-2 text-neutral-600 hover:text-primary-500 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Continue Shopping</span>
               </button>
             </div>
             <div className="flex items-center space-x-4">
-              <Link to="/cart" className="relative p-2 text-orange-600">
-                <ShoppingCart className="w-6 h-6 text-orange-600" />
+              <Link to="/cart" className="relative p-2 text-primary-500">
+                <ShoppingCart className="w-6 h-6 text-primary-500" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  <span className="absolute -top-1 -right-1 bg-accent-error-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-caption font-medium">
                     {itemCount}
                   </span>
                 )}
@@ -213,17 +242,17 @@ const Cart: React.FC = () => {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section */}
+        {/* Header Section - F Pattern */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-              <p className="text-gray-600">{itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart</p>
+              <h1 className="text-h1 font-bold text-gray-900 mb-2">Shopping Cart</h1>
+              <p className="text-body text-neutral-600">{itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart</p>
             </div>
             <button
               onClick={handleClearCart}
               disabled={clearingCart || cartLoading}
-              className="flex items-center gap-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+              className="btn-secondary text-accent-error-600 hover:text-accent-error-700 hover:bg-accent-error-50 disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
               {clearingCart ? 'Clearing...' : 'Clear Cart'}
@@ -233,12 +262,12 @@ const Cart: React.FC = () => {
 
         {/* Error Display */}
         {cartError && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="card-elevated mb-6 bg-accent-error-50 border border-accent-error-200">
             <div className="flex items-center justify-between">
-              <p className="text-red-800">{cartError}</p>
+              <p className="text-accent-error-800">{cartError}</p>
               <button
                 onClick={clearError}
-                className="text-red-600 hover:text-red-800"
+                className="text-accent-error-600 hover:text-accent-error-800 p-1"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -248,23 +277,23 @@ const Cart: React.FC = () => {
 
         {/* Loading Overlay */}
         {cartLoading && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="card-elevated mb-6 bg-accent-info-50 border border-accent-info-200">
             <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              <p className="text-blue-800">Updating cart...</p>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-accent-info-600"></div>
+              <p className="text-accent-info-800">Updating cart...</p>
             </div>
           </div>
         )}
 
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-          {/* Cart Items */}
+          {/* Cart Items - Primary Content Area */}
           <div className="lg:col-span-8">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Cart Items</h2>
+            <div className="card-elevated bg-white">
+              <div className="p-6 border-b border-neutral-200">
+                <h2 className="text-h2 font-semibold text-gray-900">Cart Items</h2>
               </div>
 
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-neutral-200">
                 {cart.map((item) => (
                   <div key={item.id} className="p-6">
                     <div className="flex items-start space-x-4">
@@ -273,16 +302,16 @@ const Cart: React.FC = () => {
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                          className="w-20 h-20 object-cover rounded-lg border border-neutral-200"
                         />
                       </div>
 
-                      {/* Product Details */}
+                      {/* Product Details - F Pattern Layout */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h3 className="text-lg font-medium text-gray-900 mb-1">{item.name}</h3>
-                            <p className="text-lg font-semibold text-orange-600">
+                            <h3 className="text-h3 font-medium text-gray-900 mb-1">{item.name}</h3>
+                            <p className="text-h3 font-semibold text-primary-500">
                               Rs. {item.price.toLocaleString()}
                             </p>
                           </div>
@@ -291,7 +320,7 @@ const Cart: React.FC = () => {
                           <button
                             onClick={() => handleRemoveFromCart(item.id)}
                             disabled={loading[item.id]}
-                            className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                            className="p-2 text-neutral-400 hover:text-accent-error-600 transition-colors disabled:opacity-50"
                             title="Remove item"
                           >
                             <Trash2 className="w-5 h-5" />
@@ -301,23 +330,23 @@ const Cart: React.FC = () => {
                         {/* Quantity Controls */}
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center space-x-3">
-                            <span className="text-sm text-gray-600">Quantity:</span>
-                            <div className="flex items-center border border-gray-300 rounded-lg">
+                            <span className="text-body text-neutral-600">Quantity:</span>
+                            <div className="flex items-center border border-neutral-300 rounded-lg">
                               <button
                                 onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
                                 disabled={loading[item.id] || cartLoading || item.quantity <= 1}
-                                className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-2 text-neutral-500 hover:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title={item.quantity <= 1 ? "Use remove button to delete item" : "Decrease quantity"}
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
-                              <span className="px-4 py-2 text-center font-medium min-w-[3rem]">
+                              <span className="px-4 py-2 text-center font-medium min-w-[3rem] text-body">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                                 disabled={loading[item.id] || cartLoading}
-                                className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="p-2 text-neutral-500 hover:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Increase quantity"
                               >
                                 <Plus className="w-4 h-4" />
@@ -327,7 +356,7 @@ const Cart: React.FC = () => {
                           
                           {/* Item Total */}
                           <div className="text-right">
-                            <p className="text-lg font-bold text-gray-900">
+                            <p className="text-h3 font-bold text-gray-900">
                               Rs. {(item.price * item.quantity).toLocaleString()}
                             </p>
                           </div>
@@ -335,8 +364,8 @@ const Cart: React.FC = () => {
 
                         {/* Loading State */}
                         {loading[item.id] && (
-                          <div className="mt-2 flex items-center gap-2 text-sm text-blue-600">
-                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                          <div className="mt-2 flex items-center gap-2 text-caption text-accent-info-600">
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-accent-info-600"></div>
                             <span>Updating...</span>
                           </div>
                         )}
@@ -348,24 +377,24 @@ const Cart: React.FC = () => {
             </div>
           </div>
 
-          {/* Cart Summary */}
+          {/* Cart Summary - Secondary Content Area */}
           <div className="lg:col-span-4 mt-8 lg:mt-0">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
+            <div className="card-elevated bg-white sticky top-8">
+              <div className="p-6 border-b border-neutral-200">
+                <h2 className="text-h2 font-semibold text-gray-900">Order Summary</h2>
               </div>
               
               <div className="p-6">
                 <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Subtotal ({itemCount} items)</span>
+                  <div className="flex justify-between text-body">
+                    <span className="text-neutral-600">Subtotal ({itemCount} items)</span>
                     <span className="font-medium">Rs. {total.toLocaleString()}</span>
                   </div>
                   
-                  <div className="border-t border-gray-200 pt-4">
+                  <div className="border-t border-neutral-200 pt-4">
                     <div className="flex justify-between">
-                      <span className="text-lg font-semibold text-gray-900">Total</span>
-                      <span className="text-xl font-bold text-orange-600">Rs. {total.toLocaleString()}</span>
+                      <span className="text-h3 font-semibold text-gray-900">Total</span>
+                      <span className="text-h2 font-bold text-primary-500">Rs. {total.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -373,7 +402,7 @@ const Cart: React.FC = () => {
                 <button
                   onClick={handleCheckout}
                   disabled={cartLoading || clearingCart || cart.length === 0}
-                  className="w-full mt-6 bg-orange-600 text-white py-3 px-4 rounded-lg hover:bg-orange-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <CreditCard className="w-5 h-5" />
                   {cartLoading ? 'Updating...' : clearingCart ? 'Clearing...' : 'Proceed to Checkout'}
@@ -381,20 +410,20 @@ const Cart: React.FC = () => {
                 
                 <button
                   onClick={() => navigate('/marketplace')}
-                  className="w-full mt-3 border border-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2"
+                  className="btn-secondary w-full mt-3 flex items-center justify-center gap-2"
                 >
                   <Package className="w-5 h-5" />
                   Continue Shopping
                 </button>
                 
                 {/* Security & Trust Indicators */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <Truck className="w-4 h-4" />
+                <div className="mt-6 pt-6 border-t border-neutral-200">
+                  <div className="flex items-center gap-3 text-body text-neutral-600">
+                    <Truck className="w-4 h-4 text-accent-success-500" />
                     <span>Free shipping on all orders</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600 mt-2">
-                    <Package className="w-4 h-4" />
+                  <div className="flex items-center gap-3 text-body text-neutral-600 mt-2">
+                    <Package className="w-4 h-4 text-accent-success-500" />
                     <span>Easy returns within 30 days</span>
                   </div>
                 </div>

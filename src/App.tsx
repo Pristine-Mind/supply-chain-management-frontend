@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Logout from './components/auth/Logout';
 import { Toaster } from './components/ui/toaster';
@@ -118,21 +120,25 @@ const App: React.FC = () => {
   return (
     <Router>
       <AuthProvider>
-        <div className="p-4">
-          <Toaster />
-          <ConditionalBackButton />
-          <Routes>
-            {publicRoutes.map((route, index) => (
-              <Route key={`public-${index}`} path={route.path} element={route.element} />
-            ))}
-            <Route element={<ProtectedRoute />}>
-              {protectedRoutes.map((route, index) => (
-                <Route key={`protected-${index}`} path={route.path} element={route.element} />
-              ))}
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
+        <ToastProvider>
+          <CartProvider>
+            <div className="p-4">
+              <Toaster />
+              <ConditionalBackButton />
+              <Routes>
+                {publicRoutes.map((route, index) => (
+                  <Route key={`public-${index}`} path={route.path} element={route.element} />
+                ))}
+                <Route element={<ProtectedRoute />}>
+                  {protectedRoutes.map((route, index) => (
+                    <Route key={`protected-${index}`} path={route.path} element={route.element} />
+                  ))}
+                </Route>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </CartProvider>
+        </ToastProvider>
       </AuthProvider>
     </Router>
   );

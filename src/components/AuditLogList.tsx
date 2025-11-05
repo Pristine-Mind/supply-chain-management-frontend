@@ -139,31 +139,34 @@ const AuditLogList: React.FC = () => {
     <Container sx={{ mt: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h4" component="h1">Audit Logs</Typography>
-        <Box display="flex" gap={1}>
-          <Tooltip title="Refresh">
-            <Button variant="outlined" startIcon={<RefreshIcon />} onClick={loadLogs} disabled={loading}>
-              Refresh
-            </Button>
-          </Tooltip>
-          <Tooltip title="Export CSV">
-            <Button variant="outlined" startIcon={<DownloadIcon />} onClick={exportCsv} disabled={logs.length === 0}>
-              Export
-            </Button>
-          </Tooltip>
-          <Fab
-            size="small"
+        <div className="flex gap-3">
+          <button
+            onClick={loadLogs}
+            disabled={loading}
+            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium"
+            title="Refresh"
+          >
+            <RefreshIcon className="mr-2" style={{ fontSize: 18 }} />
+            Refresh
+          </button>
+          <button
+            onClick={exportCsv}
+            disabled={logs.length === 0}
+            className="flex items-center px-4 py-2 bg-accent-success-600 text-white rounded-lg hover:bg-accent-success-700 disabled:opacity-50 transition-colors font-medium"
+            title="Export CSV"
+          >
+            <DownloadIcon className="mr-2" style={{ fontSize: 18 }} />
+            Export
+          </button>
+          <button
             onClick={() => navigate('/audit-logs/new')}
-            sx={{
-              ml: 1,
-              backgroundColor: '#ff9800',
-              color: '#fff',
-              '&:hover': { backgroundColor: '#fb8c00' },
-            }}
+            className="flex items-center justify-center w-10 h-10 bg-accent-warning-600 text-white rounded-full hover:bg-accent-warning-700 transition-colors"
+            title="Add audit log"
             aria-label="Add audit log"
           >
-            <AddIcon />
-          </Fab>
-        </Box>
+            <AddIcon style={{ fontSize: 20 }} />
+          </button>
+        </div>
       </Box>
 
       <Box mb={2}>
@@ -225,11 +228,14 @@ const AuditLogList: React.FC = () => {
                     <TableCell>
                       <Box display="flex" alignItems="center" gap={1}>
                         <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{log.reference_id}</Typography>
-                        <Tooltip title="Copy reference">
-                          <Button size="small" onClick={() => copyRef(log.reference_id)} startIcon={<ContentCopyIcon />}>
-                            Copy
-                          </Button>
-                        </Tooltip>
+                        <button
+                          onClick={() => copyRef(log.reference_id)}
+                          className="flex items-center px-2 py-1 bg-neutral-100 text-neutral-700 rounded hover:bg-neutral-200 transition-colors text-caption"
+                          title="Copy reference"
+                        >
+                          <ContentCopyIcon style={{ fontSize: 14, marginRight: 4 }} />
+                          Copy
+                        </button>
                       </Box>
                     </TableCell>
                     <TableCell>
@@ -245,11 +251,14 @@ const AuditLogList: React.FC = () => {
                       <Typography fontWeight={600}>Rs. {Number(log.amount).toLocaleString()}</Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Tooltip title="View details">
-                        <Button size="small" variant="text" startIcon={<VisibilityIcon />} onClick={() => navigate(`/audit-logs/${log.id}`)}>
-                          View
-                        </Button>
-                      </Tooltip>
+                      <button
+                        onClick={() => navigate(`/audit-logs/${log.id}`)}
+                        className="flex items-center px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors text-caption"
+                        title="View details"
+                      >
+                        <VisibilityIcon style={{ fontSize: 14, marginRight: 4 }} />
+                        View
+                      </button>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -99,18 +99,18 @@ const DeliveryDetails: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="bg-gray-50 py-6">
-        <div className="w-4/5 mx-auto bg-white shadow-sm">
+      <div className="bg-neutral-50 py-6">
+        <div className="w-4/5 mx-auto card-elevated bg-white">
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
+              <div className="card-soft bg-accent-error-50 border border-accent-error-200 text-accent-error-700">
                 {error}
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                <h2 className="text-h3 font-semibold text-gray-700 uppercase tracking-wide">
                   Personal Information
                 </h2>
                 
@@ -120,16 +120,16 @@ const DeliveryDetails: React.FC = () => {
                   rules={{ required: 'Full name is required' }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-body font-medium text-gray-700 mb-1">
                         Full Name
                       </label>
                       <input 
                         {...field} 
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                        className="input-field w-full focus:ring-primary-200 focus:border-primary-500"
                         placeholder="Enter your full name"
                       />
                       {errors.name && (
-                        <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                        <p className="text-accent-error-500 text-caption mt-1">{errors.name.message}</p>
                       )}
                     </div>
                   )}
@@ -144,17 +144,17 @@ const DeliveryDetails: React.FC = () => {
                   }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-body font-medium text-gray-700 mb-1">
                         Phone Number
                       </label>
                       <input 
                         {...field} 
                         type="tel" 
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                        className="input-field w-full focus:ring-primary-200 focus:border-primary-500"
                         placeholder="Your phone number"
                       />
                       {errors.phone && (
-                        <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+                        <p className="text-accent-error-500 text-caption mt-1">{errors.phone.message}</p>
                       )}
                     </div>
                   )}
@@ -168,17 +168,17 @@ const DeliveryDetails: React.FC = () => {
                   }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-body font-medium text-gray-700 mb-1">
                         Email
                       </label>
                       <input 
                         {...field} 
                         type="email" 
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                        className="input-field w-full focus:ring-primary-200 focus:border-primary-500"
                         placeholder="Your email address"
                       />
                       {errors.email  && (
-                        <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                        <p className="text-accent-error-500 text-caption mt-1">{errors.email.message}</p>
                       )}
                     </div>
                   )}
@@ -186,7 +186,7 @@ const DeliveryDetails: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                <h2 className="text-h3 font-semibold text-gray-700 uppercase tracking-wide">
                   Address Information
                 </h2>
 
@@ -196,7 +196,7 @@ const DeliveryDetails: React.FC = () => {
                   rules={{ required: 'Address is required' }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-body font-medium text-gray-700 mb-1">
                         Street Address
                       </label>
                       <textarea 
