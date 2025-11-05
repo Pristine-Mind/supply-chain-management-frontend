@@ -91,6 +91,8 @@ const protectedRoutes = [
 const publicRoutes = [
   { path: '/', element: <Marketplace /> },
   { path: '/marketplace', element: <Navigate to="/" replace /> },
+  { path: '/flash-sale', element: <Navigate to="/?view=flash-sale" replace /> },
+  { path: '/deals', element: <Navigate to="/?view=deals" replace /> },
   { path: '/marketplace/all-products', element: <MarketplaceAllProducts /> },
   { path: '/marketplace/:productId', element: <ProductPage /> },
   { path: '/about', element: <AboutUs /> },

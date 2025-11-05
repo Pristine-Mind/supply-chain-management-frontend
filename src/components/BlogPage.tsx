@@ -116,22 +116,22 @@ export const BlogPage: React.FC = () => {
                 <img src={post.image} alt={post.title} className="h-48 md:h-auto md:w-48 object-cover" />
                 <div className="p-6 flex flex-col justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">{post.date} &bull; by {post.author}</p>
-                    <h2 className="text-2xl font-semibold mb-2 hover:text-orange-600">
+                    <p className="text-caption text-neutral-500 mb-2">{post.date} &bull; by {post.author}</p>
+                    <h2 className="text-h2 font-semibold mb-2 hover:text-primary-600">
                       <Link to={`/blog/${post.id}`}>{post.title}</Link>
                     </h2>
-                    <p className="text-gray-700 mb-4">
+                    <p className="text-body text-neutral-700 mb-4">
                       {expanded.has(post.id) ? (post.content || post.excerpt) : post.excerpt}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <button
-                      className="text-orange-600 font-medium hover:underline"
+                      className="text-primary-600 font-medium hover:underline"
                       onClick={() => toggleExpand(post.id)}
                     >
                       {expanded.has(post.id) ? 'Read Less ←' : 'Read More →'}
                     </button>
-                    <Link to={`/blog/${post.id}`} className="text-gray-600 hover:text-gray-900">
+                    <Link to={`/blog/${post.id}`} className="text-neutral-600 hover:text-neutral-900">
                       Open Post
                     </Link>
                   </div>
@@ -148,7 +148,7 @@ export const BlogPage: React.FC = () => {
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                className="input-field w-full focus-ring"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -165,7 +165,7 @@ export const BlogPage: React.FC = () => {
                   <Tabs.Trigger
                     key={cat}
                     value={cat}
-                    className={`px-3 py-1 rounded-md text-sm ${selectedCategory === cat ? 'bg-orange-100 text-orange-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                    className={`px-3 py-1 rounded-md text-caption ${selectedCategory === cat ? 'bg-primary-100 text-primary-700' : 'text-neutral-700 hover:bg-neutral-100'}`}
                   >
                     {cat}
                   </Tabs.Trigger>

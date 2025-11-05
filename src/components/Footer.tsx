@@ -121,9 +121,9 @@ const NewsletterForm: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-6 rounded-2xl border border-orange-200">
+    <div className="bg-gradient-to-r from-primary-50 to-primary-100 p-6 rounded-2xl border border-primary-200">
       <div className="flex items-center mb-4">
-        <NewsletterIcon className="w-6 h-6 text-orange-600 mr-2" />
+        <NewsletterIcon className="w-6 h-6 text-primary-600 mr-2" />
         <h4 className="text-lg font-semibold text-gray-900">Stay Updated</h4>
       </div>
       <p className="text-gray-600 mb-4 text-sm">Get the latest deals and updates delivered to your inbox.</p>
@@ -140,13 +140,13 @@ const NewsletterForm: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+            className="input-field focus-ring"
             required
           />
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-brand-gradient text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 hover:shadow-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
@@ -271,8 +271,8 @@ const Footer: React.FC = () => {
         <div className="mb-12">
           <h4 className="text-lg font-semibold text-gray-900 mb-6">Contact Information</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all duration-200">
-              <MapPinIcon className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+            <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200">
+              <MapPinIcon className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-gray-900 text-sm">Address</p>
                 <p className="text-gray-600 text-sm">Panipokhari, Kathmandu, Nepal</p>
@@ -281,23 +281,23 @@ const Footer: React.FC = () => {
             
             <a 
               href="tel:+9779767474645" 
-              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all duration-200 group"
+              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200 group"
             >
-              <PhoneIcon className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0 group-hover:animate-pulse" />
+              <PhoneIcon className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0 group-hover:animate-pulse" />
               <div>
                 <p className="font-medium text-gray-900 text-sm">Phone</p>
-                <p className="text-gray-600 group-hover:text-orange-600 text-sm transition-colors">+977 9767474645</p>
+                <p className="text-gray-600 group-hover:text-primary-600 text-sm transition-colors">+977 9767474645</p>
               </div>
             </a>
             
             <a 
               href="mailto:mulyabazzar@gmail.com" 
-              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all duration-200 group"
+              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200 group"
             >
-              <MailIcon className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+              <MailIcon className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
               <div>
                 <p className="font-medium text-gray-900 text-sm">Email</p>
-                <p className="text-gray-600 group-hover:text-orange-600 text-sm transition-colors">mulyabazzar@gmail.com</p>
+                <p className="text-gray-600 group-hover:text-primary-600 text-sm transition-colors">mulyabazzar@gmail.com</p>
               </div>
             </a>
           </div>

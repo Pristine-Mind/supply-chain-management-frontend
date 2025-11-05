@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Select from '@radix-ui/react-select';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
@@ -113,6 +113,8 @@ const PLACEHOLDER = 'https://via.placeholder.com/150';
 
 const Marketplace: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [recommendations, setRecommendations] = useState<MarketplaceProduct[]>([]);
   const [newArrivals, setNewArrivals] = useState<MarketplaceProduct[]>([]);
@@ -129,7 +131,17 @@ const Marketplace: React.FC = () => {
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'marketplace' | 'flash-sale' | 'deals'>('marketplace');
+  
+  // Initialize currentView based on URL parameters
+  const getViewFromParams = (): 'marketplace' | 'flash-sale' | 'deals' => {
+    const view = searchParams.get('view');
+    if (view === 'flash-sale' || view === 'deals') {
+      return view;
+    }
+    return 'marketplace';
+  };
+  
+  const [currentView, setCurrentView] = useState<'marketplace' | 'flash-sale' | 'deals'>(getViewFromParams());
   const [flashSaleProducts, setFlashSaleProducts] = useState<MarketplaceProduct[]>([]);
   const [dealsProducts, setDealsProducts] = useState<MarketplaceProduct[]>([]);
   const [flashSaleLoading, setFlashSaleLoading] = useState(false);
@@ -138,7 +150,6 @@ const Marketplace: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<MarketplaceProduct | null>(null);
   const itemsPerPage = 10;
-  const navigate = useNavigate();
 
   const fetchMarketplaceProducts = async (page: number = 1) => {
     setLoading(true);
@@ -209,6 +220,19 @@ const Marketplace: React.FC = () => {
     fetchDealsProducts();
   }, []);
 
+  // Effect to handle URL parameter changes
+  useEffect(() => {
+    const view = getViewFromParams();
+    setCurrentView(view);
+    
+    // Fetch appropriate data based on view
+    if (view === 'flash-sale') {
+      fetchFlashSaleProducts();
+    } else if (view === 'deals') {
+      fetchDealsProducts();
+    }
+  }, [searchParams]);
+
   const totalPages = Math.ceil(totalCount / itemsPerPage);
   const startItem = totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
   const endItem = Math.min(currentPage * itemsPerPage, totalCount);
@@ -234,7 +258,7 @@ const Marketplace: React.FC = () => {
   };
 
   if (error) {
-    return <div className="text-center text-red-600 py-8">{error}</div>;
+    return <div className="text-center text-status-error py-8">{error}</div>;
   }
 
   return (
@@ -271,7 +295,7 @@ const Marketplace: React.FC = () => {
 
       {/* Navigation Header */}
       <div className="bg-white shadow-elevation-sm">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto container-padding">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button 
@@ -421,7 +445,7 @@ const Marketplace: React.FC = () => {
                 {isWishlistOpen && (
                   <div className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white rounded-lg shadow-elevation-lg border border-neutral-200 z-50">
                     <div className="p-4 border-b border-neutral-200">
-                      <h3 className="font-semibold text-gray-800 text-body">Wishlist ({wishlist.length})</h3>
+                      <h3 className="font-semibold text-neutral-800 text-body">Wishlist ({wishlist.length})</h3>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {wishlistProducts.length > 0 ? (
@@ -434,7 +458,7 @@ const Marketplace: React.FC = () => {
                                 className="w-12 h-12 object-cover rounded"
                               />
                               <div className="flex-1">
-                                <h4 className="text-body font-medium text-gray-800 truncate">
+                                <h4 className="text-body font-medium text-neutral-800 truncate">
                                   {product.product_details.name}
                                 </h4>
                                 <p className="text-primary-500 font-semibold">Rs.{product.listed_price}</p>
@@ -575,32 +599,32 @@ const Marketplace: React.FC = () => {
             </div>
             
             <nav className="space-y-4">
-              <a href="/" className="block py-2 text-gray-700 hover:text-orange-600">Home</a>
-              <a href="/blog" className="block py-2 text-gray-700 hover:text-orange-600">Blog</a>
-              <a href="/about" className="block py-2 text-gray-700 hover:text-orange-600">About</a>
-              <a href="/contact" className="block py-2 text-gray-700 hover:text-orange-600">Contact</a>
+              <a href="/" className="block py-2 text-neutral-700 hover:text-primary-600">Home</a>
+              <a href="/blog" className="block py-2 text-neutral-700 hover:text-primary-600">Blog</a>
+              <a href="/about" className="block py-2 text-neutral-700 hover:text-primary-600">About</a>
+              <a href="/contact" className="block py-2 text-neutral-700 hover:text-primary-600">Contact</a>
               
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-neutral-200">
                 {isAuthenticated ? (
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3 px-3 py-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-semibold text-sm">
+                      <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-white font-semibold text-caption">
                         {user?.name ? user.name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{user?.name || 'User'}</p>
-                        <p className="text-xs text-gray-500">{user?.email}</p>
+                        <p className="text-body font-medium text-neutral-900">{user?.name || 'User'}</p>
+                        <p className="text-caption text-neutral-500">{user?.email}</p>
                       </div>
                     </div>
                     <button 
                       onClick={() => navigate('/profile')}
-                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
                     >
                       Profile
                     </button>
                     <button 
                       onClick={() => navigate('/my-orders')}
-                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
                     >
                       My Orders
                     </button>
@@ -610,7 +634,7 @@ const Marketplace: React.FC = () => {
                         navigate('/');
                         setIsMobileMenuOpen(false);
                       }}
-                      className="w-full text-left py-2 text-red-600 hover:text-red-700"
+                      className="w-full text-left py-2 text-status-error hover:text-red-700"
                     >
                       Sign out
                     </button>
@@ -619,13 +643,13 @@ const Marketplace: React.FC = () => {
                   <div>
                     <button 
                       onClick={() => navigate('/login')}
-                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
                     >
                       Login
                     </button>
                     <button 
                       onClick={() => navigate('/register')}
-                      className="w-full text-left py-2 text-gray-700 hover:text-orange-600"
+                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
                     >
                       Register
                     </button>
@@ -633,30 +657,30 @@ const Marketplace: React.FC = () => {
                 )}
               </div>
               
-              <div className="pt-4 border-t border-gray-200">
-                <div className="text-sm text-gray-600 mb-2">Support</div>
-                <div className="text-orange-600 font-medium">977 - 9767474645</div>
-                <div className="text-sm text-gray-500">24/7 Support</div>
+              <div className="pt-4 border-t border-neutral-200">
+                <div className="text-caption text-neutral-600 mb-2">Support</div>
+                <div className="text-primary-600 font-medium">977 - 9767474645</div>
+                <div className="text-caption text-neutral-500">24/7 Support</div>
               </div>
             </nav>
           </div>
         </div>
       )}
 
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4">
+      <div className="bg-white border-b border-neutral-200">
+        <div className="container mx-auto container-padding">
           <div className="flex items-center justify-between py-3">
             <div className="flex items-center space-x-4 lg:space-x-8">
               <Select.Root 
                 value={selectedCategory} 
                 onValueChange={(value: string) => setSelectedCategory(value)}
               >
-                <Select.Trigger className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm">
+                <Select.Trigger className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors text-caption">
                   <Select.Value placeholder="Categories" />
                   <ChevronDown className="w-4 h-4" />
                 </Select.Trigger>
                 <Select.Portal>
-                  <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                  <Select.Content className="z-50 bg-white card shadow-elevation-lg border border-neutral-200 overflow-hidden">
                     <Select.Viewport className="p-2">
                       {CATEGORY_OPTIONS.map((option) => (
                         <Select.Item 
@@ -676,18 +700,17 @@ const Marketplace: React.FC = () => {
               </Select.Root>
 
               <nav className="hidden lg:flex items-center space-x-6">
-                <a href="/" className="text-gray-700 hover:text-orange-600 font-medium">Home</a>
-                <a href="/blog" className="text-gray-700 hover:text-orange-600 font-medium">Blog</a>
-                <a href="/about" className="text-gray-700 hover:text-orange-600 font-medium">About</a>
-                <a href="/contact" className="text-gray-700 hover:text-orange-600 font-medium">Contact</a>
+                <a href="/" className="text-neutral-700 hover:text-primary-600 font-medium">Home</a>
+                <a href="/blog" className="text-neutral-700 hover:text-primary-600 font-medium">Blog</a>
+                <a href="/about" className="text-neutral-700 hover:text-primary-600 font-medium">About</a>
+                <a href="/contact" className="text-neutral-700 hover:text-primary-600 font-medium">Contact</a>
               </nav>
 
               {/* Flash Sale and Deals Buttons */}
               <div className="hidden lg:flex items-center space-x-3">
                 <button
                   onClick={() => {
-                    setCurrentView('flash-sale');
-                    fetchFlashSaleProducts();
+                    window.open('/flash-sale', '_blank');
                   }}
                   className={`relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
                     currentView === 'flash-sale'
@@ -708,8 +731,7 @@ const Marketplace: React.FC = () => {
 
                 <button
                   onClick={() => {
-                    setCurrentView('deals');
-                    fetchDealsProducts();
+                    window.open('/deals', '_blank');
                   }}
                   className={`relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
                     currentView === 'deals'
@@ -734,10 +756,10 @@ const Marketplace: React.FC = () => {
                     setCurrentPage(1);
                     fetchMarketplaceProducts(1);
                   }}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-lg font-medium text-caption transition-all duration-300 ${
                     currentView === 'marketplace'
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                   }`}
                 >
                   All Products
@@ -748,8 +770,7 @@ const Marketplace: React.FC = () => {
               <div className="lg:hidden flex items-center space-x-2">
                 <button
                   onClick={() => {
-                    setCurrentView('flash-sale');
-                    fetchFlashSaleProducts();
+                    window.open('/flash-sale', '_blank');
                   }}
                   className={`relative px-3 py-1.5 rounded-md font-medium text-xs transition-all duration-300 ${
                     currentView === 'flash-sale'
@@ -762,8 +783,7 @@ const Marketplace: React.FC = () => {
 
                 <button
                   onClick={() => {
-                    setCurrentView('deals');
-                    fetchDealsProducts();
+                    window.open('/deals', '_blank');
                   }}
                   className={`relative px-3 py-1.5 rounded-md font-medium text-xs transition-all duration-300 ${
                     currentView === 'deals'
@@ -780,10 +800,10 @@ const Marketplace: React.FC = () => {
                     setCurrentPage(1);
                     fetchMarketplaceProducts(1);
                   }}
-                  className={`px-3 py-1.5 rounded-md font-medium text-xs transition-all duration-300 ${
+                  className={`px-3 py-1.5 rounded-md font-medium text-caption transition-all duration-300 ${
                     currentView === 'marketplace'
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-gray-100 text-gray-700'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-neutral-100 text-neutral-700'
                   }`}
                 >
                   All
@@ -792,23 +812,23 @@ const Marketplace: React.FC = () => {
             </div>
 
             <div className="hidden lg:flex items-center space-x-6">
-              <div className="flex items-center space-x-3 border-l border-gray-200 pl-4 ml-2">
+              <div className="flex items-center space-x-3 border-l border-neutral-200 pl-4 ml-2">
                 <Select.Root 
                   value={selectedLocation} 
                   onValueChange={(value: string) => setSelectedLocation(value)}
                 >
-                  <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-gray-200 rounded-md hover:border-orange-300 transition-colors bg-white text-sm text-gray-700">
+                  <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-neutral-200 rounded-md hover:border-primary-300 transition-colors bg-white text-caption text-neutral-700">
                     <Select.Value placeholder="Location" />
-                    <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                    <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
                   </Select.Trigger>
                   <Select.Portal>
-                    <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                    <Select.Content className="z-50 bg-white card shadow-elevation-lg border border-neutral-200 overflow-hidden">
                       <Select.Viewport className="p-2">
                         {LOCATION_OPTIONS.map((location) => (
                           <Select.Item 
                             key={location} 
                             value={location}
-                            className="relative flex items-center px-8 py-2 text-sm text-gray-700 rounded-md hover:bg-orange-50 cursor-pointer outline-none"
+                            className="relative flex items-center px-8 py-2 text-caption text-neutral-700 rounded-md hover:bg-primary-50 cursor-pointer outline-none"
                           >
                             <Select.ItemText>{location}</Select.ItemText>
                             <Select.ItemIndicator className="absolute left-2">
@@ -825,18 +845,18 @@ const Marketplace: React.FC = () => {
                   value={selectedProfileType} 
                   onValueChange={(value: string) => setSelectedProfileType(value)}
                 >
-                  <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-gray-200 rounded-md hover:border-orange-300 transition-colors bg-white text-sm text-gray-700">
+                  <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-neutral-200 rounded-md hover:border-primary-300 transition-colors bg-white text-caption text-neutral-700">
                     <Select.Value placeholder="Seller Type" />
-                    <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                    <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
                   </Select.Trigger>
                   <Select.Portal>
-                    <Select.Content className="z-50 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                    <Select.Content className="z-50 bg-white card shadow-elevation-lg border border-neutral-200 overflow-hidden">
                       <Select.Viewport className="p-2">
                         {PROFILE_TYPE_OPTIONS.map((type) => (
                           <Select.Item 
                             key={type} 
                             value={type}
-                            className="relative flex items-center px-8 py-2 text-sm text-gray-700 rounded-md hover:bg-orange-50 cursor-pointer outline-none"
+                            className="relative flex items-center px-8 py-2 text-caption text-neutral-700 rounded-md hover:bg-primary-50 cursor-pointer outline-none"
                           >
                             <Select.ItemText>{type}</Select.ItemText>
                             <Select.ItemIndicator className="absolute left-2">
@@ -852,7 +872,7 @@ const Marketplace: React.FC = () => {
 
               <div className="text-right">
                 <div className="text-gray-600 text-sm">977 - 9767474645</div>
-                <div className="text-orange-600 font-medium text-sm">24/7 Support</div>
+                <div className="text-primary-600 font-medium text-sm">24/7 Support</div>
               </div>
             </div>
           </div>
@@ -869,7 +889,7 @@ const Marketplace: React.FC = () => {
               <p className="text-lg sm:text-xl text-blue-100 leading-relaxed">
                 Elevate your everyday with quality products you'll love
               </p>
-              <button className="bg-white text-orange-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg hover:bg-blue-50 transition-colors shadow-lg">
+              <button className="bg-white text-primary-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg hover:bg-blue-50 transition-colors shadow-lg">
                 Shop Collection
               </button>
             </div>
@@ -890,15 +910,15 @@ const Marketplace: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-96 sm:h-96 bg-white/5 rounded-full translate-y-24 sm:translate-y-48 -translate-x-24 sm:-translate-x-48"></div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 sm:py-12">
+      <div className="container mx-auto container-padding section-spacing">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+          <div className="bg-gradient-to-br from-blue-100 to-blue-200 card-elevated p-6 sm:p-8 relative overflow-hidden group card-hover transition-all duration-300">
             <div className="relative z-10">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Home Decor</h3>
-              <p className="text-gray-600 mb-4 text-sm sm:text-base">Stylish home accessories</p>
+              <h3 className="text-h2 font-bold text-neutral-800 mb-2">Home Decor</h3>
+              <p className="text-neutral-600 mb-4 text-body">Stylish home accessories</p>
               <button 
                 onClick={() => navigate('/marketplace/all-products')}
-                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+                className="bg-primary-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-primary-600 transition-colors text-sm sm:text-base"
               >
                 Shop Now
               </button>
@@ -918,7 +938,7 @@ const Marketplace: React.FC = () => {
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Premium kitchen essentials</p>
               <button 
                 onClick={() => navigate('/marketplace/all-products')}
-                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+                className="bg-primary-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-primary-600 transition-colors text-sm sm:text-base"
               >
                 Shop Now
               </button>
@@ -938,7 +958,7 @@ const Marketplace: React.FC = () => {
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Luxury self-care products</p>
               <button 
                 onClick={() => navigate('/marketplace/all-products')}
-                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+                className="bg-primary-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-primary-600 transition-colors text-sm sm:text-base"
               >
                 Shop Now
               </button>
@@ -958,7 +978,7 @@ const Marketplace: React.FC = () => {
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Trendy fashion apparel</p>
               <button 
                 onClick={() => navigate('/marketplace/all-products')}
-                className="bg-orange-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+                className="bg-primary-500 text-white px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-primary-600 transition-colors text-sm sm:text-base"
               >
                 Shop Now
               </button>
@@ -1116,8 +1136,7 @@ const Marketplace: React.FC = () => {
               <div className="text-center mt-8">
                 <button
                   onClick={() => {
-                    setCurrentView('deals');
-                    fetchDealsProducts();
+                    navigate('/deals');
                   }}
                   className="bg-accent-success-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-accent-success-700 transition-all duration-200 shadow-sm hover:shadow-md"
                 >

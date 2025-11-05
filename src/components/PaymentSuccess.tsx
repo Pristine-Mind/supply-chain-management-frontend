@@ -66,13 +66,13 @@ const PaymentSuccess: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
+      <div className="min-h-screen bg-neutral-50 section-spacing">
+        <div className="max-w-4xl mx-auto container-padding">
+          <div className="bg-white card-elevated overflow-hidden">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-700">Processing your order...</p>
+                <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="text-neutral-700">Processing your order...</p>
               </div>
             ) : status === 'success' ? (
               <>
@@ -88,62 +88,62 @@ const PaymentSuccess: React.FC = () => {
                     <>
                       {/* Order Details */}
                       <div className="grid md:grid-cols-2 gap-6 mb-6">
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                            <FaShoppingBag className="mr-2 text-orange-500" />
+                        <div className="card bg-neutral-50 container-padding">
+                          <h3 className="font-semibold text-neutral-900 mb-3 flex items-center">
+                            <FaShoppingBag className="mr-2 text-primary-500" />
                             Order Information
                           </h3>
-                          <div className="space-y-2 text-sm">
+                          <div className="space-y-2 text-caption">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Order Number:</span>
+                              <span className="text-neutral-600">Order Number:</span>
                               <span className="font-medium">{order.order_number}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Total Amount:</span>
-                              <span className="font-medium text-green-600">Rs. {order.total_amount}</span>
+                              <span className="text-neutral-600">Total Amount:</span>
+                              <span className="font-medium text-status-success">Rs. {order.total_amount}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Status:</span>
-                              <span className="font-medium text-blue-600 capitalize">{order.status}</span>
+                              <span className="text-neutral-600">Status:</span>
+                              <span className="font-medium text-primary-600 capitalize">{order.status}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Order Date:</span>
+                              <span className="text-neutral-600">Order Date:</span>
                               <span className="font-medium">{formatDate(order.created_at)}</span>
                             </div>
                             {paymentMethod && (
                               <div className="flex justify-between">
-                                <span className="text-gray-600">Payment Method:</span>
+                                <span className="text-neutral-600">Payment Method:</span>
                                 <span className="font-medium">{paymentMethod}</span>
                               </div>
                             )}
                           </div>
                         </div>
 
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                            <FaMapMarkerAlt className="mr-2 text-orange-500" />
+                        <div className="card bg-neutral-50 container-padding">
+                          <h3 className="font-semibold text-neutral-900 mb-3 flex items-center">
+                            <FaMapMarkerAlt className="mr-2 text-primary-500" />
                             Delivery Information
                           </h3>
-                          <div className="space-y-2 text-sm">
+                          <div className="space-y-2 text-caption">
                             <div>
-                              <span className="text-gray-600">Name:</span>
+                              <span className="text-neutral-600">Name:</span>
                               <span className="font-medium ml-2">{order.delivery_info.customer_name}</span>
                             </div>
                             <div>
-                              <span className="text-gray-600">Phone:</span>
+                              <span className="text-neutral-600">Phone:</span>
                               <span className="font-medium ml-2">{order.delivery_info.phone_number}</span>
                             </div>
                             {order.delivery_info.customer_email && (
                               <div>
-                                <span className="text-gray-600">Email:</span>
+                                <span className="text-neutral-600">Email:</span>
                                 <span className="font-medium ml-2">{order.delivery_info.customer_email}</span>
                               </div>
                             )}
                             <div>
-                              <span className="text-gray-600">Address:</span>
+                              <span className="text-neutral-600">Address:</span>
                               <div className="mt-1">
                                 <p className="font-medium">{order.delivery_info.address}</p>
-                                <p className="text-gray-600">
+                                <p className="text-neutral-600">
                                   {order.delivery_info.city}, {order.delivery_info.state} {order.delivery_info.zip_code}
                                 </p>
                               </div>
@@ -155,18 +155,18 @@ const PaymentSuccess: React.FC = () => {
                       {/* Order Items */}
                       {order.items && order.items.length > 0 && (
                         <div className="mb-6">
-                          <h3 className="font-semibold text-gray-900 mb-3">Order Items</h3>
-                          <div className="bg-gray-50 rounded-lg overflow-hidden">
-                            <div className="divide-y divide-gray-200">
+                          <h3 className="font-semibold text-neutral-900 mb-3">Order Items</h3>
+                          <div className="card bg-neutral-50 overflow-hidden">
+                            <div className="divide-y divide-neutral-200">
                               {order.items.map((item, index) => (
-                                <div key={index} className="p-4 flex justify-between items-center">
+                                <div key={index} className="container-padding flex justify-between items-center">
                                   <div>
-                                    <h4 className="font-medium text-gray-900">{item.product_name}</h4>
-                                    <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                                    <h4 className="font-medium text-neutral-900">{item.product_name}</h4>
+                                    <p className="text-caption text-neutral-600">Quantity: {item.quantity}</p>
                                   </div>
                                   <div className="text-right">
                                     <p className="font-medium">Rs. {item.total}</p>
-                                    <p className="text-sm text-gray-600">Rs. {item.price} each</p>
+                                    <p className="text-caption text-neutral-600">Rs. {item.price} each</p>
                                   </div>
                                 </div>
                               ))}
