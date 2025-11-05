@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FaCheckCircle, FaCreditCard, FaWallet, FaMoneyBillWave } from 'react-icons/fa';
+import { 
+  CheckCircle, 
+  CreditCard, 
+  Wallet 
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { motion } from 'framer-motion';
 import Modal from 'react-modal';
@@ -278,15 +282,15 @@ const Payment: React.FC = () => {
   const getPaymentIcon = (slug: string) => {
     switch (slug) {
       case 'KHALTI':
-        return <FaWallet className="text-purple-600 text-xl" />;
+        return <Wallet className="text-purple-600 w-5 h-5" />;
       case 'SCT':
       case 'EBANKING':
       case 'CONNECT_IPS':
-        return <FaCreditCard className="text-blue-600 text-xl" />;
+        return <CreditCard className="text-blue-600 w-5 h-5" />;
       case 'MOBILE_BANKING':
-        return <FaWallet className="text-orange-600 text-xl" />;
+        return <Wallet className="text-orange-600 w-5 h-5" />;
       default:
-        return <FaCreditCard className="text-gray-600 text-xl" />;
+        return <CreditCard className="text-neutral-600 w-5 h-5" />;
     }
   };
 
@@ -354,8 +358,8 @@ const Payment: React.FC = () => {
                     whileTap={{ scale: 0.99 }}
                     className={`relative p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
                       isSelected 
-                        ? 'border-orange-500 bg-orange-50 shadow-md' 
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                        ? 'border-primary-500 bg-primary-50 shadow-md' 
+                        : 'border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -386,9 +390,9 @@ const Payment: React.FC = () => {
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center"
+                            className="w-5 h-5 bg-primary-600 rounded-full flex items-center justify-center"
                           >
-                            <FaCheckCircle className="text-white text-xs" />
+                            <CheckCircle className="text-white w-3 h-3" />
                           </motion.div>
                         )}
                         {(gateway.slug === 'MOBILE_BANKING' || gateway.slug === 'EBANKING') && gateway.items && gateway.items.length > 0 && (
@@ -448,8 +452,8 @@ const Payment: React.FC = () => {
                               <div className="text-sm font-medium text-gray-900">{bank.name}</div>
                             </div>
                             {method === `${gateway.slug}_${bank.idx}` && (
-                              <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center">
-                                <FaCheckCircle className="text-white text-xs" />
+                              <div className="w-4 h-4 bg-primary-600 rounded-full flex items-center justify-center">
+                                <CheckCircle className="text-white w-3 h-3" />
                               </div>
                             )}
                           </div>
@@ -516,7 +520,7 @@ const Payment: React.FC = () => {
               <Button
                 onClick={handleConfirm}
                 disabled={processing || !method}
-                className="w-full py-4 text-lg font-semibold bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white rounded-xl transition-all duration-200 shadow-sm"
+                className="w-full py-4 text-lg font-semibold btn-primary disabled:opacity-50 rounded-xl transition-all duration-200 shadow-sm"
               >
                 {processing ? (
                   <div className="flex items-center justify-center space-x-2">

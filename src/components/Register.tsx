@@ -8,9 +8,23 @@ import {
 } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  Lock, 
+  MapPin,
+  CheckCircle,
+  Shield,
+  Clock,
+  ArrowRight,
+  UserPlus
+} from 'lucide-react';
 import LocationPicker from './LocationPicker';
 import Footer from './Footer';
-import Navbar from './Navbar';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import logo from '../assets/logo.png';
 
 
 
@@ -122,283 +136,350 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-soft-gradient">
-      <Navbar />
-      <div className="flex flex-col lg:flex-row mt-4">
-        {/* Left Sidebar - Benefits */}
-        <div className="hidden lg:flex lg:w-1/3 bg-brand-gradient p-8 text-white">
-          <div className="flex flex-col justify-center content-spacing">
-            <h2 className="text-h2 font-bold mb-4">Join Our Community</h2>
-            <p className="text-body mb-8 opacity-90">
-              Create an account to access exclusive features and start your journey with us.
-            </p>
-            
-            <div className="content-spacing">
-              <div className="flex items-center">
-                <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
+      {/* Brand Logo */}
+      <div className="pt-8 pb-6 text-center">
+        <img src={logo} alt="MulyaBazzar Logo" className="w-20 h-20 mx-auto mb-4 rounded-xl shadow-soft" />
+        <h1 className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
+          MulyaBazzar
+        </h1>
+        <p className="text-body text-neutral-600 mt-2">
+          Join our community and start your journey
+        </p>
+      </div>
+
+      <div className="container mx-auto px-4 pb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {/* Left Sidebar - Benefits */}
+          <div className="hidden lg:flex lg:col-span-1">
+            <Card className="w-full bg-brand-gradient text-white border-0">
+              <CardHeader>
+                <CardTitle className="text-white text-xl">Join Our Community</CardTitle>
+                <p className="text-white/90">
+                  Create an account to access exclusive features and start your journey with us.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center">
+                  <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
+                    <CheckCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Easy Registration</h4>
+                    <p className="text-body-sm opacity-80">Quick setup process</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold">Easy Registration</h4>
-                  <p className="text-body-sm opacity-80">Quick setup process</p>
+                
+                <div className="flex items-center">
+                  <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
+                    <Shield className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Secure & Private</h4>
+                    <p className="text-body-sm opacity-80">Your data is protected</p>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center">
-                <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                
+                <div className="flex items-center">
+                  <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">24/7 Support</h4>
+                    <p className="text-body-sm opacity-80">We're here to help</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold">Secure & Private</h4>
-                  <p className="text-body-sm opacity-80">Your data is protected</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center">
-                <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 109.75 9.75M15.91 11.669a2.25 2.25 0 01-1.81 3.83l-1.11.956a3.359 3.359 0 01-4.91 0l-1.11-.956a2.25 2.25 0 01-1.81-3.83L12 8.25l3.91 3.419z" />
-                  </svg>
-                </div>
-                <div>
-                  <h4 className="font-semibold">24/7 Support</h4>
-                  <p className="text-body-sm opacity-80">We're here to help</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
 
-        {/* Registration Form */}
-        <div className="w-full lg:w-1/3 p-8 bg-white shadow-medium">
-          <div className="max-w-md mx-auto">
-            <h2 className="text-h2 font-bold mb-2 text-center text-neutral-900">Create Account</h2>
-            <p className="text-body text-neutral-600 text-center mb-8">
-              Fill in your details to get started
-            </p>
-
-            {submitError && (
-              <div className="status-error mb-6 p-4 rounded-lg">
-                <p className="text-body-sm font-medium">{submitError}</p>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit(onSubmit)} className="content-spacing">
-              <div>
-                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                  Username *
-                </label>
-                <input
-                  {...register('username')}
-                  className="input-field"
-                  placeholder="Choose a username"
-                />
-                {errors.username && (
-                  <p className="text-caption text-accent-error-600 mt-1">{errors.username?.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  {...register('email')}
-                  type="email"
-                  className="input-field"
-                  placeholder="your.email@example.com"
-                />
-                {errors.email && (
-                  <p className="text-caption text-accent-error-600 mt-1">{errors.email?.message}</p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                    First Name *
-                  </label>
-                  <input
-                    {...register('firstName')}
-                    className="input-field"
-                    placeholder="First name"
-                  />
-                  {errors.firstName && (
-                    <p className="text-caption text-accent-error-600 mt-1">{errors.firstName?.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                    Last Name *
-                  </label>
-                  <input
-                    {...register('lastName')}
-                    className="input-field"
-                    placeholder="Last name"
-                  />
-                  {errors.lastName && (
-                    <p className="text-caption text-accent-error-600 mt-1">{errors.lastName?.message}</p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                  Phone Number *
-                </label>
-                <input
-                  {...register('phone')}
-                  className="input-field"
-                  placeholder="+977 98xxxxxxxx"
-                />
-                {errors.phone && (
-                  <p className="text-caption text-accent-error-600 mt-1">{errors.phone?.message}</p>
-                )}
-                <p className="text-caption text-neutral-500 mt-1">
-                  We'll use this for important account updates
+          {/* Registration Form */}
+          <div className="lg:col-span-1">
+            <Card className="shadow-elevation-lg">
+              <CardHeader className="text-center">
+                <CardTitle className="flex items-center justify-center gap-2 text-neutral-900">
+                  <UserPlus className="w-5 h-5 text-primary-600" />
+                  Create Account
+                </CardTitle>
+                <p className="text-body text-neutral-600">
+                  Fill in your details to get started
                 </p>
-              </div>
-
-              <div>
-                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                  Password *
-                </label>
-                <input
-                  {...register('password')}
-                  type="password"
-                  className="input-field"
-                  placeholder="Create a strong password"
-                />
-                {errors.password && (
-                  <p className="text-caption text-accent-error-600 mt-1">{errors.password?.message}</p>
+              </CardHeader>
+              <CardContent>
+                {submitError && (
+                  <div className="status-error mb-6 p-4 rounded-lg">
+                    <p className="text-body-sm font-medium">{submitError}</p>
+                  </div>
                 )}
-                <p className="text-caption text-neutral-500 mt-1">
-                  Minimum 6 characters
-                </p>
-              </div>
 
-              <div>
-                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                  Confirm Password *
-                </label>
-                <input
-                  {...register('password2')}
-                  type="password"
-                  className="input-field"
-                  placeholder="Confirm your password"
-                />
-                {errors.password2 && (
-                  <p className="text-caption text-accent-error-600 mt-1">{errors.password2?.message}</p>
-                )}
-              </div>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  {/* Username */}
+                  <div className="space-y-2">
+                    <label htmlFor="username" className="block text-body-sm font-semibold text-neutral-700">
+                      Username *
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                      <input
+                        {...register('username')}
+                        id="username"
+                        className="input-field pl-10"
+                        placeholder="Choose a username"
+                      />
+                    </div>
+                    {errors.username && (
+                      <p className="text-caption text-accent-error-600">{errors.username?.message}</p>
+                    )}
+                  </div>
 
-              <div>
-                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                  City *
-                </label>
-                <Controller
-                  name="cityId"
-                  control={control}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      disabled={loadingCities}
-                      className="input-field"
+                  {/* Email */}
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="block text-body-sm font-semibold text-neutral-700">
+                      Email Address *
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                      <input
+                        {...register('email')}
+                        id="email"
+                        type="email"
+                        className="input-field pl-10"
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                    {errors.email && (
+                      <p className="text-caption text-accent-error-600">{errors.email?.message}</p>
+                    )}
+                  </div>
+
+                  {/* Name Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label htmlFor="firstName" className="block text-body-sm font-semibold text-neutral-700">
+                        First Name *
+                      </label>
+                      <input
+                        {...register('firstName')}
+                        id="firstName"
+                        className="input-field"
+                        placeholder="First name"
+                      />
+                      {errors.firstName && (
+                        <p className="text-caption text-accent-error-600">{errors.firstName?.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="lastName" className="block text-body-sm font-semibold text-neutral-700">
+                        Last Name *
+                      </label>
+                      <input
+                        {...register('lastName')}
+                        id="lastName"
+                        className="input-field"
+                        placeholder="Last name"
+                      />
+                      {errors.lastName && (
+                        <p className="text-caption text-accent-error-600">{errors.lastName?.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="block text-body-sm font-semibold text-neutral-700">
+                      Phone Number *
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                      <input
+                        {...register('phone')}
+                        id="phone"
+                        className="input-field pl-10"
+                        placeholder="+977 98xxxxxxxx"
+                      />
+                    </div>
+                    {errors.phone && (
+                      <p className="text-caption text-accent-error-600">{errors.phone?.message}</p>
+                    )}
+                    <p className="text-caption text-neutral-500">
+                      We'll use this for important account updates
+                    </p>
+                  </div>
+
+                  {/* Password */}
+                  <div className="space-y-2">
+                    <label htmlFor="password" className="block text-body-sm font-semibold text-neutral-700">
+                      Password *
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                      <input
+                        {...register('password')}
+                        id="password"
+                        type="password"
+                        className="input-field pl-10"
+                        placeholder="Create a strong password"
+                      />
+                    </div>
+                    {errors.password && (
+                      <p className="text-caption text-accent-error-600">{errors.password?.message}</p>
+                    )}
+                    <p className="text-caption text-neutral-500">
+                      Minimum 6 characters
+                    </p>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="space-y-2">
+                    <label htmlFor="password2" className="block text-body-sm font-semibold text-neutral-700">
+                      Confirm Password *
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                      <input
+                        {...register('password2')}
+                        id="password2"
+                        type="password"
+                        className="input-field pl-10"
+                        placeholder="Confirm your password"
+                      />
+                    </div>
+                    {errors.password2 && (
+                      <p className="text-caption text-accent-error-600">{errors.password2?.message}</p>
+                    )}
+                  </div>
+
+                  {/* City Selection */}
+                  <div className="space-y-2">
+                    <label htmlFor="cityId" className="block text-body-sm font-semibold text-neutral-700">
+                      City *
+                    </label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                      <Controller
+                        name="cityId"
+                        control={control}
+                        render={({ field }) => (
+                          <select
+                            {...field}
+                            id="cityId"
+                            disabled={loadingCities}
+                            className="input-field pl-10"
+                          >
+                            <option value={0}>Select your city</option>
+                            {cities.map(c => (
+                              <option key={c.id} value={c.id}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      />
+                    </div>
+                    {errors.cityId && (
+                      <p className="text-caption text-accent-error-600">{errors.cityId?.message}</p>
+                    )}
+                    {errorCities && (
+                      <p className="text-caption text-accent-error-600">{errorCities}</p>
+                    )}
+                  </div>
+
+                  {/* Location Selection */}
+                  <div className="space-y-2">
+                    <label className="block text-body-sm font-semibold text-neutral-700">
+                      Select Location
+                    </label>
+                    <div className="rounded-lg overflow-hidden border border-neutral-300" style={{ height: 200 }}>
+                      <LocationPicker
+                        initialCenter={{ lat: position[0], lng: position[1] }}
+                        zoom={13}
+                        onSelect={handleSelect}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        readOnly
+                        value={position[0].toFixed(6)}
+                        placeholder="Latitude"
+                        className="input-field text-center text-neutral-600"
+                      />
+                      <input
+                        readOnly
+                        value={position[1].toFixed(6)}
+                        placeholder="Longitude"
+                        className="input-field text-center text-neutral-600"
+                      />
+                    </div>
+                    <p className="text-caption text-neutral-500">
+                      Click on the map to select your precise location
+                    </p>
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-4">
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full py-4"
+                      size="lg"
                     >
-                      <option value={0}>Select your city</option>
-                      {cities.map(c => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {errors.cityId && (
-                  <p className="text-caption text-accent-error-600 mt-1">{errors.cityId?.message}</p>
-                )}
-                {errorCities && (
-                  <p className="text-caption text-accent-error-600 mt-1">{errorCities}</p>
-                )}
-              </div>
+                      {submitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Create Account
+                        </>
+                      )}
+                    </Button>
+                  </div>
 
-              <div>
-                <label className="block text-body-sm font-semibold text-neutral-700 mb-2">
-                  Select Location
-                </label>
-                <div className="rounded-lg overflow-hidden border border-neutral-300" style={{ height: 200 }}>
-                  <LocationPicker
-                    initialCenter={{ lat: position[0], lng: position[1] }}
-                    zoom={13}
-                    onSelect={handleSelect}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <input
-                    readOnly
-                    value={position[0].toFixed(6)}
-                    placeholder="Latitude"
-                    className="input-field text-center"
-                  />
-                  <input
-                    readOnly
-                    value={position[1].toFixed(6)}
-                    placeholder="Longitude"
-                    className="input-field text-center"
-                  />
-                </div>
-                <p className="text-caption text-neutral-500 mt-1">
-                  Click on the map to select your precise location
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="btn-primary w-full py-4 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Creating Account...' : 'Create Account'}
-              </button>
-
-              <div className="text-center">
-                <p className="text-body-sm text-neutral-600">
-                  Already have an account?{' '}
-                  <a href="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-                    Sign in here
-                  </a>
-                </p>
-              </div>
-            </form>
+                  {/* Login Link */}
+                  <div className="text-center pt-4 border-t border-neutral-200">
+                    <p className="text-body-sm text-neutral-600">
+                      Already have an account?{' '}
+                      <a href="/login" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                        Sign in here
+                      </a>
+                    </p>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </div>
-        </div>
-        
-        {/* Right Sidebar - Security */}
-        <div className="hidden lg:flex lg:w-1/3 bg-neutral-100 p-8">
-          <div className="flex flex-col justify-center text-center content-spacing">
-            <div>
-              <div className="bg-primary-100 p-6 rounded-full inline-block mb-6">
-                <svg className="w-12 h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-h3 font-semibold mb-3">Secure Registration</h3>
-              <p className="text-body text-neutral-600 mb-8">
-                Your information is protected with industry-standard security measures and encryption.
-              </p>
-            </div>
-            
-            <div className="pt-6 border-t border-neutral-200">
-              <p className="text-body text-neutral-700 mb-4">
-                Need help with registration?
-              </p>
-              <a href="/contact" className="btn-secondary w-full text-center">
-                Contact Support
-              </a>
-            </div>
+          
+          {/* Right Sidebar - Security */}
+          <div className="hidden lg:flex lg:col-span-1">
+            <Card className="w-full bg-neutral-100 border-neutral-200">
+              <CardContent className="flex flex-col justify-center text-center py-12">
+                <div className="space-y-6">
+                  <div>
+                    <div className="bg-primary-100 p-6 rounded-full inline-block mb-6">
+                      <Shield className="w-12 h-12 text-primary-600" />
+                    </div>
+                    <h3 className="text-h3 font-semibold mb-3 text-neutral-900">Secure Registration</h3>
+                    <p className="text-body text-neutral-600 mb-8">
+                      Your information is protected with industry-standard security measures and encryption.
+                    </p>
+                  </div>
+                  
+                  <div className="pt-6 border-t border-neutral-200">
+                    <p className="text-body text-neutral-700 mb-4">
+                      Need help with registration?
+                    </p>
+                    <Button variant="outline" className="w-full" asChild>
+                      <a href="/contact">
+                        Contact Support
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

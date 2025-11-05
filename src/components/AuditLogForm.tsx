@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  TextField,
-  MenuItem,
-  Button,
-  Box
-} from '@mui/material';
+import { ArrowLeft, Save, Plus, FileText, DollarSign, Calendar, Hash } from 'lucide-react';
+import { Button } from './ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Label } from './ui/label';
 import { fetchAuditLogs, addAuditLog, updateAuditLog } from '../api/auditLogApi';
 
 // Inline type definition
 interface AuditLog {
   id: number;
-  transaction_type: string;
-  reference_id: string;
+  transactionType: string;
+  referenceId: string;
   date: string;
-  entity_id: number;
+  entityId: number;
   amount: string;
 }
 
@@ -33,10 +29,10 @@ const AuditLogForm: React.FC = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<Omit<AuditLog, 'id'>>({
-    transaction_type: transactionTypes[0],
-    reference_id: '',
+    transactionType: transactionTypes[0],
+    referenceId: '',
     date: new Date().toISOString().slice(0, 10),
-    entity_id: 0,
+    entityId: 0,
     amount: ''
   });
 
@@ -53,7 +49,7 @@ const AuditLogForm: React.FC = () => {
       }
       fetchAuditLogs(token)
         .then(res => {
-          const entry = res.data.results.find(e => e.id === Number(id));
+          const entry = res.data.results.find((e: AuditLog) => e.id === Number(id));
           if (entry) {
             const { id, ...rest } = entry;
             setForm(rest);
@@ -67,10 +63,6 @@ const AuditLogForm: React.FC = () => {
     }
   }, [id, isEdit]);
 
-  const handleChange = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [field]: field === 'entity_id' ? Number(e.target.value) : e.target.value });
-  };
-
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -83,55 +75,177 @@ const AuditLogForm: React.FC = () => {
     }
   };
 
-  if (loading) return <Typography>Loading...</Typography>;
-  if (error) return <Typography color="error">Error: {error}</Typography>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <p className="text-neutral-600">Loading audit log...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <Card className="max-w-md mx-4">
+          <CardContent className="text-center py-8">
+            <div className="w-12 h-12 bg-accent-error-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-6 h-6 text-accent-error-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">Error Loading Data</h3>
+            <p className="text-neutral-600 mb-4">{error}</p>
+            <Button onClick={() => navigate('/audit-logs')} variant="outline">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Audit Logs
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <Container sx={{ mt: 4 }}>
-      <Typography variant="h5" gutterBottom>{isEdit ? 'Edit Audit Log' : 'New Audit Log'}</Typography>
-      <Box component="form" noValidate autoComplete="off" sx={{ display: 'grid', gap: 2 }}>
-        <TextField
-          select
-          label="Transaction Type"
-          value={form.transaction_type}
-          onChange={handleChange('transaction_type')}
-          fullWidth
-        >
-          {transactionTypes.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-        </TextField>
-        <TextField
-          label="Reference ID"
-          value={form.reference_id}
-          onChange={handleChange('reference_id')}
-          fullWidth
-        />
-        <TextField
-          label="Date"
-          type="date"
-          value={form.date}
-          onChange={handleChange('date')}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-        <TextField
-          label="Entity ID"
-          type="number"
-          value={form.entity_id}
-          onChange={handleChange('entity_id')}
-          fullWidth
-        />
-        <TextField
-          label="Amount"
-          type="text"
-          value={form.amount}
-          onChange={handleChange('amount')}
-          fullWidth
-        />
-        <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2, backgroundColor: '#ff9800'}}>
-          {isEdit ? 'Save Changes' : 'Add Log'}
-        </Button>
-      </Box>
-    </Container>
+    <div className="min-h-screen bg-neutral-50">
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        {/* Header */}
+        <div className="mb-8">
+          <Button
+            onClick={() => navigate('/audit-logs')}
+            variant="ghost"
+            className="mb-4 text-neutral-600 hover:text-neutral-900"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Audit Logs
+          </Button>
+          <h1 className="text-h2 font-bold text-neutral-900 mb-2">
+            {isEdit ? 'Edit Audit Log' : 'Create New Audit Log'}
+          </h1>
+          <p className="text-neutral-600">
+            {isEdit ? 'Update the audit log information below.' : 'Add a new audit log entry to the system.'}
+          </p>
+        </div>
+
+        {/* Form Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary-600" />
+              Audit Log Details
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Transaction Type */}
+            <div className="space-y-2">
+              <Label htmlFor="transactionType" className="text-sm font-medium text-neutral-700">
+                Transaction Type
+              </Label>
+              <select
+                id="transactionType"
+                value={form.transactionType}
+                onChange={(e) => setForm({ ...form, transactionType: e.target.value })}
+                className="input-field"
+              >
+                {transactionTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Reference ID */}
+            <div className="space-y-2">
+              <Label htmlFor="referenceId" className="text-sm font-medium text-neutral-700">
+                Reference ID
+              </Label>
+              <div className="relative">
+                <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                <input
+                  type="text"
+                  id="referenceId"
+                  value={form.referenceId}
+                  onChange={(e) => setForm({ ...form, referenceId: e.target.value })}
+                  placeholder="Enter reference ID"
+                  className="input-field pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Date */}
+            <div className="space-y-2">
+              <Label htmlFor="date" className="text-sm font-medium text-neutral-700">
+                Transaction Date
+              </Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                <input
+                  type="date"
+                  id="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                  className="input-field pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Entity ID */}
+            <div className="space-y-2">
+              <Label htmlFor="entityId" className="text-sm font-medium text-neutral-700">
+                Entity ID
+              </Label>
+              <input
+                type="number"
+                id="entityId"
+                value={form.entityId}
+                onChange={(e) => setForm({ ...form, entityId: Number(e.target.value) })}
+                placeholder="Enter entity ID"
+                className="input-field"
+                min="0"
+              />
+            </div>
+
+            {/* Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-sm font-medium text-neutral-700">
+                Amount
+              </Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                <input
+                  type="text"
+                  id="amount"
+                  value={form.amount}
+                  onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                  placeholder="Enter amount"
+                  className="input-field pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-4 border-t border-neutral-200">
+              <Button
+                onClick={handleSubmit}
+                className="w-full"
+                disabled={!form.referenceId || !form.amount}
+              >
+                {isEdit ? (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Audit Log
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

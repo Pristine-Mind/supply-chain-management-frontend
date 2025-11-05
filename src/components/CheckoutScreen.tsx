@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FaMapMarkerAlt, FaShoppingBag, FaReceipt } from 'react-icons/fa';
+import { MapPin, ShoppingBag, Receipt } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -79,11 +79,11 @@ const Checkout: React.FC = () => {
         <div className="p-6 space-y-6">
           {delivery ? (
             <div className="card-soft bg-accent-success-50 border border-accent-success-200">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 bg-accent-success-100 rounded-full flex items-center justify-center">
-                  <FaMapMarkerAlt className="text-accent-success-600 text-sm" />
+              <div className="flex items-center mb-2">
+                <div className="w-6 h-6 bg-accent-success-100 rounded-full flex items-center justify-center mr-2">
+                  <MapPin className="text-accent-success-600 text-sm" size={14} />
                 </div>
-                <h2 className="ml-3 font-semibold text-gray-900 text-h3">Delivery Address</h2>
+                <span className="font-semibold text-gray-900 text-h3">Delivery Address</span>
               </div>
               <div className="space-y-1 text-body">
                 <p className="font-medium text-gray-900">{delivery.customer_name}</p>
@@ -101,7 +101,7 @@ const Checkout: React.FC = () => {
           ) : (
             <div className="card-soft bg-primary-50 border border-primary-200">
               <div className="flex items-center mb-2">
-                <FaMapMarkerAlt className="text-primary-600 mr-2" />
+                <MapPin className="text-primary-600 mr-2" size={16} />
                 <span className="font-semibold text-gray-900 text-h3">Delivery Address Required</span>
               </div>
               <p className="text-body text-neutral-600 mb-3">
@@ -121,7 +121,7 @@ const Checkout: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
                 <div className="w-8 h-8 bg-accent-info-100 rounded-full flex items-center justify-center">
-                  <FaShoppingBag className="text-accent-info-600 text-sm" />
+                  <ShoppingBag className="text-accent-info-600 text-sm" size={16} />
                 </div>
                 <h2 className="ml-3 font-semibold text-gray-900 text-h3">Order Items</h2>
               </div>
@@ -143,7 +143,7 @@ const Checkout: React.FC = () => {
                       />
                     ) : (
                       <div className="w-full h-full bg-neutral-300 flex items-center justify-center">
-                        <FaShoppingBag className="text-neutral-500 text-xs" />
+                        <ShoppingBag className="text-neutral-500 text-xs" size={12} />
                       </div>
                     )}
                   </div>
@@ -172,7 +172,7 @@ const Checkout: React.FC = () => {
           <div className="card-soft bg-accent-info-50">
             <div className="flex items-center mb-3">
               <div className="w-8 h-8 bg-accent-info-100 rounded-full flex items-center justify-center">
-                <FaReceipt className="text-accent-info-600 text-sm" />
+                <Receipt className="text-accent-info-600 text-sm" size={16} />
               </div>
               <h2 className="ml-3 font-semibold text-gray-900 text-h3">Order Summary</h2>
             </div>
