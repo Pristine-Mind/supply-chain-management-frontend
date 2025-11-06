@@ -31,22 +31,34 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
   if (related.length === 0) return null;
   return (
     <div className="w-full mt-12">
-      <h2 className="text-h2 font-bold mb-4">You May Also Like</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900">You May Also Like</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {related.slice(0, 4).map(rel => (
           <div
             key={rel.id}
-            className="bg-white card-elevated shadow-soft hover:shadow-elevation-md transition cursor-pointer flex flex-col"
+            className="group bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer"
             onClick={() => navigate(`/marketplace/${rel.id}`)}
           >
-            <img
-              src={rel.product_details?.images?.[0]?.image || ''}
-              alt={rel.product_details?.name}
-              className="w-full h-32 object-cover rounded mb-3"
-            />
-            <div className="font-semibold text-neutral-800 truncate mb-1">{rel.product_details?.name}</div>
-            <div className="text-primary-600 font-bold mb-2">Rs.{rel.listed_price.toFixed(2)}</div>
-            <div className="text-caption text-neutral-500 truncate">{rel.product_details?.category_details || ''}</div>
+            <div className="aspect-square overflow-hidden bg-neutral-100">
+              <img
+                src={rel.product_details?.images?.[0]?.image || ''}
+                alt={rel.product_details?.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-primary-600 transition-colors">
+                {rel.product_details?.name}
+              </h3>
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-bold text-primary-600">
+                  Rs. {rel.listed_price.toLocaleString()}
+                </span>
+                <span className="text-xs text-neutral-500 px-2 py-1 bg-neutral-100 rounded-full">
+                  {rel.product_details?.category_details || 'Uncategorized'}
+                </span>
+              </div>
+            </div>
           </div>
         ))}
       </div>

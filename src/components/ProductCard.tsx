@@ -45,76 +45,87 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const rating = product.average_rating || 0;
   const reviewCount = product.total_reviews || 0;
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-NP', {
-      style: 'currency',
-      currency: 'NPR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
-  const truncateText = (text: string, maxLength: number) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
+  const buildStars = (rating: number) => (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star 
+          key={i} 
+          className={`w-3.5 h-3.5 ${
+            i < Math.floor(rating) 
+              ? 'fill-accent-warning-400 text-accent-warning-400' 
+              : i < rating 
+                ? 'fill-accent-warning-200 text-accent-warning-400' 
+                : 'fill-neutral-200 text-neutral-200'
+          }`} 
+        />
+      ))}
+    </div>
+  );
 
   return (
-    <div className="card card-hover group relative overflow-hidden">
+    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1">
       {/* Image Section */}
-      <div className="relative aspect-square mb-4 overflow-hidden rounded-lg bg-neutral-100">
+      <div className="relative aspect-square overflow-hidden bg-neutral-50">
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[0].image}
             alt={product.images[0].alt_text || product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+            onClick={onViewProduct}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-neutral-200">
-            <span className="text-neutral-400 text-body-sm">No Image</span>
+          <div className="w-full h-full flex items-center justify-center bg-neutral-100">
+            <span className="text-neutral-400 text-sm">No Image</span>
           </div>
         )}
         
         {/* Discount Badge */}
         {hasDiscount && product.percent_off && (
-          <div className="absolute top-2 left-2 bg-accent-error-500 text-white px-2 py-1 rounded-md text-caption-bold">
-            -{product.percent_off}%
+          <div className="absolute top-3 left-3 bg-accent-error-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm">
+            {product.percent_off}% OFF
           </div>
         )}
         
-        {/* Stock Status */}
+        {/* Stock Status Overlay */}
         {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="text-white font-semibold bg-neutral-900 px-3 py-1 rounded-md">
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+            <span className="text-white font-semibold bg-black/80 px-4 py-2 rounded-lg">
               Out of Stock
             </span>
           </div>
         )}
         
         {/* Quick Actions */}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200">
           <button
             onClick={onToggleWishlist}
-            className={`p-2 rounded-full shadow-soft transition-colors ${
+            className={`p-2 rounded-full shadow-lg transition-all duration-200 ${
               isInWishlist 
-                ? 'bg-accent-error-500 text-white' 
-                : 'bg-white text-neutral-600 hover:text-accent-error-500'
+                ? 'bg-accent-error-500 text-white hover:bg-accent-error-600' 
+                : 'bg-white/90 text-neutral-600 hover:text-accent-error-500 hover:bg-white'
             }`}
           >
             <Heart className="w-4 h-4" fill={isInWishlist ? 'currentColor' : 'none'} />
           </button>
         </div>
+
+        {/* Stock indicator */}
+        {product.stock > 0 && product.stock <= 5 && (
+          <div className="absolute bottom-3 left-3 bg-accent-warning-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+            Only {product.stock} left
+          </div>
+        )}
       </div>
 
       {/* Content Section */}
-      <div className="space-y-3">
-        {/* Category */}
+      <div className="p-4 space-y-3">
+        {/* Category & Views */}
         <div className="flex items-center justify-between">
-          <span className="text-caption text-primary-600 font-medium">
+          <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
             {product.category_details}
           </span>
           {product.view_count && (
-            <div className="flex items-center text-caption text-neutral-500">
+            <div className="flex items-center text-xs text-neutral-500">
               <Eye className="w-3 h-3 mr-1" />
               {product.view_count}
             </div>
@@ -122,68 +133,73 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Product Name */}
-        <h3 className="text-body font-semibold text-neutral-900 leading-tight">
-          {truncateText(product.name, 50)}
+        <h3 className="font-semibold text-neutral-900 leading-tight line-clamp-2 cursor-pointer hover:text-primary-600 transition-colors" onClick={onViewProduct}>
+          {product.name}
         </h3>
 
-        {/* Rating */}
+        {/* Rating & Reviews */}
         {rating > 0 && (
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-4 h-4 ${
-                    star <= rating 
-                      ? 'text-accent-warning-500 fill-current' 
-                      : 'text-neutral-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <span className="text-caption text-neutral-600">
-              ({reviewCount} review{reviewCount !== 1 ? 's' : ''})
+          <div className="flex items-center gap-2">
+            {buildStars(rating)}
+            <span className="text-xs text-neutral-600">
+              ({reviewCount})
             </span>
           </div>
         )}
 
         {/* Price Section */}
-        <div className="flex items-center space-x-2">
-          <span className="text-h3 font-bold text-neutral-900">
-            {formatPrice(displayPrice || product.price)}
-          </span>
-          {hasDiscount && (
-            <span className="text-body-sm text-neutral-500 line-through">
-              {formatPrice(product.price)}
+        <div className="space-y-1">
+          {hasDiscount ? (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-lg font-bold text-accent-error-600">
+                Rs. {displayPrice?.toLocaleString()}
+              </span>
+              <span className="text-sm text-neutral-500 line-through">
+                Rs. {product.price?.toLocaleString()}
+              </span>
+            </div>
+          ) : (
+            <span className="text-lg font-bold text-neutral-900">
+              Rs. {product.price?.toLocaleString()}
             </span>
           )}
         </div>
 
         {/* Stock Info */}
-        <div className="text-caption text-neutral-600">
-          {product.stock > 0 ? (
-            <span className={product.stock <= 5 ? 'text-accent-warning-600' : ''}>
-              {product.stock <= 5 ? 'Only ' : ''}{product.stock} in stock
-            </span>
-          ) : (
-            <span className="text-accent-error-600">Out of stock</span>
-          )}
+        <div className="flex items-center gap-1">
+          <div className={`w-2 h-2 rounded-full ${
+            product.stock > 10 
+              ? 'bg-accent-success-500' 
+              : product.stock > 0 
+                ? 'bg-accent-warning-500' 
+                : 'bg-accent-error-500'
+          }`}></div>
+          <span className="text-xs text-neutral-600">
+            {product.stock > 0 
+              ? `${product.stock} in stock` 
+              : 'Out of stock'
+            }
+          </span>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-2 pt-2">
+        <div className="flex gap-2 pt-2">
           <button
             onClick={onViewProduct}
-            className="btn-secondary flex-1 text-center"
+            className="flex-1 py-2.5 px-4 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-200 text-neutral-700 font-medium text-sm"
           >
             View Details
           </button>
           <button
             onClick={onAddToCart}
             disabled={product.stock <= 0}
-            className="btn-primary flex-1 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
+              product.stock === 0
+                ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
+                : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
+            }`}
           >
-            <ShoppingCart className="w-4 h-4 mr-2" />
+            <ShoppingCart className="w-4 h-4" />
             Add to Cart
           </button>
         </div>

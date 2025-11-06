@@ -419,7 +419,7 @@ const UserProfile: React.FC = () => {
                     Member since {formatDate(profile.date_joined)}
                   </p>
                   {profile.business_type && (
-                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full mt-1">
+                    <span className="inline-block px-2 py-1 bg-primary-100 text-primary-800 text-xs font-medium rounded-full mt-1">
                       {profile.business_type}
                     </span>
                   )}

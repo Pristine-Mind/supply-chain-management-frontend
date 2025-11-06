@@ -75,17 +75,17 @@ const Checkout: React.FC = () => {
     <>
     <Navbar/>
     <div className="min-h-screen bg-neutral-50 flex items-start justify-center p-4 pt-24 md:pt-10">
-      <div className="w-full max-w-lg min-h-[600px] card-elevated bg-white overflow-auto flex flex-col">
+      <div className="w-full max-w-lg min-h-[600px] bg-white rounded-xl border border-neutral-200 shadow-sm overflow-auto flex flex-col">
         <div className="p-6 space-y-6">
           {delivery ? (
-            <div className="card-soft bg-accent-success-50 border border-accent-success-200">
-              <div className="flex items-center mb-2">
-                <div className="w-6 h-6 bg-accent-success-100 rounded-full flex items-center justify-center mr-2">
-                  <MapPin className="text-accent-success-600 text-sm" size={14} />
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+              <div className="flex items-center mb-3">
+                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                  <MapPin className="text-green-600" size={16} />
                 </div>
-                <span className="font-semibold text-gray-900 text-h3">Delivery Address</span>
+                <span className="font-semibold text-gray-900 text-lg">Delivery Address</span>
               </div>
-              <div className="space-y-1 text-body">
+              <div className="space-y-1">
                 <p className="font-medium text-gray-900">{delivery.customer_name}</p>
                 <p className="text-neutral-600">{delivery.phone_number}</p>
                 <p className="text-neutral-600">{delivery.address}</p>
@@ -93,23 +93,23 @@ const Checkout: React.FC = () => {
               </div>
               <button
                 onClick={() => navigate('/delivery-details')}
-                className="mt-3 text-body text-accent-success-700 font-medium hover:text-accent-success-800 transition-colors"
+                className="mt-3 text-green-700 font-medium hover:text-green-800 transition-colors"
               >
                 Change Address
               </button>
             </div>
           ) : (
-            <div className="card-soft bg-primary-50 border border-primary-200">
-              <div className="flex items-center mb-2">
-                <MapPin className="text-primary-600 mr-2" size={16} />
-                <span className="font-semibold text-gray-900 text-h3">Delivery Address Required</span>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="flex items-center mb-3">
+                <MapPin className="text-blue-600 mr-3" size={20} />
+                <span className="font-semibold text-gray-900 text-lg">Delivery Address Required</span>
               </div>
-              <p className="text-body text-neutral-600 mb-3">
+              <p className="text-neutral-600 mb-4">
                 Please add your delivery address to continue
               </p>
               <button
                 onClick={() => navigate('/delivery-details')}
-                className="btn-secondary bg-primary-100 text-primary-700 hover:bg-primary-200"
+                className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition-colors font-medium"
               >
                 Add Address
               </button>
@@ -120,21 +120,21 @@ const Checkout: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-accent-info-100 rounded-full flex items-center justify-center">
-                  <ShoppingBag className="text-accent-info-600 text-sm" size={16} />
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <ShoppingBag className="text-blue-600" size={16} />
                 </div>
-                <h2 className="ml-3 font-semibold text-gray-900 text-h3">Order Items</h2>
+                <h2 className="ml-3 font-semibold text-gray-900 text-lg">Order Items</h2>
               </div>
-              <span className="text-body text-neutral-500">{itemsCount} items</span>
+              <span className="text-neutral-500">{itemsCount} items</span>
             </div>
 
             <div className="space-y-3">
               {items.map(item => (
                 <div
                   key={item.id}
-                  className="flex items-center bg-neutral-50 rounded-lg p-3"
+                  className="flex items-center bg-neutral-50 rounded-xl p-4 border border-neutral-100"
                 >
-                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-200 flex-shrink-0">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0">
                     {item.image ? (
                       <img
                         src={item.image}
@@ -143,25 +143,25 @@ const Checkout: React.FC = () => {
                       />
                     ) : (
                       <div className="w-full h-full bg-neutral-300 flex items-center justify-center">
-                        <ShoppingBag className="text-neutral-500 text-xs" size={12} />
+                        <ShoppingBag className="text-neutral-500" size={16} />
                       </div>
                     )}
                   </div>
 
-                  <div className="ml-3 flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 truncate text-body">
+                  <div className="ml-4 flex-1 min-w-0">
+                    <div className="font-medium text-gray-900 line-clamp-2">
                       {item.name}
                     </div>
-                    <div className="flex items-center justify-between text-caption text-neutral-500 mt-1">
+                    <div className="flex items-center justify-between text-sm text-neutral-500 mt-1">
                       <span>Qty: {item.quantity}</span>
                       {item.price > 0 && (
-                        <span>Rs. {item.price.toFixed(0)} each</span>
+                        <span>Rs. {item.price.toLocaleString()} each</span>
                       )}
                     </div>
                   </div>
 
-                  <div className="text-body font-semibold text-gray-900 ml-2">
-                    Rs. {(item.price * item.quantity).toFixed(0)}
+                  <div className="text-lg font-semibold text-gray-900 ml-4">
+                    Rs. {(item.price * item.quantity).toLocaleString()}
                   </div>
                 </div>
               ))}
@@ -169,41 +169,41 @@ const Checkout: React.FC = () => {
           </div>
 
           {/* Order Summary Section */}
-          <div className="card-soft bg-accent-info-50">
-            <div className="flex items-center mb-3">
-              <div className="w-8 h-8 bg-accent-info-100 rounded-full flex items-center justify-center">
-                <Receipt className="text-accent-info-600 text-sm" size={16} />
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <Receipt className="text-blue-600" size={16} />
               </div>
-              <h2 className="ml-3 font-semibold text-gray-900 text-h3">Order Summary</h2>
+              <h2 className="ml-3 font-semibold text-gray-900 text-lg">Order Summary</h2>
             </div>
             
-            <div className="space-y-2 text-body">
+            <div className="space-y-3">
               <div className="flex justify-between text-neutral-600">
                 <span>Subtotal ({itemsCount} items)</span>
-                <span>Rs. {subTotal?.toFixed(0) || total.toFixed(0)}</span>
+                <span>Rs. {(subTotal || total).toLocaleString()}</span>
               </div>
               {shipping !== undefined && shipping > 0 && (
                 <div className="flex justify-between text-neutral-600">
                   <span>Delivery Fee</span>
-                  <span>Rs. {shipping.toFixed(0)}</span>
+                  <span>Rs. {shipping.toLocaleString()}</span>
                 </div>
               )}
-              <div className="border-t border-accent-info-200 pt-2 mt-2">
-                <div className="flex justify-between font-semibold text-h3 text-gray-900">
+              <div className="border-t border-blue-200 pt-3 mt-3">
+                <div className="flex justify-between font-bold text-lg text-gray-900">
                   <span>Total Amount</span>
-                  <span>Rs. {total.toFixed(0)}</span>
+                  <span>Rs. {total.toLocaleString()}</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Delivery Information */}
-          <div className="card-soft bg-accent-warning-50 border border-accent-warning-200">
-            <div className="flex items-start space-x-2">
-              <div className="w-2 h-2 bg-accent-warning-500 rounded-full mt-2 flex-shrink-0"></div>
-              <div className="text-caption text-accent-warning-800">
-                <p className="font-medium mb-1">Delivery Information:</p>
-                <p>• Orders are typically delivered within 2-3 business days</p>
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div className="text-sm text-orange-800">
+                <p className="font-medium mb-2">Delivery Information:</p>
+                <p className="mb-1">• Orders are typically delivered within 2-3 business days</p>
                 <p>• You will receive a confirmation SMS once your order is confirmed</p>
               </div>
             </div>
@@ -219,11 +219,15 @@ const Checkout: React.FC = () => {
                 ? navigate('/payment', { state: { delivery, total } })
                 : navigate('/delivery-details')
             }
-            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+              delivery
+                ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
+                : 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
+            }`}
             disabled={!delivery}
           >
             {delivery 
-              ? `Proceed to Payment • Rs. ${total.toFixed(0)}` 
+              ? `Proceed to Payment • Rs. ${total.toLocaleString()}` 
               : 'Add Delivery Details First'
             }
           </button>

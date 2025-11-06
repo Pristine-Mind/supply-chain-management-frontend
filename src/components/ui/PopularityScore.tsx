@@ -41,7 +41,7 @@ export const PopularityScore: React.FC<PopularityScoreProps> = ({
               aria-valuemax={100}
               aria-valuenow={roundedScore}
               aria-label={`Popularity: ${roundedScore}%`}
-              className={`flex-1 ${container} bg-gray-200 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500`}
+              className={`flex-1 ${container} bg-neutral-200 rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-500`}
             >
               <div
                 className={`${bar} rounded-full transition-all duration-300`}

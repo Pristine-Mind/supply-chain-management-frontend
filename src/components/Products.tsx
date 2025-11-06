@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css';
 import axios, { isAxiosError } from 'axios';
 import { FaEdit, FaPlus, FaDownload, FaSearch, FaTimes, FaCheck, FaImage } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { CategorySelector } from './CategoryHierarchy';
 
 interface ProductImage {
   id: number;
@@ -75,8 +76,13 @@ const Products: React.FC = () => {
     stock: '',
     reorder_level: '10',
     is_active: true,
-    category: '',
+    category: '', // Legacy category field for backward compatibility
   });
+  
+  // New category hierarchy state
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
+  const [selectedSubSubcategoryId, setSelectedSubSubcategoryId] = useState<number | null>(null);
   const [images, setImages] = useState<FileList | null>(null);
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
   const [deletedImages, setDeletedImages] = useState<number[]>([]);
@@ -182,7 +188,21 @@ const Products: React.FC = () => {
     formDataToSend.append('stock', formData.stock);
     formDataToSend.append('reorder_level', formData.reorder_level);
     formDataToSend.append('is_active', String(formData.is_active));
+    
+    // Legacy category field for backward compatibility
     formDataToSend.append('category', formData.category);
+    
+    // New category hierarchy fields
+    if (selectedCategoryId) {
+      formDataToSend.append('category_id', selectedCategoryId.toString());
+    }
+    if (selectedSubcategoryId) {
+      formDataToSend.append('subcategory_id', selectedSubcategoryId.toString());
+    }
+    if (selectedSubSubcategoryId) {
+      formDataToSend.append('sub_subcategory_id', selectedSubSubcategoryId.toString());
+    }
+    
     if (images) {
       for (let i = 0; i < images.length; i++) {
         formDataToSend.append('uploaded_images', images[i]);
@@ -320,6 +340,12 @@ const Products: React.FC = () => {
       is_active: true,
       category: '',
     });
+    
+    // Reset category hierarchy state
+    setSelectedCategoryId(null);
+    setSelectedSubcategoryId(null);
+    setSelectedSubSubcategoryId(null);
+    
     setImages(null);
     setProducerSearchTerm('');
     setEditingProductId(null);
@@ -381,23 +407,43 @@ const Products: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50 p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
-        <h2 className="text-h1 font-bold mb-4 sm:mb-0 text-neutral-900">{t('products_list')}</h2>
-        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
+          <h2 className="text-3xl font-bold text-gray-900">{t('products_list')}</h2>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => {
+                resetForm();
+                setFormVisible(true);
+              }}
+              className="flex items-center bg-primary-600 text-white px-6 py-3 rounded-xl hover:bg-primary-700 transition-colors shadow-sm text-sm font-medium"
+            >
+              <FaPlus className="mr-2" size={14} /> {t('add_new_product')}
+            </button>
+            <button
+              onClick={handleExport}
+              className="flex items-center bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors shadow-sm text-sm font-medium"
+            >
+              <FaDownload className="mr-2" size={14} /> {t('export')}
+            </button>
+          </div>
+        </div>
+        
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="relative flex-1 max-w-md">
             <input
               type="text"
               placeholder={t('search_products')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-3 border border-neutral-300 rounded-lg w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
+              className="pl-11 pr-4 py-3 border border-neutral-300 rounded-xl w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm bg-white"
             />
-            <FaSearch className="absolute left-3 top-3.5 text-neutral-400" />
+            <FaSearch className="absolute left-4 top-3.5 text-neutral-400" size={14} />
           </div>
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-3 border border-neutral-300 rounded-lg w-full sm:w-auto focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
+            className="px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm bg-white min-w-[180px]"
           >
             <option value="">{t('all_categories')}</option>
             {categories.map((category) => (
@@ -406,100 +452,115 @@ const Products: React.FC = () => {
               </option>
             ))}
           </select>
-          <div className="flex space-x-3">
-            <button
-              onClick={() => {
-                resetForm();
-                setFormVisible(true);
-              }}
-              className="flex items-center bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors shadow-elevation-md text-body font-medium"
-            >
-              <FaPlus className="mr-2" /> {t('add_new_product')}
-            </button>
-            <button
-              onClick={handleExport}
-              className="flex items-center bg-accent-success-600 text-white px-6 py-3 rounded-lg hover:bg-accent-success-700 transition-colors shadow-elevation-md text-body font-medium"
-            >
-              <FaDownload className="mr-2" /> {t('export')}
-            </button>
-          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {products.map((product) => (
-          <div key={product.id} className="bg-white rounded-lg shadow-elevation-md border border-neutral-200 p-6 transition-all hover:shadow-elevation-lg hover:-translate-y-1">
-            <h3 className="text-h3 font-semibold text-neutral-900 mb-3">{product.name}</h3>
-            <p className="text-body text-neutral-600 mb-4 line-clamp-3" dangerouslySetInnerHTML={{ __html: product.description }} />
-            <div className="flex justify-between items-center mb-4">
-              <button
-                onClick={() => handleView(product)}
-                className="bg-accent-info-600 hover:bg-accent-info-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-caption"
-              >
-                {t('view')}
-              </button>
-              <button
-                onClick={() => handleEdit(product)}
-                className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-caption flex items-center"
-              >
-                <FaEdit className="mr-2" /> {t('edit')}
-              </button>
+          <div key={product.id} className="group bg-white rounded-xl border border-neutral-200 p-6 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
+            <div className="flex items-start justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 pr-2">{product.name}</h3>
+              <div className={`px-2 py-1 rounded-full text-xs font-medium ${product.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {product.is_active ? t('active') : t('inactive')}
+              </div>
             </div>
-                        <div className="flex justify-between items-center pt-4 border-t border-neutral-200">
-              {quickUpdateStock.id === product.id ? (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="number"
-                    value={quickUpdateStock.value}
-                    onChange={(e) => setQuickUpdateStock({ ...quickUpdateStock, value: e.target.value })}
-                    className="w-20 px-2 py-1 border border-neutral-300 rounded-md text-caption focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-                    placeholder={t('new_stock')}
-                  />
-                  <button
-                    onClick={() => {
-                      handleUpdateStock(product.id);
-                      setQuickUpdateStock({ id: null, value: '' });
-                    }}
-                    disabled={isUpdatingStock}
-                    className="px-3 py-1 bg-accent-success-600 text-white rounded hover:bg-accent-success-700 text-caption whitespace-nowrap transition-colors"
-                  >
-                    {isUpdatingStock ? 'Updating...' : <FaCheck />}
-                  </button>
-                  <button
-                    onClick={() => setQuickUpdateStock({ id: null, value: '' })}
-                    className="px-3 py-1 bg-neutral-200 text-neutral-700 rounded hover:bg-neutral-300 text-caption transition-colors"
-                  >
-                    <FaTimes />
-                  </button>
+            
+            <div className="space-y-3 mb-6">
+              <div className="text-sm text-neutral-600 line-clamp-3" dangerouslySetInnerHTML={{ __html: product.description }} />
+              
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-neutral-500">{t('price')}:</span>
+                  <span className="ml-2 font-semibold text-gray-900">Rs. {product.price.toLocaleString()}</span>
                 </div>
-              ) : (
+                <div>
+                  <span className="text-neutral-500">{t('stock')}:</span>
+                  <span className={`ml-2 font-semibold ${product.stock <= product.reorder_level ? 'text-red-600' : 'text-green-600'}`}>
+                    {product.stock}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-neutral-500">{t('sku')}:</span>
+                  <span className="ml-2 font-medium text-gray-700">{product.sku}</span>
+                </div>
+                <div>
+                  <span className="text-neutral-500">{t('category')}:</span>
+                  <span className="ml-2 font-medium text-gray-700">{product.category}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col space-y-3">
+              <div className="flex space-x-2">
                 <button
-                  onClick={() => handleQuickUpdateStock(product)}
-                  className="bg-accent-warning-600 hover:bg-accent-warning-700 text-white font-medium py-2 px-3 rounded text-caption whitespace-nowrap transition-colors"
+                  onClick={() => handleView(product)}
+                  className="flex-1 bg-blue-50 text-blue-700 font-medium py-2 px-4 rounded-lg hover:bg-blue-100 transition-colors text-sm"
                 >
-                  {t('update_stock')}
+                  {t('view')}
                 </button>
-              )}
-              <button
-                onClick={() => handleExportStats(product.id)}
-                disabled={exportingProductId === product.id}
-                className="flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-3 rounded text-caption whitespace-nowrap transition-colors"
-              >
-                {exportingProductId === product.id ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {t('exporting')}
-                  </>
+                <button
+                  onClick={() => handleEdit(product)}
+                  className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm flex items-center justify-center"
+                >
+                  <FaEdit className="mr-1" size={12} /> {t('edit')}
+                </button>
+              </div>
+              
+              <div className="flex space-x-2">
+                {quickUpdateStock.id === product.id ? (
+                  <div className="flex items-center space-x-2 w-full">
+                    <input
+                      type="number"
+                      value={quickUpdateStock.value}
+                      onChange={(e) => setQuickUpdateStock({ ...quickUpdateStock, value: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                      placeholder={t('new_stock')}
+                    />
+                    <button
+                      onClick={() => {
+                        handleUpdateStock(product.id);
+                        setQuickUpdateStock({ id: null, value: '' });
+                      }}
+                      disabled={isUpdatingStock}
+                      className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors"
+                    >
+                      {isUpdatingStock ? '...' : <FaCheck size={12} />}
+                    </button>
+                    <button
+                      onClick={() => setQuickUpdateStock({ id: null, value: '' })}
+                      className="p-2 bg-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-300 text-sm transition-colors"
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
                 ) : (
                   <>
-                    <FaDownload className="mr-1" />
-                    {t('export_stats')}
+                    <button
+                      onClick={() => handleQuickUpdateStock(product)}
+                      className="flex-1 bg-orange-50 text-orange-700 font-medium py-2 px-3 rounded-lg hover:bg-orange-100 transition-colors text-sm"
+                    >
+                      {t('update_stock')}
+                    </button>
+                    <button
+                      onClick={() => handleExportStats(product.id)}
+                      disabled={exportingProductId === product.id}
+                      className="flex-1 bg-green-50 text-green-700 font-medium py-2 px-3 rounded-lg hover:bg-green-100 transition-colors text-sm flex items-center justify-center"
+                    >
+                      {exportingProductId === product.id ? (
+                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <>
+                          <FaDownload className="mr-1" size={12} />
+                          {t('export_stats')}
+                        </>
+                      )}
+                    </button>
                   </>
                 )}
-              </button>
+              </div>
             </div>
           </div>
         ))}
@@ -725,24 +786,44 @@ const Products: React.FC = () => {
                 {errorMessages.name && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.name[0]}</p>}
               </div>
               <div>
-                <label htmlFor="category" className="block text-body font-medium text-neutral-700 mb-2">
+                <label className="block text-body font-medium text-neutral-700 mb-2">
                   {t('category')} <span className="text-accent-error-500">*</span>
                 </label>
-                <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.category ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
-                  required
-                >
-                  <option value="">{t('select_category')}</option>
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
+                
+                {/* New Category Hierarchy Selector */}
+                <CategorySelector
+                  selectedCategory={selectedCategoryId}
+                  selectedSubcategory={selectedSubcategoryId}
+                  selectedSubSubcategory={selectedSubSubcategoryId}
+                  onCategoryChange={setSelectedCategoryId}
+                  onSubcategoryChange={setSelectedSubcategoryId}
+                  onSubSubcategoryChange={setSelectedSubSubcategoryId}
+                  required={true}
+                  showHierarchy={true}
+                  mode="dropdown"
+                />
+                
+                {/* Legacy Category Selector (for backward compatibility) */}
+                <div className="mt-4">
+                  <label htmlFor="legacy-category" className="block text-sm font-medium text-gray-600 mb-1">
+                    Legacy Category (optional)
+                  </label>
+                  <select
+                    id="legacy-category"
+                    name="category"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">{t('select_category')}</option>
+                    {categories.map((category) => (
+                      <option key={category.value} value={category.value}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
                 {errorMessages.category && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.category[0]}</p>}
               </div>
               

@@ -17,14 +17,16 @@ import {
   ChevronRight,
   X,
   SlidersHorizontal,
-  Menu,
   DollarSign,
-  Tag
+  Tag,
+  Package,
+  Building
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
+import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
 
 import logo from '../assets/logo.png';
 
@@ -157,9 +159,20 @@ const MarketplaceAllProducts: React.FC = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'info' } | null>(null);
+
+  // New category hierarchy state
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
+  const [selectedSubSubcategoryId, setSelectedSubSubcategoryId] = useState<number | null>(null);
+  
+  // Filter state for sidebar
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minOrder, setMinOrder] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedBusinessType, setSelectedBusinessType] = useState('');
 
   const productsPerPage = 12;
 
@@ -170,26 +183,86 @@ const MarketplaceAllProducts: React.FC = () => {
       setError(null);
 
       const params = new URLSearchParams();
+      
+      // Search parameter
       if (searchTerm) params.append('search', searchTerm);
-      if (selectedCategory !== 'All') params.append('category', selectedCategory);
-      if (selectedPriceRange !== 'all') {
+      
+      // Category filters - prioritize hierarchy filters over legacy
+      if (selectedCategoryId) {
+        params.append('category_id', selectedCategoryId.toString());
+        console.log('Applied category_id filter:', selectedCategoryId);
+      } else if (selectedCategory !== 'All') {
+        // Legacy category support (for backward compatibility)
+        params.append('category', selectedCategory);
+        console.log('Applied legacy category filter:', selectedCategory);
+      }
+      
+      if (selectedSubcategoryId) {
+        params.append('subcategory_id', selectedSubcategoryId.toString());
+        console.log('Applied subcategory_id filter:', selectedSubcategoryId);
+      }
+      
+      if (selectedSubSubcategoryId) {
+        params.append('sub_subcategory_id', selectedSubSubcategoryId.toString());
+        console.log('Applied sub_subcategory_id filter:', selectedSubSubcategoryId);
+      }
+      
+      // Location filter
+      if (selectedCity) {
+        params.append('city', selectedCity);
+        console.log('Applied city filter:', selectedCity);
+      }
+      
+      // Business type filter
+      if (selectedBusinessType) {
+        params.append('profile_type', selectedBusinessType);
+        console.log('Applied profile_type filter:', selectedBusinessType);
+      }
+      
+      // Price filters - prioritize sidebar filters over legacy price ranges
+      if (minPrice) {
+        params.append('min_price', minPrice);
+      } else if (selectedPriceRange !== 'all') {
+        // Legacy price range support
         if (selectedPriceRange === '50000+') {
           params.append('min_price', '50000');
         } else {
-          const [min, max] = selectedPriceRange.split('-');
+          const [min] = selectedPriceRange.split('-');
           if (min) params.append('min_price', min);
-          if (max) params.append('max_price', max);
         }
       }
+      
+      if (maxPrice) {
+        params.append('max_price', maxPrice);
+      } else if (selectedPriceRange !== 'all' && selectedPriceRange !== '50000+') {
+        // Legacy price range support for max price
+        const [, max] = selectedPriceRange.split('-');
+        if (max) params.append('max_price', max);
+      }
+      
+      // Minimum order quantity
+      if (minOrder) {
+        params.append('min_order_quantity', minOrder);
+      }
+      
+      // Rating filter
       if (selectedRating !== 'all') {
         const rating = selectedRating.replace('+', '');
         params.append('min_rating', rating);
       }
+      
+      // Pagination and sorting
       params.append('page', currentPage.toString());
       params.append('limit', productsPerPage.toString());
-      params.append('sort', sortBy);
+      
+      if (sortBy && sortBy !== 'relevance') {
+        params.append('sort', sortBy);
+      }
 
-      const response = await axios.get(`https://appmulyabazzar.com/api/v1/marketplace/?${params.toString()}`);
+      const apiUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?${params.toString()}`;
+      console.log('Fetching products from:', apiUrl);
+      
+      const response = await axios.get(apiUrl);
       
       if (response.data && Array.isArray(response.data.results)) {
         setProducts(response.data.results);
@@ -202,6 +275,10 @@ const MarketplaceAllProducts: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response data:', error.response?.data);
+        console.error('Response status:', error.response?.status);
+      }
       setError('Failed to load products. Please try again.');
       setProducts([]);
     } finally {
@@ -212,7 +289,22 @@ const MarketplaceAllProducts: React.FC = () => {
   // Effects
   useEffect(() => {
     fetchProducts();
-  }, [currentPage, sortBy, selectedCategory, selectedPriceRange, selectedRating]);
+  }, [
+    currentPage, 
+    sortBy, 
+    selectedCategory, 
+    selectedPriceRange, 
+    selectedRating,
+    selectedCategoryId,
+    selectedSubcategoryId,
+    selectedSubSubcategoryId,
+    minPrice,
+    maxPrice,
+    minOrder,
+    selectedCity,
+    selectedBusinessType,
+    searchTerm
+  ]);
 
   useEffect(() => {
     const category = searchParams.get('category');
@@ -234,6 +326,8 @@ const MarketplaceAllProducts: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [message]);
+
+  // Filter handlers - using existing clearAllFilters function
 
   // Handlers
   const handleSearch = () => {
@@ -268,6 +362,16 @@ const MarketplaceAllProducts: React.FC = () => {
     setSelectedCategory('All');
     setSelectedPriceRange('all');
     setSelectedRating('all');
+    // Clear new category hierarchy
+    setSelectedCategoryId(null);
+    setSelectedSubcategoryId(null);
+    setSelectedSubSubcategoryId(null);
+    setMinPrice('');
+    setMaxPrice('');
+    setMinOrder('');
+    // Clear new filter options
+    setSelectedCity('');
+    setSelectedBusinessType('');
     setCurrentPage(1);
     setSearchParams({});
   };
@@ -307,12 +411,12 @@ const MarketplaceAllProducts: React.FC = () => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
         key={index}
-        className={`w-4 h-4 ${
+        className={`w-3.5 h-3.5 ${
           index < Math.floor(rating)
-            ? 'text-yellow-400 fill-current'
+            ? 'fill-accent-warning-400 text-accent-warning-400'
             : index < rating
-            ? 'text-yellow-400 fill-current opacity-50'
-            : 'text-gray-300'
+            ? 'fill-accent-warning-200 text-accent-warning-400'
+            : 'fill-neutral-200 text-neutral-200'
         }`}
       />
     ));
@@ -324,13 +428,13 @@ const MarketplaceAllProducts: React.FC = () => {
     const hasOffer = product.is_offer_active && product.percent_off > 0;
 
     return (
-      <div className="bg-white rounded-xl shadow-elevation-sm hover:shadow-elevation-md transition-all duration-300 group overflow-hidden border border-neutral-200">
-        {/* Image Container - Full Width */}
-        <div className="relative overflow-hidden aspect-square">
+      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1">
+        {/* Image Container */}
+        <div className="relative overflow-hidden aspect-square bg-neutral-50">
           <img
             src={mainImage}
             alt={product.product_details.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {
               e.currentTarget.src = '/api/placeholder/300/300';
             }}
@@ -339,12 +443,12 @@ const MarketplaceAllProducts: React.FC = () => {
           {/* Top Left Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {hasOffer && (
-              <div className="bg-accent-error-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-sm">
+              <div className="bg-accent-error-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
                 {product.percent_off}% OFF
               </div>
             )}
             {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
-              <div className="bg-accent-warning-500 text-white text-xs font-semibold px-2 py-1 rounded-md shadow-sm">
+              <div className="bg-accent-warning-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm">
                 Only {product.product_details.stock} left
               </div>
             )}
@@ -353,11 +457,13 @@ const MarketplaceAllProducts: React.FC = () => {
           {/* Top Right Wishlist Button */}
           <button
             onClick={() => toggleWishlist(product.id)}
-            className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-sm"
+            className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${
+              isWishlisted 
+                ? 'bg-accent-error-500 text-white hover:bg-accent-error-600' 
+                : 'bg-white/90 text-neutral-600 hover:text-accent-error-500 hover:bg-white'
+            }`}
           >
-            <Heart 
-              className={`w-4 h-4 transition-colors ${isWishlisted ? 'fill-accent-error-500 text-accent-error-500' : 'text-neutral-400 hover:text-accent-error-500'}`} 
-            />
+            <Heart className="w-4 h-4" fill={isWishlisted ? 'currentColor' : 'none'} />
           </button>
 
           {/* Quick View Overlay */}
@@ -373,18 +479,17 @@ const MarketplaceAllProducts: React.FC = () => {
 
         {/* Content Section */}
         <div className="p-4 space-y-3">
-          {/* Category Tag */}
+          {/* Category & Rating */}
           <div className="flex items-center justify-between">
-            <span className="inline-block bg-neutral-100 text-neutral-600 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
+            <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
               {product.product_details.category_details}
             </span>
             {product.average_rating > 0 && (
               <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-accent-warning-400 text-accent-warning-400" />
-                <span className="text-sm font-medium text-neutral-700">
-                  {product.average_rating.toFixed(1)}
-                </span>
-                <span className="text-xs text-neutral-500">
+                <div className="flex gap-0.5">
+                  {renderStars(product.average_rating)}
+                </div>
+                <span className="text-xs text-neutral-600 ml-1">
                   ({product.total_reviews})
                 </span>
               </div>
@@ -392,39 +497,52 @@ const MarketplaceAllProducts: React.FC = () => {
           </div>
 
           {/* Product Title */}
-          <h3 className="font-semibold text-neutral-900 line-clamp-2 text-body group-hover:text-primary-600 transition-colors leading-tight">
+          <h3 className="font-semibold text-neutral-900 leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors cursor-pointer" onClick={() => navigate(`/marketplace/${product.id}`)}>
             {product.product_details.name}
           </h3>
 
           {/* Price Section */}
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-h3 font-bold text-primary-600">
-                Rs.{hasOffer ? product.discounted_price?.toFixed(2) : product.listed_price.toFixed(2)}
-              </span>
-              {hasOffer && (
-                <span className="text-body text-neutral-500 line-through">
-                  Rs.{product.listed_price.toFixed(2)}
+            {hasOffer ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-lg font-bold text-accent-error-600">
+                  Rs. {product.discounted_price?.toLocaleString()}
                 </span>
-              )}
-            </div>
+                <span className="text-sm text-neutral-500 line-through">
+                  Rs. {product.listed_price?.toLocaleString()}
+                </span>
+              </div>
+            ) : (
+              <span className="text-lg font-bold text-neutral-900">
+                Rs. {product.listed_price?.toLocaleString()}
+              </span>
+            )}
             {hasOffer && (
               <div className="text-xs text-accent-success-600 font-medium">
-                You save Rs.{(product.listed_price - (product.discounted_price || 0)).toFixed(2)}
+                Save Rs. {((product.listed_price - (product.discounted_price || 0)) || 0)?.toLocaleString()}
               </div>
             )}
           </div>
 
           {/* Stock and Delivery Info */}
-          <div className="flex items-center justify-between text-xs text-neutral-600">
-            <div className="flex items-center gap-1">
-              <div className={`w-2 h-2 rounded-full ${product.product_details.stock > 10 ? 'bg-accent-success-500' : product.product_details.stock > 0 ? 'bg-accent-warning-500' : 'bg-accent-error-500'}`}></div>
-              <span className="font-medium">
-                {product.product_details.stock > 0 ? `${product.product_details.stock} in stock` : 'Out of stock'}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                product.product_details.stock > 10 
+                  ? 'bg-accent-success-500' 
+                  : product.product_details.stock > 0 
+                    ? 'bg-accent-warning-500' 
+                    : 'bg-accent-error-500'
+              }`}></div>
+              <span className="text-xs text-neutral-600">
+                {product.product_details.stock > 0 
+                  ? `${product.product_details.stock} in stock` 
+                  : 'Out of stock'
+                }
               </span>
             </div>
             {product.estimated_delivery_days && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2 text-xs text-neutral-600">
                 <MapPin className="w-3 h-3" />
                 <span>{product.estimated_delivery_days} days delivery</span>
               </div>
@@ -435,10 +553,10 @@ const MarketplaceAllProducts: React.FC = () => {
           <button
             onClick={() => handleAddToCart(product)}
             disabled={product.product_details.stock === 0}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+            className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
               product.product_details.stock === 0
                 ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
-                : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md'
+                : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
             }`}
           >
             <ShoppingCart className="w-4 h-4" />
@@ -544,151 +662,40 @@ const MarketplaceAllProducts: React.FC = () => {
           </div>
 
           {/* Filters Row */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between py-4 border-t border-gray-100 gap-4">
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Category Filter */}
-              <Select.Root value={selectedCategory} onValueChange={handleCategoryChange}>
-                <Select.Trigger className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-orange-100 rounded-lg transition-colors">
-                  <Filter className="w-4 h-4" />
-                  <Select.Value />
-                  <ChevronDown className="w-4 h-4" />
-                </Select.Trigger>
-                <Select.Portal>
-                  <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <Select.Viewport className="p-1">
-                      {CATEGORY_OPTIONS.map((category) => (
-                        <Select.Item
-                          key={category.code}
-                          value={category.code}
-                          className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 rounded cursor-pointer"
-                        >
-                          <Select.ItemText>{category.label}</Select.ItemText>
-                        </Select.Item>
-                      ))}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
-
-              {/* Price Range Filter */}
-              <Select.Root value={selectedPriceRange} onValueChange={handlePriceRangeChange}>
-                <Select.Trigger className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-orange-100 rounded-lg transition-colors">
-                  <DollarSign className="w-4 h-4" />
-                  <Select.Value />
-                  <ChevronDown className="w-4 h-4" />
-                </Select.Trigger>
-                <Select.Portal>
-                  <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <Select.Viewport className="p-1">
-                      {PRICE_RANGES.map((range) => (
-                        <Select.Item
-                          key={range.value}
-                          value={range.value}
-                          className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 rounded cursor-pointer"
-                        >
-                          <Select.ItemText>{range.label}</Select.ItemText>
-                        </Select.Item>
-                      ))}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
-
-              {/* Rating Filter */}
-              <Select.Root value={selectedRating} onValueChange={handleRatingChange}>
-                <Select.Trigger className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-orange-100 rounded-lg transition-colors">
-                  <Star className="w-4 h-4" />
-                  <Select.Value />
-                  <ChevronDown className="w-4 h-4" />
-                </Select.Trigger>
-                <Select.Portal>
-                  <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <Select.Viewport className="p-1">
-                      {RATING_FILTERS.map((rating) => (
-                        <Select.Item
-                          key={rating.value}
-                          value={rating.value}
-                          className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 rounded cursor-pointer"
-                        >
-                          <Select.ItemText>{rating.label}</Select.ItemText>
-                        </Select.Item>
-                      ))}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
-
-              {/* Sort Filter */}
-              <Select.Root value={sortBy} onValueChange={setSortBy}>
-                <Select.Trigger className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-orange-100 rounded-lg transition-colors">
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <Select.Value />
-                  <ChevronDown className="w-4 h-4" />
-                </Select.Trigger>
-                <Select.Portal>
-                  <Select.Content className="bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <Select.Viewport className="p-1">
-                      {SORT_OPTIONS.map((option) => (
-                        <Select.Item
-                          key={option.value}
-                          value={option.value}
-                          className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 rounded cursor-pointer"
-                        >
-                          <Select.ItemText>{option.label}</Select.ItemText>
-                        </Select.Item>
-                      ))}
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select.Portal>
-              </Select.Root>
-
-              {/* Clear Filters Button */}
-              {(selectedCategory !== 'All' || selectedPriceRange !== 'all' || selectedRating !== 'all' || searchTerm) && (
-                <button
-                  onClick={clearAllFilters}
-                  className="px-4 py-2 text-sm text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors"
-                >
-                  Clear All
-                </button>
-              )}
-
-              {/* Results Count */}
-              <span className="text-sm text-gray-600">
-                {loading ? 'Loading...' : `${totalProducts} products found`}
-              </span>
-            </div>
-
-            {/* View Toggle */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-orange-100 text-orange-600'
-                    : 'text-gray-400 hover:text-orange-600'
-                }`}
-              >
-                <Grid3X3 className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-orange-100 text-orange-600'
-                    : 'text-gray-400 hover:text-orange-600'
-                }`}
-              >
-                <List className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex gap-8">
+          {/* Sidebar Filters */}
+          <aside className="hidden lg:block">
+            <MarketplaceSidebarFilters
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              minOrder={minOrder}
+              selectedCity={selectedCity}
+              selectedBusinessType={selectedBusinessType}
+              selectedCategory={selectedCategoryId}
+              selectedSubcategory={selectedSubcategoryId}
+              selectedSubSubcategory={selectedSubSubcategoryId}
+              onMinPriceChange={setMinPrice}
+              onMaxPriceChange={setMaxPrice}
+              onMinOrderChange={setMinOrder}
+              onCityChange={setSelectedCity}
+              onBusinessTypeChange={setSelectedBusinessType}
+              onCategoryChange={setSelectedCategoryId}
+              onSubcategoryChange={setSelectedSubcategoryId}
+              onSubSubcategoryChange={setSelectedSubSubcategoryId}
+              onClearFilters={clearAllFilters}
+            />
+          </aside>
+
+          {/* Main Content Area */}
+          <div className="flex-1">
         {/* Active Filters */}
-        {(selectedCategory !== 'All' || selectedPriceRange !== 'all' || selectedRating !== 'all' || searchTerm) && (
+        {(selectedCategory !== 'All' || selectedPriceRange !== 'all' || selectedRating !== 'all' || searchTerm || selectedCategoryId || minPrice || maxPrice || minOrder || selectedCity || selectedBusinessType) && (
           <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-medium text-orange-800">Active Filters:</span>
@@ -713,6 +720,85 @@ const MarketplaceAllProducts: React.FC = () => {
                   <button
                     onClick={() => {setSelectedCategory('All'); setCurrentPage(1);}}
                     className="ml-1 hover:text-orange-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {/* New Category Hierarchy Filter Display */}
+              {selectedCategoryId && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                  <Tag className="w-3 h-3" />
+                  Category Filter
+                  <button
+                    onClick={() => {setSelectedCategoryId(null); setCurrentPage(1);}}
+                    className="ml-1 hover:text-blue-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {minPrice && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                  <DollarSign className="w-3 h-3" />
+                  Min: ₹{minPrice}
+                  <button
+                    onClick={() => {setMinPrice(''); setCurrentPage(1);}}
+                    className="ml-1 hover:text-green-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {maxPrice && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                  <DollarSign className="w-3 h-3" />
+                  Max: ₹{maxPrice}
+                  <button
+                    onClick={() => {setMaxPrice(''); setCurrentPage(1);}}
+                    className="ml-1 hover:text-green-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {minOrder && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">
+                  <Package className="w-3 h-3" />
+                  Min Order: {minOrder}
+                  <button
+                    onClick={() => {setMinOrder(''); setCurrentPage(1);}}
+                    className="ml-1 hover:text-purple-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {selectedCity && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">
+                  <MapPin className="w-3 h-3" />
+                  City: {selectedCity}
+                  <button
+                    onClick={() => {setSelectedCity(''); setCurrentPage(1);}}
+                    className="ml-1 hover:text-indigo-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {selectedBusinessType && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-cyan-100 text-cyan-800 text-sm rounded-full">
+                  <Building className="w-3 h-3" />
+                  Type: {selectedBusinessType}
+                  <button
+                    onClick={() => {setSelectedBusinessType(''); setCurrentPage(1);}}
+                    className="ml-1 hover:text-cyan-900"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -863,7 +949,9 @@ const MarketplaceAllProducts: React.FC = () => {
             )}
           </>
         )}
-      </div>
+          </div> {/* Close Main Content Area */}
+        </div> {/* Close flex container */}
+      </div> {/* Close max-w-7xl container */}
 
       {/* Mobile Search Modal */}
       <Dialog.Root open={showMobileSearch} onOpenChange={setShowMobileSearch}>
