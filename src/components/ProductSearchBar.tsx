@@ -339,9 +339,9 @@ const ProductSearchBar: React.FC = () => {
     if (!hasQuery && !hasHistory && !hasTrending) return null;
 
     return (
-      <div className="absolute left-0 right-0 bg-white border rounded-lg shadow-elevation-lg max-h-96 overflow-hidden mt-1 z-30">
+      <div className="absolute left-0 right-0 bg-white border border-neutral-200 rounded-xl shadow-lg max-h-96 overflow-hidden mt-2 z-30">
         {hasQuery && (
-          <div className="border-b">
+          <div className="border-b border-neutral-100">
             {isLoading ? (
               <div className="px-4 py-3 text-neutral-500 text-sm">
                 <div className="flex items-center">
@@ -351,14 +351,14 @@ const ProductSearchBar: React.FC = () => {
               </div>
             ) : hasRecommendations ? (
               <>
-                <div className="px-4 py-2 text-xs font-semibold text-neutral-500 uppercase border-b bg-neutral-50">
+                <div className="px-4 py-2 text-xs font-medium text-neutral-600 uppercase bg-neutral-50">
                   Products ({recommendations.length})
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {recommendations.map((product) => (
                     <div
                       key={product.id}
-                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="flex items-center px-4 py-3 cursor-pointer hover:bg-neutral-50 transition-colors"
                       onClick={() => handleProductSelect(product)}
                     >
                       <div className="flex-shrink-0 mr-3">
@@ -366,31 +366,31 @@ const ProductSearchBar: React.FC = () => {
                           <img 
                             src={product.product_details.images[0].image} 
                             alt={product.product_details.images[0].alt_text || ''} 
-                            className="w-10 h-10 rounded-lg object-cover border"
+                            className="w-12 h-12 rounded-xl object-cover border border-neutral-200"
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <FiSearch className="w-4 h-4 text-gray-400" />
+                          <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center">
+                            <FiSearch className="w-5 h-5 text-neutral-400" />
                           </div>
                         )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-gray-900 truncate">
+                        <div className="font-medium text-gray-900 line-clamp-1">
                           {product.product_details?.name}
                         </div>
                         <div className="flex items-center mt-1">
-                          <span className="text-lg font-bold text-green-600">
-                            Rs.{product.listed_price.toLocaleString()}
+                          <span className="text-lg font-bold text-primary-600">
+                            Rs. {product.listed_price.toLocaleString()}
                           </span>
                           {product.discount_percentage && (
-                            <span className="ml-2 text-xs bg-red-100 text-red-600 px-2 py-1 rounded">
+                            <span className="ml-2 text-xs bg-red-50 text-red-600 px-2 py-1 rounded-full font-medium">
                               {product.discount_percentage}% OFF
                             </span>
                           )}
                         </div>
                         {product.product_details?.brand && (
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-neutral-500 mt-1">
                             by {product.product_details.brand}
                           </div>
                         )}
@@ -415,7 +415,7 @@ const ProductSearchBar: React.FC = () => {
                 <div className="px-4 py-3 border-t bg-gray-50">
                   <button
                     onClick={() => handleSearch(query)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                    className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center"
                   >
                     <FiSearch className="w-4 h-4 mr-1" />
                     Search for "{query}"
@@ -436,7 +436,7 @@ const ProductSearchBar: React.FC = () => {
               <span>Recent Searches</span>
               <button
                 onClick={clearHistory}
-                className="text-blue-600 hover:text-blue-700 text-xs normal-case"
+                className="text-primary-600 hover:text-primary-700 text-xs normal-case"
               >
                 Clear
               </button>
@@ -474,7 +474,7 @@ const ProductSearchBar: React.FC = () => {
                   <FiTrendingUp className="w-4 h-4 text-orange-500 mr-3" />
                   <span className="flex-1 text-gray-700">{item.query}</span>
                   {item.category && (
-                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                    <span className="text-xs bg-primary-100 text-primary-600 px-2 py-1 rounded">
                       {item.category}
                     </span>
                   )}
@@ -503,7 +503,7 @@ const ProductSearchBar: React.FC = () => {
               <input
                 ref={searchInputRef}
                 type="text"
-                className="input-field w-full pl-12 pr-24 focus-ring"
+                className="w-full pl-12 pr-16 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm bg-white"
                 placeholder="Search for products, brands, categories..."
                 value={query}
                 onChange={(e) => {
@@ -516,7 +516,7 @@ const ProductSearchBar: React.FC = () => {
               
               <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
               
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
                 {query && (
                   <button
                     onClick={() => {
@@ -524,7 +524,7 @@ const ProductSearchBar: React.FC = () => {
                       setShowSuggestions(false);
                       searchInputRef.current?.focus();
                     }}
-                    className="p-1 hover:bg-neutral-200 rounded-full transition-colors"
+                    className="p-1.5 hover:bg-neutral-100 rounded-full transition-colors"
                   >
                     <FiX className="w-4 h-4 text-neutral-400" />
                   </button>
@@ -679,7 +679,7 @@ const ProductSearchBar: React.FC = () => {
         <div className="relative">
           <input
             type="text"
-            className="w-full rounded-lg border-2 border-gray-200 px-4 py-2 pl-10 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+            className="w-full rounded-lg border-2 border-gray-200 px-4 py-2 pl-10 bg-gray-50 focus:outline-none focus:border-primary-500 focus:bg-white transition-all"
             placeholder="Search products..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}

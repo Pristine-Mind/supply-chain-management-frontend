@@ -61,7 +61,6 @@ const DeliveryDetails: React.FC = () => {
         cartId = await createCartOnBackend()
       }
 
-      // Prepare delivery data for the new order flow
       const delivery: Delivery = {
         cartId: cartId,
         customer_name: data.name,
@@ -74,9 +73,6 @@ const DeliveryDetails: React.FC = () => {
         latitude: latLng.lat,
         longitude: latLng.lng,
       }
-
-      // Skip the old createDelivery API call and go directly to payment
-      // The delivery info will be used in the order creation API
       navigate('/payment', { state: { delivery } })
     } catch (err) {
       console.error(err)
@@ -100,17 +96,17 @@ const DeliveryDetails: React.FC = () => {
     <>
       <Navbar />
       <div className="bg-neutral-50 py-6">
-        <div className="w-4/5 mx-auto card-elevated bg-white">
+        <div className="w-4/5 mx-auto bg-white rounded-xl border border-neutral-200 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
             {error && (
-              <div className="card-soft bg-accent-error-50 border border-accent-error-200 text-accent-error-700">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
                 {error}
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h2 className="text-h3 font-semibold text-neutral-700 uppercase tracking-wide">
+                <h2 className="text-lg font-semibold text-gray-900 uppercase tracking-wide">
                   Personal Information
                 </h2>
                 
@@ -120,16 +116,16 @@ const DeliveryDetails: React.FC = () => {
                   rules={{ required: 'Full name is required' }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-body font-medium text-neutral-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1">
                         Full Name
                       </label>
                       <input 
                         {...field} 
-                        className="input-field w-full focus-ring"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                         placeholder="Enter your full name"
                       />
                       {errors.name && (
-                        <p className="text-accent-error-500 text-caption mt-1">{errors.name.message}</p>
+                        <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
                       )}
                     </div>
                   )}
@@ -144,17 +140,17 @@ const DeliveryDetails: React.FC = () => {
                   }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-body font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1">
                         Phone Number
                       </label>
                       <input 
                         {...field} 
                         type="tel" 
-                        className="input-field w-full focus:ring-primary-200 focus:border-primary-500"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                         placeholder="Your phone number"
                       />
                       {errors.phone && (
-                        <p className="text-accent-error-500 text-caption mt-1">{errors.phone.message}</p>
+                        <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
                       )}
                     </div>
                   )}
@@ -168,17 +164,17 @@ const DeliveryDetails: React.FC = () => {
                   }}
                   render={({ field }) => (
                     <div>
-                      <label className="block text-body font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 mb-1">
                         Email
                       </label>
                       <input 
                         {...field} 
                         type="email" 
-                        className="input-field w-full focus:ring-primary-200 focus:border-primary-500"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
                         placeholder="Your email address"
                       />
                       {errors.email  && (
-                        <p className="text-accent-error-500 text-caption mt-1">{errors.email.message}</p>
+                        <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
                       )}
                     </div>
                   )}
@@ -186,7 +182,7 @@ const DeliveryDetails: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <h2 className="text-h3 font-semibold text-gray-700 uppercase tracking-wide">
+                <h2 className="text-lg font-semibold text-gray-900 uppercase tracking-wide">
                   Address Information
                 </h2>
 

@@ -111,7 +111,7 @@ const StatsDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
       </div>
     );
   }
@@ -212,23 +212,23 @@ const StatsDashboard: React.FC = () => {
         {t('sales_statistics_dashboard')}
       </h1>
 
-      <div className="mb-8 bg-white rounded-xl shadow-elevation-lg p-6 border border-neutral-200">
-        <h2 className="text-h2 font-semibold text-neutral-800 mb-6">{t('filters')}</h2>
+      <div className="mb-8 bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('filters')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('location')}</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">{t('location')}</label>
             <input
               type="text"
-              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder={t('enter_location')}
             />
           </div>
           <div>
-            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('category')}</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">{t('category')}</label>
             <select
-              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
@@ -241,19 +241,19 @@ const StatsDashboard: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('start_date')}</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">{t('start_date')}</label>
             <input
               type="date"
-              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-caption font-medium text-neutral-700 mb-2">{t('end_date')}</label>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">{t('end_date')}</label>
             <input
               type="date"
-              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-body"
+              className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
@@ -262,7 +262,7 @@ const StatsDashboard: React.FC = () => {
         <div className="mt-6 text-right">
           <button
             onClick={handleApplyFilters}
-            className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow-elevation-md hover:bg-primary-700 transition-colors text-body font-medium"
+            className="px-6 py-3 bg-primary-600 text-white rounded-lg shadow-sm hover:bg-primary-700 transition-colors text-sm font-medium"
           >
             {t('apply_filters')}
           </button>
@@ -270,14 +270,14 @@ const StatsDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-8 text-white shadow-elevation-lg hover:shadow-elevation-xl transition-shadow">
-          <h3 className="text-h3 font-medium mb-3">{t('total_products_sold')}</h3>
-          <p className="text-h1 font-bold">
+        <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl p-8 text-white shadow-sm hover:shadow-md transition-shadow">
+          <h3 className="text-lg font-medium mb-3">{t('total_products_sold')}</h3>
+          <p className="text-3xl font-bold">
             {total_products_sold !== null ? total_products_sold.toLocaleString() : t('na')}
           </p>
         </div>
-        <div className="bg-gradient-to-br from-accent-success-500 to-accent-success-600 rounded-xl p-8 text-white shadow-elevation-lg hover:shadow-elevation-xl transition-shadow">
-          <h3 className="text-h3 font-medium mb-3">{t('total_revenue')}</h3>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-8 text-white shadow-sm hover:shadow-md transition-shadow">
+          <h3 className="text-lg font-medium mb-3">{t('total_revenue')}</h3>
           <p className="text-3xl font-bold">
             {total_revenue !== null ? `$${total_revenue.toFixed(2)}` : t('na')}
           </p>
@@ -285,18 +285,18 @@ const StatsDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">{t('top_products')}</h2>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">{t('top_products')}</h2>
           {top_products.length > 0 ? (
             <div className="w-full h-80">
               <Pie data={topProductsPieData} options={chartOptions} />
             </div>
           ) : (
-            <p className="text-center text-gray-500 text-sm">{t('no_data_available_for_top_products')}</p>
+            <p className="text-center text-neutral-500 text-sm">{t('no_data_available_for_top_products')}</p>
           )}
         </div>
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">{t('top_customers')}</h2>
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">{t('top_customers')}</h2>
           {top_customers.length > 0 ? (
             <div className="w-full h-80">
               <Pie data={topCustomersPieData} options={chartOptions} />

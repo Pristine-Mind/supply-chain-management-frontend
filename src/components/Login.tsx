@@ -87,33 +87,33 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-soft-gradient">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50">
       {/* Brand Logo */}
       <div className="mb-8 text-center">
-        <img src={logo} alt="MulyaBazzar Logo" className="w-24 h-24 mx-auto mb-4 rounded-xl shadow-soft" />
-        <h1 className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
+        <img src={logo} alt="MulyaBazzar Logo" className="w-24 h-24 mx-auto mb-4 rounded-xl shadow-sm" />
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
           MulyaBazzar
         </h1>
-        <p className="text-body text-neutral-600 mt-2">
+        <p className="text-sm text-neutral-600 mt-2">
           Welcome back! Sign in to your account
         </p>
       </div>
 
       {/* Login Form */}
-      <div className="card-elevated w-full max-w-md">
-        <h2 className="text-h3 font-bold text-center mb-6 text-neutral-900">
+      <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-8 w-full max-w-md">
+        <h2 className="text-xl font-bold text-center mb-6 text-gray-900">
           {t('login')}
         </h2>
 
         {errorMessage && (
-          <div className="status-error mb-6 p-4 rounded-lg">
-            <p className="text-body-sm font-medium">{errorMessage}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p className="text-sm font-medium text-red-700">{errorMessage}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="content-spacing">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="username" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+            <label htmlFor="username" className="block text-sm font-semibold text-neutral-700 mb-2">
               {t('username')} *
             </label>
             <input
@@ -122,14 +122,14 @@ const Login: React.FC = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="input-field"
+              className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               placeholder="Enter your username or email"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-body-sm font-semibold text-neutral-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-semibold text-neutral-700 mb-2">
               {t('password')} *
             </label>
             <input
@@ -138,24 +138,24 @@ const Login: React.FC = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="input-field"
+              className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
               placeholder="Enter your password"
               required
             />
-            <p className="text-caption text-neutral-500 mt-1">
+            <p className="text-xs text-neutral-500 mt-1">
               Forgot your password? <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">Reset here</a>
             </p>
           </div>
 
           <button
             type="submit"
-            className="btn-primary w-full py-4"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 rounded-xl transition-colors shadow-sm"
           >
             {t('login')}
           </button>
 
           <div className="text-center">
-            <p className="text-body-sm text-neutral-600">
+            <p className="text-sm text-neutral-600">
               Don't have an account?{' '}
               <a href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
                 Sign up now

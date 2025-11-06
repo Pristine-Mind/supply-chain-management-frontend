@@ -191,7 +191,7 @@ const MyOrders: React.FC = () => {
         return 'bg-yellow-100 text-yellow-800';
       case 'confirmed':
       case 'processing':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-primary-100 text-primary-800';
       case 'shipped':
       case 'in_transit':
         return 'bg-purple-100 text-purple-800';
@@ -266,8 +266,8 @@ const MyOrders: React.FC = () => {
         <Navbar />
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
-            <p className="text-body text-neutral-600">Loading your orders...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-sm text-neutral-600">Loading your orders...</p>
           </div>
         </div>
         <Footer />
@@ -282,12 +282,12 @@ const MyOrders: React.FC = () => {
         <div className="max-w-7xl mx-auto container-padding">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-h1 font-bold text-neutral-900 mb-2">My Orders</h1>
-            <p className="text-body text-neutral-600">Track and manage your marketplace orders</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
+            <p className="text-sm text-neutral-600">Track and manage your marketplace orders</p>
           </div>
 
           {/* Filters */}
-          <div className="bg-white card shadow-elevation-sm border border-neutral-200 container-padding mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               {/* Search */}
               <div className="flex-1 max-w-md">

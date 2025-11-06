@@ -9,6 +9,7 @@ import { X, ChevronDown, Check, User, LogIn, PlusCircle, ShoppingCart, Heart, St
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
+import { CategorySelector } from './CategoryHierarchy';
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -120,8 +121,21 @@ const Marketplace: React.FC = () => {
   const [newArrivals, setNewArrivals] = useState<MarketplaceProduct[]>([]);
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_OPTIONS[0].code);
-  const [selectedLocation, setSelectedLocation] = useState(LOCATION_OPTIONS[0]);
-  const [selectedProfileType, setSelectedProfileType] = useState(PROFILE_TYPE_OPTIONS[0]);
+  const [selectedLocation, setSelectedLocation] = useState<string>(LOCATION_OPTIONS[0]);
+  const [selectedProfileType, setSelectedProfileType] = useState<string>(PROFILE_TYPE_OPTIONS[0]);
+  
+  // Enhanced filtering state variables
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
+  const [selectedSubSubcategoryId, setSelectedSubSubcategoryId] = useState<number | null>(null);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minOrder, setMinOrder] = useState('');
+  // Additional filter states for unified interface
+  const [selectedCity, setSelectedCity] = useState('');
+  const [selectedBusinessType, setSelectedBusinessType] = useState('');
+  const [businessTypeDropdownOpen, setBusinessTypeDropdownOpen] = useState(false);
+  
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -159,10 +173,59 @@ const Marketplace: React.FC = () => {
         limit: itemsPerPage,
         offset: (page - 1) * itemsPerPage,
       };
+      
+      // Search term
       if (query) params.search = query;
-      if (selectedCategory !== 'All') params.category = selectedCategory;
-      if (selectedLocation !== 'All') params.city = selectedLocation;
-      if (selectedProfileType !== 'All') params.profile_type = selectedProfileType;
+      
+      // Category hierarchy (prioritized over legacy)
+      if (selectedCategoryId) {
+        params.category_id = selectedCategoryId;
+      }
+      if (selectedSubcategoryId) {
+        params.subcategory_id = selectedSubcategoryId;
+      }
+      if (selectedSubSubcategoryId) {
+        params.sub_subcategory_id = selectedSubSubcategoryId;
+      }
+      
+      // Legacy category (only if no hierarchy selected)
+      if (!selectedCategoryId && selectedCategory !== 'All') {
+        params.category = selectedCategory;
+      }
+      
+      // Location filter
+      if (selectedLocation !== 'All') {
+        params.city = selectedLocation;
+      }
+      
+      // Additional city filter from unified interface
+      if (selectedCity) {
+        params.city = selectedCity;
+      }
+      
+      // Profile type filter
+      if (selectedProfileType !== 'All') {
+        params.profile_type = selectedProfileType;
+      }
+      
+      // Additional business type filter from unified interface
+      if (selectedBusinessType) {
+        params.profile_type = selectedBusinessType;
+      }
+      
+      // Price range filters
+      if (minPrice) {
+        params.min_price = parseFloat(minPrice);
+      }
+      if (maxPrice) {
+        params.max_price = parseFloat(maxPrice);
+      }
+      
+      // Order quantity filter
+      if (minOrder) {
+        params.min_order_quantity = parseInt(minOrder);
+      }
+      
       const { data } = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
         {
@@ -209,7 +272,7 @@ const Marketplace: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
     fetchMarketplaceProducts(1);
-  }, [query, selectedCategory, selectedLocation, selectedProfileType]);
+  }, [query, selectedCategory, selectedLocation, selectedProfileType, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
 
   useEffect(() => {
     fetchMarketplaceProducts(currentPage);
@@ -232,6 +295,21 @@ const Marketplace: React.FC = () => {
       fetchDealsProducts();
     }
   }, [searchParams]);
+
+  // Close business type dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.business-type-dropdown')) {
+        setBusinessTypeDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
   const startItem = totalCount > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
@@ -675,7 +753,7 @@ const Marketplace: React.FC = () => {
                 value={selectedCategory} 
                 onValueChange={(value: string) => setSelectedCategory(value)}
               >
-                <Select.Trigger className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors text-caption">
+                <Select.Trigger className="flex items-center gap-2 px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all text-sm font-medium shadow-sm">
                   <Select.Value placeholder="Categories" />
                   <ChevronDown className="w-4 h-4" />
                 </Select.Trigger>
@@ -817,9 +895,9 @@ const Marketplace: React.FC = () => {
                   value={selectedLocation} 
                   onValueChange={(value: string) => setSelectedLocation(value)}
                 >
-                  <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-neutral-200 rounded-md hover:border-primary-300 transition-colors bg-white text-caption text-neutral-700">
+                  <Select.Trigger className="flex items-center gap-2 px-4 py-3 border border-neutral-300 rounded-xl hover:border-primary-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 transition-all bg-white text-sm">
                     <Select.Value placeholder="Location" />
-                    <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+                    <ChevronDown className="w-4 h-4 text-neutral-500" />
                   </Select.Trigger>
                   <Select.Portal>
                     <Select.Content className="z-50 bg-white card shadow-elevation-lg border border-neutral-200 overflow-hidden">
@@ -845,9 +923,9 @@ const Marketplace: React.FC = () => {
                   value={selectedProfileType} 
                   onValueChange={(value: string) => setSelectedProfileType(value)}
                 >
-                  <Select.Trigger className="flex items-center gap-1.5 px-2.5 py-1.5 border border-neutral-200 rounded-md hover:border-primary-300 transition-colors bg-white text-caption text-neutral-700">
+                  <Select.Trigger className="flex items-center gap-2 px-4 py-3 border border-neutral-300 rounded-xl hover:border-primary-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 transition-all bg-white text-sm">
                     <Select.Value placeholder="Seller Type" />
-                    <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+                    <ChevronDown className="w-4 h-4 text-neutral-500" />
                   </Select.Trigger>
                   <Select.Portal>
                     <Select.Content className="z-50 bg-white card shadow-elevation-lg border border-neutral-200 overflow-hidden">
@@ -910,9 +988,9 @@ const Marketplace: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-96 sm:h-96 bg-white/5 rounded-full translate-y-24 sm:translate-y-48 -translate-x-24 sm:-translate-x-48"></div>
       </div>
 
-      <div className="container mx-auto container-padding section-spacing">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="bg-gradient-to-br from-blue-100 to-blue-200 card-elevated p-6 sm:p-8 relative overflow-hidden group card-hover transition-all duration-300">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-gradient-to-br from-blue-100 to-blue-200 card-elevated p-4 sm:p-6 relative overflow-hidden group card-hover transition-all duration-300">
             <div className="relative z-10">
               <h3 className="text-h2 font-bold text-neutral-800 mb-2">Home Decor</h3>
               <p className="text-neutral-600 mb-4 text-body">Stylish home accessories</p>
@@ -932,7 +1010,7 @@ const Marketplace: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+          <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
             <div className="relative z-10">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Kitchenware</h3>
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Premium kitchen essentials</p>
@@ -952,7 +1030,7 @@ const Marketplace: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-teal-100 to-teal-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+          <div className="bg-gradient-to-br from-teal-100 to-teal-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
             <div className="relative z-10">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Bath & Body</h3>
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Luxury self-care products</p>
@@ -972,7 +1050,7 @@ const Marketplace: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+          <div className="bg-gradient-to-br from-pink-100 to-pink-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
             <div className="relative z-10">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Clothing</h3>
               <p className="text-gray-600 mb-4 text-sm sm:text-base">Trendy fashion apparel</p>
@@ -1148,93 +1226,298 @@ const Marketplace: React.FC = () => {
         </div>
       )}
 
-      {/* Category Pills Section */}
-      <div className="bg-white border-b border-neutral-200">
-        <div className="container mx-auto px-4 py-4">
-          <div 
-            className="flex items-center space-x-3 overflow-x-auto pb-2 scrollbar-hide" 
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {CATEGORY_OPTIONS.map((category) => (
-              <button
-                key={category.code}
-                onClick={() => setSelectedCategory(category.code)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap border ${
-                  selectedCategory === category.code
-                    ? 'bg-primary-600 text-white border-primary-600 shadow-sm'
-                    : 'bg-white text-neutral-700 border-neutral-300 hover:bg-neutral-50 hover:border-neutral-400'
-                }`}
-              >
-                {category.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-6 sm:py-8">
+      <div className="container mx-auto px-4 py-3 sm:py-4">
         {currentView === 'marketplace' && (
               <>
-                {/* <div className="bg-white rounded-lg shadow-sm p-4 mb-4 sm:mb-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-                      <span className="text-sm text-gray-600">Showing {startItem}-{endItem} of {totalCount} results</span>
-                      <div className="flex items-center flex-wrap gap-2">
-                        {selectedCategory !== 'All' && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                            {CATEGORY_OPTIONS.find(c => c.code === selectedCategory)?.label}
-                            <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => setSelectedCategory('All')} />
-                          </span>
-                        )}
-                        {selectedLocation !== 'All' && (
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {selectedLocation}
-                            <X className="w-3 h-3 ml-1 cursor-pointer" onClick={() => setSelectedLocation('All')} />
-                          </span>
-                        )}
+                {/* Enhanced Filters Section - Now More Prominent */}
+                <div className="bg-white rounded-xl shadow-lg border border-neutral-200 p-4 mb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                      </svg>
+                      Find Your Perfect Products
+                    </h2>
+                    {/* Clear All Filters - Prominent Button */}
+                    {(selectedCategory !== 'All' || selectedLocation !== 'All' || query || selectedCategoryId || minPrice || maxPrice || minOrder || selectedCity || selectedBusinessType) && (
+                      <button
+                        onClick={() => {
+                          setSelectedCategory('All');
+                          setSelectedLocation('All');
+                          setQuery('');
+                          setSelectedCategoryId(null);
+                          setSelectedSubcategoryId(null);
+                          setSelectedSubSubcategoryId(null);
+                          setMinPrice('');
+                          setMaxPrice('');
+                          setMinOrder('');
+                          setSelectedCity('');
+                          setSelectedBusinessType('');
+                        }}
+                        className="px-4 py-2 text-sm bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl transition-colors font-medium"
+                      >
+                        Clear All Filters
+                      </button>
+                    )}
+                  </div>
+                  
+                  {/* Main Filters Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
+                    {/* Category Hierarchy Filter - Most Prominent */}
+                    <div className="lg:col-span-2">
+                      <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        Category & Subcategory
+                      </label>
+                      <CategorySelector
+                        selectedCategory={selectedCategoryId}
+                        selectedSubcategory={selectedSubcategoryId}
+                        selectedSubSubcategory={selectedSubSubcategoryId}
+                        onCategoryChange={setSelectedCategoryId}
+                        onSubcategoryChange={setSelectedSubcategoryId}
+                        onSubSubcategoryChange={setSelectedSubSubcategoryId}
+                        showHierarchy={false}
+                        mode="dropdown"
+                        className="space-y-2"
+                      />
+                    </div>
+                    
+                    {/* Price Range Filters */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                        </svg>
+                        Price Range (Rs)
+                      </label>
+                      <div className="space-y-1.5">
+                        <input
+                          type="number"
+                          placeholder="Min Price"
+                          value={minPrice}
+                          onChange={(e) => setMinPrice(e.target.value)}
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Max Price"
+                          value={maxPrice}
+                          onChange={(e) => setMaxPrice(e.target.value)}
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                        />
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">Sort by:</span>
-                      <select className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        <option>Default Sorting</option>
-                        <option>Price: Low to High</option>
-                        <option>Price: High to Low</option>
-                        <option>Newest First</option>
-                      </select>
+                    
+                    {/* Location Filter */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Location
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter city..."
+                        value={selectedCity || ''}
+                        onChange={(e) => setSelectedCity(e.target.value)}
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                      />
+                    </div>
+                    
+                    {/* Business Type & Min Order */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                        <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Business & Order
+                      </label>
+                      <div className="space-y-1.5">
+                        <div className="relative business-type-dropdown">
+                          <button
+                            type="button"
+                            onClick={() => setBusinessTypeDropdownOpen(!businessTypeDropdownOpen)}
+                            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white text-left flex items-center justify-between hover:border-primary-400"
+                          >
+                            <span className={selectedBusinessType ? "text-gray-900" : "text-gray-500"}>
+                              {selectedBusinessType ? 
+                                selectedBusinessType.charAt(0).toUpperCase() + selectedBusinessType.slice(1) : 
+                                "All Business Types"
+                              }
+                            </span>
+                            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${businessTypeDropdownOpen ? 'rotate-180' : ''}`} />
+                          </button>
+                          
+                          {businessTypeDropdownOpen && (
+                            <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                              <div className="p-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedBusinessType('');
+                                    setBusinessTypeDropdownOpen(false);
+                                  }}
+                                  className="w-full px-3 py-2 text-left hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                                >
+                                  All Business Types
+                                </button>
+                                {['producer', 'supplier', 'retailer', 'distributor'].map(type => (
+                                  <button
+                                    key={type}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedBusinessType(type);
+                                      setBusinessTypeDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-3 py-2 text-left hover:bg-primary-50 rounded-lg transition-colors ${
+                                      selectedBusinessType === type ? 'bg-primary-100 text-primary-900 font-medium' : 'text-gray-900'
+                                    }`}
+                                  >
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <input
+                          type="number"
+                          placeholder="Min Order Qty"
+                          value={minOrder}
+                          onChange={(e) => setMinOrder(e.target.value)}
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div> */}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  {/* Active Filters Display */}
+                  {(query || selectedCategoryId || selectedSubcategoryId || selectedSubSubcategoryId || minPrice || maxPrice || selectedCity || selectedBusinessType || minOrder) && (
+                    <div className="flex flex-wrap items-center gap-2 p-3 bg-primary-50 border border-primary-200 rounded-lg">
+                      <span className="text-sm font-medium text-primary-800">Active Filters:</span>
+                      
+                      {query && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 text-sm rounded-full">
+                          Search: "{query}"
+                          <button onClick={() => setQuery('')} className="ml-1 hover:text-primary-900">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      )}
+                      
+                      {selectedCategoryId && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 text-sm rounded-full">
+                          Category Selected
+                          <button onClick={() => setSelectedCategoryId(null)} className="ml-1 hover:text-primary-900">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      )}
+                      
+                      {(minPrice || maxPrice) && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                          Price: {minPrice && `₹${minPrice}`}{minPrice && maxPrice && ' - '}{maxPrice && `₹${maxPrice}`}
+                          <button onClick={() => {setMinPrice(''); setMaxPrice('');}} className="ml-1 hover:text-green-900">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      )}
+                      
+                      {selectedCity && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                          Location: {selectedCity}
+                          <button onClick={() => setSelectedCity('')} className="ml-1 hover:text-blue-900">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      )}
+                      
+                      {selectedBusinessType && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">
+                          {selectedBusinessType}
+                          <button onClick={() => setSelectedBusinessType('')} className="ml-1 hover:text-purple-900">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      )}
+                      
+                      {minOrder && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">
+                          Min Order: {minOrder}
+                          <button onClick={() => setMinOrder('')} className="ml-1 hover:text-orange-900">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Products Grid */}
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    <span className="ml-3 text-gray-600">Loading products...</span>
+                  </div>
+                ) : error ? (
+                  <div className="text-center py-8">
+                    <div className="text-red-500 text-lg mb-2">⚠️ Error Loading Products</div>
+                    <p className="text-gray-600">{error}</p>
+                  </div>
+                ) : products.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 text-6xl mb-4">🔍</div>
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">No Products Found</h3>
+                    <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
+                    <button
+                      onClick={() => {
+                        setSelectedCategory('All');
+                        setSelectedLocation('All');
+                        setQuery('');
+                        setSelectedCategoryId(null);
+                        setSelectedSubcategoryId(null);
+                        setSelectedSubSubcategoryId(null);
+                        setMinPrice('');
+                        setMaxPrice('');
+                        setMinOrder('');
+                        setSelectedCity('');
+                        setSelectedBusinessType('');
+                      }}
+                      className="px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
+                ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {products.map(item => (
                     <div
                       key={item.id}
                       onClick={() => navigate(`/marketplace/${item.id}`)}
-                      className="bg-white rounded-xl shadow-elevation-sm hover:shadow-elevation-md transition-all duration-300 cursor-pointer overflow-hidden group border border-neutral-200"
+                      className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                     >
-                      <div className="relative aspect-square overflow-hidden">
+                      <div className="relative aspect-square overflow-hidden bg-neutral-50">
                         {item.percent_off > 0 && (
-                          <div className="absolute top-3 left-3 bg-accent-error-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10 shadow-sm">
+                          <div className="absolute top-3 left-3 bg-accent-error-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm z-10">
                             {Math.round(item.percent_off)}% OFF
                           </div>
                         )}
                         
-                        {/* Wishlist Button */}
-                        {/* <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Add wishlist functionality here
-                          }}
-                          className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-sm z-10"
-                        >
-                          <Heart className="w-4 h-4 text-neutral-400 hover:text-accent-error-500 transition-colors" />
-                        </button> */}
+                        {/* Stock Status Badge */}
+                        {item.product_details.stock > 0 && item.product_details.stock <= 5 && (
+                          <div className="absolute bottom-3 left-3 bg-accent-warning-500 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
+                            Only {item.product_details.stock} left
+                          </div>
+                        )}
                         
                         <img
                           src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
                           alt={item.product_details.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         
                         {/* Quick View Overlay */}
@@ -1248,12 +1531,12 @@ const Marketplace: React.FC = () => {
                       <div className="p-4 space-y-3">
                         {/* Category and Rating */}
                         <div className="flex items-center justify-between">
-                          <span className="inline-block bg-neutral-100 text-neutral-600 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
+                          <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
                             {item.product_details.category_details}
                           </span>
                           {item.average_rating > 0 && (
                             <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-accent-warning-400 text-accent-warning-400" />
+                              <Star className="w-3.5 h-3.5 fill-accent-warning-400 text-accent-warning-400" />
                               <span className="text-sm font-medium text-neutral-700">
                                 {item.average_rating.toFixed(1)}
                               </span>
@@ -1265,44 +1548,48 @@ const Marketplace: React.FC = () => {
                         </div>
                         
                         {/* Product Title */}
-                        <h3 className="font-semibold text-neutral-900 line-clamp-2 text-body group-hover:text-primary-600 transition-colors leading-tight">
+                        <h3 className="font-semibold text-neutral-900 leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors">
                           {item.product_details.name}
                         </h3>
                         
                         {/* Price Section */}
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            {item.discounted_price && item.discounted_price < item.listed_price ? (
-                              <>
-                                <span className="text-h3 font-bold text-primary-600">
-                                  Rs.{item.discounted_price}
-                                </span>
-                                <span className="text-body text-neutral-500 line-through">
-                                  Rs.{item.listed_price}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-h3 font-bold text-primary-600">
-                                Rs.{item.listed_price}
+                          {item.discounted_price && item.discounted_price < item.listed_price ? (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-lg font-bold text-accent-error-600">
+                                Rs. {item.discounted_price?.toLocaleString()}
                               </span>
-                            )}
-                          </div>
+                              <span className="text-sm text-neutral-500 line-through">
+                                Rs. {item.listed_price?.toLocaleString()}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-lg font-bold text-neutral-900">
+                              Rs. {item.listed_price?.toLocaleString()}
+                            </span>
+                          )}
                           {item.discounted_price && item.discounted_price < item.listed_price && (
                             <div className="text-xs text-accent-success-600 font-medium">
-                              You save Rs.{(item.listed_price - item.discounted_price).toFixed(2)}
+                              Save Rs. {((item.listed_price - item.discounted_price) || 0)?.toLocaleString()}
                             </div>
                           )}
                         </div>
                         
-                        {/* Stock and Views Info */}
-                        <div className="flex items-center justify-between text-xs text-neutral-600">
-                          <div className="flex items-center gap-1">
-                            <div className={`w-2 h-2 rounded-full ${item.product_details.stock > 10 ? 'bg-accent-success-500' : item.product_details.stock > 0 ? 'bg-accent-warning-500' : 'bg-accent-error-500'}`}></div>
-                            <span className="font-medium">
-                              {item.product_details.stock > 0 ? `${item.product_details.stock} in stock` : 'Out of stock'}
-                            </span>
-                          </div>
-                          <span>Views: {item.view_count}</span>
+                        {/* Stock Status */}
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${
+                            item.product_details.stock > 10 
+                              ? 'bg-accent-success-500' 
+                              : item.product_details.stock > 0 
+                                ? 'bg-accent-warning-500' 
+                                : 'bg-accent-error-500'
+                          }`}></div>
+                          <span className="text-xs text-neutral-600">
+                            {item.product_details.stock > 0 
+                              ? `${item.product_details.stock} in stock` 
+                              : 'Out of stock'
+                            }
+                          </span>
                         </div>
                         
                         {/* Action Button */}
@@ -1315,7 +1602,7 @@ const Marketplace: React.FC = () => {
                           className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
                             item.product_details.stock === 0
                               ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
-                              : 'bg-primary-600 text-white hover:bg-primary-700 hover:shadow-md'
+                              : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
                           }`}
                         >
                           <ShoppingCart className="w-4 h-4" />
@@ -1325,9 +1612,10 @@ const Marketplace: React.FC = () => {
                     </div>
                   ))}
                 </div>
+                )}
 
                 {totalPages > 0 && (
-                  <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+                  <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center items-center gap-3">
                     <div className="flex items-center space-x-1 sm:space-x-2">
                       <button 
                         onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
