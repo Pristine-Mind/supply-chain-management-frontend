@@ -114,27 +114,33 @@ const BlogDetail: React.FC = () => {
       </div>
 
       <main className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
-        {loading ? (
-          <div className="lg:col-span-2">Loading...</div>
-        ) : error ? (
-          <div className="lg:col-span-2 text-red-600">{error}</div>
-        ) : post ? (
-          <article className="lg:col-span-2 bg-white rounded-lg shadow p-6">
-            <img src={post.image} alt={post.title} className="w-full h-64 object-cover rounded" />
-            <div className="mt-4 text-sm text-gray-500">{post.date} • by {post.author}{post.category ? ` • ${post.category}` : ''}</div>
-            <h2 className="mt-2 text-3xl font-bold">{post.title}</h2>
-            <div className="prose max-w-none mt-4">
-              {isLikelyHtml(content) ? (
-                <div dangerouslySetInnerHTML={{ __html: content }} />
-              ) : (
-                <p>{content}</p>
-              )}
+        <div className="p-8 bg-white rounded-xl shadow-sm mb-8 w-full max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold text-primary-700 mb-6">Blog Detail</h1>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-4"></div>
+              <span className="text-base text-gray-500">Loading blog...</span>
             </div>
-            <div className="mt-6">
-              <Link to="/blog" className="text-orange-600 hover:underline">← Back to Blog</Link>
-            </div>
-          </article>
-        ) : null}
+          ) : error ? (
+            <div className="text-red-600">{error}</div>
+          ) : post ? (
+            <>
+              <img src={post.image} alt={post.title} className="w-full h-64 object-cover rounded" />
+              <div className="mt-4 text-sm text-gray-500">{post.date} • by {post.author}{post.category ? ` • ${post.category}` : ''}</div>
+              <h2 className="mt-2 text-3xl font-bold">{post.title}</h2>
+              <div className="prose max-w-none lg:prose-lg mt-4">
+                {isLikelyHtml(content) ? (
+                  <div dangerouslySetInnerHTML={{ __html: content }} />
+                ) : (
+                  <p>{content}</p>
+                )}
+              </div>
+              <div className="mt-6">
+                <Link to="/blog" className="text-orange-600 hover:underline">← Back to Blog</Link>
+              </div>
+            </>
+          ) : null}
+        </div>
 
         <aside className="space-y-6">
           <div className="bg-white rounded-lg shadow p-4">

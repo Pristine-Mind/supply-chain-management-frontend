@@ -84,7 +84,7 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">{t('ledger_entries')}</h2>
         <button
-          className="px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition"
+          className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-semibold shadow"
           onClick={() => setShowModal(true)}
         >
           + {t('add')}
@@ -94,7 +94,7 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4">
-            <div className="px-6 py-4 border-b">
+            <div className="px-6 py-4 border-b ">
               <h3 className="text-lg font-medium">{t('add_ledger_entry')}</h3>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -194,9 +194,9 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                  className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-semibold"
                 >
-                  {t('add')}
+                  Add
                 </button>
               </div>
             </form>

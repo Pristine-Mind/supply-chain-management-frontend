@@ -11,6 +11,7 @@ interface InfoItem {
 
 const ShippingAndDelivery: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const shippingInfo: InfoItem[] = [
     {
@@ -55,20 +56,26 @@ const ShippingAndDelivery: React.FC = () => {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
+  // Simulate loading delay
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
       <Navbar />
-      <div className="bg-white py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Shipping & Delivery Information
-            </h2>
-            <p className="mt-4 text-xl text-gray-600">
-              Everything you need to know about getting your order
-            </p>
+      <div className="p-8 bg-white rounded-xl shadow-sm mb-8 w-full max-w-3xl mx-auto">
+        <h1 className="text-2xl font-bold text-primary-700 mb-6">Shipping & Delivery</h1>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-4"></div>
+            <span className="text-base text-gray-500">Loading shipping info...</span>
           </div>
-
+        ) : (
           <div className="space-y-4">
             {shippingInfo.map((item, index) => (
               <div
@@ -106,20 +113,7 @@ const ShippingAndDelivery: React.FC = () => {
               </div>
             ))}
           </div>
-
-          <div className="mt-12 bg-orange-50 rounded-lg p-6 text-center">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Need Help With Your Order?</h3>
-            <p className="text-gray-600 mb-4">
-              Our customer service team is here to help with any shipping or delivery questions.
-            </p>
-            <a
-              href="/contact"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-            >
-              Contact Support
-            </a>
-          </div>
-        </div>
+        )}
       </div>
       <Footer />
     </>

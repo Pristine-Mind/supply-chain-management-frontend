@@ -56,6 +56,7 @@ import SupportComponent from './components/SupportComponent';
 import TransporterLanding from './components/TransporterLanding';
 import MyOrders from './components/MyOrders';
 import UserProfile from './components/UserProfile';
+import UserAdminProfile from './components/UserAdminProfile';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -116,6 +117,7 @@ const publicRoutes = [
   { path: '/payment/success', element: <PaymentSuccess /> },
   { path: '/my-orders', element: <MyOrders /> },
   { path: '/user-profile', element: <UserProfile /> },
+  { path: '/user-admin-profile', element: <UserAdminProfile /> },
 ];
 
 const App: React.FC = () => {

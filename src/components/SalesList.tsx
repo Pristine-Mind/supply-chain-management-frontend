@@ -3,13 +3,23 @@ import axios, { isAxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
 import { FaPlus, FaDownload, FaTimes, FaPrint } from 'react-icons/fa';
 
-// Define payment status options
+// Define payment status and method options
 const paymentStatusOptions = [
-  { value: "pending", label: "Pending" },
-  { value: "approved", label: "Approved" },
-  { value: "shipped", label: "Shipped" },
-  { value: "delivered", label: "Delivered" },
-  { value: "cancelled", label: "Cancelled" },
+  { value: "pending", label: "Pending", color: "yellow" },
+  { value: "approved", label: "Approved", color: "blue" },
+  { value: "shipped", label: "Shipped", color: "indigo" },
+  { value: "delivered", label: "Delivered", color: "green" },
+  { value: "cancelled", label: "Cancelled", color: "red" },
+];
+
+const paymentMethodOptions = [
+  { value: "cash", label: "Cash", icon: "💵" },
+  { value: "qr", label: "QR Code Payment", icon: "📱" },
+  { value: "bank_transfer", label: "Bank Transfer", icon: "🏦" },
+  { value: "card", label: "Debit/Credit Card", icon: "💳" },
+  { value: "digital_wallet", label: "Digital Wallet", icon: "📲" },
+  { value: "cheque", label: "Cheque", icon: "📝" },
+  { value: "credit", label: "Credit/Due Payment", icon: "💰" },
 ];
 
 interface Customer {
@@ -58,10 +68,29 @@ const SaleList: React.FC = () => {
   const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  
+  // Sales analytics state
+  const [salesAnalytics, setSalesAnalytics] = useState({
+    totalSales: 0,
+    totalRevenue: 0,
+    pendingPayments: 0,
+    completedSales: 0,
+    averageOrderValue: 0,
+  });
+  
   const [formData, setFormData] = useState({
     quantity: null,
     sale_price: null,
     payment_status: "pending",
+    payment_method: "cash",
     payment_due_date: '',
     order: null,
   });
@@ -69,6 +98,7 @@ const SaleList: React.FC = () => {
   const [success, setSuccess] = useState('');
 
   const fetchSales = async () => {
+    setLoading(true);
     try {
       const params = { limit, offset };
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/sales/`, {
@@ -79,6 +109,8 @@ const SaleList: React.FC = () => {
       setTotalCount(response.data.count);
     } catch (error) {
       console.error(t('error_fetching_sales'), error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -260,6 +292,7 @@ const SaleList: React.FC = () => {
         quantity: null,
         sale_price: null,
         payment_status: 'pending',
+        payment_method: 'cash',
         payment_due_date: '',
         order: null,
       });
@@ -312,18 +345,18 @@ const SaleList: React.FC = () => {
                   <td className="py-4 px-6">{sale.quantity}</td>
                   <td className="py-4 px-6">NPR {sale.sale_price?.toFixed(2)}</td>
                   <td className="py-4 px-6">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       sale.payment_status === 'delivered'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-700'
                         : sale.payment_status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-yellow-100 text-yellow-700'
                         : sale.payment_status === 'cancelled'
-                        ? 'bg-red-100 text-red-800'
+                        ? 'bg-red-100 text-red-700'
                         : sale.payment_status === 'approved'
-                        ? 'bg-blue-100 text-blue-800'
+                        ? 'bg-blue-100 text-blue-700'
                         : sale.payment_status === 'shipped'
-                        ? 'bg-indigo-100 text-indigo-800'
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'bg-indigo-100 text-indigo-700'
+                        : 'bg-gray-100 text-gray-600'
                     }`}>
                       {sale.payment_status_display}
                     </span>
@@ -479,7 +512,7 @@ const SaleList: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg bg-primary-600 hover:bg-primary-700 transition duration-300"
                 >
                   {t('add_sale')}
                 </button>

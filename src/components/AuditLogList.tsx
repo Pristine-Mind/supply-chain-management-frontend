@@ -137,145 +137,146 @@ const AuditLogList: React.FC = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h4" component="h1">Audit Logs</Typography>
-        <div className="flex gap-3">
-          <button
-            onClick={loadLogs}
-            disabled={loading}
-            className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium"
-            title="Refresh"
-          >
-            <RefreshIcon className="mr-2" style={{ fontSize: 18 }} />
-            Refresh
-          </button>
-          <button
-            onClick={exportCsv}
-            disabled={logs.length === 0}
-            className="flex items-center px-4 py-2 bg-accent-success-600 text-white rounded-lg hover:bg-accent-success-700 disabled:opacity-50 transition-colors font-medium"
-            title="Export CSV"
-          >
-            <DownloadIcon className="mr-2" style={{ fontSize: 18 }} />
-            Export
-          </button>
-          <button
-            onClick={() => navigate('/audit-logs/new')}
-            className="flex items-center justify-center w-10 h-10 bg-accent-warning-600 text-white rounded-full hover:bg-accent-warning-700 transition-colors"
-            title="Add audit log"
-            aria-label="Add audit log"
-          >
-            <AddIcon style={{ fontSize: 20 }} />
-          </button>
-        </div>
-      </Box>
-
-      <Box mb={2}>
-        <TextField
-          fullWidth
-          placeholder="Search by reference, type, entity, or amount"
-          value={query}
-          onChange={e => { setQuery(e.target.value); setPage(0); }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-
-      {loading && (
-        <Box display="flex" justifyContent="center" my={4}>
-          <CircularProgress />
+      <div className="p-8 bg-white rounded-xl shadow-sm mb-8">
+        <h1 className="text-2xl font-bold text-primary-700 mb-6">Audit Logs</h1>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <div className="flex gap-3">
+            <button
+              onClick={loadLogs}
+              disabled={loading}
+              className="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors font-medium"
+              title="Refresh"
+            >
+              <RefreshIcon className="mr-2" style={{ fontSize: 18 }} />
+              Refresh
+            </button>
+            <button
+              onClick={exportCsv}
+              disabled={logs.length === 0}
+              className="flex items-center px-4 py-2 bg-accent-success-600 text-white rounded-lg hover:bg-accent-success-700 disabled:opacity-50 transition-colors font-medium"
+              title="Export CSV"
+            >
+              <DownloadIcon className="mr-2" style={{ fontSize: 18 }} />
+              Export
+            </button>
+            <button
+              onClick={() => navigate('/audit-logs/new')}
+              className="flex items-center justify-center w-10 h-10 bg-accent-warning-600 text-white rounded-full hover:bg-accent-warning-700 transition-colors"
+              title="Add audit log"
+              aria-label="Add audit log"
+            >
+              <AddIcon style={{ fontSize: 20 }} />
+            </button>
+          </div>
         </Box>
-      )}
-      {error && !loading && (
-        <Typography color="error" sx={{ mb: 2 }}>Error: {error}</Typography>
-      )}
 
-      {!loading && filteredSorted.length === 0 && !error && (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>No audit logs found</Typography>
-          <Typography variant="body2" color="text.secondary">Try adjusting your search or refresh.</Typography>
-        </Paper>
-      )}
-
-      {!loading && filteredSorted.length > 0 && (
-        <Paper>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell onClick={() => toggleSort('date')} sx={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                    Date {sortBy === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-                  </TableCell>
-                  <TableCell>Reference</TableCell>
-                  <TableCell onClick={() => toggleSort('transaction_type')} sx={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                    Type {sortBy === 'transaction_type' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-                  </TableCell>
-                  <TableCell>Entity</TableCell>
-                  <TableCell onClick={() => toggleSort('amount')} sx={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                    Amount {sortBy === 'amount' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-                  </TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paged.map((log) => (
-                  <TableRow hover key={log.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell>{new Date(log.date).toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{log.reference_id}</Typography>
-                        <button
-                          onClick={() => copyRef(log.reference_id)}
-                          className="flex items-center px-2 py-1 bg-neutral-100 text-neutral-700 rounded hover:bg-neutral-200 transition-colors text-caption"
-                          title="Copy reference"
-                        >
-                          <ContentCopyIcon style={{ fontSize: 14, marginRight: 4 }} />
-                          Copy
-                        </button>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={log.transaction_type}
-                        color={log.transaction_type.toLowerCase().includes('debit') ? 'error' : log.transaction_type.toLowerCase().includes('credit') ? 'success' : 'default'}
-                        size="small"
-                        variant="outlined"
-                      />
-                    </TableCell>
-                    <TableCell>#{log.entity_id}</TableCell>
-                    <TableCell>
-                      <Typography fontWeight={600}>Rs. {Number(log.amount).toLocaleString()}</Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <button
-                        onClick={() => navigate(`/audit-logs/${log.id}`)}
-                        className="flex items-center px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors text-caption"
-                        title="View details"
-                      >
-                        <VisibilityIcon style={{ fontSize: 14, marginRight: 4 }} />
-                        View
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            component="div"
-            count={filteredSorted.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+        <Box mb={2}>
+          <TextField
+            fullWidth
+            placeholder="Search by reference, type, entity, or amount"
+            value={query}
+            onChange={e => { setQuery(e.target.value); setPage(0); }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
           />
-        </Paper>
-      )}
+        </Box>
+
+        {/* Loading indicator */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-4"></div>
+            <span className="text-base text-gray-500">Loading audit logs...</span>
+          </div>
+        ) : error && !loading ? (
+          <Typography color="error" sx={{ mb: 2 }}>Error: {error}</Typography>
+        ) : !loading && filteredSorted.length === 0 && !error ? (
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="h6" gutterBottom>No audit logs found</Typography>
+            <Typography variant="body2" color="text.secondary">Try adjusting your search or refresh.</Typography>
+          </Paper>
+        ) : (
+          !loading && filteredSorted.length > 0 && (
+            <Paper>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell onClick={() => toggleSort('date')} sx={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        Date {sortBy === 'date' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                      </TableCell>
+                      <TableCell>Reference</TableCell>
+                      <TableCell onClick={() => toggleSort('transaction_type')} sx={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        Type {sortBy === 'transaction_type' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                      </TableCell>
+                      <TableCell>Entity</TableCell>
+                      <TableCell onClick={() => toggleSort('amount')} sx={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        Amount {sortBy === 'amount' ? (sortDir === 'asc' ? '▲' : '▼') : ''}
+                      </TableCell>
+                      <TableCell align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paged.map((log) => (
+                      <TableRow hover key={log.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                        <TableCell>{new Date(log.date).toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{log.reference_id}</Typography>
+                            <button
+                              onClick={() => copyRef(log.reference_id)}
+                              className="flex items-center px-2 py-1 bg-neutral-100 text-neutral-700 rounded hover:bg-neutral-200 transition-colors text-caption"
+                              title="Copy reference"
+                            >
+                              <ContentCopyIcon style={{ fontSize: 14, marginRight: 4 }} />
+                              Copy
+                            </button>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={log.transaction_type}
+                            color={log.transaction_type.toLowerCase().includes('debit') ? 'error' : log.transaction_type.toLowerCase().includes('credit') ? 'success' : 'default'}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>#{log.entity_id}</TableCell>
+                        <TableCell>
+                          <Typography fontWeight={600}>Rs. {Number(log.amount).toLocaleString()}</Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <button
+                            onClick={() => navigate(`/audit-logs/${log.id}`)}
+                            className="flex items-center px-3 py-1 bg-primary-600 text-white rounded hover:bg-primary-700 transition-colors text-caption"
+                            title="View details"
+                          >
+                            <VisibilityIcon style={{ fontSize: 14, marginRight: 4 }} />
+                            View
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                component="div"
+                count={filteredSorted.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+              />
+            </Paper>
+          )
+        )}
+      </div>
     </Container>
   );
 };

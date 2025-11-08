@@ -54,6 +54,7 @@ const CustomerList: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomerId, setEditingCustomerId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'inactive' | 'top'>('all');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -66,8 +67,10 @@ const CustomerList: React.FC = () => {
   });
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const fetchCustomers = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customers/`, {
         params: {
@@ -83,6 +86,8 @@ const CustomerList: React.FC = () => {
       setTotalCount(response.data.count);
     } catch (error) {
       console.error(t('error_fetching_customers'), error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -254,8 +259,10 @@ const CustomerList: React.FC = () => {
       {
         label: t('top_sales'),
         data: topSalesCustomers.map((customer) => customer.total_sales),
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+        hoverBackgroundColor: ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED'],
+        borderWidth: 2,
+        borderColor: '#ffffff',
       },
     ],
   };
@@ -266,33 +273,123 @@ const CustomerList: React.FC = () => {
       {
         label: t('top_orders'),
         data: topOrdersCustomers.map((customer) => customer.total_orders),
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+        hoverBackgroundColor: ['#2563EB', '#059669', '#D97706', '#DC2626', '#7C3AED'],
+        borderWidth: 2,
+        borderColor: '#ffffff',
       },
     ],
   };
 
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          padding: 16,
+          usePointStyle: true,
+          pointStyle: 'circle',
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            return `${label}: ${value}`;
+          }
+        }
+      }
+    },
+    onClick: (event: any, elements: any) => {
+      if (elements.length > 0) {
+        const elementIndex = elements[0].index;
+        const customerName = activeTab === 'top' ? topSalesCustomers[elementIndex]?.name : topOrdersCustomers[elementIndex]?.name;
+        if (customerName) {
+          // Find and show customer details
+          const customer = customers.find(c => c.name === customerName);
+          if (customer) {
+            handleCustomerClick(customer);
+          }
+        }
+      }
+    }
+  };
+
+  const filteredCustomers = customers.filter(customer => {
+    switch(activeTab) {
+      case 'active':
+        return customer.current_balance >= 0;
+      case 'inactive':
+        return customer.current_balance < 0;
+      case 'top':
+        return topSalesCustomers.some(tc => tc.name === customer.name) || 
+               topOrdersCustomers.some(tc => tc.name === customer.name);
+      default:
+        return true;
+    }
+  });
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
-      {/* Top Sales and Orders Section */}
-      <div className="flex flex-wrap mb-8">
-        <div className="w-full md:w-1/2 p-4">
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">{t('top_customers_by_sales')}</h3>
-            <div className="w-full h-80">
-              <Pie data={salesChartData} options={{ responsive: true, maintainAspectRatio: false }} />
-            </div>
-          </div>
-        </div>
-        <div className="w-full md:w-1/2 p-4">
-          <div className="bg-white shadow-md rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">{t('top_customers_by_orders')}</h3>
-            <div className="w-full h-80">
-              <Pie data={ordersChartData} options={{ responsive: true, maintainAspectRatio: false }} />
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Navigation Tabs */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Customer Management</h1>
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {[
+              { id: 'all', label: 'All Customers', count: customers.length },
+              { id: 'active', label: 'Active', count: customers.filter(c => c.current_balance >= 0).length },
+              { id: 'inactive', label: 'Inactive', count: customers.filter(c => c.current_balance < 0).length },
+              { id: 'top', label: 'Top Performers', count: topSalesCustomers.length + topOrdersCustomers.length }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                  activeTab === tab.id
+                    ? 'bg-primary-100 text-primary-600'
+                    : 'bg-gray-100 text-gray-500'
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </nav>
         </div>
       </div>
+      {/* Top Sales and Orders Section - Only show when on 'all' or 'top' tab */}
+      {(activeTab === 'all' || activeTab === 'top') && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Top Customers by Sales</h3>
+            <div className="w-full h-80">
+              <Pie data={salesChartData} options={chartOptions} />
+            </div>
+            <div className="mt-4 text-sm text-gray-600 text-center">
+              Click on chart segments to view customer details
+            </div>
+          </div>
+          <div className="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Top Customers by Orders</h3>
+            <div className="w-full h-80">
+              <Pie data={ordersChartData} options={chartOptions} />
+            </div>
+            <div className="mt-4 text-sm text-gray-600 text-center">
+              Click on chart segments to view customer details
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Customer List and Search */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
@@ -353,37 +450,53 @@ const CustomerList: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {customers.length > 0 ? (
-              customers.map((customer) => (
+            {filteredCustomers.length > 0 ? (
+              filteredCustomers.map((customer) => (
                 <tr key={customer.id} className="hover:bg-gray-100 cursor-pointer transition duration-200">
                   <td className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">{customer.name}</td>
                   <td className="py-4 px-6">{customer.email}</td>
                   <td className="py-4 px-6">{customer.contact}</td>
                   <td className="py-4 px-6">{customer.billing_address}</td>
                   <td className="py-4 px-6">{customer.shipping_address}</td>
-                  <td className="py-4 px-6">{customer.customer_type}</td>
-                  <td className="py-4 px-6">{customer.credit_limit}</td>
-                  <td className="py-4 px-6">{customer.current_balance}</td>
+                  <td className="py-4 px-6">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      customer.customer_type === 'Retailer' ? 'bg-blue-100 text-blue-700' :
+                      customer.customer_type === 'Wholesaler' ? 'bg-green-100 text-green-700' :
+                      'bg-purple-100 text-purple-700'
+                    }`}>
+                      {customer.customer_type}
+                    </span>
+                  </td>
+                  <td className="py-4 px-6">₹{customer.credit_limit.toLocaleString()}</td>
+                  <td className="py-4 px-6">
+                    <span className={`font-medium ${
+                      customer.current_balance >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      ₹{customer.current_balance.toLocaleString()}
+                    </span>
+                  </td>
                   <td className="py-4 px-6 flex space-x-2">
                     <button
-                      onClick={() => handleEditClick(customer)}
-                      className="bg-accent-warning-600 text-white px-3 py-1 rounded-lg hover:bg-accent-warning-700 transition-colors flex items-center justify-center"
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
                       onClick={() => handleCustomerClick(customer)}
-                      className="bg-primary-600 text-white px-3 py-1 rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
+                      className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
+                      title="View Details"
                     >
                       <FaEye />
+                    </button>
+                    <button
+                      onClick={() => handleEditClick(customer)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center"
+                      title="Edit Customer"
+                    >
+                      <FaEdit />
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={9} className="text-center py-4 text-gray-500">
-                  {t('no_customers_found')}
+                <td colSpan={9} className="text-center py-8 text-gray-500">
+                  {activeTab === 'all' ? t('no_customers_found') : `No ${activeTab} customers found`}
                 </td>
               </tr>
             )}
@@ -614,7 +727,7 @@ const CustomerList: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+                  className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700  transition duration-300"
                 >
                   {editingCustomerId ? t('update_customer') : t('add_customer')}
                 </button>
