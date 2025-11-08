@@ -324,8 +324,9 @@ const Payment: React.FC = () => {
             <div className="bg-white shadow-lg rounded-2xl p-6">
               <h2 className="font-semibold text-gray-900 mb-6 text-xl">Choose Payment Method</h2>
               {loading ? (
-                <div className="flex justify-center py-8">
-                  <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-4"></div>
+                  <span className="text-base text-gray-500">Processing payment...</span>
                 </div>
               ) : error ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">

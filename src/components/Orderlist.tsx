@@ -38,6 +38,7 @@ const OrderList: React.FC = () => {
   const [filterCustomer, setFilterCustomer] = useState<number | 'all'>('all');
   const [filterProduct, setFilterProduct] = useState<number | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [activeStatusTab, setActiveStatusTab] = useState<'all' | 'pending' | 'shipped' | 'delivered' | 'cancelled'>('all');
   const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
@@ -376,9 +377,13 @@ const OrderList: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold mb-4 sm:mb-0">{t('order_list')}</h2>
+    <div className="min-h-screen bg-gray-100 p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-primary-700 mb-6">Orders</h1>
+          <p className="text-gray-600">Manage and track all customer orders</p>
+        </div>
         <div className="flex space-x-3">
           <button
             onClick={() => setFormVisible(true)}
@@ -397,22 +402,66 @@ const OrderList: React.FC = () => {
         </div>
       </div>
 
+      {/* Status Tabs */}
+      <div className="mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            {[
+              { id: 'all', label: 'All Orders', status: null },
+              { id: 'pending', label: 'Pending', status: 'pending' },
+              { id: 'shipped', label: 'Shipped', status: 'shipped' },
+              { id: 'delivered', label: 'Delivered', status: 'delivered' },
+              { id: 'cancelled', label: 'Cancelled', status: 'cancelled' }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveStatusTab(tab.id as any);
+                  setFilterStatus(tab.status || 'all');
+                }}
+                className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                  activeStatusTab === tab.id
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab.label}
+                <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                  activeStatusTab === tab.id
+                    ? tab.id === 'pending' ? 'bg-yellow-100 text-yellow-600' :
+                      tab.id === 'shipped' ? 'bg-blue-100 text-blue-600' :
+                      tab.id === 'delivered' ? 'bg-green-100 text-green-600' :
+                      tab.id === 'cancelled' ? 'bg-red-100 text-red-600' :
+                      'bg-primary-100 text-primary-600'
+                    : 'bg-gray-100 text-gray-500'
+                }`}>
+                  {orders.filter(order => tab.status ? normalizeStatus(order.status) === tab.status : true).length}
+                </span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
+
       {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
       {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
 
-      <div className="flex flex-wrap gap-4 mb-4">
+      {/* Enhanced Filters */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Filters & Search</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearch}
           placeholder={t('search_by_order_number')}
-          className="px-4 py-2 border rounded-lg w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 border border-gray-300 rounded-xl w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           aria-label={t('search_by_order_number')}
         />
         <select
           value={filterCustomer}
           onChange={handleFilterCustomer}
-          className="px-4 py-2 border rounded-lg w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 border border-gray-300 rounded-xl w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           aria-label={t('filter_by_customer')}
         >
           <option value="all">{t('all_customers')}</option>
@@ -425,7 +474,7 @@ const OrderList: React.FC = () => {
         <select
           value={filterProduct}
           onChange={handleFilterProduct}
-          className="px-4 py-2 border rounded-lg w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 border border-gray-300 rounded-xl w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           aria-label={t('filter_by_product')}
         >
           <option value="all">{t('all_products')}</option>
@@ -438,7 +487,7 @@ const OrderList: React.FC = () => {
         <select
           value={filterStatus}
           onChange={handleFilterStatus}
-          className="px-4 py-2 border rounded-lg w-full sm:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-3 border border-gray-300 rounded-xl w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           aria-label={t('filter_by_status')}
         >
           <option value="all">{t('all_statuses')}</option>
@@ -448,27 +497,29 @@ const OrderList: React.FC = () => {
           <option value="delivered">{t('delivered')}</option>
           <option value="cancelled">{t('cancelled')}</option>
         </select>
+        </div>
       </div>
 
-      <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
+      {/* Orders Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {isLoading ? (
-          <div className="text-center py-4">
-            <FaSpinner className="animate-spin h-8 w-8 text-blue-500 mx-auto" />
-            <p>{t('loading')}</p>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-4"></div>
+            <span className="text-base text-gray-500">Loading orders...</span>
           </div>
         ) : (
           <table className="w-full text-sm text-left text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="py-3 px-6">{t('order_number')}</th>
-                <th className="py-3 px-6">{t('customer')}</th>
-                <th className="py-3 px-6">{t('product')}</th>
-                <th className="py-3 px-6">{t('quantity')}</th>
-                <th className="py-3 px-6">{t('total_price')}</th>
-                <th className="py-3 px-6">{t('status')}</th>
-                <th className="py-3 px-6">{t('order_date')}</th>
-                <th className="py-3 px-6">{t('delivery_date')}</th>
-                <th className="py-3 px-6">{t('actions')}</th>
+                <th className="py-4 px-6 font-semibold">{t('order_number')}</th>
+                <th className="py-4 px-6 font-semibold">{t('customer')}</th>
+                <th className="py-4 px-6 font-semibold">{t('product')}</th>
+                <th className="py-4 px-6 font-semibold">{t('quantity')}</th>
+                <th className="py-4 px-6 font-semibold">{t('total_price')}</th>
+                <th className="py-4 px-6 font-semibold">{t('status')}</th>
+                <th className="py-4 px-6 font-semibold">{t('order_date')}</th>
+                <th className="py-4 px-6 font-semibold">{t('delivery_date')}</th>
+                <th className="py-4 px-6 font-semibold">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -483,21 +534,19 @@ const OrderList: React.FC = () => {
                     <td className="py-4 px-6">{order.quantity}</td>
                     <td className="py-4 px-6">NPR {order.total_price.toFixed(2)}</td>
                     <td className="py-4 px-6">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          order.status === 'delivered'
-                            ? 'bg-green-100 text-green-800'
-                            : order.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : order.status === 'cancelled'
-                            ? 'bg-red-100 text-red-800'
-                            : order.status === 'approved'
-                            ? 'bg-blue-100 text-blue-800'
-                            : order.status === 'shipped'
-                            ? 'bg-indigo-100 text-indigo-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        order.status === 'delivered'
+                          ? 'bg-green-100 text-green-700'
+                          : order.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : order.status === 'cancelled'
+                          ? 'bg-red-100 text-red-700'
+                          : order.status === 'approved'
+                          ? 'bg-blue-100 text-blue-700'
+                          : order.status === 'shipped'
+                          ? 'bg-indigo-100 text-indigo-700'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
                         {t(order.status)}
                       </span>
                     </td>
@@ -713,7 +762,7 @@ const OrderList: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg bg-primary-600 hover:bg-primary-700  transition duration-300"
                   aria-label={t('add_order')}
                 >
                   {t('add_order')}
