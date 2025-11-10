@@ -149,6 +149,8 @@ const MarketplaceAllProducts: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  // Debounced search term to avoid calling the search API on every keystroke
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
   const [selectedRating, setSelectedRating] = useState('all');
@@ -176,15 +178,42 @@ const MarketplaceAllProducts: React.FC = () => {
 
   const productsPerPage = 12;
 
+  // Debounce the searchTerm so fetchProducts is called only after user pauses typing
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
   // Fetch products
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
+      // If debouncedSearchTerm is present, use the search endpoint (Elasticsearch-backed)
+      if (debouncedSearchTerm && debouncedSearchTerm.trim() !== '') {
+        const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?keyword=${encodeURIComponent(
+          debouncedSearchTerm.trim()
+        )}`;
+        console.log('Searching products with:', searchUrl);
+        const response = await axios.get(searchUrl);
+
+        if (response.data && Array.isArray(response.data.results)) {
+          setProducts(response.data.results);
+          setTotalPages(Math.ceil((response.data.count || response.data.results.length) / productsPerPage));
+          setTotalProducts(response.data.count || response.data.results.length);
+        } else {
+          setProducts([]);
+          setTotalPages(1);
+          setTotalProducts(0);
+        }
+
+        // Return early since search endpoint already provided results
+        return;
+      }
+
       const params = new URLSearchParams();
-      
-      // Search parameter
+      // Search parameter (legacy listing) - only used when debouncedSearchTerm is empty
       if (searchTerm) params.append('search', searchTerm);
       
       // Category filters - prioritize hierarchy filters over legacy
@@ -303,7 +332,7 @@ const MarketplaceAllProducts: React.FC = () => {
     minOrder,
     selectedCity,
     selectedBusinessType,
-    searchTerm
+    debouncedSearchTerm
   ]);
 
   useEffect(() => {
