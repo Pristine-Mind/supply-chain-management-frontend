@@ -120,6 +120,7 @@ const Marketplace: React.FC = () => {
   const [recommendations, setRecommendations] = useState<MarketplaceProduct[]>([]);
   const [newArrivals, setNewArrivals] = useState<MarketplaceProduct[]>([]);
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_OPTIONS[0].code);
   const [selectedLocation, setSelectedLocation] = useState<string>(LOCATION_OPTIONS[0]);
   const [selectedProfileType, setSelectedProfileType] = useState<string>(PROFILE_TYPE_OPTIONS[0]);
@@ -169,6 +170,20 @@ const Marketplace: React.FC = () => {
     setLoading(true);
     setError('');
     try {
+      // If there's a debounced query string, call the dedicated search endpoint
+      if (debouncedQuery && debouncedQuery.trim() !== '') {
+        const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?keyword=${encodeURIComponent(
+          debouncedQuery.trim()
+        )}`;
+        const { data } = await axios.get(searchUrl);
+        setProducts(data.results || []);
+        setRecommendations(data.results || []);
+        setNewArrivals((data.results || []).slice(0, 5));
+        setTotalCount(data.count || (data.results || []).length || 0);
+        setLoading(false);
+        return;
+      }
+
       const params: Record<string, any> = {
         limit: itemsPerPage,
         offset: (page - 1) * itemsPerPage,
@@ -268,11 +283,25 @@ const Marketplace: React.FC = () => {
       setDealsLoading(false);
     }
   };
+  
+  // Navigate to full results page when user presses Enter in search
+  const handleSearchEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Navigate to marketplace all-products with search query
+      navigate(`/marketplace/all-products?search=${encodeURIComponent(query)}`);
+    }
+  };
+
+  // Debounce query input so search is performed after typing pauses
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
 
   useEffect(() => {
     setCurrentPage(1);
     fetchMarketplaceProducts(1);
-  }, [query, selectedCategory, selectedLocation, selectedProfileType, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
+  }, [debouncedQuery, selectedCategory, selectedLocation, selectedProfileType, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
 
   useEffect(() => {
     fetchMarketplaceProducts(currentPage);
@@ -397,10 +426,14 @@ const Marketplace: React.FC = () => {
                       className="input-field w-full pl-12 pr-20 focus:border-primary-500 focus:ring-primary-200"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={handleSearchEnter}
                       onClick={() => setShowSuggestions(true)}
                     />
                     <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
-                    <button className="absolute right-3 top-1/2 transform -translate-y-1/2 btn-primary px-4 sm:px-6 py-2 text-caption font-medium">
+                    <button
+                      onClick={() => navigate(`/marketplace/all-products?search=${encodeURIComponent(query)}`)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 btn-primary px-4 sm:px-6 py-2 text-caption font-medium"
+                    >
                       Search
                     </button>
                   </div>
@@ -416,6 +449,7 @@ const Marketplace: React.FC = () => {
                           setQuery(e.target.value);
                           setShowSuggestions(e.target.value.length >= 3);
                         }}
+                        onKeyDown={handleSearchEnter}
                         className="input-field w-full h-14 pl-12 pr-12 focus:ring-primary-200 text-body"
                         placeholder="Search products..."
                       />
@@ -472,6 +506,7 @@ const Marketplace: React.FC = () => {
                           setQuery(e.target.value);
                           setShowSuggestions(e.target.value.length >= 3);
                         }}
+                        onKeyDown={handleSearchEnter}
                         className="input-field w-full h-12 pl-12 pr-12 focus:ring-primary-200"
                         placeholder="Search products..."
                       />
