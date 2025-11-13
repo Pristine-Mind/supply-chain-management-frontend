@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -176,7 +176,7 @@ const MarketplaceAllProducts: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedBusinessType, setSelectedBusinessType] = useState('');
 
-  const productsPerPage = 12;
+  const [productsPerPage, setProductsPerPage] = useState<number>(60);
 
   // Debounce the searchTerm so fetchProducts is called only after user pauses typing
   useEffect(() => {
@@ -192,16 +192,22 @@ const MarketplaceAllProducts: React.FC = () => {
 
       // If debouncedSearchTerm is present, use the search endpoint (Elasticsearch-backed)
       if (debouncedSearchTerm && debouncedSearchTerm.trim() !== '') {
-        const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?keyword=${encodeURIComponent(
-          debouncedSearchTerm.trim()
-        )}`;
+        // Include pagination params when using the search endpoint so page changes work correctly
+        const searchParams = new URLSearchParams();
+        searchParams.append('keyword', debouncedSearchTerm.trim());
+  // Use offset/limit for pagination so servers that expect offsets return correct pages
+  const offset = (currentPage - 1) * productsPerPage;
+  searchParams.append('offset', offset.toString());
+  searchParams.append('limit', productsPerPage.toString());
+
+        const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?${searchParams.toString()}`;
         console.log('Searching products with:', searchUrl);
         const response = await axios.get(searchUrl);
 
         if (response.data && Array.isArray(response.data.results)) {
           setProducts(response.data.results);
-          setTotalPages(Math.ceil((response.data.count || response.data.results.length) / productsPerPage));
-          setTotalProducts(response.data.count || response.data.results.length);
+          setTotalPages(Math.max(1, Math.ceil((response.data.count || response.data.results.length) / productsPerPage)));
+          setTotalProducts(response.data.count || response.data.results.length || 0);
         } else {
           setProducts([]);
           setTotalPages(1);
@@ -280,9 +286,9 @@ const MarketplaceAllProducts: React.FC = () => {
         params.append('min_rating', rating);
       }
       
-      // Pagination and sorting
-      params.append('page', currentPage.toString());
-      params.append('limit', productsPerPage.toString());
+  // Pagination and sorting - use offset/limit for broader API compatibility
+  params.append('limit', productsPerPage.toString());
+  params.append('offset', ((currentPage - 1) * productsPerPage).toString());
       
       if (sortBy && sortBy !== 'relevance') {
         params.append('sort', sortBy);
@@ -315,6 +321,8 @@ const MarketplaceAllProducts: React.FC = () => {
     }
   };
 
+  const productsGridRef = useRef<HTMLDivElement | null>(null);
+
   // Effects
   useEffect(() => {
     fetchProducts();
@@ -332,12 +340,14 @@ const MarketplaceAllProducts: React.FC = () => {
     minOrder,
     selectedCity,
     selectedBusinessType,
-    debouncedSearchTerm
+    debouncedSearchTerm,
+    productsPerPage
   ]);
 
   useEffect(() => {
     const category = searchParams.get('category');
     const search = searchParams.get('search');
+    const page = Number(searchParams.get('page') || 1);
     
     if (category && category !== selectedCategory) {
       setSelectedCategory(category);
@@ -345,7 +355,25 @@ const MarketplaceAllProducts: React.FC = () => {
     if (search && search !== searchTerm) {
       setSearchTerm(search);
     }
+    if (page && page !== currentPage) {
+      setCurrentPage(page);
+    }
   }, [searchParams]);
+
+  // Keep the URL in sync with the current page and scroll grid into view on page change
+  useEffect(() => {
+    // Update search params with page (remove if first page)
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    if (currentPage > 1) params.set('page', currentPage.toString());
+    else params.delete('page');
+    setSearchParams(params);
+
+    // Scroll products into view for better UX when paging
+    if (productsGridRef.current) {
+      productsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   useEffect(() => {
     if (message) {
@@ -457,9 +485,9 @@ const MarketplaceAllProducts: React.FC = () => {
     const hasOffer = product.is_offer_active && product.percent_off > 0;
 
     return (
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1">
+  <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1">
         {/* Image Container */}
-        <div className="relative overflow-hidden aspect-square bg-neutral-50">
+  <div className="relative overflow-hidden bg-neutral-50 h-56 sm:h-64">
           <img
             src={mainImage}
             alt={product.product_details.name}
@@ -484,7 +512,7 @@ const MarketplaceAllProducts: React.FC = () => {
           </div>
 
           {/* Top Right Wishlist Button */}
-          <button
+          {/* <button
             onClick={() => toggleWishlist(product.id)}
             className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${
               isWishlisted 
@@ -493,7 +521,7 @@ const MarketplaceAllProducts: React.FC = () => {
             }`}
           >
             <Heart className="w-4 h-4" fill={isWishlisted ? 'currentColor' : 'none'} />
-          </button>
+          </button> */}
 
           {/* Quick View Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -507,7 +535,7 @@ const MarketplaceAllProducts: React.FC = () => {
         </div>
 
         {/* Content Section */}
-        <div className="p-4 space-y-3">
+  <div className="p-2 space-y-2 text-sm">
           {/* Category & Rating */}
           <div className="flex items-center justify-between">
             <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
@@ -526,7 +554,7 @@ const MarketplaceAllProducts: React.FC = () => {
           </div>
 
           {/* Product Title */}
-          <h3 className="font-semibold text-neutral-900 leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors cursor-pointer" onClick={() => navigate(`/marketplace/${product.id}`)}>
+          <h3 className="font-semibold text-neutral-900 text-sm leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors cursor-pointer" onClick={() => navigate(`/marketplace/${product.id}`)}>
             {product.product_details.name}
           </h3>
 
@@ -534,7 +562,7 @@ const MarketplaceAllProducts: React.FC = () => {
           <div className="space-y-1">
             {hasOffer ? (
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-lg font-bold text-accent-error-600">
+                <span className="text-sm font-bold text-accent-error-600">
                   Rs. {product.discounted_price?.toLocaleString()}
                 </span>
                 <span className="text-sm text-neutral-500 line-through">
@@ -542,7 +570,7 @@ const MarketplaceAllProducts: React.FC = () => {
                 </span>
               </div>
             ) : (
-              <span className="text-lg font-bold text-neutral-900">
+              <span className="text-sm font-bold text-neutral-900">
                 Rs. {product.listed_price?.toLocaleString()}
               </span>
             )}
@@ -582,7 +610,7 @@ const MarketplaceAllProducts: React.FC = () => {
           <button
             onClick={() => handleAddToCart(product)}
             disabled={product.product_details.stock === 0}
-            className={`w-full py-2.5 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+            className={`w-full py-1.5 px-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
               product.product_details.stock === 0
                 ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
                 : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
@@ -607,7 +635,7 @@ const MarketplaceAllProducts: React.FC = () => {
 
       {/* Header */}
       <div className="bg-white shadow-elevation-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div className="w-full px-4 sm:px-6 lg:px-8">
           {/* Top Header */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
@@ -695,8 +723,80 @@ const MarketplaceAllProducts: React.FC = () => {
         </div>
       </div>
 
+      {/* Promo banner (match Marketplace screen design) */}
+      <div className="relative w-full bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 h-40 overflow-hidden px-6 rounded-xl mt-10 flex items-center justify-center">
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-repeat" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}></div>
+        </div>
+        
+        {/* Subtle glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-black/10"></div>
+        
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full relative z-10 flex items-center">
+          <div className="text-center w-full">
+            {/* Icon */}
+            <div className="inline-flex items-center justify-center mb-2">
+              <svg className="w-8 h-8 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            
+            {/* Main text */}
+            <div className="text-white text-2xl font-bold mb-1 tracking-tight">
+              Free Delivery on First Order
+            </div>
+            
+            {/* Subtext */}
+            <div className="text-orange-100 text-sm font-medium flex items-center justify-center gap-2">
+              <span className="inline-block w-8 h-px bg-orange-200"></span>
+              <span>Shop now and save on shipping</span>
+              <span className="inline-block w-8 h-px bg-orange-200"></span>
+            </div>
+            
+            {/* CTA Button */}
+            <button onClick={() => navigate('/marketplace/all-products')} className="mt-3 px-6 py-2 bg-white text-orange-600 rounded-full font-semibold text-sm hover:bg-orange-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform">
+              Start Shopping
+            </button>
+          </div>
+        </div>
+        
+        {/* Decorative corner elements */}
+        <div className="absolute top-0 left-0 w-32 h-32 opacity-10">
+          <div className="absolute top-4 left-4 w-16 h-16 border-t-2 border-l-2 border-white rounded-tl-lg"></div>
+        </div>
+        <div className="absolute bottom-0 right-0 w-32 h-32 opacity-10">
+          <div className="absolute bottom-4 right-4 w-16 h-16 border-b-2 border-r-2 border-white rounded-br-lg"></div>
+        </div>
+      </div>
+
+      {/* Categories row - mirror Marketplace categories */}
+  <div className="w-full px-4 py-8 sm:py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { title: 'Home Decor', desc: 'Stylish home accessories', img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=150&h=150&fit=crop', gradient: 'from-blue-100 to-blue-200' },
+            { title: 'Kitchenware', desc: 'Premium kitchen essentials', img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=150&h=150&fit=crop', gradient: 'from-purple-100 to-purple-200' },
+            { title: 'Bath & Body', desc: 'Luxury self-care products', img: 'https://images.unsplash.com/photo-1514066359479-47a54d1a48d4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632', gradient: 'from-teal-100 to-teal-200' },
+            { title: 'Clothing', desc: 'Trendy fashion apparel', img: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=150&h=150&fit=crop', gradient: 'from-pink-100 to-pink-200' }
+          ].map((c, i) => (
+            <div key={i} className={`bg-gradient-to-br ${c.gradient} rounded-2xl p-4 sm:p-6 relative overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer`}>
+              <div className="relative z-10">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">{c.title}</h3>
+                <p className="text-gray-600 mb-4 text-sm sm:text-base">{c.desc}</p>
+                <button onClick={() => navigate('/marketplace/all-products')} className="bg-primary-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-primary-600 transition-colors">Shop Now</button>
+              </div>
+              <div className="absolute right-3 bottom-3 w-20 h-20 sm:w-24 sm:h-24">
+                <img src={c.img} alt={c.title} className="w-full h-full object-cover rounded-xl sm:rounded-2xl shadow-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <aside className="hidden lg:block">
@@ -919,10 +1019,61 @@ const MarketplaceAllProducts: React.FC = () => {
           </div>
         ) : (
           <>
+            {/* Products Grid Toolbar */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <div className="text-sm text-neutral-700">
+                Showing <span className="font-semibold">{totalProducts}</span> results
+              </div>
+
+              <div className="flex items-center gap-3 ml-auto">
+                <label className="text-sm text-neutral-600 mr-2">Sort:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
+                  className="input-field text-sm"
+                  aria-label="Sort products"
+                >
+                  {SORT_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+
+                <div className="flex items-center gap-2 ml-2">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-orange-600 text-white' : 'bg-white border'}`}
+                    aria-label="Grid view"
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-orange-600 text-white' : 'bg-white border'}`}
+                    aria-label="List view"
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+
+                  <label className="sr-only">Items per page</label>
+                  <select
+                    value={productsPerPage}
+                    onChange={(e) => { setProductsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                    className="input-field text-sm ml-2"
+                    aria-label="Items per page"
+                  >
+                      <option value={12}>12</option>
+                      <option value={24}>24</option>
+                      <option value={48}>48</option>
+                      <option value={60}>60</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {/* Products Grid */}
-            <div className={`grid gap-6 ${
+            <div ref={productsGridRef} className={`grid gap-6 ${
               viewMode === 'grid'
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5'
                 : 'grid-cols-1'
             }`}>
               {products.map((product) => (
@@ -933,46 +1084,53 @@ const MarketplaceAllProducts: React.FC = () => {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-12 flex items-center justify-center">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="p-2 rounded-lg border border-gray-300 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
-                    const pageNumber = currentPage <= 3 
-                      ? index + 1 
-                      : currentPage >= totalPages - 2
-                      ? totalPages - 4 + index
-                      : currentPage - 2 + index;
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-neutral-600">Page {currentPage} of {totalPages}</div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      aria-label="Previous page"
+                      className="p-2 rounded-lg border border-gray-300 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
                     
-                    if (pageNumber < 1 || pageNumber > totalPages) return null;
+                    {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
+                      const pageNumber = currentPage <= 3 
+                        ? index + 1 
+                        : currentPage >= totalPages - 2
+                        ? totalPages - 4 + index
+                        : currentPage - 2 + index;
+                      
+                      if (pageNumber < 1 || pageNumber > totalPages) return null;
+                      
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => setCurrentPage(pageNumber)}
+                          aria-current={currentPage === pageNumber}
+                          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                            currentPage === pageNumber
+                              ? 'bg-orange-600 text-white'
+                              : 'border border-gray-300 hover:bg-orange-50'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
                     
-                    return (
-                      <button
-                        key={pageNumber}
-                        onClick={() => setCurrentPage(pageNumber)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                          currentPage === pageNumber
-                            ? 'bg-orange-600 text-white'
-                            : 'border border-gray-300 hover:bg-orange-50'
-                        }`}
-                      >
-                        {pageNumber}
-                      </button>
-                    );
-                  })}
-                  
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg border border-gray-300 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      aria-label="Next page"
+                      className="p-2 rounded-lg border border-gray-300 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

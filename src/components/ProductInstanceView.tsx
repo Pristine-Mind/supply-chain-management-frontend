@@ -470,12 +470,12 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-6 lg:py-8">
+  <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
             <div className="lg:col-span-7">
               <div className="sticky top-24 space-y-4">
                 <div className="relative bg-white rounded-2xl overflow-hidden group shadow-sm border border-gray-200">
-                  <div className="aspect-square relative">
+                  <div className="relative w-full h-80 sm:h-96 lg:h-[640px]">
                     <img
                       src={images[currentImage]?.image || ''}
                       alt={product.product_details?.name}
@@ -523,7 +523,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 </div>
 
                 {images.length > 1 && (
-                  <div className="grid grid-cols-6 gap-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 overflow-x-auto">
                     {images.map((img, idx) => (
                       <button
                         key={idx}
@@ -548,7 +548,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
             </div>
 
             <div className="lg:col-span-5">
-              <div className="space-y-6">
+              <div className="space-y-6 pb-20 md:pb-0">
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="inline-block bg-primary-100 text-primary-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
@@ -618,7 +618,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 <div className="space-y-3">
 
                   {/* Trust Badges */}
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="bg-neutral-50 rounded-lg p-3 text-center border border-neutral-200">
                       <Shield className="w-5 h-5 text-primary-600 mx-auto mb-1" />
                       <p className="text-xs font-medium text-neutral-700">Secure Payment</p>
@@ -712,7 +712,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-3 sticky bottom-0 bg-white pt-4 border-t border-gray-200">
+                <div className="space-y-3 md:sticky md:bottom-0 md:bg-white md:pt-4 md:border-t md:border-gray-200">
                   <button
                     onClick={handleAddToCart}
                     disabled={stockLevel === 0}
