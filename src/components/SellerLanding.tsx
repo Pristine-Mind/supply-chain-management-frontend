@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
 const BENEFITS = [
   { title: '0% Commission', subtitle: 'Only pay when you sell.' },
@@ -30,6 +32,7 @@ export const SellerLanding: React.FC = () => {
 
   return (
     <div className="space-y-24">
+      <Navbar />
       <section className="relative bg-orange-50 overflow-hidden">
         <div className="container mx-auto flex flex-col md:flex-row items-center py-20">
           <div className="md:w-1/2 text-center md:text-left space-y-4 px-4">
@@ -148,6 +151,7 @@ export const SellerLanding: React.FC = () => {
           </button>
         </Link>
       </section>
+      <Footer />
     </div>
   );
 };

@@ -143,7 +143,14 @@ const Login: React.FC = () => {
               required
             />
             <p className="text-xs text-neutral-500 mt-1">
-              Forgot your password? <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">Reset here</a>
+              Forgot your password?{' '}
+              <button
+                type="button"
+                className="text-primary-600 hover:text-primary-700 font-medium"
+                onClick={() => navigate('/support')}
+              >
+                Reset here
+              </button>
             </p>
           </div>
 

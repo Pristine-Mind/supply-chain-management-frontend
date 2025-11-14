@@ -19,7 +19,7 @@ const FeaturedProducts: React.FC<{ products?: any[] }> = ({ products: initialPro
       setLoading(true);
       setError('');
       try {
-        const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?limit=8`;
+        const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/featured/`;
         const { data } = await axios.get(url);
         setProducts(data.results || data || []);
       } catch (err) {

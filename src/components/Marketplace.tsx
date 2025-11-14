@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { categoryApi, subcategoryApi, subSubcategoryApi } from '../api/categoryApi';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as Select from '@radix-ui/react-select';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, Check, User, ShoppingCart, Heart, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronDown, Check, User, ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import FeaturedProducts from './FeaturedProducts';
+import CategoryMenu from './CategoryMenu';
+import SearchSuggestions from './SearchSuggestions';
 
 import logo from '../assets/logo.png';
-import christmasBanner from '../assets/christmas.jpg';
 import Footer from './Footer';
+import BannerSaleImage from '../assets/banner_sale.png';
 
 interface ProductImage {
   id: number;
@@ -81,34 +84,6 @@ interface MarketplaceProduct {
   rank_score: number;
 }
 
-const CATEGORY_OPTIONS = [
-  { code: 'All', label: 'All Categories' },
-  { code: 'FA', label: 'Fashion & Apparel' },
-  { code: 'EG', label: 'Electronics & Gadgets' },
-  { code: 'GE', label: 'Groceries & Essentials' },
-  { code: 'HB', label: 'Health & Beauty' },
-  { code: 'HL', label: 'Home & Living' },
-  { code: 'TT', label: 'Travel & Tourism' },
-  { code: 'IS', label: 'Industrial Supplies' },
-  { code: 'OT', label: 'Other' },
-] as const;
-
-const LOCATION_OPTIONS = [
-  'All',
-  'Kathmandu',
-  'Pokhara',
-  'Lalitpur',
-  'Bhaktapur',
-  'Chitwan',
-  'Biratnagar',
-  'Butwal',
-  'Dharan',
-  'Hetauda',
-  'Nepalgunj',
-  'Other',
-] as const;
-
-const PROFILE_TYPE_OPTIONS = ['All', 'Retailer', 'Distributor'] as const;
 const PLACEHOLDER = 'https://via.placeholder.com/150';
 
 const Marketplace: React.FC = () => {
@@ -118,13 +93,16 @@ const Marketplace: React.FC = () => {
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
-  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_OPTIONS[0].code);
-  const [selectedLocation, setSelectedLocation] = useState<string>(LOCATION_OPTIONS[0]);
-  // profile type dropdown removed from UI; keep value for potential future use
-  const [selectedProfileType] = useState<string>(PROFILE_TYPE_OPTIONS[0]);
+  // Dynamic category hierarchy state
+  const [categories, setCategories] = useState<Array<{ id: number; name: string; code: string }>>([]);
+  const [categoryHierarchy, setCategoryHierarchy] = useState<any[]>([]);
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [subcategories, setSubcategories] = useState<Array<{ id: number; name: string; code: string }>>([]);
+  const [subSubcategories, setSubSubcategories] = useState<Array<{ id: number; name: string; code: string }>>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
+  const [selectedSubSubcategoryId, setSelectedSubSubcategoryId] = useState<number | null>(null);
   
-  // Enhanced filtering state variables
-  // Category hierarchy removed per request; keep simple category string only
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [minOrder, setMinOrder] = useState('');
@@ -133,7 +111,11 @@ const Marketplace: React.FC = () => {
   const [selectedBusinessType, setSelectedBusinessType] = useState('');
   const [businessTypeDropdownOpen, setBusinessTypeDropdownOpen] = useState(false);
   
-  const [error, setError] = useState('');
+  
+  const [productsError, setProductsError] = useState('');
+  const [flashSaleError, setFlashSaleError] = useState('');
+  const [dealsError, setDealsError] = useState('');
+  const [todaysPickError, setTodaysPickError] = useState('');
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -142,8 +124,10 @@ const Marketplace: React.FC = () => {
   // (view concept removed) we always render marketplace product grid
   const [flashSaleProducts, setFlashSaleProducts] = useState<MarketplaceProduct[]>([]);
   const [dealsProducts, setDealsProducts] = useState<MarketplaceProduct[]>([]);
+  const [todaysPickProducts, setTodaysPickProducts] = useState<MarketplaceProduct[]>([]);
   const [flashSaleLoading, setFlashSaleLoading] = useState(false);
   const [dealsLoading, setDealsLoading] = useState(false);
+  const [todaysPickLoading, setTodaysPickLoading] = useState(false);
   const { addToCart, distinctItemCount } = useCart();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -181,7 +165,7 @@ const Marketplace: React.FC = () => {
 
   const fetchMarketplaceProducts = async (page: number = 1) => {
     setLoading(true);
-    setError('');
+    setProductsError('');
     try {
       // If there's a debounced query string, call the dedicated search endpoint
       if (debouncedQuery && debouncedQuery.trim() !== '') {
@@ -199,6 +183,10 @@ const Marketplace: React.FC = () => {
         limit: itemsPerPage,
         offset: (page - 1) * itemsPerPage,
       };
+      // Include category filters when present (use the same param names as MarketplaceAllProducts)
+      if (selectedCategoryId) params.category_id = selectedCategoryId;
+      if (selectedSubcategoryId) params.subcategory_id = selectedSubcategoryId;
+      if (selectedSubSubcategoryId) params.sub_subcategory_id = selectedSubSubcategoryId;
       // ...existing code...
       const { data } = await axios.get(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
@@ -209,7 +197,7 @@ const Marketplace: React.FC = () => {
       setProducts(data.results);
       setTotalCount(data.count || 0);
     } catch {
-      setError('Error fetching marketplace products');
+      setProductsError('Error fetching marketplace products');
     } finally {
       setLoading(false);
     }
@@ -217,12 +205,13 @@ const Marketplace: React.FC = () => {
 
   const fetchFlashSaleProducts = async () => {
     setFlashSaleLoading(true);
-    setError('');
+    setFlashSaleError('');
     try {
-      const { data } = await axios.get('https://appmulyabazzar.com/api/v1/marketplace-trending/fastest_selling/');
+      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/most_viewed/`;
+      const { data } = await axios.get(url, { timeout: 8000 });
       setFlashSaleProducts(data.results);
     } catch {
-      setError('Error fetching flash sale products');
+      setFlashSaleError('Error fetching flash sale products');
     } finally {
       setFlashSaleLoading(false);
     }
@@ -230,14 +219,29 @@ const Marketplace: React.FC = () => {
 
   const fetchDealsProducts = async () => {
     setDealsLoading(true);
-    setError('');
+    setDealsError('');
     try {
-      const { data } = await axios.get('https://appmulyabazzar.com/api/v1/marketplace-trending/deals/');
+      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/deals/`;
+      const { data } = await axios.get(url, { timeout: 8000 });
       setDealsProducts(data.results);
     } catch {
-      setError('Error fetching deals products');
+      setDealsError('Error fetching deals products');
     } finally {
       setDealsLoading(false);
+    }
+  };
+
+  const fetchTodaysPick = async () => {
+    setTodaysPickLoading(true);
+    setTodaysPickError('');
+    try {
+      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/new_trending/`;
+      const { data } = await axios.get(url, { timeout: 8000 });
+      setTodaysPickProducts(data.results);
+    } catch {
+      setTodaysPickError('Error fetching todays pick products');
+    } finally {
+      setTodaysPickLoading(false);
     }
   };
 
@@ -262,10 +266,43 @@ const Marketplace: React.FC = () => {
     return () => clearTimeout(t);
   }, [query]);
 
+  // Fetch categories on mount
   useEffect(() => {
-    // Always fetch the first page (we load up to `itemsPerPage` = 50 items here)
+    categoryApi.getCategories().then(setCategories).catch(() => setCategories([]));
+    categoryApi.getCategoryHierarchy().then(setCategoryHierarchy).catch(() => setCategoryHierarchy([]));
+  }, []);
+
+  // Fetch subcategories when category changes
+  useEffect(() => {
+    if (selectedCategoryId) {
+      subcategoryApi.getSubcategories(selectedCategoryId).then(setSubcategories).catch(() => setSubcategories([]));
+      setSelectedSubcategoryId(null);
+      setSubSubcategories([]);
+      setSelectedSubSubcategoryId(null);
+    } else {
+      setSubcategories([]);
+      setSelectedSubcategoryId(null);
+      setSubSubcategories([]);
+      setSelectedSubSubcategoryId(null);
+    }
+  }, [selectedCategoryId]);
+
+  // Fetch sub-subcategories when subcategory changes
+  useEffect(() => {
+    if (selectedSubcategoryId) {
+      subSubcategoryApi.getSubSubcategories(selectedSubcategoryId).then(setSubSubcategories).catch(() => setSubSubcategories([]));
+      setSelectedSubSubcategoryId(null);
+    } else {
+      setSubSubcategories([]);
+      setSelectedSubSubcategoryId(null);
+    }
+  }, [selectedSubcategoryId]);
+
+  // Update navigation and fetch products when filters change
+  // Only fetch products, do not navigate away from / on mount
+  useEffect(() => {
     fetchMarketplaceProducts(1);
-  }, [debouncedQuery, selectedCategory, selectedLocation, selectedProfileType, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
+  }, [debouncedQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
 
   useEffect(() => {
     // Fetch deals products on component mount for the trending deals section
@@ -309,12 +346,10 @@ const Marketplace: React.FC = () => {
     }
   };
 
-  if (error) {
-    return <div className="text-center text-status-error py-8">{error}</div>;
-  }
+  // Do not block the whole screen on an API error — render available sections and show inline errors.
 
   return (
-    <>
+    <div className="marketplace-root">
       <div className="min-h-screen bg-neutral-50">
         {showLoginModal && (
           <LoginModal
@@ -359,6 +394,15 @@ const Marketplace: React.FC = () => {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleSearchEnter}
                   />
+                    <div className="relative">
+                            <SearchSuggestions
+                              query={query}
+                              onSelect={(val) => {
+                                // navigate to all-products with search param when suggestion clicked
+                                navigate(`/marketplace/all-products?search=${encodeURIComponent(val)}`);
+                              }}
+                            />
+                    </div>
                   <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
                   <button
                     onClick={() => navigate(`/marketplace/all-products?search=${encodeURIComponent(query)}`)}
@@ -392,10 +436,6 @@ const Marketplace: React.FC = () => {
                           <div className="flex items-center space-x-3 px-3 py-2">
                             <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-white font-semibold text-caption">
                               {user?.name ? user.name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                            </div>
-                            <div>
-                              <p className="text-body font-medium text-neutral-900">{user?.name || 'User'}</p>
-                              <p className="text-caption text-neutral-500">{user?.email}</p>
                             </div>
                           </div>
                           <button
@@ -446,7 +486,16 @@ const Marketplace: React.FC = () => {
 
               {/* Mobile: stacked search and small cart icon */}
               <div className="md:hidden col-span-1 w-full flex items-center justify-between mt-2">
-                <div className="relative w-full">
+                <div className="flex items-center gap-2">
+                  <button
+                    className="p-2 text-neutral-600"
+                    onClick={() => setIsMobileMenuOpen(true)}
+                    aria-label="Open menu"
+                  >
+                    <Menu className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="relative flex-1 mx-2">
                   <input
                     type="text"
                     placeholder="Search products..."
@@ -455,6 +504,12 @@ const Marketplace: React.FC = () => {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleSearchEnter}
                   />
+                  <div className="relative">
+                    <SearchSuggestions
+                      query={query}
+                      onSelect={(val) => navigate(`/marketplace/all-products?search=${encodeURIComponent(val)}`)}
+                    />
+                  </div>
                   <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
                 </div>
                 <button
@@ -470,47 +525,50 @@ const Marketplace: React.FC = () => {
 
         {/* Category/Menu Bar - With Category List and Filters */}
         <div className="bg-white border-b border-neutral-200">
-          <div className="container mx-auto container-padding flex items-center justify-between py-3">
+          <div className="container mx-auto container-padding flex items-center justify-between py-3 relative">
             <div className="flex items-center gap-3 w-full">
-              {/* Mobile menu toggle - visible on small screens */}
-              <button
-                onClick={() => setIsMobileMenuOpen(true)}
-                className="lg:hidden p-2 rounded-md text-neutral-700 hover:bg-neutral-100"
-                aria-label="Open menu"
-              >
-                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-
-              <div className="flex-1 lg:flex-none lg:w-auto">
-                <Select.Root
-                  value={selectedCategory}
-                  onValueChange={(value: string) => setSelectedCategory(value)}
+              <div className="flex-1 lg:flex-none lg:w-auto flex gap-2">
+                {/* Category Button triggers grouped menu */}
+                <button
+                  className="flex items-center gap-2 px-3 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all text-sm font-medium shadow-sm w-full max-w-xs"
+                  onClick={() => setShowCategoryMenu((v) => !v)}
                 >
-                  <Select.Trigger className="flex items-center gap-2 px-3 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all text-sm font-medium shadow-sm w-full max-w-xs">
-                    <Select.Value placeholder="Categories" />
-                    <ChevronDown className="w-4 h-4" />
-                  </Select.Trigger>
-                  <Select.Portal>
-                    <Select.Content className="z-50 bg-white card shadow-elevation-lg border border-neutral-200 overflow-hidden">
-                      <Select.Viewport className="p-2">
-                        {CATEGORY_OPTIONS.map((option) => (
-                          <Select.Item
-                            key={option.code}
-                            value={option.code}
-                            className="relative flex items-center px-8 py-2 text-sm text-gray-700 rounded-md hover:bg-orange-50 cursor-pointer outline-none"
-                          >
-                            <Select.ItemText>{option.label}</Select.ItemText>
-                            <Select.ItemIndicator className="absolute left-2">
-                              <Check className="w-4 h-4" />
-                            </Select.ItemIndicator>
-                          </Select.Item>
-                        ))}
-                      </Select.Viewport>
-                    </Select.Content>
-                  </Select.Portal>
-                </Select.Root>
+                  <span>Categories</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                {/* Show grouped menu if triggered */}
+                {showCategoryMenu && (
+                  <>
+                    <div
+                      className="fixed inset-0 bg-black/40 z-40"
+                      onClick={() => setShowCategoryMenu(false)}
+                    />
+                    <div className="absolute left-0 top-full mt-2 z-50 w-full max-w-4xl">
+                      <CategoryMenu
+                        categories={categoryHierarchy}
+                        onSelect={(categoryId?: any, subcategoryId?: any) => {
+                          // update selected filters based on choice
+                          const catId = categoryId ? Number(categoryId) : null;
+                          const subId = subcategoryId ? Number(subcategoryId) : null;
+                          setSelectedCategoryId(catId);
+                          setSelectedSubcategoryId(subId);
+                          // clear deeper selection
+                          setSelectedSubSubcategoryId(null);
+
+                          // close the menu
+                          setShowCategoryMenu(false);
+
+                          // Redirect to the full products page with applied filters so URL shares the state
+                          const qp: string[] = [];
+                          if (catId) qp.push(`category_id=${encodeURIComponent(catId.toString())}`);
+                          if (subId) qp.push(`subcategory_id=${encodeURIComponent(subId.toString())}`);
+                          const queryString = qp.length ? `?${qp.join('&')}` : '';
+                          navigate(`/marketplace/all-products${queryString}`);
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Desktop links - hide on small screens */}
@@ -544,13 +602,13 @@ const Marketplace: React.FC = () => {
         {/* CTA banner image - replace previous CTA */}
         <div className="w-full">
           <div className="relative w-full h-64 md:h-96 overflow-hidden">
-            <img src={christmasBanner} alt="Christmas Sale" className="w-full h-full object-cover" />
+            <img src={BannerSaleImage} alt="Christmas Sale" className="w-full h-full object-cover" />
 
-            {/* Centered Shop Now button overlay */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {/* Shop Now button positioned at the bottom-center of the banner */}
+            <div className="absolute inset-0 flex items-end justify-center pointer-events-none pb-6">
               <button
                 onClick={() => navigate('/deals')}
-                aria-label="Shop Christmas Deals"
+                aria-label="Shop Now"
                 className="pointer-events-auto bg-primary-600 text-white px-6 py-3 rounded-full text-lg font-semibold shadow-lg hover:bg-primary-700 transition"
               >
                 Shop Now
@@ -561,6 +619,14 @@ const Marketplace: React.FC = () => {
 
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
+          {/* Show any trending-related errors but continue rendering available content */}
+          {(flashSaleError || dealsError || todaysPickError) && (
+            <div className="mb-4 space-y-2">
+              {flashSaleError && <div className="text-sm text-red-600">{flashSaleError}</div>}
+              {dealsError && <div className="text-sm text-red-600">{dealsError}</div>}
+              {todaysPickError && <div className="text-sm text-red-600">{todaysPickError}</div>}
+            </div>
+          )}
           {/* Top horizontal trending cards with nav */}
           <div className="relative">
             <button
@@ -576,6 +642,7 @@ const Marketplace: React.FC = () => {
               onMouseEnter={() => {
                 if (!trendingFetched) {
                   fetchDealsProducts();
+                  fetchTodaysPick();
                   fetchFlashSaleProducts();
                   setTrendingFetched(true);
                 }
@@ -583,8 +650,8 @@ const Marketplace: React.FC = () => {
               className="flex gap-4 overflow-x-auto no-scrollbar py-2"
             >
               {/* Render up to 4 trending placeholders / products */}
-              {products && products.length > 0 ? (
-                products.slice(0, 8).map((p) => (
+              { flashSaleProducts && flashSaleProducts.length > 0 ? (
+                flashSaleProducts.slice(0, 8).map((p) => (
                   <div
                     key={p.id}
                     className="min-w-[220px] bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 cursor-pointer flex flex-col"
@@ -682,8 +749,8 @@ const Marketplace: React.FC = () => {
             <div className="bg-neutral-100 rounded-lg p-6">
               <h3 className="text-2xl font-bold mb-4">Top picks today</h3>
               <div className="grid grid-cols-3 gap-3">
-                {products && products.length > 0 ? (
-                  products.slice(0, 3).map((p) => (
+                {todaysPickProducts && todaysPickProducts.length > 0 ? (
+                  todaysPickProducts.slice(0, 3).map((p) => (
                     <div
                       key={p.id}
                       onClick={() => navigate(`/marketplace/${p.id}`)}
@@ -760,76 +827,73 @@ const Marketplace: React.FC = () => {
         </div>
 
         {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
-          <div className="bg-white w-80 h-full p-6 overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-semibold">Menu</h2>
-              <button onClick={() => setIsMobileMenuOpen(false)}>
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <nav className="space-y-4">
-              <a href="/featured" className="block py-2 text-neutral-700 hover:text-primary-600">Featured Selection</a>
-              <a href="/sell" className="block py-2 text-neutral-700 hover:text-primary-600">Sell</a>
-              <a href="/support" className="block py-2 text-neutral-700 hover:text-primary-600">Support</a>
-              
-              <div className="pt-4 border-t border-neutral-200">
-                {isAuthenticated ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3 px-3 py-2">
-                      <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-white font-semibold text-caption">
-                        {user?.name ? user.name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                      </div>
-                      <div>
-                        <p className="text-body font-medium text-neutral-900">{user?.name || 'User'}</p>
-                        <p className="text-caption text-neutral-500">{user?.email}</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => navigate('/profile')}
-                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
-                    >
-                      Profile
-                    </button>
-                    <button 
-                      onClick={() => navigate('/my-orders')}
-                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
-                    >
-                      My Orders
-                    </button>
-                    <button 
-                      onClick={async () => {
-                        await logout();
-                        navigate('/');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="w-full text-left py-2 text-status-error hover:text-red-700"
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <button 
-                      onClick={() => navigate('/login')}
-                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
-                    >
-                      Login
-                    </button>
-                    <button 
-                      onClick={() => navigate('/register')}
-                      className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
-                    >
-                      Register
-                    </button>
-                  </div>
-                )}
+          <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
+            <div className="bg-white w-80 h-full p-6 overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-semibold">Menu</h2>
+                <button onClick={() => setIsMobileMenuOpen(false)}>
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-            </nav>
+
+              <nav className="space-y-4">
+                <a href="/featured" className="block py-2 text-neutral-700 hover:text-primary-600">Featured Selection</a>
+                <a href="/sell" className="block py-2 text-neutral-700 hover:text-primary-600">Sell</a>
+                <a href="/support" className="block py-2 text-neutral-700 hover:text-primary-600">Support</a>
+
+                <div className="pt-4 border-t border-neutral-200">
+                  {isAuthenticated ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3 px-3 py-2">
+                        <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-white font-semibold text-caption">
+                          {user?.name ? user.name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                          <p className="text-body font-medium text-neutral-900">{user?.name || 'User'}</p>
+                          <p className="text-caption text-neutral-500">{user?.email}</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
+                        className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
+                      >
+                        Profile
+                      </button>
+                      <button
+                        onClick={() => { navigate('/my-orders'); setIsMobileMenuOpen(false); }}
+                        className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
+                      >
+                        My Orders
+                      </button>
+                      <button
+                        onClick={async () => { await logout(); navigate('/'); setIsMobileMenuOpen(false); }}
+                        className="w-full text-left py-2 text-status-error hover:text-red-700"
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
+                        className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
+                      >
+                        Login
+                      </button>
+                      <button
+                        onClick={() => { navigate('/register'); setIsMobileMenuOpen(false); }}
+                        className="w-full text-left py-2 text-neutral-700 hover:text-primary-600"
+                      >
+                        Register
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </nav>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <FeaturedProducts/>
 
@@ -1111,10 +1175,10 @@ const Marketplace: React.FC = () => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                     <span className="ml-3 text-gray-600">Loading products...</span>
                   </div>
-                ) : error ? (
+                ) : productsError ? (
                   <div className="text-center py-8">
                     <div className="text-red-500 text-lg mb-2">⚠️ Error Loading Products</div>
-                    <p className="text-gray-600">{error}</p>
+                    <p className="text-gray-600">{productsError}</p>
                   </div>
                 ) : products.length === 0 ? (
                   <div className="text-center py-8">
@@ -1123,8 +1187,6 @@ const Marketplace: React.FC = () => {
                     <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
                     <button
                       onClick={() => {
-                        setSelectedCategory('All');
-                        setSelectedLocation('All');
                         setQuery('');
                         setMinPrice('');
                         setMaxPrice('');
@@ -1271,10 +1333,10 @@ const Marketplace: React.FC = () => {
                 )}
         
       </div>
+    <Footer />
     </div>
-
-      <Footer />
-    </>
+    {/* Closing tag for marketplace-root */}
+  </div>
   );
 };
 

@@ -165,7 +165,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           <button
             type="button"
             onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-            className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white text-left flex items-center justify-between hover:border-primary-400"
+            className="w-full px-4 py-2 border border-neutral-300 rounded-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white text-left flex items-center justify-between hover:border-primary-400"
             disabled={disabled || loading}
           >
             <span className={selectedCategory ? "text-gray-900" : "text-gray-500"}>
@@ -228,7 +228,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             <button
               type="button"
               onClick={() => setSubcategoryDropdownOpen(!subcategoryDropdownOpen)}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white text-left flex items-center justify-between hover:border-primary-400"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white text-left flex items-center justify-between hover:border-primary-400"
               disabled={disabled || subcategories.length === 0}
             >
               <span className={selectedSubcategory ? "text-gray-900" : "text-gray-500"}>
@@ -293,7 +293,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
             <button
               type="button"
               onClick={() => setSubSubcategoryDropdownOpen(!subSubcategoryDropdownOpen)}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white text-left flex items-center justify-between hover:border-primary-400"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all bg-white text-left flex items-center justify-between hover:border-primary-400"
               disabled={disabled || subSubcategories.length === 0}
             >
               <span className={selectedSubSubcategory ? "text-gray-900" : "text-gray-500"}>

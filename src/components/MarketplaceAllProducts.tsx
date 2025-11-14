@@ -27,6 +27,7 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
 import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
+import { categoryApi, subcategoryApi } from '../api/categoryApi';
 
 import logo from '../assets/logo.png';
 
@@ -154,6 +155,8 @@ const MarketplaceAllProducts: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [selectedPriceRange, setSelectedPriceRange] = useState('all');
   const [selectedRating, setSelectedRating] = useState('all');
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
+  const [selectedSubcategoryName, setSelectedSubcategoryName] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('relevance');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
@@ -176,7 +179,7 @@ const MarketplaceAllProducts: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedBusinessType, setSelectedBusinessType] = useState('');
 
-  const [productsPerPage, setProductsPerPage] = useState<number>(60);
+  const [productsPerPage, setProductsPerPage] = useState<number>(50);
 
   // Debounce the searchTerm so fetchProducts is called only after user pauses typing
   useEffect(() => {
@@ -205,9 +208,20 @@ const MarketplaceAllProducts: React.FC = () => {
         const response = await axios.get(searchUrl);
 
         if (response.data && Array.isArray(response.data.results)) {
-          setProducts(response.data.results);
-          setTotalPages(Math.max(1, Math.ceil((response.data.count || response.data.results.length) / productsPerPage)));
-          setTotalProducts(response.data.count || response.data.results.length || 0);
+          const results = response.data.results;
+          const resultsLen = results.length;
+          const count = typeof response.data.count === 'number' ? response.data.count : null;
+          setProducts(results);
+          if (count !== null) {
+            setTotalPages(Math.max(1, Math.ceil(count / productsPerPage)));
+            setTotalProducts(count);
+          } else {
+            // If API doesn't return a total count but returned a full page of results,
+            // assume there may be more and allow navigating to next page (optimistic).
+            const pages = resultsLen === productsPerPage ? currentPage + 1 : 1;
+            setTotalPages(pages);
+            setTotalProducts(resultsLen);
+          }
         } else {
           setProducts([]);
           setTotalPages(1);
@@ -224,22 +238,17 @@ const MarketplaceAllProducts: React.FC = () => {
       
       // Category filters - prioritize hierarchy filters over legacy
       if (selectedCategoryId) {
-        params.append('category_id', selectedCategoryId.toString());
-        console.log('Applied category_id filter:', selectedCategoryId);
+        params.append('category', selectedCategoryId.toString());
       } else if (selectedCategory !== 'All') {
-        // Legacy category support (for backward compatibility)
         params.append('category', selectedCategory);
-        console.log('Applied legacy category filter:', selectedCategory);
       }
       
       if (selectedSubcategoryId) {
-        params.append('subcategory_id', selectedSubcategoryId.toString());
-        console.log('Applied subcategory_id filter:', selectedSubcategoryId);
+        params.append('subcategory', selectedSubcategoryId.toString());
       }
       
       if (selectedSubSubcategoryId) {
-        params.append('sub_subcategory_id', selectedSubSubcategoryId.toString());
-        console.log('Applied sub_subcategory_id filter:', selectedSubSubcategoryId);
+        params.append('sub_subcategory', selectedSubSubcategoryId.toString());
       }
       
       // Location filter
@@ -300,9 +309,18 @@ const MarketplaceAllProducts: React.FC = () => {
       const response = await axios.get(apiUrl);
       
       if (response.data && Array.isArray(response.data.results)) {
-        setProducts(response.data.results);
-        setTotalPages(Math.ceil(response.data.count / productsPerPage));
-        setTotalProducts(response.data.count);
+        const results = response.data.results;
+        const resultsLen = results.length;
+        const count = typeof response.data.count === 'number' ? response.data.count : null;
+        setProducts(results);
+        if (count !== null) {
+          setTotalPages(Math.max(1, Math.ceil(count / productsPerPage)));
+          setTotalProducts(count);
+        } else {
+          const pages = resultsLen === productsPerPage ? currentPage + 1 : 1;
+          setTotalPages(pages);
+          setTotalProducts(resultsLen);
+        }
       } else {
         setProducts([]);
         setTotalPages(1);
@@ -358,7 +376,85 @@ const MarketplaceAllProducts: React.FC = () => {
     if (page && page !== currentPage) {
       setCurrentPage(page);
     }
+    // New: support hierarchy filters passed via query params
+    const categoryIdParam = searchParams.get('category_id');
+    const subcategoryIdParam = searchParams.get('subcategory_id');
+    const subSubcategoryIdParam = searchParams.get('sub_subcategory_id');
+
+    if (categoryIdParam) {
+      const cid = Number(categoryIdParam);
+      if (!Number.isNaN(cid) && cid !== selectedCategoryId) {
+        setSelectedCategoryId(cid);
+      }
+    } else if (selectedCategoryId) {
+      setSelectedCategoryId(null);
+    }
+
+    if (subcategoryIdParam) {
+      const scid = Number(subcategoryIdParam);
+      if (!Number.isNaN(scid) && scid !== selectedSubcategoryId) {
+        setSelectedSubcategoryId(scid);
+      }
+    } else if (selectedSubcategoryId) {
+      setSelectedSubcategoryId(null);
+    }
+
+    if (subSubcategoryIdParam) {
+      const sscid = Number(subSubcategoryIdParam);
+      if (!Number.isNaN(sscid) && sscid !== selectedSubSubcategoryId) {
+        setSelectedSubSubcategoryId(sscid);
+      }
+    } else if (selectedSubSubcategoryId) {
+      setSelectedSubSubcategoryId(null);
+    }
+
+    // Fetch and set category/subcategory display names
+    if (categoryIdParam) {
+      const cid = Number(categoryIdParam);
+      if (!Number.isNaN(cid)) {
+        categoryApi.getCategory(cid).then(c => setSelectedCategoryName(c.name)).catch(() => setSelectedCategoryName(null));
+      }
+    } else {
+      setSelectedCategoryName(null);
+    }
+
+    if (subcategoryIdParam) {
+      const scid = Number(subcategoryIdParam);
+      if (!Number.isNaN(scid)) {
+        subcategoryApi.getSubcategory(scid).then(s => setSelectedSubcategoryName(s.name)).catch(() => setSelectedSubcategoryName(null));
+      }
+    } else {
+      setSelectedSubcategoryName(null);
+    }
   }, [searchParams]);
+
+  // When sidebar hierarchical category selections change, sync them into URL search params
+  useEffect(() => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    // Update category hierarchy params
+    if (selectedCategoryId) {
+      params.set('category_id', selectedCategoryId.toString());
+    } else {
+      params.delete('category_id');
+    }
+
+    if (selectedSubcategoryId) {
+      params.set('subcategory_id', selectedSubcategoryId.toString());
+    } else {
+      params.delete('subcategory_id');
+    }
+
+    if (selectedSubSubcategoryId) {
+      params.set('sub_subcategory_id', selectedSubSubcategoryId.toString());
+    } else {
+      params.delete('sub_subcategory_id');
+    }
+
+    // Reset page when filters change
+    params.delete('page');
+    setSearchParams(params);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId]);
 
   // Keep the URL in sync with the current page and scroll grid into view on page change
   useEffect(() => {
@@ -847,7 +943,15 @@ const MarketplaceAllProducts: React.FC = () => {
                   <Tag className="w-3 h-3" />
                   {CATEGORY_OPTIONS.find(cat => cat.code === selectedCategory)?.label}
                   <button
-                    onClick={() => {setSelectedCategory('All'); setCurrentPage(1);}}
+                    onClick={() => {
+                      setSelectedCategory('All');
+                      setCurrentPage(1);
+                      const params = new URLSearchParams(Array.from(searchParams.entries()));
+                      params.delete('category');
+                      // reset page param when clearing filters
+                      params.delete('page');
+                      setSearchParams(params);
+                    }}
                     className="ml-1 hover:text-orange-900"
                   >
                     <X className="w-3 h-3" />
@@ -859,9 +963,23 @@ const MarketplaceAllProducts: React.FC = () => {
               {selectedCategoryId && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
                   <Tag className="w-3 h-3" />
-                  Category Filter
+                  {selectedCategoryName ?? `Category #${selectedCategoryId}`}
+                  {selectedSubcategoryName && (
+                    <span className="mx-1">›</span>
+                  )}
+                  {selectedSubcategoryName && <span className="text-sm text-blue-700">{selectedSubcategoryName}</span>}
                   <button
-                    onClick={() => {setSelectedCategoryId(null); setCurrentPage(1);}}
+                    onClick={() => {
+                      setSelectedCategoryId(null);
+                      setSelectedSubcategoryId(null);
+                      setCurrentPage(1);
+                      const params = new URLSearchParams(Array.from(searchParams.entries()));
+                      params.delete('category_id');
+                      params.delete('subcategory_id');
+                      params.delete('sub_subcategory_id');
+                      params.delete('page');
+                      setSearchParams(params);
+                    }}
                     className="ml-1 hover:text-blue-900"
                   >
                     <X className="w-3 h-3" />
@@ -915,19 +1033,6 @@ const MarketplaceAllProducts: React.FC = () => {
                   <button
                     onClick={() => {setSelectedCity(''); setCurrentPage(1);}}
                     className="ml-1 hover:text-indigo-900"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {selectedBusinessType && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-cyan-100 text-cyan-800 text-sm rounded-full">
-                  <Building className="w-3 h-3" />
-                  Type: {selectedBusinessType}
-                  <button
-                    onClick={() => {setSelectedBusinessType(''); setCurrentPage(1);}}
-                    className="ml-1 hover:text-cyan-900"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -1021,10 +1126,6 @@ const MarketplaceAllProducts: React.FC = () => {
           <>
             {/* Products Grid Toolbar */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-              <div className="text-sm text-neutral-700">
-                Showing <span className="font-semibold">{totalProducts}</span> results
-              </div>
-
               <div className="flex items-center gap-3 ml-auto">
                 <label className="text-sm text-neutral-600 mr-2">Sort:</label>
                 <select
@@ -1064,6 +1165,7 @@ const MarketplaceAllProducts: React.FC = () => {
                       <option value={12}>12</option>
                       <option value={24}>24</option>
                       <option value={48}>48</option>
+                      <option value={50}>50</option>
                       <option value={60}>60</option>
                   </select>
                 </div>
