@@ -8,6 +8,8 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
+import Navbar from './Navbar';
+import Footer from './Footer';
 
 const SupportComponent = () => {
   const [activeTab, setActiveTab] = useState('contact');
@@ -51,6 +53,7 @@ const SupportComponent = () => {
 
   return (
     <div className="container mx-auto p-4 space-y-6">
+      <Navbar />
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="text-xl font-bold">Support Center</CardTitle>
@@ -174,6 +177,7 @@ const SupportComponent = () => {
           )}
         </CardContent>
       </Card>
+      <Footer />
     </div>
   );
 };

@@ -6,6 +6,9 @@ import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Logout from './components/auth/Logout';
 import { Toaster } from './components/ui/toaster';
+import FeaturedSelectionPage from './components/FeaturedSelectionPage';
+import Deals from './components/Deals';
+import FlashSale from './components/FlashSale';
 
 import Home from './components/Home';
 import AddProducer from './components/AddProducer';
@@ -19,7 +22,7 @@ import AuditLogList from './components/AuditLogList';
 import AuditLogForm from './components/AuditLogForm';
 import PurchaseOrderCards from './components/PurchaseOrderCards';
 import Marketplace from './components/Marketplace';
-import MarketplaceAllProducts from './components/MarketplaceAllProducts';``
+import MarketplaceAllProducts from './components/MarketplaceAllProducts';
 import ProductPage from './components/ProductPage';
 import Cart from './components/Cart';
 import DeliveryDetails from './components/DeliveryDetails';
@@ -92,12 +95,15 @@ const protectedRoutes = [
 const publicRoutes = [
   { path: '/', element: <Marketplace /> },
   { path: '/marketplace', element: <Navigate to="/" replace /> },
-  { path: '/flash-sale', element: <Navigate to="/?view=flash-sale" replace /> },
-  { path: '/deals', element: <Navigate to="/?view=deals" replace /> },
+  { path: '/flash-sale', element: <FlashSale /> },
+  { path: '/deals', element: <Deals /> },
   { path: '/marketplace/all-products', element: <MarketplaceAllProducts /> },
   { path: '/marketplace/:productId', element: <ProductPage /> },
   { path: '/about', element: <AboutUs /> },
   { path: '/contact', element: <Contact /> },
+  { path: '/sell', element: <SellerLanding /> },
+  { path: '/featured', element: <FeaturedSelectionPage /> },
+  { path: '/support', element: <SupportComponent /> },
   { path: '/sellers', element: <SellerLanding /> },
   { path: '/account', element: <AccountDialog /> },
   { path: '/register', element: <Register /> },

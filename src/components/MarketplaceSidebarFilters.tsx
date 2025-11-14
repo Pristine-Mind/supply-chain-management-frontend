@@ -140,31 +140,6 @@ const MarketplaceSidebarFilters: React.FC<SidebarFiltersProps> = ({
         </div>
       </div>
 
-      {/* Business Type Filter */}
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Business Type</h3>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Profile Type
-          </label>
-          <select
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            value={selectedBusinessType}
-            onChange={e => onBusinessTypeChange(e.target.value)}
-          >
-            <option value="">All Types</option>
-            <option value="farmer">Farmer</option>
-            <option value="producer">Producer</option>
-            <option value="distributor">Distributor</option>
-            <option value="retailer">Retailer</option>
-            <option value="exporter">Exporter</option>
-            <option value="importer">Importer</option>
-            <option value="manufacturer">Manufacturer</option>
-            <option value="wholesaler">Wholesaler</option>
-          </select>
-        </div>
-      </div>
-
       {/* Active Filters Summary */}
       {hasActiveFilters && (
         <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
