@@ -87,6 +87,7 @@ interface MarketplaceProduct {
 const PLACEHOLDER = 'https://via.placeholder.com/150';
 
 const Marketplace: React.FC = () => {
+  
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -116,6 +117,7 @@ const Marketplace: React.FC = () => {
   const [flashSaleError, setFlashSaleError] = useState('');
   const [dealsError, setDealsError] = useState('');
   const [todaysPickError, setTodaysPickError] = useState('');
+  const [madeInNepalError, setMadeInNepalError] = useState('');
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -125,16 +127,17 @@ const Marketplace: React.FC = () => {
   const [flashSaleProducts, setFlashSaleProducts] = useState<MarketplaceProduct[]>([]);
   const [dealsProducts, setDealsProducts] = useState<MarketplaceProduct[]>([]);
   const [todaysPickProducts, setTodaysPickProducts] = useState<MarketplaceProduct[]>([]);
+  const [madeInNepalProducts, setMadeInNepalProducts] = useState<MarketplaceProduct[]>([]);
   const [flashSaleLoading, setFlashSaleLoading] = useState(false);
   const [dealsLoading, setDealsLoading] = useState(false);
   const [todaysPickLoading, setTodaysPickLoading] = useState(false);
+  const [madeInNepalLoading, setMadeInNepalLoading] = useState(false);
   const { addToCart, distinctItemCount } = useCart();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const firstMenuItemRef = useRef<HTMLButtonElement | null>(null);
   const trendingRef = useRef<HTMLDivElement | null>(null);
-  const [trendingFetched, setTrendingFetched] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<MarketplaceProduct | null>(null);
 
   // Close user menu on outside click or ESC
@@ -245,6 +248,44 @@ const Marketplace: React.FC = () => {
     }
   };
 
+  const fetchMadeInNepal = async () => {
+    console.log('🇳🇵 [Made in Nepal] Starting fetch...');
+    setMadeInNepalLoading(true);
+    setMadeInNepalError('');
+    
+    try {
+      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/made-in-nepal/`;
+      console.log('🇳🇵 [Made in Nepal] API URL:', url);
+      console.log('🇳🇵 [Made in Nepal] Environment variable VITE_REACT_APP_API_URL:', import.meta.env.VITE_REACT_APP_API_URL);
+      
+      const response = await axios.get(url, { timeout: 8000 });
+      console.log('🇳🇵 [Made in Nepal] Raw response:', response);
+      console.log('🇳🇵 [Made in Nepal] Response status:', response.status);
+      console.log('🇳🇵 [Made in Nepal] Response data:', response.data);
+      
+      if (response.data && response.data.results) {
+        console.log('🇳🇵 [Made in Nepal] Products found:', response.data.results.length);
+        console.log('🇳🇵 [Made in Nepal] First few products:', response.data.results.slice(0, 3));
+        setMadeInNepalProducts(response.data.results);
+      } else {
+        console.warn('🇳🇵 [Made in Nepal] No results in response data:', response.data);
+        setMadeInNepalProducts([]);
+      }
+    } catch (error: any) {
+      console.error('🇳🇵 [Made in Nepal] Error fetching products:', error);
+      console.error('🇳🇵 [Made in Nepal] Error details:', {
+        message: error?.message,
+        response: error?.response,
+        status: error?.response?.status,
+        data: error?.response?.data
+      });
+      setMadeInNepalError('Error fetching Made in Nepal products');
+    } finally {
+      setMadeInNepalLoading(false);
+      console.log('🇳🇵 [Made in Nepal] Fetch completed');
+    }
+  };
+
   // Helpers for trending strip scrolling
   const scrollTrendingBy = (distance: number) => {
     if (trendingRef.current) {
@@ -298,24 +339,32 @@ const Marketplace: React.FC = () => {
     }
   }, [selectedSubcategoryId]);
 
-  // Update navigation and fetch products when filters change
-  // Only fetch products, do not navigate away from / on mount
   useEffect(() => {
     fetchMarketplaceProducts(1);
   }, [debouncedQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
 
   useEffect(() => {
-    // Fetch deals products on component mount for the trending deals section
+    // Fetch all trending section data on component mount for immediate loading
     fetchDealsProducts();
+    fetchMadeInNepal();
+    fetchTodaysPick();
+    fetchFlashSaleProducts();
   }, []);
 
   // Effect to handle URL parameter changes
   useEffect(() => {
-    // Previously the UI supported switching view via URL params (flash-sale / deals).
-    // That behaviour has been removed; keep fetching deals/flashsale on mount elsewhere.
   }, [searchParams]);
 
-  // Close business type dropdown when clicking outside
+  // Debug effect to track Made in Nepal products changes
+  useEffect(() => {
+    console.log('🇳🇵 [Made in Nepal State Change] Products updated:', {
+      count: madeInNepalProducts.length,
+      products: madeInNepalProducts,
+      loading: madeInNepalLoading,
+      error: madeInNepalError
+    });
+  }, [madeInNepalProducts, madeInNepalLoading, madeInNepalError]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -620,11 +669,12 @@ const Marketplace: React.FC = () => {
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
           {/* Show any trending-related errors but continue rendering available content */}
-          {(flashSaleError || dealsError || todaysPickError) && (
+          {(flashSaleError || dealsError || todaysPickError || madeInNepalError) && (
             <div className="mb-4 space-y-2">
               {flashSaleError && <div className="text-sm text-red-600">{flashSaleError}</div>}
               {dealsError && <div className="text-sm text-red-600">{dealsError}</div>}
               {todaysPickError && <div className="text-sm text-red-600">{todaysPickError}</div>}
+              {madeInNepalError && <div className="text-sm text-red-600">{madeInNepalError}</div>}
             </div>
           )}
           {/* Top horizontal trending cards with nav */}
@@ -640,12 +690,7 @@ const Marketplace: React.FC = () => {
             <div
               ref={trendingRef}
               onMouseEnter={() => {
-                if (!trendingFetched) {
-                  fetchDealsProducts();
-                  fetchTodaysPick();
-                  fetchFlashSaleProducts();
-                  setTrendingFetched(true);
-                }
+                // All trending data is already fetched on mount, no need to fetch again
               }}
               className="flex gap-4 overflow-x-auto no-scrollbar py-2"
             >
@@ -897,6 +942,88 @@ const Marketplace: React.FC = () => {
 
       <FeaturedProducts/>
 
+      {/* Made in Nepal Section */}
+      <div className="bg-neutral-50 py-8">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 bg-red-100 text-red-600 rounded-full text-sm font-semibold">
+              <span>🇳🇵</span>
+              <span>MADE IN NEPAL</span>
+            </div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-neutral-800 to-neutral-600 bg-clip-text text-transparent mb-2">
+              Proudly Made in Nepal
+            </h2>
+            <p className="text-neutral-600 text-sm">
+              Support local businesses and craftsmanship
+            </p>
+          </div>
+
+          {(() => {
+            console.log('🇳🇵 [Made in Nepal Render] Current state:', {
+              productsCount: madeInNepalProducts.length,
+              isLoading: madeInNepalLoading,
+              hasError: !!madeInNepalError,
+              error: madeInNepalError,
+              products: madeInNepalProducts
+            });
+            
+            return madeInNepalProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {madeInNepalProducts.slice(0, 8).map((p) => (
+                <div
+                  key={p.id}
+                  className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 cursor-pointer"
+                  onClick={() => navigate(`/marketplace/${p.id}`)}
+                >
+                  <div className="aspect-square w-full overflow-hidden">
+                    <img 
+                      src={p.product_details?.images?.[0]?.image ?? 'https://via.placeholder.com/150'} 
+                      alt={p.product_details?.name} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="text-sm font-semibold line-clamp-2 text-neutral-900">{p.product_details?.name}</h3>
+                    <div className="mt-2 text-xs text-neutral-500">Rs. {p.discounted_price ?? p.listed_price}</div>
+                    <div className="mt-2 flex items-center gap-1 text-xs text-red-600 font-medium">
+                      <span>🇳🇵</span>
+                      <span>Made in Nepal</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : madeInNepalLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-neutral-100 rounded-xl h-64 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-neutral-600">
+                {madeInNepalError ? madeInNepalError : 'No Made in Nepal products available at the moment'}
+              </p>
+              <p className="text-neutral-400 text-xs mt-2">
+                Debug: Products array length: {madeInNepalProducts.length}, Loading: {madeInNepalLoading.toString()}, Error: {madeInNepalError || 'None'}
+              </p>
+            </div>
+          );
+          })()}
+
+          {madeInNepalProducts.length > 8 && (
+            <div className="text-center mt-6">
+              <button
+                onClick={() => navigate('/marketplace/all-products?made_in_nepal=true')}
+                className="bg-red-600 text-white px-6 py-2 rounded-full font-medium hover:bg-red-700 transition-colors"
+              >
+                View All Made in Nepal Products
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Injected CategorySection (user-provided) - renders 4 category cards in a single responsive row */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
         {/* Section Header */}
@@ -1133,7 +1260,7 @@ const Marketplace: React.FC = () => {
                       className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
                         item.product_details.stock === 0
                           ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
-                          : 'bg-accent-success-600 text-white hover:bg-accent-success-700 hover:shadow-md'
+                          : 'bg-orange-600 text-white hover:bg-accent-success-700 hover:shadow-md'
                       }`}
                     >
                       <ShoppingCart className="w-4 h-4" />
