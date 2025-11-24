@@ -9,6 +9,7 @@ import { Toaster } from './components/ui/toaster';
 import FeaturedSelectionPage from './components/FeaturedSelectionPage';
 import Deals from './components/Deals';
 import FlashSale from './components/FlashSale';
+import CategoryProducts from './components/CategoryProducts';
 
 import Home from './components/Home';
 import AddProducer from './components/AddProducer';
@@ -97,6 +98,8 @@ const publicRoutes = [
   { path: '/marketplace', element: <Navigate to="/" replace /> },
   { path: '/flash-sale', element: <FlashSale /> },
   { path: '/deals', element: <Deals /> },
+  { path: '/marketplace/categories/:categorySlug', element: <CategoryProducts /> },
+  { path: '/marketplace/categories/:categorySlug/:subcategorySlug', element: <CategoryProducts /> },
   { path: '/marketplace/all-products', element: <MarketplaceAllProducts /> },
   { path: '/marketplace/:productId', element: <ProductPage /> },
   { path: '/about', element: <AboutUs /> },

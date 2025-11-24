@@ -68,10 +68,10 @@ const FeaturedProducts: React.FC<{ products?: any[] }> = ({ products: initialPro
             <div className="p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded-full">{item.product_details?.category_details}</span>
-                <div className="flex items-center gap-1 text-sm text-neutral-600">
+                {/* <div className="flex items-center gap-1 text-sm text-neutral-600">
                   <Star className="w-4 h-4 text-yellow-400" />
                   <span>{(item.average_rating || 0).toFixed(1)}</span>
-                </div>
+                </div> */}
               </div>
 
               <h3 className="font-semibold text-neutral-900 line-clamp-2">{item.product_details?.name}</h3>

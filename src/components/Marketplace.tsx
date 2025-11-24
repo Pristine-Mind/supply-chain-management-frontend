@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { categoryApi, subcategoryApi, subSubcategoryApi } from '../api/categoryApi';
+import { categoryApi } from '../api/categoryApi';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import * as Select from '@radix-ui/react-select';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, Check, User, ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import FeaturedProducts from './FeaturedProducts';
 import CategoryMenu from './CategoryMenu';
 import SearchSuggestions from './SearchSuggestions';
+import { createSlug } from '../utils/slugUtils';
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -95,14 +95,8 @@ const Marketplace: React.FC = () => {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
   // Dynamic category hierarchy state
-  const [categories, setCategories] = useState<Array<{ id: number; name: string; code: string }>>([]);
   const [categoryHierarchy, setCategoryHierarchy] = useState<any[]>([]);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
-  const [subcategories, setSubcategories] = useState<Array<{ id: number; name: string; code: string }>>([]);
-  const [subSubcategories, setSubSubcategories] = useState<Array<{ id: number; name: string; code: string }>>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
-  const [selectedSubSubcategoryId, setSelectedSubSubcategoryId] = useState<number | null>(null);
   
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -170,33 +164,35 @@ const Marketplace: React.FC = () => {
     setLoading(true);
     setProductsError('');
     try {
+      const params: Record<string, any> = {
+        limit: itemsPerPage,
+        offset: (page - 1) * itemsPerPage,
+      };
+      
+      // Include price filters
+      if (minPrice) params.min_price = minPrice;
+      if (maxPrice) params.max_price = maxPrice;
+      if (minOrder) params.min_order_quantity = minOrder;
+      
+      // Include location and business type filters
+      if (selectedCity) params.city = selectedCity;
+      if (selectedBusinessType) params.profile_type = selectedBusinessType;
+
+
       // If there's a debounced query string, call the dedicated search endpoint
       if (debouncedQuery && debouncedQuery.trim() !== '') {
-        const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?keyword=${encodeURIComponent(
-          debouncedQuery.trim()
-        )}`;
-        const { data } = await axios.get(searchUrl);
+        params.keyword = debouncedQuery.trim();
+        const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/`;
+        const { data } = await axios.get(searchUrl, { params });
         setProducts(data.results || []);
         setTotalCount(data.count || (data.results || []).length || 0);
         setLoading(false);
         return;
       }
 
-      const params: Record<string, any> = {
-        limit: itemsPerPage,
-        offset: (page - 1) * itemsPerPage,
-      };
-      // Include category filters when present (use the same param names as MarketplaceAllProducts)
-      if (selectedCategoryId) params.category_id = selectedCategoryId;
-      if (selectedSubcategoryId) params.subcategory_id = selectedSubcategoryId;
-      if (selectedSubSubcategoryId) params.sub_subcategory_id = selectedSubSubcategoryId;
-      // ...existing code...
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
-        {
-          params,
-        }
-      );
+      // Regular marketplace endpoint for category filtering without search
+      const marketplaceUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`;
+      const { data } = await axios.get(marketplaceUrl, { params });
       setProducts(data.results);
       setTotalCount(data.count || 0);
     } catch {
@@ -249,40 +245,24 @@ const Marketplace: React.FC = () => {
   };
 
   const fetchMadeInNepal = async () => {
-    console.log('🇳🇵 [Made in Nepal] Starting fetch...');
     setMadeInNepalLoading(true);
     setMadeInNepalError('');
     
     try {
       const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/made-in-nepal/`;
-      console.log('🇳🇵 [Made in Nepal] API URL:', url);
-      console.log('🇳🇵 [Made in Nepal] Environment variable VITE_REACT_APP_API_URL:', import.meta.env.VITE_REACT_APP_API_URL);
       
       const response = await axios.get(url, { timeout: 8000 });
-      console.log('🇳🇵 [Made in Nepal] Raw response:', response);
-      console.log('🇳🇵 [Made in Nepal] Response status:', response.status);
-      console.log('🇳🇵 [Made in Nepal] Response data:', response.data);
       
       if (response.data && response.data.results) {
-        console.log('🇳🇵 [Made in Nepal] Products found:', response.data.results.length);
-        console.log('🇳🇵 [Made in Nepal] First few products:', response.data.results.slice(0, 3));
+      
         setMadeInNepalProducts(response.data.results);
       } else {
-        console.warn('🇳🇵 [Made in Nepal] No results in response data:', response.data);
         setMadeInNepalProducts([]);
       }
     } catch (error: any) {
-      console.error('🇳🇵 [Made in Nepal] Error fetching products:', error);
-      console.error('🇳🇵 [Made in Nepal] Error details:', {
-        message: error?.message,
-        response: error?.response,
-        status: error?.response?.status,
-        data: error?.response?.data
-      });
       setMadeInNepalError('Error fetching Made in Nepal products');
     } finally {
       setMadeInNepalLoading(false);
-      console.log('🇳🇵 [Made in Nepal] Fetch completed');
     }
   };
 
@@ -309,39 +289,14 @@ const Marketplace: React.FC = () => {
 
   // Fetch categories on mount
   useEffect(() => {
-    categoryApi.getCategories().then(setCategories).catch(() => setCategories([]));
     categoryApi.getCategoryHierarchy().then(setCategoryHierarchy).catch(() => setCategoryHierarchy([]));
   }, []);
 
-  // Fetch subcategories when category changes
-  useEffect(() => {
-    if (selectedCategoryId) {
-      subcategoryApi.getSubcategories(selectedCategoryId).then(setSubcategories).catch(() => setSubcategories([]));
-      setSelectedSubcategoryId(null);
-      setSubSubcategories([]);
-      setSelectedSubSubcategoryId(null);
-    } else {
-      setSubcategories([]);
-      setSelectedSubcategoryId(null);
-      setSubSubcategories([]);
-      setSelectedSubSubcategoryId(null);
-    }
-  }, [selectedCategoryId]);
 
-  // Fetch sub-subcategories when subcategory changes
-  useEffect(() => {
-    if (selectedSubcategoryId) {
-      subSubcategoryApi.getSubSubcategories(selectedSubcategoryId).then(setSubSubcategories).catch(() => setSubSubcategories([]));
-      setSelectedSubSubcategoryId(null);
-    } else {
-      setSubSubcategories([]);
-      setSelectedSubSubcategoryId(null);
-    }
-  }, [selectedSubcategoryId]);
 
   useEffect(() => {
     fetchMarketplaceProducts(1);
-  }, [debouncedQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
+  }, [debouncedQuery, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
 
   useEffect(() => {
     // Fetch all trending section data on component mount for immediate loading
@@ -357,12 +312,6 @@ const Marketplace: React.FC = () => {
 
   // Debug effect to track Made in Nepal products changes
   useEffect(() => {
-    console.log('🇳🇵 [Made in Nepal State Change] Products updated:', {
-      count: madeInNepalProducts.length,
-      products: madeInNepalProducts,
-      loading: madeInNepalLoading,
-      error: madeInNepalError
-    });
   }, [madeInNepalProducts, madeInNepalLoading, madeInNepalError]);
 
   useEffect(() => {
@@ -390,7 +339,6 @@ const Marketplace: React.FC = () => {
       }
       await addToCart(product);
     } catch (error) {
-      console.error('Failed to add to cart:', error);
       alert('Failed to add item to cart. Please try again.');
     }
   };
@@ -413,7 +361,6 @@ const Marketplace: React.FC = () => {
                 try {
                   await addToCart(pendingProduct);
                 } catch (e) {
-                  console.error('Add to cart after login failed:', e);
                 } finally {
                   setPendingProduct(null);
                 }
@@ -596,23 +543,29 @@ const Marketplace: React.FC = () => {
                       <CategoryMenu
                         categories={categoryHierarchy}
                         onSelect={(categoryId?: any, subcategoryId?: any) => {
-                          // update selected filters based on choice
-                          const catId = categoryId ? Number(categoryId) : null;
-                          const subId = subcategoryId ? Number(subcategoryId) : null;
-                          setSelectedCategoryId(catId);
-                          setSelectedSubcategoryId(subId);
-                          // clear deeper selection
-                          setSelectedSubSubcategoryId(null);
-
                           // close the menu
                           setShowCategoryMenu(false);
 
-                          // Redirect to the full products page with applied filters so URL shares the state
-                          const qp: string[] = [];
-                          if (catId) qp.push(`category_id=${encodeURIComponent(catId.toString())}`);
-                          if (subId) qp.push(`subcategory_id=${encodeURIComponent(subId.toString())}`);
-                          const queryString = qp.length ? `?${qp.join('&')}` : '';
-                          navigate(`/marketplace/all-products${queryString}`);
+                          // Find category and subcategory names for URL
+                          const category = categoryHierarchy.find(cat => cat.id === categoryId);
+                          if (!category) return;
+                          
+                          const categorySlug = createSlug(category.name);
+                          
+                          if (subcategoryId) {
+                            // Find subcategory name
+                            const subcategory = category.subcategories?.find((sub: any) => sub.id === subcategoryId);
+                            if (subcategory) {
+                              const subcategorySlug = createSlug(subcategory.name);
+                              navigate(`/marketplace/categories/${categorySlug}/${subcategorySlug}`);
+                            } else {
+                              // Fallback to category only
+                              navigate(`/marketplace/categories/${categorySlug}`);
+                            }
+                          } else {
+                            // Category only
+                            navigate(`/marketplace/categories/${categorySlug}`);
+                          }
                         }}
                       />
                     </div>
@@ -959,14 +912,6 @@ const Marketplace: React.FC = () => {
           </div>
 
           {(() => {
-            console.log('🇳🇵 [Made in Nepal Render] Current state:', {
-              productsCount: madeInNepalProducts.length,
-              isLoading: madeInNepalLoading,
-              hasError: !!madeInNepalError,
-              error: madeInNepalError,
-              products: madeInNepalProducts
-            });
-            
             return madeInNepalProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {madeInNepalProducts.slice(0, 8).map((p) => (
@@ -1167,17 +1112,6 @@ const Marketplace: React.FC = () => {
                         {Math.round(item.percent_off)}% OFF
                       </div>
                     )}
-                    
-                    {/* Wishlist Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Add wishlist functionality here
-                      }}
-                      className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-all duration-200 shadow-sm z-10"
-                    >
-                      <Heart className="w-4 h-4 text-neutral-400 hover:text-accent-error-500 transition-colors" />
-                    </button>
                     
                     <img
                       src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
