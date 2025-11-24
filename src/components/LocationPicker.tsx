@@ -4,13 +4,15 @@ interface LocationPickerProps {
   initialCenter: { lat: number; lng: number }
   zoom?: number
   onSelect: (lat: number, lng: number) => void
+  showMarker?: boolean
 }
 
-const LocationPicker: React.FC<LocationPickerProps> = ({ initialCenter, zoom = 13, onSelect }) => {
+const LocationPicker: React.FC<LocationPickerProps> = ({ initialCenter, zoom = 13, onSelect, showMarker = false }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapInstanceRef = useRef<any | null>(null)
   const markerRef = useRef<any | null>(null)
   const containerIdRef = useRef<string>(`galli-map-${Math.random().toString(36).slice(2)}`)
+  const panoIdRef = useRef<string>(`galli-pano-${Math.random().toString(36).slice(2)}`)
   const accessToken = import.meta.env.VITE_GALLI_API_KEY as string | undefined
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<any[]>([])
@@ -38,152 +40,199 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialCenter, zoom = 1
 
   useEffect(() => {
     (async () => {
-      if (!mapContainerRef.current) return
-      if (!accessToken) {
-        setError('Galli access token is missing. Please set VITE_GALLI_API_KEY.')
-        return
-      }
-      await loadScript()
-      const GalliMapPlugin = (window as any).GalliMapPlugin
-      if (!GalliMapPlugin) return
+      if (!mapContainerRef.current) return;
+      
+      try {
+        await loadScript();
+        const GalliMapPlugin = (window as any).GalliMapPlugin;
+        if (!GalliMapPlugin) return;
 
-      const customClick = (event: any) => {
-        const lng = event?.lngLat?.lng
-        const lat = event?.lngLat?.lat
-        if (typeof lat === 'number' && typeof lng === 'number') {
-          // Drop or move pin marker using plugin API
-          try {
-            if (markerRef.current && mapInstanceRef.current?.removePinMarker) {
-              mapInstanceRef.current.removePinMarker(markerRef.current)
-              markerRef.current = null
+        // GalliMaps Options (based on documentation example)
+        const galliMapsObject = {
+          accessToken: accessToken || '',
+          map: { 
+            container: containerIdRef.current, 
+            center: [initialCenter.lat, initialCenter.lng], 
+            zoom: Math.max(5, Math.min(25, zoom)), 
+            maxZoom: 25, 
+            minZoom: 5,
+            clickable: true
+          },
+          pano: { container: panoIdRef.current }
+        };
+
+        // Initialize Gallimaps Object
+        const map = new GalliMapPlugin(galliMapsObject);
+        mapInstanceRef.current = map;
+        setPluginReady(true);
+
+        // Add click handler for interactive marker placement
+        if (map && typeof map.on === 'function') {
+          map.on('click', (event: any) => {
+            const lat = event?.lngLat?.lat;
+            const lng = event?.lngLat?.lng;
+            if (typeof lat === 'number' && typeof lng === 'number') {
+              // Remove existing marker
+              if (markerRef.current && map.removePinMarker) {
+                map.removePinMarker(markerRef.current);
+                markerRef.current = null;
+              }
+              
+              // Initialize marker object (based on documentation)
+              const pinMarkerObject = {
+                color: "#f97316", // Orange hex color
+                draggable: false,
+                latLng: [lat, lng]
+              };
+
+              // Display a pin marker on the map
+              const marker = map.displayPinMarker(pinMarkerObject);
+              if (marker) {
+                markerRef.current = marker;
+              }
+              
+              onSelect(lat, lng);
             }
-            const pinMarkerObject = {
-              color: '#f97316',
-              draggable: false,
-              latLng: [lat, lng],
-            }
-            if (mapInstanceRef.current?.displayPinMarker) {
-              markerRef.current = mapInstanceRef.current.displayPinMarker(pinMarkerObject)
-            }
-          } catch {}
-          onSelect(lat, lng)
+          });
         }
-      }
 
-      const options = {
-        accessToken: accessToken || '',
-        map: {
-          container: containerIdRef.current,
-          center: [initialCenter.lat, initialCenter.lng],
-          zoom: Math.max(5, Math.min(25, zoom)),
-          maxZoom: 25,
-          minZoom: 5,
-          clickable: true,
-        },
-        customClickFunctions: [customClick],
-      }
+        // Place initial marker if showMarker is true
+        if (showMarker) {
+          setTimeout(() => {
+            renderInitialMarker();
+          }, 100);
+        }
 
-      const map = new GalliMapPlugin(options)
-      mapInstanceRef.current = map
-      setPluginReady(true)
-    })()
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        setError('Failed to initialize map');
+      }
+    })();
 
     return () => {
       try {
         if (markerRef.current && mapInstanceRef.current?.removePinMarker) {
-          mapInstanceRef.current.removePinMarker(markerRef.current)
+          mapInstanceRef.current.removePinMarker(markerRef.current);
         }
       } catch {}
-      markerRef.current = null
-      mapInstanceRef.current = null
-    }
-  }, [])
+      markerRef.current = null;
+      mapInstanceRef.current = null;
+    };
+  }, []);
 
-  // Autocomplete: debounce query and fetch suggestions
-  useEffect(() => {
-    const map = mapInstanceRef.current
-    if (!map || !pluginReady) return
-    if (debounceRef.current) {
-      window.clearTimeout(debounceRef.current)
-      debounceRef.current = null
-    }
-    if (!query || query.trim().length < 3) {
-      setSuggestions([])
-      setError(null)
-      return
-    }
-    setLoading(true)
-    debounceRef.current = window.setTimeout(async () => {
-      try {
-        const res = await map.autoCompleteSearch?.(query)
-        setSuggestions(Array.isArray(res) ? res : [])
-        setError(null)
-      } catch (e: any) {
-        setError(e?.message || 'Failed to fetch suggestions')
-      } finally {
-        setLoading(false)
-      }
-    }, 300)
-    return () => {
-      if (debounceRef.current) {
-        window.clearTimeout(debounceRef.current)
-        debounceRef.current = null
-      }
-    }
-  }, [query, pluginReady])
-
-  const handleSelectSuggestion = async (item: any) => {
-    const map = mapInstanceRef.current
-    if (!map) return
+  function renderInitialMarker() {
+    const map = mapInstanceRef.current;
+    if (!map || !showMarker) return;
+    
     try {
-      if (typeof map.searchData === 'function') {
-        try {
-          await map.searchData(item)
-        } catch {
-          const name: string = item?.name || item?.address || item?.display_name || ''
-          if (name) await map.searchData(name)
-        }
+      // Remove existing marker
+      if (markerRef.current && map.removePinMarker) {
+        map.removePinMarker(markerRef.current);
+        markerRef.current = null;
       }
-      const rawLat = item?.lat ?? item?.latitude
-      const rawLng = item?.lng ?? item?.longitude
-      const lat = typeof rawLat === 'string' ? parseFloat(rawLat) : rawLat
-      const lng = typeof rawLng === 'string' ? parseFloat(rawLng) : rawLng
-      if (typeof lat === 'number' && typeof lng === 'number') {
-        if (typeof map.setCenter === 'function') {
-          map.setCenter([lat, lng])
-        }
-        try {
-          if (markerRef.current && mapInstanceRef.current?.removePinMarker) {
-            mapInstanceRef.current.removePinMarker(markerRef.current)
-            markerRef.current = null
-          }
-          const pinMarkerObject = {
-            color: '#f97316',
-            draggable: false,
-            latLng: [lat, lng],
-          }
-          if (mapInstanceRef.current?.displayPinMarker) {
-            markerRef.current = mapInstanceRef.current.displayPinMarker(pinMarkerObject)
-          }
-        } catch {}
-        onSelect(lat, lng)
+      
+      // Initialize marker object (based on documentation)
+      const pinMarkerObject = {
+        color: "#f97316", // Orange hex color
+        draggable: false,
+        latLng: [initialCenter.lat, initialCenter.lng]
+      };
+
+      // Display a pin marker on the map
+      const marker = map.displayPinMarker(pinMarkerObject);
+      if (marker) {
+        markerRef.current = marker;
       }
-    } catch (e) {}
-    setQuery('')
-    setSuggestions([])
+    } catch (error) {
+      console.error('Error placing initial marker:', error);
+    }
   }
 
+  // Effect to update marker when coordinates change
   useEffect(() => {
-    const map = mapInstanceRef.current
+    if (pluginReady && mapInstanceRef.current) {
+      setTimeout(() => {
+        renderInitialMarker();
+      }, 50);
+    }
+  }, [showMarker, pluginReady, initialCenter.lat, initialCenter.lng]);
+
+  // Autocomplete search functionality
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !pluginReady) return;
+    if (debounceRef.current) {
+      window.clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (!query || query.trim().length < 3) {
+      setSuggestions([]);
+      setError(null);
+      return;
+    }
+    setLoading(true);
+    debounceRef.current = window.setTimeout(async () => {
+      try {
+        const res = await map.autoCompleteSearch?.(query);
+        setSuggestions(Array.isArray(res) ? res : []);
+        setError(null);
+      } catch (e) {
+        setError('Search failed');
+        setSuggestions([]);
+      }
+      setLoading(false);
+    }, 300);
+  }, [query, pluginReady]);
+
+  const handleSelectSuggestion = async (s: any) => {
+    try {
+      if (s?.geometry?.coordinates && Array.isArray(s.geometry.coordinates) && s.geometry.coordinates.length >= 2) {
+        const lng = s.geometry.coordinates[0];
+        const lat = s.geometry.coordinates[1];
+        
+        if (typeof lat === 'number' && typeof lng === 'number') {
+          const map = mapInstanceRef.current;
+          if (map) {
+            // Remove existing marker
+            if (markerRef.current && map.removePinMarker) {
+              map.removePinMarker(markerRef.current);
+              markerRef.current = null;
+            }
+            
+            // Initialize marker object
+            const pinMarkerObject = {
+              color: "#f97316",
+              draggable: false,
+              latLng: [lat, lng]
+            };
+
+            // Display a pin marker on the map
+            const marker = map.displayPinMarker(pinMarkerObject);
+            if (marker) {
+              markerRef.current = marker;
+            }
+          }
+          onSelect(lat, lng);
+        }
+      }
+    } catch (e) {
+      console.warn('Error handling suggestion:', e);
+    }
+    setQuery('');
+    setSuggestions([]);
+  };
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
     try {
       if (map && typeof map.setCenter === 'function') {
-        map.setCenter([initialCenter.lat, initialCenter.lng])
+        map.setCenter([initialCenter.lat, initialCenter.lng]);
       }
       if (map && typeof map.setZoom === 'function') {
-        map.setZoom(Math.max(5, Math.min(25, zoom)))
+        map.setZoom(Math.max(5, Math.min(25, zoom)));
       }
     } catch {}
-  }, [initialCenter.lat, initialCenter.lng, zoom])
+  }, [initialCenter.lat, initialCenter.lng, zoom]);
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
@@ -221,9 +270,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ initialCenter, zoom = 1
           <div className="mt-2 text-xs text-gray-600">Initializing Galli map…</div>
         )}
       </div>
+      
+      {/* Map container */}
       <div id={containerIdRef.current} ref={mapContainerRef} style={{ height: '100%', width: '100%' }} />
+      
+      {/* Hidden pano container (required by GalliMaps) */}
+      <div id={panoIdRef.current} style={{ display: 'none' }} />
     </div>
-  )
-}
+  );
+};
 
-export default LocationPicker
+export default LocationPicker;

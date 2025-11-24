@@ -238,17 +238,25 @@ const MarketplaceAllProducts: React.FC = () => {
       
       // Category filters - prioritize hierarchy filters over legacy
       if (selectedCategoryId) {
+        // Try both parameter names to see which one works
         params.append('category', selectedCategoryId.toString());
+        params.append('category_id', selectedCategoryId.toString());
+        console.log('🔍 Applied category filter:', selectedCategoryId);
       } else if (selectedCategory !== 'All') {
         params.append('category', selectedCategory);
+        console.log('🔍 Applied legacy category filter:', selectedCategory);
       }
       
       if (selectedSubcategoryId) {
         params.append('subcategory', selectedSubcategoryId.toString());
+        params.append('subcategory_id', selectedSubcategoryId.toString());
+        console.log('🔍 Applied subcategory filter:', selectedSubcategoryId);
       }
       
       if (selectedSubSubcategoryId) {
         params.append('sub_subcategory', selectedSubSubcategoryId.toString());
+        params.append('sub_subcategory_id', selectedSubSubcategoryId.toString());
+        console.log('🔍 Applied sub_subcategory filter:', selectedSubSubcategoryId);
       }
       
       // Location filter
@@ -304,9 +312,23 @@ const MarketplaceAllProducts: React.FC = () => {
       }
 
       const apiUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?${params.toString()}`;
+      console.log('🔍 Current filter state:', {
+        selectedCategoryId,
+        selectedSubcategoryId,
+        selectedSubSubcategoryId,
+        searchTerm,
+        debouncedSearchTerm
+      });
       console.log('Fetching products from:', apiUrl);
       
       const response = await axios.get(apiUrl);
+      
+      console.log('🔍 API Response:', {
+        url: apiUrl,
+        resultCount: response.data?.results?.length || 0,
+        totalCount: response.data?.count || 0,
+        hasResults: Array.isArray(response.data?.results)
+      });
       
       if (response.data && Array.isArray(response.data.results)) {
         const results = response.data.results;
@@ -343,6 +365,15 @@ const MarketplaceAllProducts: React.FC = () => {
 
   // Effects
   useEffect(() => {
+    console.log('🔍 fetchProducts triggered by state change:', {
+      currentPage, 
+      sortBy, 
+      selectedCategory, 
+      selectedCategoryId,
+      selectedSubcategoryId,
+      selectedSubSubcategoryId,
+      debouncedSearchTerm
+    });
     fetchProducts();
   }, [
     currentPage, 
@@ -383,10 +414,13 @@ const MarketplaceAllProducts: React.FC = () => {
 
     if (categoryIdParam) {
       const cid = Number(categoryIdParam);
+      console.log('🔍 URL category_id parameter:', categoryIdParam, 'parsed as:', cid);
       if (!Number.isNaN(cid) && cid !== selectedCategoryId) {
+        console.log('🔍 Setting selectedCategoryId to:', cid);
         setSelectedCategoryId(cid);
       }
     } else if (selectedCategoryId) {
+      console.log('🔍 No category_id in URL, clearing selectedCategoryId');
       setSelectedCategoryId(null);
     }
 
@@ -430,6 +464,22 @@ const MarketplaceAllProducts: React.FC = () => {
 
   // When sidebar hierarchical category selections change, sync them into URL search params
   useEffect(() => {
+    // Skip URL sync if state was just set from URL to avoid infinite loop
+    const categoryIdParam = searchParams.get('category_id');
+    const subcategoryIdParam = searchParams.get('subcategory_id');
+    const subSubcategoryIdParam = searchParams.get('sub_subcategory_id');
+    
+    const urlCategoryId = categoryIdParam ? Number(categoryIdParam) : null;
+    const urlSubcategoryId = subcategoryIdParam ? Number(subcategoryIdParam) : null;
+    const urlSubSubcategoryId = subSubcategoryIdParam ? Number(subSubcategoryIdParam) : null;
+    
+    // Only update URL if state differs from what's in URL (user changed filters via UI)
+    if (selectedCategoryId === urlCategoryId && 
+        selectedSubcategoryId === urlSubcategoryId && 
+        selectedSubSubcategoryId === urlSubSubcategoryId) {
+      return; // State matches URL, no sync needed
+    }
+
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     // Update category hierarchy params
     if (selectedCategoryId) {
