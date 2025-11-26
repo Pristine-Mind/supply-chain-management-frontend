@@ -5,6 +5,7 @@ import axios, { isAxiosError } from 'axios';
 import { FaEdit, FaPlus, FaDownload, FaSearch, FaTimes, FaCheck, FaImage } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { CategorySelector } from './CategoryHierarchy';
+import { createMarketplaceProductFromProduct } from '../api/marketplaceApi';
 
 interface ProductImage {
   id: number;
@@ -26,6 +27,9 @@ interface Product {
   producer: string;
   images: ProductImage[];
   category_details: string;
+  size?: string | null;
+  color?: string | null;
+  additional_information?: string | null;
   avg_daily_demand?: number;
   stddev_daily_demand?: number;
   safety_stock?: number;
@@ -44,6 +48,40 @@ interface Category {
   value: string;
   label: string;
 }
+
+// Size and Color choices
+const SIZE_CHOICES = [
+  { value: 'XS', label: 'Extra Small' },
+  { value: 'S', label: 'Small' },
+  { value: 'M', label: 'Medium' },
+  { value: 'L', label: 'Large' },
+  { value: 'XL', label: 'Extra Large' },
+  { value: 'XXL', label: 'Double Extra Large' },
+  { value: 'XXXL', label: 'Triple Extra Large' },
+  { value: 'ONE_SIZE', label: 'One Size' },
+  { value: 'CUSTOM', label: 'Custom Size' },
+];
+
+const COLOR_CHOICES = [
+  { value: 'RED', label: 'Red' },
+  { value: 'BLUE', label: 'Blue' },
+  { value: 'GREEN', label: 'Green' },
+  { value: 'YELLOW', label: 'Yellow' },
+  { value: 'BLACK', label: 'Black' },
+  { value: 'WHITE', label: 'White' },
+  { value: 'GRAY', label: 'Gray' },
+  { value: 'BROWN', label: 'Brown' },
+  { value: 'ORANGE', label: 'Orange' },
+  { value: 'PURPLE', label: 'Purple' },
+  { value: 'PINK', label: 'Pink' },
+  { value: 'NAVY', label: 'Navy' },
+  { value: 'BEIGE', label: 'Beige' },
+  { value: 'GOLD', label: 'Gold' },
+  { value: 'SILVER', label: 'Silver' },
+  { value: 'MULTICOLOR', label: 'Multicolor' },
+  { value: 'TRANSPARENT', label: 'Transparent' },
+  { value: 'CUSTOM', label: 'Custom Color' },
+];
 
 interface ErrorMessages {
   producer?: string[];
@@ -77,6 +115,9 @@ const Products: React.FC = () => {
     reorder_level: '10',
     is_active: true,
     category: '', // Legacy category field for backward compatibility
+    size: '',
+    color: '',
+    additional_information: '',
   });
   
   // New category hierarchy state
@@ -99,6 +140,9 @@ const Products: React.FC = () => {
   const [producerSearchTerm, setProducerSearchTerm] = useState('');
   const [showProducerList, setShowProducerList] = useState(false);
   const producerSearchRef = useRef<HTMLDivElement>(null);
+  const [creatingMarketplaceProduct, setCreatingMarketplaceProduct] = useState<number | null>(null);
+  const [marketplaceSuccess, setMarketplaceSuccess] = useState('');
+  const [marketplaceError, setMarketplaceError] = useState('');
 
   const categoryOptions: Category[] = [
     { value: 'FA', label: t('fashion_apparel') },
@@ -318,6 +362,9 @@ const Products: React.FC = () => {
       reorder_level: product.reorder_level.toString(),
       is_active: product.is_active,
       category: product.category,
+      size: product.size || '',
+      color: product.color || '',
+      additional_information: product.additional_information || '',
     });
     setExistingImages(product.images);
     setFormVisible(true);
@@ -339,6 +386,9 @@ const Products: React.FC = () => {
       reorder_level: '10',
       is_active: true,
       category: '',
+      size: '',
+      color: '',
+      additional_information: '',
     });
     
     // Reset category hierarchy state
@@ -403,6 +453,23 @@ const Products: React.FC = () => {
     setStockUpdateError('');
     setStockUpdateSuccess('');
     setQuickUpdateStock({ id: null, value: '' });
+  };
+
+  const createMarketplaceProduct = async (productId: number) => {
+    setCreatingMarketplaceProduct(productId);
+    setMarketplaceError('');
+    setMarketplaceSuccess('');
+    
+    try {
+      const response = await createMarketplaceProductFromProduct({ product_id: productId });
+      setMarketplaceSuccess(response.message);
+      setTimeout(() => setMarketplaceSuccess(''), 5000);
+    } catch (error) {
+      setMarketplaceError(error instanceof Error ? error.message : 'Failed to create marketplace product');
+      setTimeout(() => setMarketplaceError(''), 5000);
+    } finally {
+      setCreatingMarketplaceProduct(null);
+    }
   };
 
   return (
@@ -561,6 +628,30 @@ const Products: React.FC = () => {
                   </>
                 )}
               </div>
+              
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => createMarketplaceProduct(product.id)}
+                  disabled={creatingMarketplaceProduct === product.id || !product.is_active}
+                  className={`flex-1 font-medium py-2 px-3 rounded-lg transition-colors text-sm flex items-center justify-center ${
+                    !product.is_active 
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                  }`}
+                >
+                  {creatingMarketplaceProduct === product.id ? (
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <>
+                      <FaPlus className="mr-1" size={12} />
+                      Push To Marketplace
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -601,7 +692,26 @@ const Products: React.FC = () => {
                   <span className="text-caption font-medium text-neutral-500">{t('reorder_level')}</span>
                   <p className="text-body text-neutral-900 mt-1">{viewingProductId.reorder_level}</p>
                 </div>
+                {viewingProductId.size && (
+                  <div>
+                    <span className="text-caption font-medium text-neutral-500">Size</span>
+                    <p className="text-body text-neutral-900 mt-1">{SIZE_CHOICES.find(choice => choice.value === viewingProductId.size)?.label || viewingProductId.size}</p>
+                  </div>
+                )}
+                {viewingProductId.color && (
+                  <div>
+                    <span className="text-caption font-medium text-neutral-500">Color</span>
+                    <p className="text-body text-neutral-900 mt-1">{COLOR_CHOICES.find(choice => choice.value === viewingProductId.color)?.label || viewingProductId.color}</p>
+                  </div>
+                )}
               </div>
+              
+              {viewingProductId.additional_information && (
+                <div>
+                  <span className="text-caption font-medium text-neutral-500">Additional Information</span>
+                  <div className="text-body text-neutral-900 mt-1 whitespace-pre-wrap">{viewingProductId.additional_information}</div>
+                </div>
+              )}
               
               <div>
                 <span className="text-caption font-medium text-neutral-500">{t('description')}</span>
@@ -700,6 +810,36 @@ const Products: React.FC = () => {
                   </div>
                 </div>
               )}
+              
+              <div className="pt-6 border-t border-neutral-200">
+                <button
+                  onClick={() => {
+                    createMarketplaceProduct(viewingProductId.id);
+                    handleCloseModal();
+                  }}
+                  disabled={creatingMarketplaceProduct === viewingProductId.id || !viewingProductId.is_active}
+                  className={`w-full font-medium py-3 px-4 rounded-lg transition-colors text-sm flex items-center justify-center ${
+                    !viewingProductId.is_active 
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                  }`}
+                >
+                  {creatingMarketplaceProduct === viewingProductId.id ? (
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <>
+                      <FaPlus className="mr-2" size={16} />
+                      Create Marketplace Product
+                    </>
+                  )}
+                </button>
+                {!viewingProductId.is_active && (
+                  <p className="text-sm text-gray-500 mt-2 text-center">Product must be active to create marketplace listing</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -722,6 +862,12 @@ const Products: React.FC = () => {
               </div>}
               {success && <div className="p-4 bg-accent-success-50 border border-accent-success-200 rounded-lg">
                 <p className="text-accent-success-700 text-body">{success}</p>
+              </div>}
+              {marketplaceSuccess && <div className="p-4 bg-accent-success-50 border border-accent-success-200 rounded-lg">
+                <p className="text-accent-success-700 text-body">{marketplaceSuccess}</p>
+              </div>}
+              {marketplaceError && <div className="p-4 bg-accent-error-50 border border-accent-error-200 rounded-lg">
+                <p className="text-accent-error-700 text-body">{marketplaceError}</p>
               </div>}
               <div className="relative" ref={producerSearchRef}>
                 <label htmlFor="producer" className="block text-body font-medium text-neutral-700 mb-2">
@@ -920,6 +1066,63 @@ const Products: React.FC = () => {
                   {errorMessages.reorder_level && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.reorder_level[0]}</p>}
                 </div>
               </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="size" className="block text-body font-medium text-neutral-700 mb-2">
+                    Size
+                  </label>
+                  <select
+                    id="size"
+                    name="size"
+                    value={formData.size}
+                    onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">Select Size</option>
+                    {SIZE_CHOICES.map((choice) => (
+                      <option key={choice.value} value={choice.value}>
+                        {choice.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="color" className="block text-body font-medium text-neutral-700 mb-2">
+                    Color
+                  </label>
+                  <select
+                    id="color"
+                    name="color"
+                    value={formData.color}
+                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option value="">Select Color</option>
+                    {COLOR_CHOICES.map((choice) => (
+                      <option key={choice.value} value={choice.value}>
+                        {choice.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="additional_information" className="block text-body font-medium text-neutral-700 mb-2">
+                  Additional Information
+                </label>
+                <textarea
+                  id="additional_information"
+                  name="additional_information"
+                  value={formData.additional_information}
+                  onChange={(e) => setFormData({ ...formData, additional_information: e.target.value })}
+                  rows={4}
+                  placeholder="Enter any additional product information..."
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-vertical"
+                />
+              </div>
+              
               <div>
                 <label className="block text-body font-medium text-neutral-700 mb-3">
                   {t('active_status')}
