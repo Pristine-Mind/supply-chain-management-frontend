@@ -58,6 +58,9 @@ interface ProductDetails {
   created_at: string;
   updated_at: string;
   is_marketplace_created: boolean;
+  size?: string | null;
+  color?: string | null;
+  additional_information?: string | null;
   avg_daily_demand: number;
   stddev_daily_demand: number;
   safety_stock: number;
@@ -835,7 +838,27 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                             <span className="text-gray-600 font-medium">Lead Time</span>
                             <span className="text-gray-900 font-semibold">{product.product_details.lead_time_days} days</span>
                           </div>
+                          {product.product_details.size && (
+                            <div className="flex justify-between py-2 border-b border-gray-200">
+                              <span className="text-gray-600 font-medium">Size</span>
+                              <span className="text-gray-900 font-semibold">{product.product_details.size}</span>
+                            </div>
+                          )}
+                          {product.product_details.color && (
+                            <div className="flex justify-between py-2 border-b border-gray-200">
+                              <span className="text-gray-600 font-medium">Color</span>
+                              <span className="text-gray-900 font-semibold">{product.product_details.color}</span>
+                            </div>
+                          )}
                         </div>
+                        {product.product_details.additional_information && (
+                          <div className="mt-6 pt-4 border-t border-gray-200">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-3">Additional Information</h4>
+                            <div className="text-gray-700 leading-relaxed whitespace-pre-wrap bg-white p-4 rounded-lg border border-gray-200">
+                              {product.product_details.additional_information}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     
