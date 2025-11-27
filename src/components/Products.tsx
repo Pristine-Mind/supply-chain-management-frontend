@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import axios, { isAxiosError } from 'axios';
@@ -137,9 +137,6 @@ const Products: React.FC = () => {
   const [stockUpdateSuccess, setStockUpdateSuccess] = useState('');
   const [quickUpdateStock, setQuickUpdateStock] = useState<{ id: number | null, value: string }>({ id: null, value: '' });
   const [exportingProductId, setExportingProductId] = useState<number | null>(null);
-  const [producerSearchTerm, setProducerSearchTerm] = useState('');
-  const [showProducerList, setShowProducerList] = useState(false);
-  const producerSearchRef = useRef<HTMLDivElement>(null);
   const [creatingMarketplaceProduct, setCreatingMarketplaceProduct] = useState<number | null>(null);
   const [marketplaceSuccess, setMarketplaceSuccess] = useState('');
   const [marketplaceError, setMarketplaceError] = useState('');
@@ -161,6 +158,70 @@ const Products: React.FC = () => {
     setCategories(categoryOptions);
   }, [searchQuery, categoryFilter]);
 
+  // Map producer when producers are loaded and we have an editing product
+  useEffect(() => {
+    const editingProductStr = sessionStorage.getItem('editingProduct');
+    if (editingProductStr && producers.length > 0) {
+      const editingProduct = JSON.parse(editingProductStr);
+      
+      let selectedProducer = null;
+      let producerId = '';
+      
+      
+      if (editingProduct.producer) {
+        if (typeof editingProduct.producer === 'string') {
+          // Producer is a name string - find by name
+          selectedProducer = producers.find(p => p.name === editingProduct.producer);
+          
+          if (!selectedProducer) {
+            selectedProducer = producers.find(p => 
+              p.name.toLowerCase() === editingProduct.producer.toLowerCase()
+            );
+          }
+          
+          if (!selectedProducer) {
+            selectedProducer = producers.find(p => 
+              p.name.trim().toLowerCase() === editingProduct.producer.trim().toLowerCase()
+            );
+          }
+          
+          if (selectedProducer) {
+            producerId = selectedProducer.id.toString();
+          } else {
+          }
+        } else if (typeof editingProduct.producer === 'number') {
+          // Producer is an ID number - find by ID
+          selectedProducer = producers.find(p => p.id === editingProduct.producer);
+          
+          if (selectedProducer) {
+            producerId = selectedProducer.id.toString();
+          } else {
+          }
+        } else {
+        }
+        
+        // Update form data with the producer ID if found
+        if (selectedProducer) {
+          setFormData(prev => {
+            const newFormData = {
+              ...prev,
+              producer: producerId
+            };
+            return newFormData;
+          });
+          
+          // Also verify after a short delay
+          setTimeout(() => {
+          }, 100);
+        }
+      } else {
+      }
+      
+      // Clear the stored product since we've processed it
+      sessionStorage.removeItem('editingProduct');
+    }
+  }, [producers]);
+
   const fetchProducts = async (query = '', category = '') => {
     try {
       let url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}`;
@@ -181,9 +242,11 @@ const Products: React.FC = () => {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` },
       });
-      setProducers(response.data.results);
+      console.log('Producers API response:', response.data);
+      setProducers(response.data.results || response.data || []);
     } catch (error) {
       console.error(t('error_fetching_producers'), error);
+      setProducers([]); // Set empty array on error
     }
   };
 
@@ -351,8 +414,14 @@ const Products: React.FC = () => {
 
   const handleEdit = (product: Product) => {
     setEditingProductId(product.id);
+    
+    // Ensure producers are loaded before trying to map
+    if (producers.length === 0) {
+      fetchProducers();
+    }
+    
     setFormData({
-      producer: product.producer.toString(),
+      producer: '', // Will be set by useEffect after producers load
       name: product.name,
       description: product.description,
       sku: product.sku,
@@ -361,11 +430,21 @@ const Products: React.FC = () => {
       stock: product.stock.toString(),
       reorder_level: product.reorder_level.toString(),
       is_active: product.is_active,
-      category: product.category,
+      category: product.category || '',
       size: product.size || '',
       color: product.color || '',
       additional_information: product.additional_information || '',
     });
+    
+    // Store the product for producer mapping
+    sessionStorage.setItem('editingProduct', JSON.stringify(product));
+    
+    // Reset category hierarchy state to null for consistency
+    // TODO: If product has category/subcategory/sub_subcategory IDs in the future, set them here
+    setSelectedCategoryId(null);
+    setSelectedSubcategoryId(null);
+    setSelectedSubSubcategoryId(null);
+    
     setExistingImages(product.images);
     setFormVisible(true);
   };
@@ -397,7 +476,6 @@ const Products: React.FC = () => {
     setSelectedSubSubcategoryId(null);
     
     setImages(null);
-    setProducerSearchTerm('');
     setEditingProductId(null);
     setExistingImages([]);
     setDeletedImages([]);
@@ -481,6 +559,9 @@ const Products: React.FC = () => {
             <button
               onClick={() => {
                 resetForm();
+                if (producers.length === 0) {
+                  fetchProducers();
+                }
                 setFormVisible(true);
               }}
               className="flex items-center bg-primary-600 text-white px-6 py-3 rounded-xl hover:bg-primary-700 transition-colors shadow-sm text-sm font-medium"
@@ -869,50 +950,31 @@ const Products: React.FC = () => {
               {marketplaceError && <div className="p-4 bg-accent-error-50 border border-accent-error-200 rounded-lg">
                 <p className="text-accent-error-700 text-body">{marketplaceError}</p>
               </div>}
-              <div className="relative" ref={producerSearchRef}>
+              <div>
                 <label htmlFor="producer" className="block text-body font-medium text-neutral-700 mb-2">
                   {t('producer')} <span className="text-accent-error-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   id="producer"
                   name="producer"
-                  value={producerSearchTerm}
+                  value={formData.producer}
                   onChange={(e) => {
-                    setProducerSearchTerm(e.target.value);
-                    setShowProducerList(true);
+                    console.log('Producer dropdown changed to:', e.target.value);
+                    setFormData({ ...formData, producer: e.target.value });
                   }}
-                  onFocus={() => setShowProducerList(true)}
                   className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.producer ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}
-                  placeholder={t('search_farmer')}
                   required
-                />
-                {showProducerList && (
-                  <ul className="absolute z-10 bg-white border border-neutral-200 rounded-lg w-full max-h-48 overflow-y-auto mt-1 shadow-elevation-md">
-                    {producers
-                      .filter((producer) =>
-                        producer.name.toLowerCase().includes(producerSearchTerm.toLowerCase())
-                      )
-                      .map((producer) => (
-                        <li
-                          key={producer.id}
-                          onClick={() => {
-                            setFormData({ ...formData, producer: producer.id.toString() });
-                            setProducerSearchTerm(producer.name);
-                            setShowProducerList(false);
-                          }}
-                          className="px-4 py-3 hover:bg-neutral-50 cursor-pointer transition-colors text-body border-b border-neutral-100 last:border-b-0"
-                        >
-                          {producer.name}
-                        </li>
-                      ))}
-                    {producers.filter((producer) =>
-                      producer.name.toLowerCase().includes(producerSearchTerm.toLowerCase())
-                    ).length === 0 && (
-                      <li className="px-4 py-3 text-body text-neutral-500">{t('no_producers_found')}</li>
-                    )}
-                  </ul>
-                )}
+                >
+                  <option value="">Select Producer ({producers.length} available)</option>
+                  {producers.length === 0 && (
+                    <option value="" disabled>Loading producers...</option>
+                  )}
+                  {producers.map((producer) => (
+                    <option key={producer.id} value={producer.id.toString()}>
+                      {producer.name} (ID: {producer.id})
+                    </option>
+                  ))}
+                </select>
                 {errorMessages.producer && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.producer[0]}</p>}
               </div>
               

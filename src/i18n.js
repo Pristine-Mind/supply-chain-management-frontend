@@ -76,7 +76,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         is_active: "Is Active",
         existing_images: "Existing Images",
         upload_new_images: "Upload New Images",
-        search_farmer: "Search for a farmer...",
+        search_farmer: "Search for a producer...",
         no_producers_found: "No producers found",
         error_occurred_try_again: "An error occurred. Please try again.",
         failed_add_update_product: "Failed to add/update product. Please try again later.",
@@ -363,6 +363,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         exact_delivery_location: "Exact Delivery Location",
         location_confirmed: "Location Confirmed",
         precision: "Precision",
+        update_product: "Update Product",
       }
         
     },
@@ -732,6 +733,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
         exact_delivery_location: "सटीक वितरण स्थान",
         location_confirmed: "स्थान पुष्टि भयो",
         precision: "शुद्धता",
+        update_product: "उत्पादन अद्यावधिक गर्नुहोस्",
     }    
     },
   },
