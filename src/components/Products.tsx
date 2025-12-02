@@ -24,7 +24,7 @@ interface Product {
   reorder_level: number;
   is_active: boolean;
   category: string;
-  producer: string;
+  producer: string | number;
   images: ProductImage[];
   category_details: string;
   size?: string | null;
@@ -37,16 +37,17 @@ interface Product {
   reorder_quantity?: number;
   lead_time_days?: number;
   projected_stockout_date_field?: string;
+  // Category hierarchy fields (if available from API)
+  category_id?: number;
+  subcategory_id?: number;
+  sub_subcategory_id?: number;
+  // Producer field should be either string (name) or number (ID)
+  producer_id?: number;
 }
 
 interface Producer {
   id: number;
   name: string;
-}
-
-interface Category {
-  value: string;
-  label: string;
 }
 
 // Size and Color choices
@@ -100,7 +101,6 @@ const Products: React.FC = () => {
   const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [producers, setProducers] = useState<Producer[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [formVisible, setFormVisible] = useState(false);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [viewingProductId, setViewingProductId] = useState<Product | null>(null);
@@ -128,9 +128,16 @@ const Products: React.FC = () => {
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
   const [deletedImages, setDeletedImages] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [producerFilter, setProducerFilter] = useState<string>('');
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
   const [success, setSuccess] = useState('');
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [editingStock, setEditingStock] = useState<{ id: number | null, value: string }>({ id: null, value: '' });
   const [stockUpdateError, setStockUpdateError] = useState('');
@@ -141,22 +148,10 @@ const Products: React.FC = () => {
   const [marketplaceSuccess, setMarketplaceSuccess] = useState('');
   const [marketplaceError, setMarketplaceError] = useState('');
 
-  const categoryOptions: Category[] = [
-    { value: 'FA', label: t('fashion_apparel') },
-    { value: 'EG', label: t('electronics_gadgets') },
-    { value: 'GE', label: t('groceries_essentials') },
-    { value: 'HB', label: t('health_beauty') },
-    { value: 'HL', label: t('home_living') },
-    { value: 'TT', label: t('travel_tourism') },
-    { value: 'IS', label: t('industrial_supplies') },
-    { value: 'OT', label: t('other') },
-  ];
-
   useEffect(() => {
-    fetchProducts(searchQuery, categoryFilter);
+    fetchProducts(searchQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, producerFilter);
     fetchProducers();
-    setCategories(categoryOptions);
-  }, [searchQuery, categoryFilter]);
+  }, [searchQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, producerFilter, currentPage, itemsPerPage]);
 
   // Map producer when producers are loaded and we have an editing product
   useEffect(() => {
@@ -222,18 +217,41 @@ const Products: React.FC = () => {
     }
   }, [producers]);
 
-  const fetchProducts = async (query = '', category = '') => {
+  const fetchProducts = async (query = '', categoryId: number | null = null, subcategoryId: number | null = null, subSubcategoryId: number | null = null, producer = '') => {
     try {
-      let url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}`;
-      if (category) {
-        url += `&category=${category}`;
+      setLoading(true);
+      const offset = (currentPage - 1) * itemsPerPage;
+      let url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/?search=${query}&limit=${itemsPerPage}&offset=${offset}`;
+      
+      // Category hierarchy filters - prioritize hierarchy filters over legacy
+      if (categoryId) {
+        url += `&category=${categoryId}`;
       }
+      if (subcategoryId) {
+        url += `&subcategory=${subcategoryId}`;
+      }
+      if (subSubcategoryId) {
+        url += `&sub_subcategory=${subSubcategoryId}`;
+      }
+      
+      if (producer) {
+        url += `&producer=${producer}`;
+      }
+      
       const response = await axios.get(url, {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` },
       });
-      setProducts(response.data.results);
+      
+      setProducts(response.data.results || []);
+      setTotalItems(response.data.count || 0);
+      setTotalPages(Math.ceil((response.data.count || 0) / itemsPerPage));
     } catch (error) {
       console.error(t('error_fetching_products'), error);
+      setProducts([]);
+      setTotalItems(0);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -346,7 +364,8 @@ const Products: React.FC = () => {
       }
       resetForm();
       setFormVisible(false);
-      fetchProducts(searchQuery, categoryFilter);
+      setCurrentPage(1); // Reset to first page after add/update
+      fetchProducts(searchQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, producerFilter);
       setTimeout(() => setSuccess(''), 3000);
     } catch (error: unknown) {
       if (isAxiosError(error)) {
@@ -420,8 +439,27 @@ const Products: React.FC = () => {
       fetchProducers();
     }
     
+    // Map producer to the correct ID
+    let producerId = '';
+    if (product.producer_id) {
+      // If we have producer_id in the response, use it
+      producerId = product.producer_id.toString();
+    } else if (product.producer && producers.length > 0) {
+      // If we have producer name, find the ID
+      const producerValue = typeof product.producer === 'string' ? product.producer : product.producer.toString();
+      const foundProducer = producers.find(p => 
+        p.name === producerValue || 
+        p.name.toLowerCase() === producerValue.toLowerCase() ||
+        p.name.trim().toLowerCase() === producerValue.trim().toLowerCase() ||
+        p.id.toString() === producerValue
+      );
+      if (foundProducer) {
+        producerId = foundProducer.id.toString();
+      }
+    }
+    
     setFormData({
-      producer: '', // Will be set by useEffect after producers load
+      producer: producerId,
       name: product.name,
       description: product.description,
       sku: product.sku,
@@ -436,14 +474,15 @@ const Products: React.FC = () => {
       additional_information: product.additional_information || '',
     });
     
-    // Store the product for producer mapping
-    sessionStorage.setItem('editingProduct', JSON.stringify(product));
+    // Map category hierarchy if available in the response
+    setSelectedCategoryId(product.category_id || null);
+    setSelectedSubcategoryId(product.subcategory_id || null);
+    setSelectedSubSubcategoryId(product.sub_subcategory_id || null);
     
-    // Reset category hierarchy state to null for consistency
-    // TODO: If product has category/subcategory/sub_subcategory IDs in the future, set them here
-    setSelectedCategoryId(null);
-    setSelectedSubcategoryId(null);
-    setSelectedSubSubcategoryId(null);
+    // Store the product for fallback producer mapping if needed
+    if (!producerId && product.producer) {
+      sessionStorage.setItem('editingProduct', JSON.stringify(product));
+    }
     
     setExistingImages(product.images);
     setFormVisible(true);
@@ -550,11 +589,32 @@ const Products: React.FC = () => {
     }
   };
 
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setSelectedCategoryId(null);
+    setSelectedSubcategoryId(null);
+    setSelectedSubSubcategoryId(null);
+    setProducerFilter('');
+    setCurrentPage(1);
+  };
+
+  const hasActiveFilters = searchQuery || selectedCategoryId || selectedSubcategoryId || selectedSubSubcategoryId || producerFilter;
+
   return (
     <div className="min-h-screen bg-neutral-50 p-4 sm:p-8">
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">{t('products_list')}</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-3xl font-bold text-gray-900">{t('products_list')}</h2>
+            {hasActiveFilters && (
+              <button
+                onClick={clearAllFilters}
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium px-3 py-1 border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors"
+              >
+                Clear All Filters
+              </button>
+            )}
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => {
@@ -583,25 +643,83 @@ const Products: React.FC = () => {
               type="text"
               placeholder={t('search_products')}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="pl-11 pr-4 py-3 border border-neutral-300 rounded-xl w-full focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm bg-white"
             />
             <FaSearch className="absolute left-4 top-3.5 text-neutral-400" size={14} />
           </div>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
+          
+          {/* Category Hierarchy Filter */}
+          <div className="min-w-[200px]">
+            <CategorySelector
+              selectedCategory={selectedCategoryId}
+              selectedSubcategory={selectedSubcategoryId}
+              selectedSubSubcategory={selectedSubSubcategoryId}
+              onCategoryChange={(categoryId) => {
+                setSelectedCategoryId(categoryId);
+                setSelectedSubcategoryId(null);
+                setSelectedSubSubcategoryId(null);
+                setCurrentPage(1);
+              }}
+              onSubcategoryChange={(subcategoryId) => {
+                setSelectedSubcategoryId(subcategoryId);
+                setSelectedSubSubcategoryId(null);
+                setCurrentPage(1);
+              }}
+              onSubSubcategoryChange={(subSubcategoryId) => {
+                setSelectedSubSubcategoryId(subSubcategoryId);
+                setCurrentPage(1);
+              }}
+              showHierarchy={false}
+              mode="dropdown"
+            />
+          </div>
+          
+          {/* <select
+            value={producerFilter}
+            onChange={(e) => {
+              setProducerFilter(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm bg-white min-w-[180px]"
           >
-            <option value="">{t('all_categories')}</option>
-            {categories.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
+            <option value="">{t('all_producers')}</option>
+            {producers.map((producer) => (
+              <option key={producer.id} value={producer.id.toString()}>
+                {producer.name}
               </option>
             ))}
+          </select> */}
+        </div>
+        
+        {/* Items per page selector */}
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>Items per page:</span>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+            className="px-2 py-1 border border-neutral-300 rounded text-sm"
+          >
+            <option value={6}>6</option>
+            <option value={12}>12</option>
+            <option value={24}>24</option>
+            <option value={48}>48</option>
           </select>
         </div>
       </div>
+
+      {loading && (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+          <span className="ml-2 text-gray-600">Loading products...</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         {products.map((product) => (
@@ -737,6 +855,65 @@ const Products: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {!loading && totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-between">
+          <div className="flex items-center text-sm text-gray-700">
+            <span>
+              Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} to{' '}
+              {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} products
+            </span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-1 border text-sm ${
+                      currentPage === pageNum
+                        ? 'bg-primary-600 text-white border-primary-600'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {viewingProductId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-start justify-center pt-16">
@@ -1010,27 +1187,6 @@ const Products: React.FC = () => {
                   showHierarchy={true}
                   mode="dropdown"
                 />
-                
-                {/* Legacy Category Selector (for backward compatibility) */}
-                <div className="mt-4">
-                  <label htmlFor="legacy-category" className="block text-sm font-medium text-gray-600 mb-1">
-                    Legacy Category (optional)
-                  </label>
-                  <select
-                    id="legacy-category"
-                    name="category"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
-                  >
-                    <option value="">{t('select_category')}</option>
-                    {categories.map((category) => (
-                      <option key={category.value} value={category.value}>
-                        {category.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
                 
                 {errorMessages.category && <p className="text-accent-error-600 text-caption mt-1">{errorMessages.category[0]}</p>}
               </div>
