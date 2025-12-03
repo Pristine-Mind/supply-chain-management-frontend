@@ -84,6 +84,24 @@ interface MarketplaceProduct {
   rank_score: number;
 }
 
+interface Brand {
+  id: number;
+  name: string;
+  description: string;
+  logo: string | null;
+  logo_url: string | null;
+  website: string;
+  country_of_origin: string;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
+  manufacturer_info: string;
+  contact_email: string;
+  contact_phone: string;
+  products_count: number;
+}
+
 const PLACEHOLDER = 'https://via.placeholder.com/150';
 
 const Marketplace: React.FC = () => {
@@ -122,6 +140,9 @@ const Marketplace: React.FC = () => {
   const [dealsProducts, setDealsProducts] = useState<MarketplaceProduct[]>([]);
   const [todaysPickProducts, setTodaysPickProducts] = useState<MarketplaceProduct[]>([]);
   const [madeInNepalProducts, setMadeInNepalProducts] = useState<MarketplaceProduct[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandsLoading, setBrandsLoading] = useState(false);
+  const [brandsError, setBrandsError] = useState('');
   const [flashSaleLoading, setFlashSaleLoading] = useState(false);
   const [dealsLoading, setDealsLoading] = useState(false);
   const [todaysPickLoading, setTodaysPickLoading] = useState(false);
@@ -266,6 +287,27 @@ const Marketplace: React.FC = () => {
     }
   };
 
+  const fetchBrands = async () => {
+    setBrandsLoading(true);
+    setBrandsError('');
+    
+    try {
+      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/brands/`;
+      
+      const response = await axios.get(url, { timeout: 8000 });
+      
+      if (response.data && response.data.results) {
+        setBrands(response.data.results);
+      } else {
+        setBrands([]);
+      }
+    } catch (error: any) {
+      setBrandsError('Error fetching brands');
+    } finally {
+      setBrandsLoading(false);
+    }
+  };
+
   // Helpers for trending strip scrolling
   const scrollTrendingBy = (distance: number) => {
     if (trendingRef.current) {
@@ -304,6 +346,7 @@ const Marketplace: React.FC = () => {
     fetchMadeInNepal();
     fetchTodaysPick();
     fetchFlashSaleProducts();
+    fetchBrands();
   }, []);
 
   // Effect to handle URL parameter changes
@@ -327,6 +370,67 @@ const Marketplace: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Auto-scroll for flash sale products
+  useEffect(() => {
+    const scrollContainer = trendingRef.current;
+    if (!scrollContainer || !flashSaleProducts.length) return;
+
+    let scrollDirection = 1;
+    const scrollSpeed = 50; // pixels per second
+    const intervalTime = 50; // milliseconds
+
+    const autoScroll = setInterval(() => {
+      const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+      
+      if (scrollContainer.scrollLeft >= maxScrollLeft) {
+        scrollDirection = -1;
+      } else if (scrollContainer.scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+      
+      scrollContainer.scrollLeft += scrollDirection * (scrollSpeed * intervalTime / 1000);
+    }, intervalTime);
+
+    // Pause auto-scroll on hover
+    const handleMouseEnter = () => clearInterval(autoScroll);
+    const handleMouseLeave = () => {
+      // Restart auto-scroll when mouse leaves
+      setTimeout(() => {
+        if (scrollContainer) {
+          const newAutoScroll = setInterval(() => {
+            const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+            
+            if (scrollContainer.scrollLeft >= maxScrollLeft) {
+              scrollDirection = -1;
+            } else if (scrollContainer.scrollLeft <= 0) {
+              scrollDirection = 1;
+            }
+            
+            scrollContainer.scrollLeft += scrollDirection * (scrollSpeed * intervalTime / 1000);
+          }, intervalTime);
+          
+          // Store the interval reference
+          scrollContainer.dataset.autoScrollInterval = newAutoScroll.toString();
+        }
+      }, 1000);
+    };
+
+    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      clearInterval(autoScroll);
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
+        scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
+        const intervalId = scrollContainer.dataset.autoScrollInterval;
+        if (intervalId) {
+          clearInterval(parseInt(intervalId));
+        }
+      }
+    };
+  }, [flashSaleProducts]);
 
   
   const handleAddToCart = async (product: any, e: React.MouseEvent) => {
@@ -601,23 +705,100 @@ const Marketplace: React.FC = () => {
           </div>
         </div>
 
-        {/* CTA banner image - replace previous CTA */}
-        <div className="w-full">
-          <div className="relative w-full h-64 md:h-96 overflow-hidden">
-            <img src={BannerSaleImage} alt="Christmas Sale" className="w-full h-full object-cover" />
+        {/* CTA banner with categories overlapping */}
+        <div className="w-full relative">
+          <div className="relative w-full h-auto min-h-[400px] overflow-hidden">
+            {/* Background Banner Image */}
+            <img src={BannerSaleImage} alt="Christmas Sale" className="w-full h-full object-cover absolute inset-0" />
 
-            {/* Shop Now button positioned at the bottom-center of the banner */}
-            <div className="absolute inset-0 flex items-end justify-center pointer-events-none pb-6">
-              <button
-                onClick={() => navigate('/deals')}
-                aria-label="Shop Now"
-                className="pointer-events-auto bg-primary-600 text-white px-6 py-3 rounded-full text-lg font-semibold shadow-lg hover:bg-primary-700 transition"
-              >
-                Shop Now
-              </button>
+            {/* Gradient overlay for better readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40"></div>
+          </div>
+
+          {/* Categories positioned to overlap banner - only 10% inside */}
+          <div className="absolute bottom-0 left-0 right-0 z-0 transform translate-y-[90%]">
+            <div className="container mx-auto px-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  {
+                    title: 'Shop Electronics',
+                    description: 'Shop the full selection now',
+                    image: 'https://himstar.com.np/Media/TV/ht-55u4ksdj.png',
+                    searchTerm: 'electronics',
+                    categoryName: 'Electronics & Gadgets'
+                  },
+                  {
+                    title: 'Everything for your home',
+                    description: 'See more',
+                    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop',
+                    searchTerm: 'home',
+                    categoryName: 'Home & Living'
+                  },
+                  {
+                    title: 'Premium beauty',
+                    description: 'See more',
+                    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop',
+                    searchTerm: 'beauty',
+                    categoryName: 'Health & Beauty'
+                  },
+                  {
+                    title: 'Shop pantry food',
+                    description: 'Shop now',
+                    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&h=200&fit=crop',
+                    searchTerm: 'food',
+                    categoryName: 'Food & Beverages'
+                  }
+                ].map((card, index) => {
+                  const handleCategoryClick = () => {
+                    // Try to find matching category in the hierarchy first
+                    const matchingCategory = categoryHierarchy.find(cat => 
+                      cat.name.toLowerCase().includes(card.searchTerm.toLowerCase()) ||
+                      card.categoryName.toLowerCase().includes(cat.name.toLowerCase())
+                    );
+
+                    if (matchingCategory) {
+                      // If we found a matching category, navigate to it
+                      const categorySlug = createSlug(matchingCategory.name);
+                      navigate(`/marketplace/categories/${categorySlug}`);
+                    } else {
+                      // Fallback to search-based filtering
+                      navigate(`/marketplace/all-products?search=${encodeURIComponent(card.searchTerm)}`);
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={index}
+                      className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
+                      onClick={handleCategoryClick}
+                    >
+                      <div className="p-3">
+                        <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                          {card.title}
+                        </h3>
+                        
+                        <div className="aspect-[3/2] mb-2 overflow-hidden rounded">
+                          <img
+                            src={card.image}
+                            alt={card.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        
+                        <button className="text-orange-600 hover:text-orange-700 hover:underline font-medium text-xm">
+                          {card.description}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Add spacing to account for overlapping categories */}
+        <div className="pt-64"></div>
 
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
@@ -630,45 +811,114 @@ const Marketplace: React.FC = () => {
               {madeInNepalError && <div className="text-sm text-red-600">{madeInNepalError}</div>}
             </div>
           )}
-          {/* Top horizontal trending cards with nav */}
-          <div className="relative">
+          {/* Flash Sale Section - Revamped with auto-scroll */}
+          <div className="relative mb-8">
+            {/* Section Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-gray-900">Limited Time Offers</h2>
+              </div>
+            </div>
+
+            {/* Navigation Buttons */}
             <button
               onClick={() => scrollTrendingBy(-300)}
               aria-label="Scroll left"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white rounded-full p-2 shadow-md hidden lg:inline-flex"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg border hover:bg-white hover:shadow-xl transition-all duration-300 hidden lg:inline-flex"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
 
+            {/* Products Container */}
             <div
               ref={trendingRef}
-              onMouseEnter={() => {
-                // All trending data is already fetched on mount, no need to fetch again
-              }}
-              className="flex gap-4 overflow-x-auto no-scrollbar py-2"
+              className="flex gap-4 overflow-x-auto no-scrollbar py-2 scroll-smooth"
+              style={{ scrollBehavior: 'smooth' }}
             >
-              {/* Render up to 4 trending placeholders / products */}
-              { flashSaleProducts && flashSaleProducts.length > 0 ? (
-                flashSaleProducts.slice(0, 8).map((p) => (
+              {flashSaleProducts && flashSaleProducts.length > 0 ? (
+                flashSaleProducts.slice(0, 12).map((p) => (
                   <div
                     key={p.id}
-                    className="min-w-[220px] bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 cursor-pointer flex flex-col"
+                    className="min-w-[240px] bg-white rounded-2xl border border-gray-200 overflow-hidden group hover:shadow-xl hover:border-red-200 transition-all duration-300 cursor-pointer flex flex-col relative"
                     onClick={() => navigate(`/marketplace/${p.id}`)}
                     role="button"
                     tabIndex={0}
                   >
-                    <div className="aspect-square w-full overflow-hidden flex-shrink-0">
-                      <img src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER} alt={p.product_details?.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    {/* Sale Badge */}
+                    {p.percent_off > 0 && (
+                      <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10 shadow-md">
+                        {Math.round(p.percent_off)}% OFF
+                      </div>
+                    )}
+                    
+                    {/* Product Image */}
+                    <div className="aspect-square w-full overflow-hidden flex-shrink-0 relative">
+                      <img 
+                        src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER} 
+                        alt={p.product_details?.name} 
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      />
+                      
+                      {/* Overlay on hover */}
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold text-gray-900 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                          Quick View
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-3 flex-1 flex flex-col justify-between">
-                      <h3 className="text-sm font-semibold line-clamp-2 text-neutral-900">{p.product_details?.name}</h3>
-                      <div className="mt-2 text-xs text-neutral-500">Rs. {p.discounted_price ?? p.listed_price}</div>
+                    
+                    {/* Product Info */}
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="text-sm font-bold line-clamp-2 text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+                          {p.product_details?.name}
+                        </h3>
+                        
+                        {/* Price Section */}
+                        <div className="flex items-center gap-2 mb-2">
+                          {p.discounted_price && p.discounted_price < p.listed_price ? (
+                            <>
+                              <span className="text-lg font-bold text-red-600">
+                                Rs. {p.discounted_price?.toLocaleString()}
+                              </span>
+                              <span className="text-sm text-gray-500 line-through">
+                                Rs. {p.listed_price?.toLocaleString()}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-lg font-bold text-gray-900">
+                              Rs. {p.listed_price?.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Savings */}
+                        {p.discounted_price && p.discounted_price < p.listed_price && (
+                          <div className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
+                            Save Rs. {((p.listed_price - p.discounted_price) || 0)?.toLocaleString()}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Stock indicator */}
+                      {/* <div className="mt-2 flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          p.product_details?.stock > 10 ? 'bg-green-500' : 
+                          p.product_details?.stock > 0 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}></div>
+                        <span className="text-xs text-gray-600">
+                          {p.product_details?.stock > 0 ? `${p.product_details.stock} left` : 'Out of stock'}
+                        </span>
+                      </div> */}
                     </div>
                   </div>
                 ))
               ) : (
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="min-w-[220px] bg-neutral-100 rounded-xl h-64" />
+                // Loading placeholders with shimmer effect
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="min-w-[240px] bg-gray-100 rounded-2xl h-80 animate-pulse relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
+                  </div>
                 ))
               )}
             </div>
@@ -676,10 +926,68 @@ const Marketplace: React.FC = () => {
             <button
               onClick={() => scrollTrendingBy(300)}
               aria-label="Scroll right"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white rounded-full p-2 shadow-md hidden lg:inline-flex"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg border hover:bg-white hover:shadow-xl transition-all duration-300 hidden lg:inline-flex"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-5 h-5 text-gray-600" />
             </button>
+          </div>
+
+          {/* Flat 5% OFF Promotional Banner */}
+          <div className="relative w-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 rounded-xl mt-6 overflow-hidden shadow-md">
+            {/* Decorative circles */}
+            <div className="absolute top-2 left-2 w-8 h-8 bg-white/20 rounded-full"></div>
+            <div className="absolute top-4 right-4 w-6 h-6 bg-white/15 rounded-full"></div>
+            <div className="absolute bottom-2 left-4 w-4 h-4 bg-white/10 rounded-full"></div>
+            <div className="absolute bottom-4 right-2 w-6 h-6 bg-white/20 rounded-full"></div>
+
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-repeat" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M20 20m-4 0a4 4 0 1 1 8 0a4 4 0 1 1 -8 0'/%3E%3C/g%3E%3C/svg%3E")`,
+              }}></div>
+            </div>
+
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                {/* Left side - Discount tag */}
+                <div className="flex items-center gap-3">
+                  <div className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-lg font-bold text-sm shadow-md transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                    5%
+                  </div>
+                  
+                  {/* Main offer text */}
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-1 tracking-tight">
+                      Flat 5% OFF
+                    </h2>
+                    <p className="text-pink-100 text-sm">
+                      Upto Rs. 200
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right side - Promo code */}
+                <div className="flex flex-col items-center md:items-end gap-2">
+                  <div className="bg-green-400 text-green-900 px-4 py-2 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div className="text-center">
+                      <div className="text-xs font-medium">Min. Purchase Rs. 3000</div>
+                      <div className="text-sm font-bold">Use Code "FLAT5"</div>
+                    </div>
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <button 
+                    onClick={() => navigate('/marketplace/all-products')}
+                    className="bg-white text-pink-600 px-6 py-2 rounded-full font-bold text-sm hover:bg-pink-50 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 transform"
+                  >
+                    Shop Now
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-1000 transform -translate-x-full hover:translate-x-full"></div>
           </div>
 
           {/* Two-column promo / top picks */}
@@ -968,117 +1276,7 @@ const Marketplace: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* Injected CategorySection (user-provided) - renders 4 category cards in a single responsive row */}
-      <div className="container mx-auto px-4 py-8 sm:py-12">
-        {/* Section Header */}
-        <div className="text-center mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 bg-orange-100 text-orange-600 rounded-full text-sm font-semibold">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-            <span>CATEGORIES</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-neutral-800 to-neutral-600 bg-clip-text text-transparent mb-2">
-            Explore by Category
-          </h2>
-          <p className="text-neutral-600 text-sm sm:text-base">
-            Discover our curated collections for every room and style
-          </p>
-        </div>
-
-        {/* Category Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {[
-            {
-              name: 'Home Decor',
-              description: 'Stylish home accessories',
-              image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=150&h=150&fit=crop',
-              gradient: 'from-blue-100 to-blue-200',
-              accentColor: 'blue',
-            },
-            {
-              name: 'Kitchenware',
-              description: 'Premium kitchen essentials',
-              image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=150&h=150&fit=crop',
-              gradient: 'from-purple-100 to-purple-200',
-              accentColor: 'purple',
-            },
-            {
-              name: 'Bath & Body',
-              description: 'Luxury self-care products',
-              image: 'https://images.unsplash.com/photo-1514066359479-47a54d1a48d4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632',
-              gradient: 'from-teal-100 to-teal-200',
-              accentColor: 'teal',
-            },
-            {
-              name: 'Clothing',
-              description: 'Trendy fashion apparel',
-              image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=150&h=150&fit=crop',
-              gradient: 'from-pink-100 to-pink-200',
-              accentColor: 'pink',
-            },
-          ].map((category, index) => (
-            <div
-              key={index}
-              className={`bg-gradient-to-br ${category.gradient} rounded-2xl sm:rounded-3xl p-4 sm:p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer`}
-            >
-              {/* Decorative pattern overlay */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-repeat" style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 0l15 15-15 15L0 15z' fill='%23000000' fill-opacity='0.1'/%3E%3C/svg%3E")`,
-                }}></div>
-              </div>
-
-              {/* Shine effect on hover */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-700"></div>
-
-              <div className="relative z-10">
-                {/* Category icon badge */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <svg className={`w-5 h-5 sm:w-6 sm:h-6 text-${category.accentColor}-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
-                </div>
-
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-gray-600 mb-4 text-sm sm:text-base">
-                  {category.description}
-                </p>
-
-                <button
-                  onClick={() => navigate('/marketplace/all-products')}
-                  className="bg-white/90 backdrop-blur-sm text-gray-800 px-4 sm:px-6 py-2 rounded-full font-medium hover:bg-white transition-all text-sm sm:text-base shadow-sm hover:shadow-md group/btn inline-flex items-center gap-2"
-                >
-                  Shop Now
-                  <svg className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Category image with enhanced styling */}
-              <div className="absolute right-3 bottom-3 sm:right-4 sm:bottom-4 w-20 h-20 sm:w-24 sm:h-24 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                <div className="relative w-full h-full">
-                  <div className="absolute inset-0 bg-white/30 rounded-xl sm:rounded-2xl blur-sm"></div>
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className="relative w-full h-full object-cover rounded-xl sm:rounded-2xl shadow-lg"
-                  />
-                </div>
-              </div>
-
-              {/* Corner accent */}
-              <div className="absolute top-0 right-0 w-20 h-20 opacity-20">
-                <div className="absolute top-3 right-3 w-12 h-12 border-t-2 border-r-2 border-white rounded-tr-2xl"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      
       {/* Trending Deals Section - Only show if deals are available */}
       {dealsProducts.length > 0 && (
         <div className="bg-neutral-50 py-8">
@@ -1222,6 +1420,58 @@ const Marketplace: React.FC = () => {
         </div>
       )}
 
+      {/* Brands Section */}
+      <div className="bg-gray-50 py-4">
+        <div className="container mx-auto px-4">
+          {/* Title */}
+          <div className="text-center mb-4">
+            <h2 className="text-4xl font-light text-gray-900 mb-2">
+              <span className="text-orange-500 italic font-normal">Top  Brands</span>
+            </h2>
+          </div>
+
+          {brandsLoading ? (
+            <div className="flex justify-center items-center space-x-8">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
+                  <div className="w-20 h-8 bg-gray-200 rounded"></div>
+                </div>
+              ))}
+            </div>
+          ) : brandsError ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">{brandsError}</p>
+            </div>
+          ) : brands.length > 0 ? (
+            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
+              {brands.map((brand) => (
+                <div
+                  key={brand.id}
+                  className="bg-white rounded-2xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group min-w-[120px] flex items-center justify-center"
+                  onClick={() => navigate(`/brand-products/${brand.id}`)}
+                >
+                  {brand.logo_url ? (
+                    <img
+                      src={brand.logo_url}
+                      alt={brand.name}
+                      className="h-8 max-w-[100px] object-contain group-hover:scale-105 transition-transform duration-300 filter grayscale group-hover:grayscale-0"
+                    />
+                  ) : (
+                    <div className="text-2xl font-bold text-gray-800 group-hover:text-red-500 transition-colors duration-300">
+                      {brand.name}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600">No brands available</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-3 sm:py-4">
         {/* Filters removed as requested */}
 
@@ -1276,11 +1526,11 @@ const Marketplace: React.FC = () => {
                         )}
                         
                         {/* Stock Status Badge */}
-                        {item.product_details.stock > 0 && item.product_details.stock <= 5 && (
+                        {/* {item.product_details.stock > 0 && item.product_details.stock <= 5 && (
                           <div className="absolute bottom-3 left-3 bg-accent-warning-500 text-white px-2 py-1 rounded-full text-xs font-medium z-10">
                             Only {item.product_details.stock} left
                           </div>
-                        )}
+                        )} */}
                         
                         <img
                           src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
@@ -1302,23 +1552,12 @@ const Marketplace: React.FC = () => {
                           <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
                             {item.product_details.category_details}
                           </span>
-                          {item.average_rating > 0 && (
-                            <div className="flex items-center gap-1">
-                              <Star className="w-3.5 h-3.5 fill-accent-warning-400 text-accent-warning-400" />
-                              <span className="text-sm font-medium text-neutral-700">
-                                {item.average_rating.toFixed(1)}
-                              </span>
-                              <span className="text-xs text-neutral-500">
-                                ({item.total_reviews})
-                              </span>
-                            </div>
-                          )}
                         </div>
                         
                         {/* Product Title */}
-                        <h3 className="font-semibold text-neutral-900 leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors">
+                        <h6 className="font-semibold text-neutral-500 leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors">
                           {item.product_details.name}
-                        </h3>
+                        </h6>
                         
                         {/* Price Section */}
                         <div className="space-y-1">
@@ -1344,7 +1583,7 @@ const Marketplace: React.FC = () => {
                         </div>
                         
                         {/* Stock Status */}
-                        <div className="flex items-center gap-2">
+                        {/* <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${
                             item.product_details.stock > 10 
                               ? 'bg-accent-success-500' 
@@ -1358,7 +1597,7 @@ const Marketplace: React.FC = () => {
                               : 'Out of stock'
                             }
                           </span>
-                        </div>
+                        </div> */}
                         
                         {/* Action Button */}
                         <button 
