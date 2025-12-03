@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Trash2, 
@@ -34,7 +34,15 @@ const Cart: React.FC = () => {
     isLoading: cartLoading,
     error: cartError,
     clearError,
+    refreshCart,
   } = useCart();
+
+  // Refresh cart data when component mounts
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshCart();
+    }
+  }, [isAuthenticated]); // Remove refreshCart from dependencies to avoid infinite loops
 
   const handleRemoveFromCart = async (productId: number) => {
     setLoading(prev => ({ ...prev, [productId]: true }));

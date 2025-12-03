@@ -52,6 +52,7 @@ const Login: React.FC = () => {
         businessType: userInfoResponse.data.business_type,
         role: userInfoResponse.data.role,
         shopId: userInfoResponse.data.shop_id,
+        b2b_verified: userInfoResponse.data.b2b_verified || false,
       };
 
       login(token, userData);

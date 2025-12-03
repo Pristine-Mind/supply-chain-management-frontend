@@ -218,6 +218,18 @@ export const Navbar: React.FC = () => {
                           <p className="text-caption text-neutral-500 truncate">
                             {user?.email}
                           </p>
+                          {user?.role && (
+                            <p className="text-caption text-neutral-400 mt-1">
+                              Role: {user.role}
+                            </p>
+                          )}
+                          {user?.b2b_verified && (
+                            <div className="mt-2">
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                                B2B Verified
+                              </span>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="mt-2 space-y-1">
@@ -310,13 +322,25 @@ export const Navbar: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3 px-3 py-2">
                       <UserAvatar user={user} />
-                      <div>
+                      <div className="flex-1">
                         <p className="text-body-sm font-medium text-neutral-900">
                           {user?.name || 'User'}
                         </p>
                         <p className="text-caption text-neutral-500">
                           {user?.email}
                         </p>
+                        {user?.role && (
+                          <p className="text-caption text-neutral-400">
+                            Role: {user.role}
+                          </p>
+                        )}
+                        {user?.b2b_verified && (
+                          <div className="mt-1">
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-100 rounded-full">
+                              B2B Verified
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     

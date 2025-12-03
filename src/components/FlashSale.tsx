@@ -22,7 +22,12 @@ const FlashSale: React.FC = () => {
       setError('');
       try {
         const base = import.meta.env.VITE_REACT_APP_API_URL || 'https://appmulyabazzar.com';
-        const { data } = await axios.get(`${base}/api/v1/marketplace-trending/fastest_selling/`);
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Token ${token}` } : {};
+        
+        const { data } = await axios.get(`${base}/api/v1/marketplace-trending/fastest_selling/`, {
+          headers
+        });
         setProducts(data.results || data || []);
       } catch (err) {
         setError('Failed to load flash sale products');

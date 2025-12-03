@@ -68,6 +68,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSuccess }) =
         hasAccessToMarketplace: !!userInfoResponse.data.has_access_to_marketplace,
         businessType: userInfoResponse.data.business_type,
         shopId: userInfoResponse.data.shop_id,
+        b2b_verified: userInfoResponse.data.b2b_verified || false,
       }
 
       login(token, userData)

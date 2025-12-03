@@ -21,7 +21,12 @@ const Deals: React.FC = () => {
       setError('');
       try {
         const base = import.meta.env.VITE_REACT_APP_API_URL || 'https://appmulyabazzar.com';
-        const { data } = await axios.get(`${base}/api/v1/marketplace-trending/deals/`);
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Token ${token}` } : {};
+        
+        const { data } = await axios.get(`${base}/api/v1/marketplace-trending/deals/`, {
+          headers
+        });
         setProducts(data.results || data || []);
       } catch (err) {
         setError('Failed to load deals products');

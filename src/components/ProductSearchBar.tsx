@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import axios, { AxiosError, CancelTokenSource } from 'axios';
+import axios, { CancelTokenSource } from 'axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { 
   FiSearch, 
   FiX, 
@@ -9,11 +11,9 @@ import {
   FiFilter,
   FiShoppingCart,
   FiUser,
-  FiBell,
   FiHeart,
   FiMenu,
-  FiMic,
-  FiCamera
+  FiMic
 } from 'react-icons/fi';
 import logo from '../assets/logo.png';
 
@@ -39,6 +39,11 @@ interface MarketplaceProduct {
   listed_price: number;
   discount_percentage?: number;
   availability?: 'in_stock' | 'low_stock' | 'out_of_stock';
+  discounted_price?: number;
+  is_b2b_eligible?: boolean;
+  b2b_price?: number;
+  b2b_discounted_price?: number;
+  b2b_min_quantity?: number;
 }
 
 interface SearchHistory {
@@ -52,12 +57,6 @@ interface TrendingSearch {
   query: string;
   category?: string;
   count: number;
-}
-
-interface User {
-  name?: string;
-  email?: string;
-  avatar?: string;
 }
 
 const useDebounce = (value: string, delay: number) => {
@@ -118,10 +117,22 @@ const ProductSearchBar: React.FC = () => {
   const [trendingSearches, setTrendingSearches] = useState<TrendingSearch[]>([]);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const [isListening, setIsListening] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User>({});
+  
+  const { isAuthenticated, user, logout } = useAuth();
+  const { distinctItemCount } = useCart();
+
+  // Helper function to get the appropriate price based on user's B2B status
+  const getDisplayPrice = (product: MarketplaceProduct) => {
+    const isB2BUser = user?.b2b_verified === true;
+    const isB2BEligible = product.is_b2b_eligible === true;
+    
+    if (isB2BUser && isB2BEligible) {
+      return product.b2b_discounted_price || product.b2b_price || product.listed_price;
+    } else {
+      return product.discounted_price || product.listed_price;
+    }
+  };
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -134,27 +145,6 @@ const ProductSearchBar: React.FC = () => {
   
   const debouncedQuery = useDebounce(query, 300);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-      const fetchUserProfile = async () => {
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/user/profile/`,
-            { headers: { Authorization: `Token ${token}` } }
-          );
-          setUser(response.data);
-        } catch (error) {
-          console.error('Failed to fetch user profile:', error);
-          localStorage.removeItem('token');
-          setIsLoggedIn(false);
-        }
-      };
-      fetchUserProfile();
-    }
-  }, []);
-
   const handleLogout = useCallback(async () => {
     try {
       await axios.post(
@@ -165,10 +155,7 @@ const ProductSearchBar: React.FC = () => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
-      setIsLoggedIn(false);
-      setUser({});
-      setCartCount(0);
+      logout();
       setShowUserDropdown(false);
       navigate('/');
     }
@@ -221,24 +208,6 @@ const ProductSearchBar: React.FC = () => {
 
     fetchTrendingSearches();
   }, []);
-
-  useEffect(() => {
-    const fetchCartCount = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/cart/count/`,
-          { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
-        );
-        setCartCount(response.data.count || 0);
-      } catch (error) {
-        console.error('Failed to fetch cart count:', error);
-      }
-    };
-
-    if (isLoggedIn) {
-      fetchCartCount();
-    }
-  }, [isLoggedIn]);
 
   useEffect(() => {
     if (debouncedQuery.length < 2) {
@@ -381,8 +350,13 @@ const ProductSearchBar: React.FC = () => {
                         </div>
                         <div className="flex items-center mt-1">
                           <span className="text-lg font-bold text-primary-600">
-                            Rs. {product.listed_price.toLocaleString()}
+                            Rs. {getDisplayPrice(product).toLocaleString()}
                           </span>
+                          {user?.b2b_verified && product.is_b2b_eligible && (
+                            <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full font-medium ml-2">
+                              B2B
+                            </span>
+                          )}
                           {product.discount_percentage && (
                             <span className="ml-2 text-xs bg-red-50 text-red-600 px-2 py-1 rounded-full font-medium">
                               {product.discount_percentage}% OFF
@@ -544,15 +518,11 @@ const ProductSearchBar: React.FC = () => {
           <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg">
             <FiSearch className="w-5 h-5 text-gray-600" />
           </button>
-
-          <Link to="/wishlist" className="hidden lg:flex p-2 hover:bg-gray-100 rounded-lg">
-            <FiHeart className="w-5 h-5 text-gray-600" />
-          </Link>
           <Link to="/cart" className="p-2 hover:bg-gray-100 rounded-lg relative">
             <FiShoppingCart className="w-5 h-5 text-gray-600" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {cartCount > 9 ? '9+' : cartCount}
+            {distinctItemCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">
+                {distinctItemCount > 9 ? '9+' : distinctItemCount}
               </span>
             )}
           </Link>
@@ -563,7 +533,7 @@ const ProductSearchBar: React.FC = () => {
               onClick={() => setShowUserDropdown(!showUserDropdown)}
             >
               <FiUser className="w-5 h-5 text-gray-600" />
-              {isLoggedIn && user?.name && (
+              {isAuthenticated && user?.name && (
                 <span className="text-sm text-gray-700 max-w-20 truncate">
                   {user.name}
                 </span>
@@ -572,7 +542,7 @@ const ProductSearchBar: React.FC = () => {
 
             {showUserDropdown && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-white border rounded-lg shadow-lg z-40">
-                {isLoggedIn ? (
+                {isAuthenticated ? (
                   <>
                     <div className="px-4 py-3 border-b bg-gray-50">
                       <div className="font-medium text-gray-900 truncate">
