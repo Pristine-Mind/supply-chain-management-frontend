@@ -114,6 +114,9 @@ interface MarketplaceProductInstance {
   latitude: number | null;
   longitude: number | null;
   bulk_price_tiers: BulkPriceTier[];
+  b2b_price?: number;
+  b2b_min_quantity?: number;
+  is_b2b_eligible?: boolean;
   variants: any[];
   reviews: Review[];
   average_rating: number;
@@ -126,7 +129,32 @@ interface MarketplaceProductInstance {
 const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = ({ product }): JSX.Element => {
   const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(0);
-  const [quantity, setQuantity] = useState(product.min_order || 1);
+  
+  const { addToCart, distinctItemCount, refreshCart } = useCart();
+  const { isAuthenticated, user } = useAuth();
+  
+  // Initialize quantity based on B2B or regular minimum order
+  const getInitialQuantity = () => {
+    const isB2BVerified = user?.b2b_verified || false;
+    const isB2BEligible = product.is_b2b_eligible || false;
+    const hasB2BPrice = typeof product.b2b_price === 'number';
+    
+    if (isB2BVerified && isB2BEligible && hasB2BPrice) {
+      return product.b2b_min_quantity || product.min_order || 1;
+    }
+    return product.min_order || 1;
+  };
+  
+  const [quantity, setQuantity] = useState(() => getInitialQuantity());
+  
+  // Update quantity when user authentication changes or B2B status changes
+  useEffect(() => {
+    const newMinQuantity = getInitialQuantity();
+    if (quantity < newMinQuantity) {
+      setQuantity(newMinQuantity);
+    }
+  }, [user?.b2b_verified, product.is_b2b_eligible, product.b2b_min_quantity]);
+  
   const [tab, setTab] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isFullScreenOpen, setIsFullScreenOpen] = useState(false);
@@ -144,9 +172,37 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState<string>('');
-  
-  const { addToCart, distinctItemCount, refreshCart } = useCart();
-  const { isAuthenticated } = useAuth();
+
+
+  // Helper function to determine the correct price to display
+  const getDisplayPrice = () => {
+    const isB2BVerified = user?.b2b_verified || false;
+    const isB2BEligible = product.is_b2b_eligible || false;
+    const hasB2BPrice = typeof product.b2b_price === 'number';
+    
+    if (isB2BVerified && isB2BEligible && hasB2BPrice) {
+      return {
+        price: product.b2b_price,
+        isB2BPrice: true,
+        minQuantity: product.b2b_min_quantity || 1
+      };
+    }
+    
+    // Regular pricing logic
+    if (product.is_offer_active && product.discounted_price < product.listed_price) {
+      return {
+        price: product.discounted_price,
+        isB2BPrice: false,
+        minQuantity: 1
+      };
+    }
+    
+    return {
+      price: product.listed_price,
+      isB2BPrice: false,
+      minQuantity: 1
+    };
+  };
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString(undefined, {
@@ -359,6 +415,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
       return;
     }
     try {
+      const { price: currentPrice, isB2BPrice } = getDisplayPrice();
       const cartProduct = {
         id: product.id,
         product: product.product,
@@ -366,10 +423,13 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
           ...product.product_details,
           projected_stockout_date_field: null,
         },
-        discounted_price: product.discounted_price,
-        listed_price: product.listed_price,
+        // Use the current displayed price (B2B or regular)
+        discounted_price: isB2BPrice ? (currentPrice || null) : (product.discounted_price || null),
+        listed_price: isB2BPrice ? (currentPrice || 0) : product.listed_price,
         percent_off: product.percent_off,
-        savings_amount: (product.listed_price - product.discounted_price) * quantity,
+        savings_amount: isB2BPrice 
+          ? (product.listed_price - (currentPrice || 0)) * quantity
+          : (product.listed_price - (product.discounted_price || product.listed_price)) * quantity,
         offer_start: product.offer_start,
         offer_end: product.offer_end,
         is_offer_active: product.is_offer_active,
@@ -384,6 +444,9 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
         latitude: product.latitude || 0,
         longitude: product.longitude || 0,
         bulk_price_tiers: product.bulk_price_tiers,
+        b2b_price: product.b2b_price,
+        b2b_min_quantity: product.b2b_min_quantity,
+        is_b2b_eligible: product.is_b2b_eligible,
         variants: product.variants,
         reviews: product.reviews,
         average_rating: product.average_rating,
@@ -408,13 +471,15 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   };
 
   const decrementQuantity = () => {
-    if (quantity > (product.min_order || 1)) {
+    const { minQuantity } = getDisplayPrice();
+    const minAllowed = Math.max(minQuantity, product.min_order || 1);
+    if (quantity > minAllowed) {
       setQuantity(q => q - 1);
     }
   };
 
-  const showOffer = product.is_offer_active && product.discounted_price < product.listed_price;
-  const currentPrice = showOffer ? product.discounted_price : product.listed_price;
+  const { price: currentPrice = product.listed_price, isB2BPrice, minQuantity } = getDisplayPrice();
+  const showOffer = !isB2BPrice && product.is_offer_active && product.discounted_price < product.listed_price;
   const stockLevel = product.product_details?.stock || 0;
 
   return (
@@ -487,6 +552,11 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     />
                     
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      {isB2BPrice && (
+                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-sm">
+                          B2B
+                        </div>
+                      )}
                       {showOffer && (
                         <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-sm">
                           {product.percent_off}% OFF
@@ -600,14 +670,19 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   <div className="flex items-end gap-4 flex-wrap">
                     <div className="text-4xl font-bold text-gray-900">
                       Rs. {currentPrice.toLocaleString()}
+                      {isB2BPrice && (
+                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          B2B Price
+                        </span>
+                      )}
                     </div>
-                    {showOffer && (
+                    {(showOffer || isB2BPrice) && (
                       <>
                         <div className="text-2xl text-gray-400 line-through">
                           Rs. {product.listed_price.toLocaleString()}
                         </div>
                         <div className="bg-red-50 text-red-700 px-3 py-1 rounded-lg text-sm font-bold border border-red-200">
-                          Save Rs. {(product.listed_price - product.discounted_price).toLocaleString()}
+                          Save Rs. {(product.listed_price - currentPrice).toLocaleString()}
                         </div>
                       </>
                     )}
@@ -664,10 +739,13 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     </div>
                   </div>
 
-                  {product.min_order > 1 && (
+                  {(minQuantity > 1 || product.min_order > 1) && (
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                       <p className="text-sm text-blue-800">
-                        <span className="font-semibold">Minimum order:</span> {product.min_order} units
+                        <span className="font-semibold">Minimum order:</span> {Math.max(minQuantity, product.min_order || 1)} units
+                        {isB2BPrice && minQuantity > 1 && (
+                          <span className="block mt-1 text-xs text-blue-600">B2B minimum quantity requirement</span>
+                        )}
                       </p>
                     </div>
                   )}
@@ -675,12 +753,19 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
 
                 {/* Quantity Selector */}
                 <div className="space-y-3">
-                  <label className="text-sm font-medium text-gray-700">Quantity</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-700">Quantity</label>
+                    {isB2BPrice && minQuantity > 1 && (
+                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        Min: {minQuantity} units
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden">
                       <button
                         onClick={decrementQuantity}
-                        disabled={quantity <= (product.min_order || 1)}
+                        disabled={quantity <= Math.max(minQuantity, product.min_order || 1)}
                         className="p-3 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         aria-label="Decrease quantity"
                       >
@@ -690,13 +775,13 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                         type="number"
                         value={quantity}
                         onChange={(e) => {
-                          const val = parseInt(e.target.value) || product.min_order || 1;
-                          if (val >= (product.min_order || 1) && val <= stockLevel) {
+                          const val = parseInt(e.target.value) || Math.max(minQuantity, product.min_order || 1);
+                          if (val >= Math.max(minQuantity, product.min_order || 1) && val <= stockLevel) {
                             setQuantity(val);
                           }
                         }}
                         className="w-16 text-center font-semibold text-gray-900 border-none focus:outline-none"
-                        min={product.min_order || 1}
+                        min={Math.max(minQuantity, product.min_order || 1)}
                         max={stockLevel}
                       />
                       <button
@@ -710,6 +795,11 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     </div>
                     <span className="text-sm text-neutral-600">
                       Total: <span className="font-bold text-gray-900">Rs. {(currentPrice * quantity).toLocaleString()}</span>
+                      {isB2BPrice && minQuantity > 1 && (
+                        <span className="block text-xs text-blue-600 mt-1">
+                          B2B pricing • {quantity} units @ Rs. {currentPrice.toLocaleString()} each
+                        </span>
+                      )}
                     </span>
                   </div>
                 </div>

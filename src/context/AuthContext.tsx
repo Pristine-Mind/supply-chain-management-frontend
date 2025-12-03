@@ -14,6 +14,7 @@ export interface User {
   isActive?: boolean;
   dateJoined?: string;
   lastLogin?: string;
+  b2b_verified?: boolean;
 }
 
 interface AuthContextType {

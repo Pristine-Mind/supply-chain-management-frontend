@@ -42,7 +42,33 @@ const BrandProducts: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+
+  // Helper function to get the appropriate price based on user's B2B status
+  const getDisplayPrice = (product: BrandProduct, user: any) => {
+    const isB2BUser = user?.b2b_verified === true;
+    const isB2BEligible = product.is_b2b_eligible === true;
+    
+    if (isB2BUser && isB2BEligible) {
+      // Show B2B pricing
+      return {
+        currentPrice: product.b2b_discounted_price || product.b2b_price || product.price,
+        originalPrice: product.price, // Always show regular price as crossed-out for B2B
+        isB2BPrice: true,
+        minQuantity: product.b2b_min_quantity || 1,
+        savings: Math.max(0, product.price - (product.b2b_discounted_price || product.b2b_price || product.price))
+      };
+    } else {
+      // Show regular pricing
+      return {
+        currentPrice: product.price,
+        originalPrice: null,
+        isB2BPrice: false,
+        minQuantity: 1,
+        savings: 0
+      };
+    }
+  };
 
   // State
   const [brand, setBrand] = useState<Brand | null>(null);
@@ -416,11 +442,43 @@ const BrandProducts: React.FC = () => {
                       <p className="text-sm text-gray-600">by {product.brand_name}</p>
 
                       {/* Price */}
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-gray-900">
-                          Rs. {product.price?.toLocaleString()}
-                        </span>
-                      </div>                    
+                      <div className="flex items-center space-x-2 flex-wrap">
+                        {(() => {
+                          const pricing = getDisplayPrice(product, user);
+                          return (
+                            <>
+                              <span className="text-lg font-bold text-gray-900">
+                                Rs. {pricing.currentPrice?.toLocaleString()}
+                              </span>
+                              {pricing.originalPrice && (
+                                <span className="text-sm text-gray-500 line-through">
+                                  Rs. {pricing.originalPrice?.toLocaleString()}
+                                </span>
+                              )}
+                              {pricing.isB2BPrice && (
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                                  B2B
+                                </span>
+                              )}
+                              {pricing.savings > 0 && (
+                                <div className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full">
+                                  Save Rs. {pricing.savings?.toLocaleString()}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+
+                      {/* B2B Minimum Quantity Info */}
+                      {(() => {
+                        const pricing = getDisplayPrice(product, user);
+                        return pricing.isB2BPrice && pricing.minQuantity > 1 ? (
+                          <div className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded-full inline-block mt-2">
+                            Min. order: {pricing.minQuantity} units
+                          </div>
+                        ) : null;
+                      })()}                    
 
                       {/* Add to Cart Button */}
                       <button

@@ -82,6 +82,10 @@ interface MarketplaceProduct {
   total_reviews: number;
   view_count: number;
   rank_score: number;
+  is_b2b_eligible?: boolean;
+  b2b_price?: number;
+  b2b_discounted_price?: number;
+  b2b_min_quantity?: number;
 }
 
 interface Brand {
@@ -181,10 +185,40 @@ const Marketplace: React.FC = () => {
   }, [isUserMenuOpen]);
   const itemsPerPage = 48;
 
+  // Helper function to get the appropriate price based on user's B2B status
+  const getDisplayPrice = (product: MarketplaceProduct, user: any) => {
+    const isB2BUser = user?.b2b_verified === true;
+    const isB2BEligible = product.is_b2b_eligible === true;
+    
+    if (isB2BUser && isB2BEligible) {
+      // Show B2B pricing
+      return {
+        currentPrice: product.b2b_discounted_price || product.b2b_price || product.listed_price,
+        originalPrice: product.listed_price, // Always show listed price as crossed-out for B2B
+        isB2BPrice: true,
+        minQuantity: product.b2b_min_quantity || 1,
+        savings: Math.max(0, product.listed_price - (product.b2b_discounted_price || product.b2b_price || product.listed_price))
+      };
+    } else {
+      // Show regular pricing
+      return {
+        currentPrice: product.discounted_price || product.listed_price,
+        originalPrice: product.discounted_price ? product.listed_price : null,
+        isB2BPrice: false,
+        minQuantity: 1,
+        savings: product.discounted_price ? (product.listed_price - product.discounted_price) : 0
+      };
+    }
+  };
+
   const fetchMarketplaceProducts = async (page: number = 1) => {
     setLoading(true);
     setProductsError('');
     try {
+      // Get authentication token for API request
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Token ${token}` } : {};
+      
       const params: Record<string, any> = {
         limit: itemsPerPage,
         offset: (page - 1) * itemsPerPage,
@@ -204,7 +238,7 @@ const Marketplace: React.FC = () => {
       if (debouncedQuery && debouncedQuery.trim() !== '') {
         params.keyword = debouncedQuery.trim();
         const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/`;
-        const { data } = await axios.get(searchUrl, { params });
+        const { data } = await axios.get(searchUrl, { params, headers });
         setProducts(data.results || []);
         setTotalCount(data.count || (data.results || []).length || 0);
         setLoading(false);
@@ -213,7 +247,7 @@ const Marketplace: React.FC = () => {
 
       // Regular marketplace endpoint for category filtering without search
       const marketplaceUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`;
-      const { data } = await axios.get(marketplaceUrl, { params });
+      const { data } = await axios.get(marketplaceUrl, { params, headers });
       setProducts(data.results);
       setTotalCount(data.count || 0);
     } catch {
@@ -227,8 +261,10 @@ const Marketplace: React.FC = () => {
     setFlashSaleLoading(true);
     setFlashSaleError('');
     try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Token ${token}` } : {};
       const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/most_viewed/`;
-      const { data } = await axios.get(url, { timeout: 8000 });
+      const { data } = await axios.get(url, { timeout: 8000, headers });
       setFlashSaleProducts(data.results);
     } catch {
       setFlashSaleError('Error fetching flash sale products');
@@ -241,8 +277,10 @@ const Marketplace: React.FC = () => {
     setDealsLoading(true);
     setDealsError('');
     try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Token ${token}` } : {};
       const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/deals/`;
-      const { data } = await axios.get(url, { timeout: 8000 });
+      const { data } = await axios.get(url, { timeout: 8000, headers });
       setDealsProducts(data.results);
     } catch {
       setDealsError('Error fetching deals products');
@@ -255,8 +293,10 @@ const Marketplace: React.FC = () => {
     setTodaysPickLoading(true);
     setTodaysPickError('');
     try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Token ${token}` } : {};
       const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/new_trending/`;
-      const { data } = await axios.get(url, { timeout: 8000 });
+      const { data } = await axios.get(url, { timeout: 8000, headers });
       setTodaysPickProducts(data.results);
     } catch {
       setTodaysPickError('Error fetching todays pick products');
@@ -270,9 +310,11 @@ const Marketplace: React.FC = () => {
     setMadeInNepalError('');
     
     try {
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Token ${token}` } : {};
       const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/made-in-nepal/`;
       
-      const response = await axios.get(url, { timeout: 8000 });
+      const response = await axios.get(url, { timeout: 8000, headers });
       
       if (response.data && response.data.results) {
       
@@ -876,28 +918,47 @@ const Marketplace: React.FC = () => {
                         
                         {/* Price Section */}
                         <div className="flex items-center gap-2 mb-2">
-                          {p.discounted_price && p.discounted_price < p.listed_price ? (
-                            <>
-                              <span className="text-lg font-bold text-red-600">
-                                Rs. {p.discounted_price?.toLocaleString()}
-                              </span>
-                              <span className="text-sm text-gray-500 line-through">
-                                Rs. {p.listed_price?.toLocaleString()}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-lg font-bold text-gray-900">
-                              Rs. {p.listed_price?.toLocaleString()}
-                            </span>
-                          )}
+                          {(() => {
+                            const pricing = getDisplayPrice(p, user);
+                            return (
+                              <>
+                                <span className="text-lg font-bold text-red-600">
+                                  Rs. {pricing.currentPrice?.toLocaleString()}
+                                </span>
+                                {pricing.originalPrice && (
+                                  <span className="text-sm text-gray-500 line-through">
+                                    Rs. {pricing.originalPrice?.toLocaleString()}
+                                  </span>
+                                )}
+                                {pricing.isB2BPrice && (
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                                    B2B
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                         
+                        {/* B2B Minimum Quantity Info */}
+                        {(() => {
+                          const pricing = getDisplayPrice(p, user);
+                          return pricing.isB2BPrice && pricing.minQuantity > 1 ? (
+                            <div className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded-full inline-block">
+                              Min. order: {pricing.minQuantity} units
+                            </div>
+                          ) : null;
+                        })()}
+                        
                         {/* Savings */}
-                        {p.discounted_price && p.discounted_price < p.listed_price && (
-                          <div className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
-                            Save Rs. {((p.listed_price - p.discounted_price) || 0)?.toLocaleString()}
-                          </div>
-                        )}
+                        {(() => {
+                          const pricing = getDisplayPrice(p, user);
+                          return pricing.savings > 0 ? (
+                            <div className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
+                              Save Rs. {pricing.savings?.toLocaleString()}
+                            </div>
+                          ) : null;
+                        })()}
                       </div>
                       
                       {/* Stock indicator */}
@@ -1067,7 +1128,12 @@ const Marketplace: React.FC = () => {
                       </div>
                       <div className="p-3">
                         <h4 className="text-sm font-semibold line-clamp-2 text-neutral-900">{p.product_details?.name}</h4>
-                        <div className="mt-1 text-xs text-neutral-500">Rs. {p.discounted_price ?? p.listed_price}</div>
+                        <div className="mt-1 text-xs text-neutral-500 flex items-center gap-1">
+                          Rs. {getDisplayPrice(p, user).currentPrice}
+                          {getDisplayPrice(p, user).isB2BPrice && (
+                            <span className="text-xs bg-blue-100 text-blue-600 px-1 py-0.5 rounded">B2B</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
@@ -1237,7 +1303,12 @@ const Marketplace: React.FC = () => {
                   </div>
                   <div className="p-3">
                     <h3 className="text-sm font-semibold line-clamp-2 text-neutral-900">{p.product_details?.name}</h3>
-                    <div className="mt-2 text-xs text-neutral-500">Rs. {p.discounted_price ?? p.listed_price}</div>
+                    <div className="mt-2 text-xs text-neutral-500 flex items-center gap-1">
+                      Rs. {getDisplayPrice(p, user).currentPrice}
+                      {getDisplayPrice(p, user).isB2BPrice && (
+                        <span className="text-xs bg-blue-100 text-blue-600 px-1 py-0.5 rounded">B2B</span>
+                      )}
+                    </div>
                     <div className="mt-2 flex items-center gap-1 text-xs text-red-600 font-medium">
                       <span>🇳🇵</span>
                       <span>Made in Nepal</span>
@@ -1352,26 +1423,35 @@ const Marketplace: React.FC = () => {
                     {/* Price Section */}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        {item.discounted_price && item.discounted_price < item.listed_price ? (
-                          <>
-                            <span className="text-h3 font-bold text-accent-success-600">
-                              Rs.{item.discounted_price}
-                            </span>
-                            <span className="text-body text-neutral-500 line-through">
-                              Rs.{item.listed_price}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-h3 font-bold text-accent-success-600">
-                            Rs.{item.listed_price}
-                          </span>
-                        )}
+                        {(() => {
+                          const pricing = getDisplayPrice(item, user);
+                          return (
+                            <>
+                              <span className="text-h3 font-bold text-accent-success-600">
+                                Rs.{pricing.currentPrice}
+                              </span>
+                              {pricing.originalPrice && (
+                                <span className="text-body text-neutral-500 line-through">
+                                  Rs.{pricing.originalPrice}
+                                </span>
+                              )}
+                              {pricing.isB2BPrice && (
+                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                                  B2B
+                                </span>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
-                      {item.discounted_price && item.discounted_price < item.listed_price && (
-                        <div className="text-xs text-accent-success-600 font-medium bg-accent-success-50 px-2 py-1 rounded-full inline-block">
-                          You save Rs.{(item.listed_price - item.discounted_price).toFixed(2)}
-                        </div>
-                      )}
+                      {(() => {
+                        const pricing = getDisplayPrice(item, user);
+                        return pricing.savings > 0 ? (
+                          <div className="text-xs text-accent-success-600 font-medium bg-accent-success-50 px-2 py-1 rounded-full inline-block">
+                            You save Rs.{pricing.savings.toFixed(2)}
+                          </div>
+                        ) : null;
+                      })()}
                     </div>
                     
                     {/* Stock Info */}
@@ -1561,25 +1641,34 @@ const Marketplace: React.FC = () => {
                         
                         {/* Price Section */}
                         <div className="space-y-1">
-                          {item.discounted_price && item.discounted_price < item.listed_price ? (
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-lg font-bold text-accent-error-600">
-                                Rs. {item.discounted_price?.toLocaleString()}
-                              </span>
-                              <span className="text-sm text-neutral-500 line-through">
-                                Rs. {item.listed_price?.toLocaleString()}
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-lg font-bold text-neutral-900">
-                              Rs. {item.listed_price?.toLocaleString()}
-                            </span>
-                          )}
-                          {item.discounted_price && item.discounted_price < item.listed_price && (
-                            <div className="text-xs text-accent-success-600 font-medium">
-                              Save Rs. {((item.listed_price - item.discounted_price) || 0)?.toLocaleString()}
-                            </div>
-                          )}
+                          {(() => {
+                            const pricing = getDisplayPrice(item, user);
+                            return (
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-lg font-bold text-accent-error-600">
+                                  Rs. {pricing.currentPrice?.toLocaleString()}
+                                </span>
+                                {pricing.originalPrice && (
+                                  <span className="text-sm text-neutral-500 line-through">
+                                    Rs. {pricing.originalPrice?.toLocaleString()}
+                                  </span>
+                                )}
+                                {pricing.isB2BPrice && (
+                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                                    B2B
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                          {(() => {
+                            const pricing = getDisplayPrice(item, user);
+                            return pricing.savings > 0 ? (
+                              <div className="text-xs text-accent-success-600 font-medium">
+                                Save Rs. {pricing.savings?.toLocaleString()}
+                              </div>
+                            ) : null;
+                          })()}
                         </div>
                         
                         {/* Stock Status */}

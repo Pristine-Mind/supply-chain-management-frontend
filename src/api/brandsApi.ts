@@ -79,6 +79,10 @@ export interface BrandProduct {
   sub_subcategory: number | null;
   user: number;
   location: number | null;
+  is_b2b_eligible?: boolean;
+  b2b_price?: number;
+  b2b_discounted_price?: number;
+  b2b_min_quantity?: number;
 }
 
 export interface BrandProductsResponse {

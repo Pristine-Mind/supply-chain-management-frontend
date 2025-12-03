@@ -22,6 +22,7 @@ type LoginResponse = {
   has_access_to_marketplace: boolean;
   business_type: string;
   shop_id: string;
+  b2b_verified?: boolean;
   redirect_url?: string;
 };
 
@@ -117,6 +118,7 @@ const PhoneLogin: React.FC = () => {
         hasAccessToMarketplace: loginResponse.data.has_access_to_marketplace,
         businessType: loginResponse.data.business_type,
         shopId: loginResponse.data.shop_id,
+        b2b_verified: loginResponse.data.b2b_verified || false,
       }));
 
       // Redirect based on user type or to home

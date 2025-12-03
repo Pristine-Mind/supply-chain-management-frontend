@@ -22,6 +22,11 @@ interface MarketplaceProduct {
   listed_price: number;
   views_count: number;
   recent_purchases_count: number;
+  discounted_price?: number;
+  is_b2b_eligible?: boolean;
+  b2b_price?: number;
+  b2b_discounted_price?: number;
+  b2b_min_quantity?: number;
 }
 
 
@@ -59,9 +64,15 @@ const ProductPage: React.FC = () => {
 
     setLoading(true);
     setError('');
+    
+    // Get authentication token for API request
+    const token = localStorage.getItem('token');
+    const headers = token ? { Authorization: `Token ${token}` } : {};
+    
     axios
-      .get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`,
-      )
+      .get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/${productId}/`, {
+        headers
+      })
       .then(res => {
         setProduct(res.data);
         logProductView(productId);

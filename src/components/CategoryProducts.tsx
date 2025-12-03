@@ -92,6 +92,10 @@ interface MarketplaceProduct {
   total_reviews: number;
   view_count: number;
   rank_score: number;
+  is_b2b_eligible?: boolean;
+  b2b_price?: number;
+  b2b_discounted_price?: number;
+  b2b_min_quantity?: number;
 }
 
 // Constants
@@ -113,6 +117,32 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart, distinctItemCount } = useCart();
   const { user } = useAuth();
+
+  // Helper function to get the appropriate price based on user's B2B status
+  const getDisplayPrice = (product: MarketplaceProduct, user: any) => {
+    const isB2BUser = user?.b2b_verified === true;
+    const isB2BEligible = product.is_b2b_eligible === true;
+    
+    if (isB2BUser && isB2BEligible) {
+      // Show B2B pricing
+      return {
+        currentPrice: product.b2b_discounted_price || product.b2b_price || product.listed_price,
+        originalPrice: product.listed_price, // Always show listed price as crossed-out for B2B
+        isB2BPrice: true,
+        minQuantity: product.b2b_min_quantity || 1,
+        savings: Math.max(0, product.listed_price - (product.b2b_discounted_price || product.b2b_price || product.listed_price))
+      };
+    } else {
+      // Show regular pricing
+      return {
+        currentPrice: product.discounted_price || product.listed_price,
+        originalPrice: product.discounted_price ? product.listed_price : null,
+        isB2BPrice: false,
+        minQuantity: 1,
+        savings: product.discounted_price ? (product.listed_price - product.discounted_price) : 0
+      };
+    }
+  };
 
   // State
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
@@ -530,25 +560,34 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
 
           {/* Price Section */}
           <div className="space-y-1">
-            {hasOffer ? (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-bold text-accent-error-600">
-                  Rs. {product.discounted_price?.toLocaleString()}
-                </span>
-                <span className="text-sm text-neutral-500 line-through">
-                  Rs. {product.listed_price?.toLocaleString()}
-                </span>
-              </div>
-            ) : (
-              <span className="text-sm font-bold text-neutral-900">
-                Rs. {product.listed_price?.toLocaleString()}
-              </span>
-            )}
-            {hasOffer && (
-              <div className="text-xs text-accent-success-600 font-medium">
-                Save Rs. {((product.listed_price - (product.discounted_price || 0)) || 0)?.toLocaleString()}
-              </div>
-            )}
+            {(() => {
+              const pricing = getDisplayPrice(product, user);
+              
+              return (
+                <>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-accent-error-600">
+                      Rs. {pricing.currentPrice?.toLocaleString()}
+                    </span>
+                    {pricing.originalPrice && (
+                      <span className="text-sm text-neutral-500 line-through">
+                        Rs. {pricing.originalPrice?.toLocaleString()}
+                      </span>
+                    )}
+                    {pricing.isB2BPrice && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                        B2B
+                      </span>
+                    )}
+                  </div>
+                  {pricing.savings > 0 && (
+                    <div className="text-xs text-accent-success-600 font-medium">
+                      Save Rs. {pricing.savings?.toLocaleString()}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Stock and Delivery Info */}

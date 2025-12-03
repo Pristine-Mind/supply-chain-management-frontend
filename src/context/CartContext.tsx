@@ -166,7 +166,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('https://appmulyabazzar.com/api/v1/carts/', {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/carts/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const response = await fetch('https://appmulyabazzar.com/api/v1/my-cart/', {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/my-cart/`, {
         headers: {
           'Authorization': `Token ${token}`
         }
@@ -242,6 +242,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           total_reviews: Number(it.total_reviews ?? 0),
           view_count: Number(it.view_count ?? 0),
           rank_score: Number(it.rank_score ?? 0),
+          // Include B2B fields
+          b2b_price: it.b2b_price ?? null,
+          b2b_min_quantity: it.b2b_min_quantity ?? null,
+          is_b2b_eligible: Boolean(it.is_b2b_eligible ?? false),
         } as unknown as MarketplaceProduct;
 
         return {
@@ -254,6 +258,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           name: pd?.name || 'Product',
         };
       });
+      
       setCart(mapped);
 
       setBackendTotals({
@@ -276,8 +281,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         backendCartId = await createCartOnBackend();
       }
 
-      const url = `https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/`;
-      console.debug('[Cart] addItemToBackendCart', { productId, quantity, url });
+      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/carts/${backendCartId}/items/`;
+      console.debug('[Cart] addItemToBackendCart', { productId, quantity, url, token: token?.substring(0, 10) + '...' });
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -315,7 +320,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const backendCartId = state.cartId;
       if (!backendCartId) throw new Error('Cart not found');
 
-      const response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -342,7 +347,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const backendCartId = state.cartId;
       if (!backendCartId) throw new Error('Cart not found');
 
-      let response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
+      let response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Token ${token}`
@@ -350,7 +355,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       if (!response.ok && response.status === 405) {
-        response = await fetch(`https://appmulyabazzar.com/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
+        response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/carts/${backendCartId}/items/${backendItemId}/`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -375,7 +380,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('https://appmulyabazzar.com/api/v1/customer/location/', {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/customer/location/`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -401,7 +406,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
-      const response = await fetch('https://appmulyabazzar.com/api/v1/deliveries/', {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/deliveries/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -473,6 +478,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Optimistic update
     const tempId = Date.now();
+    
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
       if (existingItem) {
@@ -523,8 +529,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
       }
 
-      // Refresh cart data
-      fetchMyCart().catch(console.error);
+      // Refresh cart data after a short delay to ensure backend is updated
+      setTimeout(() => {
+        fetchMyCart().catch(console.error);
+      }, 100);
     } catch (error) {
       // Rollback optimistic update
       setCart(prevCart => {
