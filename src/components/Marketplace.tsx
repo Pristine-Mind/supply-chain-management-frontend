@@ -157,6 +157,7 @@ const Marketplace: React.FC = () => {
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const firstMenuItemRef = useRef<HTMLButtonElement | null>(null);
   const trendingRef = useRef<HTMLDivElement | null>(null);
+  const brandsRef = useRef<HTMLDivElement | null>(null);
   const [pendingProduct, setPendingProduct] = useState<MarketplaceProduct | null>(null);
 
   // Close user menu on outside click or ESC
@@ -354,6 +355,12 @@ const Marketplace: React.FC = () => {
   const scrollTrendingBy = (distance: number) => {
     if (trendingRef.current) {
       trendingRef.current.scrollBy({ left: distance, behavior: 'smooth' });
+    }
+  };
+
+  const scrollBrandsBy = (distance: number) => {
+    if (brandsRef.current) {
+      brandsRef.current.scrollBy({ left: distance, behavior: 'smooth' });
     }
   };
   
@@ -1286,63 +1293,107 @@ const Marketplace: React.FC = () => {
 
       <FeaturedProducts/>
 
-      {/* Made in Nepal Section */}
-      <div className="bg-neutral-50 py-8">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 bg-red-100 text-red-600 rounded-full text-sm font-semibold">
-              <span>🇳🇵</span>
-              <span>MADE IN NEPAL</span>
+      {/* Made in Nepal Section - Revamped */}
+      <div className="relative py-16 overflow-hidden">
+        {/* Background with gradient and pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-yellow-50"></div>
+        
+        {/* Decorative elements - Abstract representation of mountains/flag triangles */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-5 pointer-events-none">
+            <div className="absolute -top-24 -left-24 w-96 h-96 bg-orange-600 rounded-full blur-3xl"></div>
+            <div className="absolute top-1/2 right-0 w-64 h-64 bg-yellow-500 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 mb-4 px-6 py-2 bg-white border border-orange-100 text-orange-700 rounded-full text-sm font-bold shadow-sm">
+              <span className="animate-pulse">🇳🇵</span>
+              <span className="tracking-wide uppercase">Authentic Nepali Products</span>
             </div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-neutral-800 to-neutral-600 bg-clip-text text-transparent mb-2">
-              Proudly Made in Nepal
+            
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+              Crafted in <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-800">Nepal</span>
             </h2>
-            <p className="text-neutral-600 text-sm">
-              Support local businesses and craftsmanship
+            
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+              Discover unique products that tell a story of tradition, culture, and local craftsmanship. 
+              Directly from local artisans to your doorstep.
             </p>
+            
+            {/* Decorative divider */}
+            <div className="flex items-center justify-center gap-2 mt-6 opacity-50">
+                <div className="h-1 w-12 bg-orange-600 rounded-full"></div>
+                <div className="h-1 w-2 bg-yellow-500 rounded-full"></div>
+                <div className="h-1 w-12 bg-orange-600 rounded-full"></div>
+            </div>
           </div>
 
           {(() => {
             return madeInNepalProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {madeInNepalProducts.slice(0, 8).map((p) => (
                 <div
                   key={p.id}
-                  className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 cursor-pointer"
+                  className="bg-white rounded-2xl border-none shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group overflow-hidden relative transform hover:-translate-y-2"
                   onClick={() => navigate(`/marketplace/${p.id}`)}
                 >
-                  <div className="aspect-square w-full overflow-hidden">
+                  {/* Card Border Gradient on Hover */}
+                  <div className="absolute inset-0 border-2 border-transparent group-hover:border-orange-100 rounded-2xl transition-colors z-20 pointer-events-none"></div>
+
+                  {/* Image Container */}
+                  <div className="aspect-[4/5] w-full overflow-hidden relative bg-gray-100">
                     <img 
                       src={p.product_details?.images?.[0]?.image ?? 'https://via.placeholder.com/150'} 
                       alt={p.product_details?.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                     />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-semibold line-clamp-2 text-neutral-900">{p.product_details?.name}</h3>
-                    <div className="mt-2 text-xs text-neutral-500 flex items-center gap-1">
-                      Rs. {getDisplayPrice(p, user).currentPrice}
-                      {getDisplayPrice(p, user).isB2BPrice && (
-                        <span className="text-xs bg-blue-100 text-blue-600 px-1 py-0.5 rounded">B2B</span>
-                      )}
+                    
+                    {/* Overlay Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                    
+                    {/* Floating Badge */}
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-orange-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm z-10 flex items-center gap-1">
+                        <span>🇳🇵</span> Local
                     </div>
-                    <div className="mt-2 flex items-center gap-1 text-xs text-red-600 font-medium">
-                      <span>🇳🇵</span>
-                      <span>Made in Nepal</span>
+
+                    {/* Content Overlay at Bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                        <div className="text-xs font-medium text-orange-200 mb-1 uppercase tracking-wider">
+                            {p.product_details?.category_details || 'Handmade'}
+                        </div>
+                        <h3 className="text-lg font-bold leading-tight mb-2 line-clamp-2 group-hover:text-orange-100 transition-colors">
+                            {p.product_details?.name}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                            <span className="text-xl font-bold">
+                                Rs. {getDisplayPrice(p, user).currentPrice?.toLocaleString()}
+                            </span>
+                            <button className="bg-white text-orange-600 p-2 rounded-full opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 shadow-lg hover:bg-orange-50">
+                                <ShoppingCart className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : madeInNepalLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-neutral-100 rounded-xl h-64 animate-pulse" />
+                <div key={i} className="bg-white rounded-2xl h-96 shadow-sm animate-pulse overflow-hidden">
+                    <div className="h-2/3 bg-gray-200"></div>
+                    <div className="p-4 space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-neutral-600">
+            <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
+              <div className="text-4xl mb-4">🏔️</div>
+              <p className="text-gray-600 font-medium">
                 {madeInNepalError ? madeInNepalError : 'No Made in Nepal products available at the moment'}
               </p>
               <p className="text-neutral-400 text-xs mt-2">
@@ -1353,12 +1404,16 @@ const Marketplace: React.FC = () => {
           })()}
 
           {madeInNepalProducts.length > 8 && (
-            <div className="text-center mt-6">
+            <div className="text-center mt-12">
               <button
                 onClick={() => navigate('/marketplace/all-products?made_in_nepal=true')}
-                className="bg-red-600 text-white px-6 py-2 rounded-full font-medium hover:bg-red-700 transition-colors"
+                className="group relative inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-orange-700 rounded-full overflow-hidden transition-all duration-300 hover:bg-orange-800 hover:shadow-lg hover:-translate-y-1"
               >
-                View All Made in Nepal Products
+                <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
+                <span className="relative flex items-center gap-2">
+                    Explore All Nepali Products
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
               </button>
             </div>
           )}
@@ -1518,54 +1573,82 @@ const Marketplace: React.FC = () => {
       )}
 
       {/* Brands Section */}
-      <div className="bg-gray-50 py-4">
-        <div className="container mx-auto px-4">
+      <div className="bg-white py-12 border-t border-neutral-100">
+        <div className="container mx-auto px-4 relative group">
           {/* Title */}
-          <div className="text-center mb-4">
-            <h2 className="text-4xl font-light text-gray-900 mb-2">
-              <span className="text-orange-500 italic font-normal">Top  Brands</span>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Top Brands
             </h2>
+            <p className="text-gray-500">Shop from your favorite brands</p>
           </div>
 
-          {brandsLoading ? (
-            <div className="flex justify-center items-center space-x-8">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 shadow-sm animate-pulse">
-                  <div className="w-20 h-8 bg-gray-200 rounded"></div>
+          {/* Navigation Buttons */}
+          <button
+            onClick={() => scrollBrandsBy(-300)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 border border-neutral-200 text-neutral-600 hover:text-primary-600 hover:border-primary-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 hidden lg:block"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          
+          <button
+            onClick={() => scrollBrandsBy(300)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 border border-neutral-200 text-neutral-600 hover:text-primary-600 hover:border-primary-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 hidden lg:block"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          <div 
+            ref={brandsRef}
+            className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 px-4 scroll-smooth"
+          >
+            {brandsLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex-shrink-0">
+                  <div className="w-32 h-32 rounded-full bg-gray-100 animate-pulse"></div>
                 </div>
-              ))}
-            </div>
-          ) : brandsError ? (
-            <div className="text-center py-8">
-              <p className="text-red-600">{brandsError}</p>
-            </div>
-          ) : brands.length > 0 ? (
-            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
-              {brands.map((brand) => (
+              ))
+            ) : brandsError ? (
+              <div className="w-full text-center py-8">
+                <p className="text-red-600">{brandsError}</p>
+              </div>
+            ) : brands.length > 0 ? (
+              brands.map((brand) => (
                 <div
                   key={brand.id}
-                  className="bg-white rounded-2xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group min-w-[120px] flex items-center justify-center"
                   onClick={() => navigate(`/brand-products/${brand.id}`)}
+                  className="flex-shrink-0 cursor-pointer group/brand flex flex-col items-center gap-3"
                 >
-                  {brand.logo_url ? (
-                    <img
-                      src={brand.logo_url}
-                      alt={brand.name}
-                      className="h-8 max-w-[100px] object-contain group-hover:scale-105 transition-transform duration-300 filter grayscale group-hover:grayscale-0"
-                    />
-                  ) : (
-                    <div className="text-2xl font-bold text-gray-800 group-hover:text-red-500 transition-colors duration-300">
-                      {brand.name}
-                    </div>
-                  )}
+                  {/* Ring Container */}
+                  <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-b from-gray-200 via-gray-100 to-white shadow-inner relative transition-transform duration-300 group-hover/brand:scale-105">
+                     {/* Outer Ring Gradient */}
+                     <div className="absolute inset-0 rounded-full bg-gradient-to-b from-gray-300 to-gray-100 opacity-50"></div>
+                     
+                     {/* Inner White Circle */}
+                     <div className="relative w-full h-full bg-white rounded-full flex items-center justify-center p-4 shadow-sm group-hover/brand:shadow-md transition-all duration-300 border border-gray-100">
+                        {brand.logo_url ? (
+                          <img
+                            src={brand.logo_url}
+                            alt={brand.name}
+                            className="max-w-full max-h-full object-contain filter grayscale group-hover/brand:grayscale-0 transition-all duration-300"
+                          />
+                        ) : (
+                          <span className="text-xs font-bold text-center text-gray-400 group-hover/brand:text-gray-800 line-clamp-2">
+                            {brand.name}
+                          </span>
+                        )}
+                     </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600">No brands available</p>
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="w-full text-center py-8">
+                <p className="text-gray-600">No brands available</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
