@@ -749,7 +749,7 @@ const Marketplace: React.FC = () => {
 
         {/* CTA banner with categories overlapping */}
         <div className="w-full relative">
-          <div className="relative w-full h-auto min-h-[400px] overflow-hidden">
+          <div className="relative w-full h-auto min-h-[250px] sm:min-h-[300px] md:min-h-[400px] overflow-hidden">
             {/* Background Banner Image */}
             <img src={BannerSaleImage} alt="Christmas Sale" className="w-full h-full object-cover absolute inset-0" />
 
@@ -759,8 +759,8 @@ const Marketplace: React.FC = () => {
 
           {/* Categories positioned to overlap banner - only 10% inside */}
           <div className="absolute bottom-0 left-0 right-0 z-0 transform translate-y-[90%]">
-            <div className="container mx-auto px-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="container mx-auto px-4 sm:px-8">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {[
                   {
                     title: 'Shop Electronics',
@@ -840,7 +840,7 @@ const Marketplace: React.FC = () => {
         </div>
 
         {/* Add spacing to account for overlapping categories */}
-        <div className="pt-64"></div>
+        <div className="pt-96 sm:pt-80 md:pt-64"></div>
 
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
@@ -854,11 +854,28 @@ const Marketplace: React.FC = () => {
             </div>
           )}
           {/* Flash Sale Section - Revamped with auto-scroll */}
-          <div className="relative mb-8">
-            {/* Section Header */}
-            <div className="flex items-center justify-between mb-6">
+          <div className="relative mb-12 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl p-4 sm:p-8 border border-orange-100 overflow-hidden">
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-100 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-100 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
+
+            {/* Section Header with Timer */}
+            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-gray-900">Limited Time Offers</h2>
+                <div className="bg-orange-100 p-2 rounded-lg">
+                  <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                    Flash Sale
+                    <span className="text-sm font-normal text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full animate-pulse">
+                      Ending Soon
+                    </span>
+                  </h2>
+                  <p className="text-sm text-gray-500">Grab these deals before they're gone!</p>
+                </div>
               </div>
             </div>
 
@@ -874,21 +891,21 @@ const Marketplace: React.FC = () => {
             {/* Products Container */}
             <div
               ref={trendingRef}
-              className="flex gap-4 overflow-x-auto no-scrollbar py-2 scroll-smooth"
+              className="flex gap-4 overflow-x-auto no-scrollbar py-2 scroll-smooth relative z-10"
               style={{ scrollBehavior: 'smooth' }}
             >
               {flashSaleProducts && flashSaleProducts.length > 0 ? (
                 flashSaleProducts.slice(0, 12).map((p) => (
                   <div
                     key={p.id}
-                    className="min-w-[240px] bg-white rounded-2xl border border-gray-200 overflow-hidden group hover:shadow-xl hover:border-red-200 transition-all duration-300 cursor-pointer flex flex-col relative"
+                    className="min-w-[240px] bg-white rounded-2xl border border-gray-200 overflow-hidden group hover:shadow-xl hover:border-orange-200 transition-all duration-300 cursor-pointer flex flex-col relative"
                     onClick={() => navigate(`/marketplace/${p.id}`)}
                     role="button"
                     tabIndex={0}
                   >
                     {/* Sale Badge */}
                     {p.percent_off > 0 && (
-                      <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10 shadow-md">
+                      <div className="absolute top-3 left-3 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10 shadow-md">
                         {Math.round(p.percent_off)}% OFF
                       </div>
                     )}
@@ -912,7 +929,7 @@ const Marketplace: React.FC = () => {
                     {/* Product Info */}
                     <div className="p-4 flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="text-sm font-bold line-clamp-2 text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+                        <h3 className="text-sm font-bold line-clamp-2 text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
                           {p.product_details?.name}
                         </h3>
                         
@@ -922,7 +939,7 @@ const Marketplace: React.FC = () => {
                             const pricing = getDisplayPrice(p, user);
                             return (
                               <>
-                                <span className="text-lg font-bold text-red-600">
+                                <span className="text-lg font-bold text-orange-600">
                                   Rs. {pricing.currentPrice?.toLocaleString()}
                                 </span>
                                 {pricing.originalPrice && (
@@ -959,18 +976,18 @@ const Marketplace: React.FC = () => {
                             </div>
                           ) : null;
                         })()}
+
+                        {/* Sold Progress Bar (Mock) */}
+                        <div className="mt-3">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-500">Available: {p.product_details?.stock || 0}</span>
+                            <span className="text-orange-500 font-medium">Almost Gone!</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-1.5">
+                            <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: '85%' }}></div>
+                          </div>
+                        </div>
                       </div>
-                      
-                      {/* Stock indicator */}
-                      {/* <div className="mt-2 flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          p.product_details?.stock > 10 ? 'bg-green-500' : 
-                          p.product_details?.stock > 0 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`}></div>
-                        <span className="text-xs text-gray-600">
-                          {p.product_details?.stock > 0 ? `${p.product_details.stock} left` : 'Out of stock'}
-                        </span>
-                      </div> */}
                     </div>
                   </div>
                 ))
@@ -1053,7 +1070,7 @@ const Marketplace: React.FC = () => {
 
           {/* Two-column promo / top picks */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <div className="relative bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-lg p-8 flex flex-col items-center justify-center overflow-hidden shadow-lg">
+            <div className="relative bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-lg p-6 sm:p-8 flex flex-col items-center justify-center overflow-hidden shadow-lg">
               {/* Animated background circles */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-orange-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-300 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
@@ -1113,9 +1130,9 @@ const Marketplace: React.FC = () => {
               <div className="absolute bottom-4 left-4 w-16 h-16 border-b-2 border-l-2 border-orange-300 rounded-bl-2xl opacity-30"></div>
             </div>
 
-            <div className="bg-neutral-100 rounded-lg p-6">
-              <h3 className="text-2xl font-bold mb-4">Top picks today</h3>
-              <div className="grid grid-cols-3 gap-3">
+            <div className="bg-neutral-100 rounded-lg p-4 sm:p-6">
+              <h3 className="text-xl sm:text-2xl font-bold mb-4">Top picks today</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {todaysPickProducts && todaysPickProducts.length > 0 ? (
                   todaysPickProducts.slice(0, 3).map((p) => (
                     <div
@@ -1146,7 +1163,7 @@ const Marketplace: React.FC = () => {
             </div>
           </div>
           {/* Promo banner */}
-          <div className="relative w-full bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 h-40 overflow-hidden px-6 rounded-xl mt-10 flex items-center justify-center">
+          <div className="relative w-full bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 min-h-[10rem] h-auto py-6 overflow-hidden px-6 rounded-xl mt-10 flex items-center justify-center">
             {/* Animated background pattern */}
             <div className="absolute inset-0 opacity-10">
               <div className="absolute inset-0 bg-repeat" style={{

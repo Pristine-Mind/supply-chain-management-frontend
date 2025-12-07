@@ -596,16 +596,16 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 </div>
 
                 {images.length > 1 && (
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 overflow-x-auto">
+                  <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth">
                     {images.map((img, idx) => (
                       <button
                         key={idx}
                         onClick={() => setCurrentImage(idx)}
                         onDoubleClick={() => openFullScreen(idx)}
-                        className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                        className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
                           idx === currentImage 
-                            ? 'border-primary-500 ring-4 ring-primary-100 scale-105' 
-                            : 'border-gray-200 hover:border-gray-300 hover:scale-105'
+                            ? 'border-primary-500 ring-2 ring-primary-100' 
+                            : 'border-gray-200 hover:border-gray-300'
                         }`}
                       >
                         <img 
@@ -630,7 +630,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     <PopularityScore score={product.rank_score} size="sm" showLabel={false} />
                   </div>
                   
-                  <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                     {product.product_details?.name}
                   </h1>
 
@@ -668,10 +668,10 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
 
                 <div className="space-y-3">
                   <div className="flex items-end gap-4 flex-wrap">
-                    <div className="text-4xl font-bold text-gray-900">
+                    <div className="text-3xl sm:text-4xl font-bold text-gray-900">
                       Rs. {currentPrice.toLocaleString()}
                       {isB2BPrice && (
-                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 align-middle">
                           B2B Price
                         </span>
                       )}
@@ -805,7 +805,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 </div>
 
                 {/* Action Buttons */}
-                <div className="space-y-3 md:sticky md:bottom-0 md:bg-white md:pt-4 md:border-t md:border-gray-200">
+                <div className="fixed bottom-0 left-0 right-0 z-50 bg-white p-4 border-t border-gray-200 shadow-lg space-y-3 md:static md:shadow-none md:p-0 md:space-y-3 md:sticky md:bottom-0 md:bg-white md:pt-4 md:border-t md:border-gray-200">
                   <button
                     onClick={handleAddToCart}
                     disabled={stockLevel === 0}
@@ -880,7 +880,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     <button
                       key={idx}
                       onClick={() => setTab(idx)}
-                      className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-300 relative ${
+                      className={`flex-1 py-3 px-2 sm:px-6 text-sm sm:text-base text-center font-semibold transition-all duration-300 relative ${
                         tab === idx 
                           ? 'bg-white text-primary-600' 
                           : 'text-neutral-600 hover:text-gray-900 hover:bg-gray-100'
