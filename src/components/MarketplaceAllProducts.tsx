@@ -20,7 +20,8 @@ import {
   DollarSign,
   Tag,
   Package,
-  Building
+  Building,
+  Mic
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -194,6 +195,56 @@ const MarketplaceAllProducts: React.FC = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [wishlist, setWishlist] = useState<Set<number>>(new Set());
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+
+  const startVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice search is not supported in your browser');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    setIsListening(true);
+    setSearchTerm('');
+
+    recognition.onresult = (event: any) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setSearchTerm(finalTranscript);
+        setIsListening(false);
+        // Trigger search immediately
+        setDebouncedSearchTerm(finalTranscript);
+      } else {
+        setSearchTerm(interimTranscript);
+      }
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'info' } | null>(null);
 
@@ -849,16 +900,22 @@ const MarketplaceAllProducts: React.FC = () => {
 
             {/* Desktop Search and Cart */}
             <div className="hidden md:flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
+              <div className={`relative transition-all duration-300 ${isListening ? 'scale-[1.02]' : ''}`}>
+                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isListening ? 'text-red-500 animate-bounce' : 'text-neutral-400'}`} />
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={isListening ? "Listening..." : "Search products..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="input-field pl-10 pr-4 w-80 focus:border-primary-500 focus:ring-primary-200"
+                  className={`input-field pl-10 pr-10 w-80 transition-all ${isListening ? 'border-red-400 ring-4 ring-red-100' : 'focus:border-primary-500 focus:ring-primary-200'}`}
                 />
+                <button
+                  onClick={startVoiceSearch}
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                >
+                  <Mic className="w-4 h-4" />
+                </button>
               </div>
               <button
                 onClick={handleSearch}
@@ -1337,11 +1394,11 @@ const MarketplaceAllProducts: React.FC = () => {
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
           <Dialog.Content className="fixed top-0 left-0 right-0 bg-white p-4 z-50">
             <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className={`relative flex-1 transition-all duration-300 ${isListening ? 'scale-[1.02]' : ''}`}>
+                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isListening ? 'text-red-500 animate-bounce' : 'text-gray-400'}`} />
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={isListening ? "Listening..." : "Search products..."}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => {
@@ -1350,9 +1407,15 @@ const MarketplaceAllProducts: React.FC = () => {
                       setShowMobileSearch(false);
                     }
                   }}
-                  className="pl-10 pr-4 py-3 w-full border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className={`pl-10 pr-10 py-3 w-full border-2 rounded-lg transition-all ${isListening ? 'border-red-400 ring-4 ring-red-100' : 'border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500'}`}
                   autoFocus
                 />
+                <button
+                  onClick={startVoiceSearch}
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                >
+                  <Mic className="w-4 h-4" />
+                </button>
               </div>
               <button
                 onClick={() => {

@@ -171,15 +171,31 @@ const ProductSearchBar: React.FC = () => {
     const recognition = new SpeechRecognition();
 
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true;
     recognition.lang = 'en-US';
 
     setIsListening(true);
+    setQuery(''); // Clear query when starting to listen
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setQuery(transcript);
-      setShowSuggestions(true);
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setQuery(finalTranscript);
+        setShowSuggestions(true);
+        setIsListening(false);
+      } else {
+        setQuery(interimTranscript);
+      }
     };
 
     recognition.onerror = () => {
@@ -472,13 +488,13 @@ const ProductSearchBar: React.FC = () => {
         </Link>
 
         <div className="flex-1 max-w-2xl mx-4 hidden md:block">
-          <div className="relative">
+          <div className={`relative transition-all duration-300 ${isListening ? 'ring-4 ring-red-100 rounded-xl scale-[1.02]' : ''}`}>
             <div className="relative">
               <input
                 ref={searchInputRef}
                 type="text"
-                className="w-full pl-12 pr-16 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm bg-white"
-                placeholder="Search for products, brands, categories..."
+                className={`w-full pl-12 pr-16 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all text-sm bg-white ${isListening ? 'border-red-400' : ''}`}
+                placeholder={isListening ? "Listening..." : "Search for products, brands, categories..."}
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);
@@ -488,9 +504,16 @@ const ProductSearchBar: React.FC = () => {
                 onKeyDown={handleKeyDown}
               />
               
-              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+              <FiSearch className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isListening ? 'text-red-500 animate-bounce' : 'text-neutral-400'}`} />
               
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                <button
+                  onClick={startVoiceSearch}
+                  className={`p-1.5 hover:bg-neutral-100 rounded-full transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                  title="Search by voice"
+                >
+                  <FiMic className="w-4 h-4" />
+                </button>
                 {query && (
                   <button
                     onClick={() => {
@@ -649,13 +672,19 @@ const ProductSearchBar: React.FC = () => {
         <div className="relative">
           <input
             type="text"
-            className="w-full rounded-lg border-2 border-gray-200 px-4 py-2 pl-10 bg-gray-50 focus:outline-none focus:border-primary-500 focus:bg-white transition-all"
+            className="w-full rounded-lg border-2 border-gray-200 px-4 py-2 pl-10 pr-10 bg-gray-50 focus:outline-none focus:border-primary-500 focus:bg-white transition-all"
             placeholder="Search products..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <button
+            onClick={startVoiceSearch}
+            className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded-full ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400'}`}
+          >
+            <FiMic className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
