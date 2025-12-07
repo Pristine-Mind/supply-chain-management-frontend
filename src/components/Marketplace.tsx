@@ -1076,96 +1076,76 @@ const Marketplace: React.FC = () => {
           </div>
 
           {/* Two-column promo / top picks */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            <div className="relative bg-gradient-to-br from-neutral-50 to-neutral-100 rounded-lg p-6 sm:p-8 flex flex-col items-center justify-center overflow-hidden shadow-lg">
-              {/* Animated background circles */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-orange-200 rounded-full blur-3xl opacity-20 animate-pulse"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-300 rounded-full blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            
+            {/* Left: Limited Time Deals */}
+            <div className="lg:col-span-1 relative bg-[#FDFBF7] rounded-[2rem] p-8 flex flex-col items-center justify-center text-center overflow-hidden border border-orange-100/50 shadow-sm min-h-[400px]">
+              {/* Diagonal Stripes Background */}
+              <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 40px)' }}></div>
               
-              {/* Decorative pattern */}
-              <div className="absolute inset-0 opacity-5">
-                <div className="absolute inset-0 bg-repeat" style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E")`,
-                }}></div>
-              </div>
+              {/* Decorative corner lines */}
+              <div className="absolute bottom-6 left-6 w-32 h-32 border-l-2 border-b-2 border-orange-200/40 rounded-bl-[2rem]"></div>
+              <div className="absolute top-6 right-6 w-32 h-32 border-t-2 border-r-2 border-orange-200/40 rounded-tr-[2rem]"></div>
 
               {/* Content */}
-              <div className="relative z-10 text-center">
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 bg-orange-100 text-orange-600 rounded-full text-sm font-semibold">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                  </svg>
-                  <span>HOT DEALS</span>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-3xl font-bold mb-2 bg-gradient-to-r from-neutral-800 to-neutral-600 bg-clip-text text-transparent">
-                  Limited Time Deals
-                </h3>
-
-                {/* Subtitle */}
-                <p className="text-neutral-600 mb-6 text-sm">
-                  Exclusive offers you don't want to miss
-                </p>
-
-                {/* CTA Button */}
-                <button
-                  onClick={() => navigate('/deals')}
-                  className="group px-8 py-3.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white transition-all duration-300 text-lg font-semibold shadow-lg hover:shadow-xl hover:scale-105 transform relative overflow-hidden"
-                >
-                  <span className="relative z-10 flex items-center gap-2">
-                    Explore Deals
-                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </span>
-                  {/* Button shine effect */}
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                </button>
-
-                {/* Decorative dots */}
-                <div className="flex justify-center gap-1 mt-6">
-                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></span>
-                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
-                  <span className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></span>
-                </div>
+              <div className="relative z-10 flex flex-col items-center h-full justify-center py-8">
+                  <div className="inline-flex items-center gap-2 bg-[#FFEAD5] text-orange-600 px-5 py-2 rounded-full text-xs font-bold mb-6 uppercase tracking-wider shadow-sm">
+                    <span className="animate-pulse">🔔</span> HOT DEALS
+                  </div>
+                  
+                  <h3 className="text-4xl font-extrabold text-gray-800 mb-3 leading-tight tracking-tight">
+                    Limited Time Deals
+                  </h3>
+                  <p className="text-gray-500 mb-10 max-w-[200px] mx-auto text-sm font-medium">
+                    Exclusive offers you don't want to miss
+                  </p>
+                  
+                  <button onClick={() => navigate('/deals')} className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3.5 rounded-full font-bold hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 text-sm shadow-orange-200 shadow-lg">
+                    Explore Deals 
+                    <span className="text-lg leading-none mb-0.5">→</span>
+                  </button>
+                  
+                  <div className="flex gap-2 mt-12 justify-center">
+                    <div className="w-2 h-2 rounded-full bg-orange-200"></div>
+                    <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+                    <div className="w-2 h-2 rounded-full bg-orange-200"></div>
+                  </div>
               </div>
-
-              {/* Corner accents */}
-              <div className="absolute top-4 right-4 w-16 h-16 border-t-2 border-r-2 border-orange-300 rounded-tr-2xl opacity-30"></div>
-              <div className="absolute bottom-4 left-4 w-16 h-16 border-b-2 border-l-2 border-orange-300 rounded-bl-2xl opacity-30"></div>
             </div>
 
-            <div className="bg-neutral-100 rounded-lg p-4 sm:p-6">
-              <h3 className="text-xl sm:text-2xl font-bold mb-4">Top picks today</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {todaysPickProducts && todaysPickProducts.length > 0 ? (
-                  todaysPickProducts.slice(0, 3).map((p) => (
-                    <div
-                      key={p.id}
-                      onClick={() => navigate(`/marketplace/${p.id}`)}
-                      className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="aspect-square w-full overflow-hidden">
-                        <img src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER} alt={p.product_details?.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      </div>
-                      <div className="p-3">
-                        <h4 className="text-sm font-semibold line-clamp-2 text-neutral-900">{p.product_details?.name}</h4>
-                        <div className="mt-1 text-xs text-neutral-500 flex items-center gap-1">
-                          Rs. {getDisplayPrice(p, user).currentPrice}
-                          {getDisplayPrice(p, user).isB2BPrice && (
-                            <span className="text-xs bg-blue-100 text-blue-600 px-1 py-0.5 rounded">B2B</span>
-                          )}
+            {/* Right: Top Picks Today */}
+            <div className="lg:col-span-2 bg-[#F8F9FA] rounded-[2rem] p-8 border border-gray-100 shadow-sm flex flex-col">
+              <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Top picks today</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 flex-grow">
+                  {todaysPickProducts && todaysPickProducts.length > 0 ? (
+                    todaysPickProducts.slice(0, 3).map((p) => (
+                      <div
+                        key={p.id}
+                        onClick={() => navigate(`/marketplace/${p.id}`)}
+                        className="bg-white rounded-2xl p-4 border border-gray-100 hover:shadow-lg hover:border-orange-100 transition-all duration-300 cursor-pointer flex flex-col h-full group"
+                      >
+                        <div className="aspect-[5/4] w-full overflow-hidden bg-white rounded-xl mb-4 relative flex items-center justify-center p-2">
+                           <img src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER} alt={p.product_details?.name} className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                        </div>
+                        
+                        <div className="mt-auto">
+                            <h4 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors">
+                                {p.product_details?.name}
+                            </h4>
+                            <div className="text-xs text-gray-500 font-medium">
+                                Rs. {getDisplayPrice(p, user).currentPrice?.toLocaleString()}
+                            </div>
                         </div>
                       </div>
-                    </div>
-                  ))
-                ) : (
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="bg-neutral-200 rounded-xl h-64" />
-                  ))
-                )}
+                    ))
+                  ) : (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="bg-white rounded-2xl h-full min-h-[240px] animate-pulse border border-gray-100"></div>
+                    ))
+                  )}
               </div>
             </div>
           </div>
