@@ -3,7 +3,7 @@ import { categoryApi } from '../api/categoryApi';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, User, ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, Menu, Mic } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
@@ -113,6 +113,55 @@ const Marketplace: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [isListening, setIsListening] = useState(false);
+
+  const startVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Voice search is not supported in your browser');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    setIsListening(true);
+    setQuery('');
+
+    recognition.onresult = (event: any) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setQuery(finalTranscript);
+        setIsListening(false);
+        navigate(`/marketplace/all-products?search=${encodeURIComponent(finalTranscript)}`);
+      } else {
+        setQuery(interimTranscript);
+      }
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
@@ -534,11 +583,11 @@ const Marketplace: React.FC = () => {
 
               {/* Centered large search on desktop */}
               <div className="hidden md:flex justify-center">
-                <div className="relative w-full max-w-xl">
+                <div className={`relative w-full max-w-xl transition-all duration-300 ${isListening ? 'scale-[1.02]' : ''}`}>
                   <input
                     type="text"
-                    placeholder="Search products..."
-                    className="input-field w-full pl-12 pr-20 focus:border-primary-500 focus:ring-primary-200 text-lg font-medium rounded-full"
+                    placeholder={isListening ? "Listening..." : "Search products..."}
+                    className={`input-field w-full pl-12 pr-32 text-lg font-medium rounded-full transition-all ${isListening ? 'border-red-400 ring-4 ring-red-100' : 'focus:border-primary-500 focus:ring-primary-200'}`}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleSearchEnter}
@@ -552,7 +601,14 @@ const Marketplace: React.FC = () => {
                               }}
                             />
                     </div>
-                  <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
+                  <MagnifyingGlassIcon className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isListening ? 'text-red-500 animate-bounce' : 'text-neutral-400'}`} />
+                  <button
+                    onClick={startVoiceSearch}
+                    className={`absolute right-28 top-1/2 transform -translate-y-1/2 p-2 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                    title="Search by voice"
+                  >
+                    <Mic className="w-5 h-5" />
+                  </button>
                   <button
                     onClick={() => navigate(`/marketplace/all-products?search=${encodeURIComponent(query)}`)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 btn-primary px-4 sm:px-6 py-2 text-caption font-medium rounded-full"
@@ -659,7 +715,13 @@ const Marketplace: React.FC = () => {
                       onSelect={(val) => navigate(`/marketplace/all-products?search=${encodeURIComponent(val)}`)}
                     />
                   </div>
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isListening ? 'text-red-500 animate-bounce' : 'text-neutral-400'}`} />
+                  <button
+                    onClick={startVoiceSearch}
+                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                  >
+                    <Mic className="w-4 h-4" />
+                  </button>
                 </div>
                 <button
                   className="ml-3 p-2 text-neutral-600"
@@ -822,7 +884,7 @@ const Marketplace: React.FC = () => {
                       onClick={handleCategoryClick}
                     >
                       <div className="p-3">
-                        <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
                           {card.title}
                         </h3>
                         
