@@ -158,9 +158,9 @@ const VideoItem: React.FC<{
             />
 
             {/* Overlay Controls */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 via-black/20 to-transparent text-white">
+            <div className="absolute bottom-0 left-0 right-0 pt-20 pb-6 px-4 bg-gradient-to-t from-black/90 via-black/40 to-transparent text-white pointer-events-none">
                 <div className="flex justify-between items-end">
-                    <div className="flex-1 mr-12">
+                    <div className="flex-1 mr-4 pointer-events-auto">
                         {/* <div className="flex items-center mb-3">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-400 to-red-500 p-[2px] mr-2">
                                 <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
@@ -169,8 +169,8 @@ const VideoItem: React.FC<{
                             </div>
                             <span className="font-semibold text-base shadow-black drop-shadow-md">@{video.uploader_name}</span>
                         </div> */}
-                        <h2 className="font-medium text-sm mb-2 drop-shadow-md">{video.title}</h2>
-                        <h3 className="font-medium text-sm mb-2 drop-shadow-md">{video.description}</h3>
+                        <h2 className="font-bold text-base mb-1 drop-shadow-md line-clamp-2">{video.title}</h2>
+                        <h3 className="font-medium text-sm mb-3 drop-shadow-md text-gray-200 line-clamp-2">{video.description}</h3>
                         
                         <div className="flex items-center text-xs mb-4 opacity-90">
                             <Music2 size={14} className="mr-2 animate-spin-slow" />
@@ -181,66 +181,66 @@ const VideoItem: React.FC<{
                         {video.product && (
                             <div 
                                 onClick={handleProductClick}
-                                className="bg-black/40 backdrop-blur-md rounded-lg p-2 flex items-center cursor-pointer border border-white/10 hover:bg-black/60 transition-all active:scale-95"
+                                className="bg-white/10 backdrop-blur-md rounded-xl p-2.5 flex items-center cursor-pointer border border-white/20 hover:bg-white/20 transition-all active:scale-95 max-w-[85%]"
                             >
                                 {video.product.images && video.product.images.length > 0 && (
                                     <img 
                                         src={video.product.images[0].image} 
                                         alt={video.product.name} 
-                                        className="w-12 h-12 rounded-md object-cover mr-3 bg-white"
+                                        className="w-10 h-10 rounded-lg object-cover mr-3 bg-white shrink-0"
                                     />
                                 )}
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate text-white">{video.product.name}</p>
-                                    <div className="flex items-center mt-0.5">
-                                        <span className="text-sm font-bold text-primary-400">
+                                <div className="flex-1 min-w-0 mr-2">
+                                    <p className="text-xs font-semibold truncate text-white mb-0.5">{video.product.name}</p>
+                                    <div className="flex items-center">
+                                        <span className="text-xs font-bold text-primary-400">
                                             Rs. {video.product.discounted_price || video.product.listed_price}
                                         </span>
                                         {video.product.discounted_price && (
-                                            <span className="text-xs text-gray-400 line-through ml-2">
+                                            <span className="text-[10px] text-gray-400 line-through ml-2">
                                                 Rs. {video.product.listed_price}
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                                <div className="bg-primary-600 p-2 rounded-full ml-2 shadow-lg shadow-primary-600/20">
-                                    <ShoppingBag size={18} className="text-white" />
+                                <div className="bg-primary-600 p-2 rounded-full shadow-lg shadow-primary-600/20 shrink-0">
+                                    <ShoppingBag size={16} className="text-white" />
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Right Side Actions */}
-                    <div className="flex flex-col items-center space-y-6 pb-4">
+                    <div className="flex flex-col items-center space-y-5 pb-2 pointer-events-auto min-w-[50px]">
                         <button onClick={handleLike} className="flex flex-col items-center group">
-                            <div className={`p-3 rounded-full bg-black/20 backdrop-blur-sm transition-transform group-active:scale-75 ${liked ? 'text-red-500' : 'text-white'}`}>
-                                <Heart size={32} fill={liked ? "currentColor" : "none"} className={`filter drop-shadow-lg ${liked ? 'animate-heart-bounce' : ''}`} />
+                            <div className={`p-2.5 rounded-full bg-black/20 backdrop-blur-sm transition-transform group-active:scale-75 ${liked ? 'text-red-500' : 'text-white'}`}>
+                                <Heart size={28} fill={liked ? "currentColor" : "none"} className={`filter drop-shadow-lg ${liked ? 'animate-heart-bounce' : ''}`} />
                             </div>
                             <span className="text-xs mt-1 font-medium drop-shadow-md">{likesCount}</span>
                         </button>
                         
                         <button onClick={handleSave} className="flex flex-col items-center group">
-                            <div className={`p-3 rounded-full bg-black/20 backdrop-blur-sm transition-transform group-active:scale-75 ${saved ? 'text-yellow-400' : 'text-white'}`}>
-                                <Bookmark size={30} fill={saved ? "currentColor" : "none"} className="filter drop-shadow-lg" />
+                            <div className={`p-2.5 rounded-full bg-black/20 backdrop-blur-sm transition-transform group-active:scale-75 ${saved ? 'text-yellow-400' : 'text-white'}`}>
+                                <Bookmark size={26} fill={saved ? "currentColor" : "none"} className="filter drop-shadow-lg" />
                             </div>
                             <span className="text-xs mt-1 font-medium drop-shadow-md">Save</span>
                         </button>
 
                         <button onClick={handleShare} className="flex flex-col items-center group">
-                            <div className="p-3 rounded-full bg-black/20 backdrop-blur-sm text-white transition-transform group-active:scale-90">
-                                <Share2 size={30} className="filter drop-shadow-lg" />
+                            <div className="p-2.5 rounded-full bg-black/20 backdrop-blur-sm text-white transition-transform group-active:scale-90">
+                                <Share2 size={26} className="filter drop-shadow-lg" />
                             </div>
                             <span className="text-xs mt-1 font-medium drop-shadow-md">{video.shares_count}</span>
                         </button>
 
                         <button onClick={toggleMute} className="flex flex-col items-center group">
-                            <div className="p-3 rounded-full bg-black/20 backdrop-blur-sm text-white transition-transform group-active:scale-90">
-                                {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                            <div className="p-2.5 rounded-full bg-black/20 backdrop-blur-sm text-white transition-transform group-active:scale-90">
+                                {isMuted ? <VolumeX size={22} /> : <Volume2 size={22} />}
                             </div>
                         </button>
                         
                         {video.product && (
-                             <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden animate-spin-slow mt-4">
+                             <div className="w-10 h-10 rounded-full border-2 border-white overflow-hidden animate-spin-slow mt-2">
                                 {video.product.images && video.product.images.length > 0 ? (
                                     <img src={video.product.images[0].image} className="w-full h-full object-cover" />
                                 ) : (
@@ -316,10 +316,10 @@ const ShoppableVideoFeed: React.FC<ShoppableVideoFeedProps> = ({ onClose, onRequ
 
 
     return (
-        <div className="fixed inset-0 z-50 bg-black flex justify-center">
-            <div className="relative w-full max-w-md h-full bg-black shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black flex justify-center items-end sm:items-center">
+            <div className="relative w-full sm:max-w-md h-[100dvh] sm:h-[90vh] sm:rounded-2xl overflow-hidden bg-black shadow-2xl">
                 {/* Header / Close Button */}
-                <div className="absolute top-0 left-0 right-0 z-10 p-4 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent">
+                <div className="absolute top-0 left-0 right-0 z-10 pt-4 px-4 pb-2 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent mt-2">
                     <h2 className="text-white font-bold text-lg drop-shadow-md">Just For You</h2>
                     <button 
                         onClick={onClose}

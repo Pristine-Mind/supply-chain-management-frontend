@@ -791,7 +791,7 @@ const Marketplace: React.FC = () => {
               </div>
 
               {/* Desktop links - hide on small screens */}
-              <div className="hidden lg:flex items-center ml-3 space-x-4">
+              <div className="hidden md:flex items-center ml-3 space-x-4">
                 <button
                   onClick={() => navigate('/featured')}
                   className="text-neutral-700 font-medium cursor-pointer bg-transparent border-0 p-0"
@@ -1289,6 +1289,16 @@ const Marketplace: React.FC = () => {
 
               <nav className="space-y-4">
                 <a href="/featured" className="block py-2 text-neutral-700 hover:text-primary-600">Featured Selection</a>
+                <button 
+                  onClick={() => { setShowVideoFeed(true); setIsMobileMenuOpen(false); }}
+                  className="w-full text-left py-2 text-neutral-700 hover:text-primary-600 flex items-center gap-2"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
+                  </span>
+                  Just For You
+                </button>
                 <a href="/sell" className="block py-2 text-neutral-700 hover:text-primary-600">Sell</a>
                 <a href="/support" className="block py-2 text-neutral-700 hover:text-primary-600">Support</a>
 

@@ -176,11 +176,17 @@ module.exports = {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        'heart-bounce': {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.3)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 0.5s ease-in-out forwards',
         'fade-and-scale': 'fade-and-scale 0.5s ease-in-out forwards',
         'slide-in': 'slide-in 0.3s ease-out forwards',
+        'spin-slow': 'spin 4s linear infinite',
+        'heart-bounce': 'heart-bounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
       },
     },
   },
