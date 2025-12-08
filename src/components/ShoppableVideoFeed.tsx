@@ -263,16 +263,21 @@ const ShoppableVideoFeed: React.FC<ShoppableVideoFeedProps> = ({ onClose, onRequ
 
     const fetchVideos = useCallback(async (pageNum: number) => {
         try {
-            const data = await shoppableVideosApi.getVideos(pageNum);
-            if (data && Array.isArray(data.results)) {
-                if (pageNum === 1) {
-                    setVideos(data.results);
-                } else {
-                    setVideos(prev => [...prev, ...data.results]);
-                }
+            const data: any = await shoppableVideosApi.getVideos(pageNum);
+            let newVideos: ShoppableVideo[] = [];
+
+            if (Array.isArray(data)) {
+                newVideos = data;
+            } else if (data && Array.isArray(data.results)) {
+                newVideos = data.results;
             } else {
                 console.error("Invalid API response format", data);
-                if (pageNum === 1) setVideos([]);
+            }
+
+            if (pageNum === 1) {
+                setVideos(newVideos);
+            } else {
+                setVideos(prev => [...prev, ...newVideos]);
             }
         } catch (error) {
             console.error("Failed to fetch videos", error);
