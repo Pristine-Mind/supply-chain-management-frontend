@@ -10,6 +10,7 @@ import LoginModal from './auth/LoginModal';
 import FeaturedProducts from './FeaturedProducts';
 import CategoryMenu from './CategoryMenu';
 import SearchSuggestions from './SearchSuggestions';
+import ShoppableVideoFeed from './ShoppableVideoFeed';
 import { createSlug } from '../utils/slugUtils';
 
 import logo from '../assets/logo.png';
@@ -114,6 +115,7 @@ const Marketplace: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isListening, setIsListening] = useState(false);
+  const [showVideoFeed, setShowVideoFeed] = useState(false);
 
   const startVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -796,6 +798,17 @@ const Marketplace: React.FC = () => {
                   aria-label="Featured Selection"
                 >
                   Featured Selection
+                </button>
+                <button
+                  onClick={() => setShowVideoFeed(true)}
+                  className="text-neutral-700 font-medium cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1"
+                  aria-label="Just For You"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-500"></span>
+                  </span>
+                  Just For You
                 </button>
                 <button
                   onClick={() => navigate('/sell')}
@@ -1867,8 +1880,13 @@ const Marketplace: React.FC = () => {
     <Footer />
     </div>
     {/* Closing tag for marketplace-root */}
-  </div>
+      {showVideoFeed && (
+        <ShoppableVideoFeed 
+          onClose={() => setShowVideoFeed(false)} 
+          onRequireLogin={() => setShowLoginModal(true)}
+        />
+      )}
+    </div>
   );
 };
-
 export default Marketplace;
