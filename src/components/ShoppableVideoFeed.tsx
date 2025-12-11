@@ -20,7 +20,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
-// ===== COMMENTS SHEET (unchanged) =====
 const CommentsSheet: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -481,7 +480,6 @@ const VideoItem: React.FC<{
   );
 };
 
-// ===== MAIN FEED =====
 const ShoppableVideoFeed: React.FC<{ onClose: () => void; onRequireLogin: () => void }> = ({ onClose, onRequireLogin }) => {
   const [videos, setVideos] = useState<ShoppableVideo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -489,7 +487,6 @@ const ShoppableVideoFeed: React.FC<{ onClose: () => void; onRequireLogin: () => 
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  // Track touch for swipe
   const touchStart = useRef<{ y: number; time: number } | null>(null);
 
   const muteAllOthers = useCallback((exceptIndex: number) => {
@@ -522,7 +519,6 @@ const ShoppableVideoFeed: React.FC<{ onClose: () => void; onRequireLogin: () => 
     fetchVideos(1);
   }, [fetchVideos]);
 
-  // Intersection Observer
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -544,7 +540,6 @@ const ShoppableVideoFeed: React.FC<{ onClose: () => void; onRequireLogin: () => 
     return () => observer.disconnect();
   }, [videos]);
 
-  // === Touch Handlers for Swipe ===
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStart.current = {
       y: e.touches[0].clientY,
