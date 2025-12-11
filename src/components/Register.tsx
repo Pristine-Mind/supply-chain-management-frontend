@@ -111,7 +111,7 @@ const Register = () => {
         password2: vals.password2,
         first_name: vals.firstName,
         last_name: vals.lastName,
-        phone: vals.phone,
+        phone_number: vals.phone,
         city_id: vals.cityId,
         latitude: position[0],
         longitude: position[1],
