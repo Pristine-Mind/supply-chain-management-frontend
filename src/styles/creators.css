@@ -1,0 +1,57 @@
+/* Smooth UI styles for creators / ForYou grid */
+.creators-grid-card {
+  transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms ease, opacity 180ms ease;
+  will-change: transform, box-shadow;
+}
+.creators-grid-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 10px 30px rgba(21, 24, 28, 0.12);
+}
+.creators-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.08);
+}
+.follow-pill {
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.follow-pill:hover { opacity: 0.95; }
+.for-you-tabs .tab {
+  transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+.for-you-tabs .tab.active { transform: translateY(-2px); }
+.modal-player { animation: pop 180ms cubic-bezier(.2,.9,.2,1); }
+@keyframes pop { from { transform: scale(.98); opacity:0 } to { transform: scale(1); opacity:1 } }
+
+.input-field { border: 1px solid rgba(15,23,42,0.06); padding: 10px 14px; }
+.btn-primary { background: linear-gradient(180deg,#0ea5a4,#0369a1); color: white; }
+
+/* CSS masonry */
+.masonry {
+  column-gap: 1rem;
+  column-fill: auto;
+  column-count: 4;
+  padding: 0 0.5rem;
+}
+.masonry-item {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 1rem;
+  break-inside: avoid;
+}
+
+@media (max-width: 1024px) {
+  .masonry { column-count: 3; }
+}
+@media (max-width: 768px) {
+  .masonry { column-count: 2; }
+}
+@media (max-width: 420px) {
+  .masonry { column-count: 1; }
+}
+
+/* Grid helpers used for compact mode */
+.grid-item { display: block; }
+
