@@ -43,6 +43,10 @@ import Privacy from './components/Privacy';
 import Contact from './components/Contact';
 import BlogPage from './components/BlogPage';
 import BlogDetail from './components/BlogDetail';
+import CreatorsList from './components/CreatorsList';
+import CreatorProfilePage from './components/CreatorProfilePage';
+import ForYouPage from './components/ForYouPage';
+import MyFollowing from './components/MyFollowing';
 import BuyerRegister from './components/BuyerRegister';
 import BackButton from './components/BackButton';
 import PaymentSuccess from './components/PaymentSuccess';
@@ -78,6 +82,7 @@ const protectedRoutes = [
   { path: '/purchase-orders', element: <PurchaseOrderCards /> },
   { path: '/cart', element: <Cart /> },
   { path: '/my-orders', element: <MyOrders /> },
+  { path: '/creators/me_following', element: <MyFollowing /> },
   { path: '/delivery-details', element: <DeliveryDetails /> },
   { path: '/checkout', element: <CheckoutScreen /> },
   { path: '/payment', element: <Payment /> },
@@ -110,6 +115,10 @@ const publicRoutes = [
   { path: '/featured', element: <FeaturedSelectionPage /> },
   { path: '/support', element: <SupportComponent /> },
   { path: '/sellers', element: <SellerLanding /> },
+  { path: '/creators', element: <CreatorsList /> },
+  { path: '/creators/:id', element: <CreatorProfilePage /> },
+  { path: '/creators/:id/videos', element: <CreatorProfilePage /> },
+  { path: '/just-for-you', element: <ForYouPage /> },
   { path: '/account', element: <AccountDialog /> },
   { path: '/register', element: <Register /> },
   { path: '/business-register', element: <BusinessRegister /> },

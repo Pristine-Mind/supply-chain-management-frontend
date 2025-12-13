@@ -188,6 +188,8 @@ const Marketplace: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // start with no tab selected — only render For You when user explicitly clicks it
+  const [currentTab, setCurrentTab] = useState<'none' | 'for_you' | 'following'>('none');
   
   // Initialize currentView based on URL parameters
   // (view concept removed) we always render marketplace product grid
@@ -585,35 +587,38 @@ const Marketplace: React.FC = () => {
 
               {/* Centered large search on desktop */}
               <div className="hidden md:flex justify-center">
-                <div className={`relative w-full max-w-xl transition-all duration-300 ${isListening ? 'scale-[1.02]' : ''}`}>
-                  <input
-                    type="text"
-                    placeholder={isListening ? "Listening..." : "Search products..."}
-                    className={`input-field w-full pl-12 pr-32 text-lg font-medium rounded-full transition-all ${isListening ? 'border-red-400 ring-4 ring-red-100' : 'focus:border-primary-500 focus:ring-primary-200'}`}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={handleSearchEnter}
-                  />
-                    <div className="relative">
-                            <SearchSuggestions
-                              query={query}
-                              onSelect={(val) => {
-                                // navigate to all-products with search param when suggestion clicked
-                                navigate(`/marketplace/all-products?search=${encodeURIComponent(val)}`);
-                              }}
-                            />
+                <div className={`relative w-full max-w-xl transition-all duration-300 bg-white border border-neutral-200 rounded-full px-4 py-2 flex items-center ${isListening ? 'scale-[1.02]' : ''}`}>
+                  <MagnifyingGlassIcon className={`text-neutral-400 w-5 h-5 mr-3 ${isListening ? 'text-red-500 animate-bounce' : ''}`} />
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      placeholder={isListening ? "Listening..." : "Search products..."}
+                      className={`w-full bg-transparent text-lg font-medium placeholder:text-neutral-400 outline-none`}
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={handleSearchEnter}
+                    />
+                    <div className="absolute top-full left-0 right-0 z-40">
+                      <SearchSuggestions
+                        query={query}
+                        onSelect={(val) => {
+                          navigate(`/marketplace/all-products?search=${encodeURIComponent(val)}`);
+                        }}
+                      />
                     </div>
-                  <MagnifyingGlassIcon className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${isListening ? 'text-red-500 animate-bounce' : 'text-neutral-400'}`} />
+                  </div>
+
                   <button
                     onClick={startVoiceSearch}
-                    className={`absolute right-28 top-1/2 transform -translate-y-1/2 p-2 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                    className={`ml-3 p-2 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-500'}`}
                     title="Search by voice"
                   >
                     <Mic className="w-5 h-5" />
                   </button>
+
                   <button
                     onClick={() => navigate(`/marketplace/all-products?search=${encodeURIComponent(query)}`)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 btn-primary px-4 sm:px-6 py-2 text-caption font-medium rounded-full"
+                    className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md"
                   >
                     Search
                   </button>
@@ -703,27 +708,23 @@ const Marketplace: React.FC = () => {
                   </button>
                 </div>
                 <div className="relative flex-1 mx-2">
-                  <input
-                    type="text"
-                    placeholder="Search products..."
-                    className="input-field w-full pl-10 pr-12 focus:border-primary-500 focus:ring-primary-200 text-base rounded-full"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={handleSearchEnter}
-                  />
-                  <div className="relative">
-                    <SearchSuggestions
-                      query={query}
-                      onSelect={(val) => navigate(`/marketplace/all-products?search=${encodeURIComponent(val)}`)}
+                  <div className="relative bg-white border border-neutral-200 rounded-full px-3 py-2 flex items-center">
+                    <MagnifyingGlassIcon className={`text-neutral-400 w-4 h-4 mr-3 ${isListening ? 'text-red-500 animate-bounce' : ''}`} />
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      className="w-full bg-transparent text-base placeholder:text-neutral-400 outline-none"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={handleSearchEnter}
                     />
+                    <button
+                      onClick={startVoiceSearch}
+                      className={`ml-2 p-1.5 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
                   </div>
-                  <MagnifyingGlassIcon className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${isListening ? 'text-red-500 animate-bounce' : 'text-neutral-400'}`} />
-                  <button
-                    onClick={startVoiceSearch}
-                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
-                  >
-                    <Mic className="w-4 h-4" />
-                  </button>
                 </div>
                 <button
                   className="ml-3 p-2 text-neutral-600"
@@ -800,7 +801,7 @@ const Marketplace: React.FC = () => {
                   Featured Selection
                 </button>
                 <button
-                  onClick={() => setShowVideoFeed(true)}
+                  onClick={() => navigate('/just-for-you')}
                   className="text-neutral-700 font-medium cursor-pointer bg-transparent border-0 p-0 flex items-center gap-1"
                   aria-label="Just For You"
                 >
@@ -827,6 +828,26 @@ const Marketplace: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Render main view depending on tab */}
+        <div>
+          {/* For You is shown on the dedicated `/just-for-you` route —
+              do not render the `ForYouGrid` inline here. */}
+
+          {/* {currentTab === 'following' && (
+            (isAuthenticated) ? <MyFollowing /> : (
+              <div className="container mx-auto container-padding p-6">
+                <div className="bg-white rounded-lg p-6 text-center">
+                  <h3 className="text-lg font-semibold mb-2">Following</h3>
+                  <p className="text-sm text-muted">Sign in to see creators you follow.</p>
+                  <div className="mt-4">
+                    <button onClick={() => navigate('/login')} className="btn-primary px-4 py-2 rounded">Sign in</button>
+                  </div>
+                </div>
+              </div>
+            )
+          )} */}
         </div>
 
         {/* CTA banner with categories overlapping */}

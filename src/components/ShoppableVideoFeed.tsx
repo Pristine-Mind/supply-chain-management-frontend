@@ -15,7 +15,9 @@ import {
   Eye,
 } from 'lucide-react';
 import { shoppableVideosApi } from '../api/shoppableVideosApi';
+import { creatorsApi } from '../api/creatorsApi';
 import { ShoppableVideo, VideoComment } from '../types/shoppableVideo';
+import FollowButton from './FollowButton';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
@@ -148,12 +150,27 @@ const VideoItem: React.FC<{
     if (isActive) {
       videoEl.muted = true;
       setIsMuted(true);
-      try {
-        void videoEl.play();
-        shoppableVideosApi.incrementView(video.id).catch(console.error);
-      } catch (err) {
-        console.log('Autoplay prevented', err);
-      }
+      videoEl.play().catch(() => {
+        // play may be blocked by autoplay policies or interrupted by navigation; ignore rejection
+      });
+      
+      // Avoid double-counting: track viewed video IDs in sessionStorage for the session
+        try {
+          const key = 'viewed_video_ids';
+          const raw = sessionStorage.getItem(key);
+          const seen: number[] = raw ? JSON.parse(raw) : [];
+          if (!seen.includes(video.id)) {
+            // mark immediately so concurrent increments don't double-post
+            seen.push(video.id);
+            sessionStorage.setItem(key, JSON.stringify(seen));
+            creatorsApi.incrementVideoView(video.id).catch((err) => {
+              console.error('Failed to increment creator-linked view', err);
+            });
+          }
+        } catch (err) {
+          // fallback to direct increment if sessionStorage unavailable
+          creatorsApi.incrementVideoView(video.id).catch(console.error);
+        }
     } else {
       videoEl.pause();
       videoEl.currentTime = 0;
@@ -262,9 +279,9 @@ const VideoItem: React.FC<{
       return;
     }
     try {
-      const response = await shoppableVideosApi.toggleFollow(video.uploader);
-      setIsFollowing(response.is_following);
-      toast.success(response.is_following ? `Following ${video.uploader_name}` : `Unfollowed ${video.uploader_name}`, {
+      const response = await creatorsApi.toggleFollow(video.uploader);
+      setIsFollowing(response.following);
+      toast.success(response.following ? `Following ${video.uploader_name}` : `Unfollowed ${video.uploader_name}`, {
         position: 'bottom-center',
         autoClose: 1500,
         hideProgressBar: true,
@@ -347,11 +364,7 @@ const VideoItem: React.FC<{
               </div>
               <div className="flex flex-col">
                 <span className="font-semibold text-base">@{video.uploader_name}</span>
-                {!isFollowing && (
-                  <button onClick={handleFollow} className="text-xs text-primary-400 font-bold flex items-center hover:text-primary-300">
-                    <UserPlus size={12} className="mr-1" /> Follow
-                  </button>
-                )}
+                <FollowButton creatorId={video.uploader} initialFollowing={!!video.is_following} onToggle={(f) => setIsFollowing(f)} className="text-xs" />
               </div>
             </div>
             <h2 className="font-bold text-base mb-1 line-clamp-2">{video.title}</h2>
