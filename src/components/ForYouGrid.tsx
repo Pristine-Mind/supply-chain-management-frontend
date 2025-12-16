@@ -164,23 +164,45 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
     </div>
   );
 
-  // Video thumbnail component to manage audio per-card
-  const VideoThumbnail: React.FC<{ video: ShoppableVideo }> = ({ video }) => {
+  // Video thumbnail component: show poster image by default and only load/play video when visible.
+  const VideoThumbnail: React.FC<{ video: ShoppableVideo }> = React.memo(({ video }) => {
     const vidRef = React.useRef<HTMLVideoElement | null>(null);
+    const wrapperRef = React.useRef<HTMLDivElement | null>(null);
     const [isMuted, setIsMuted] = useState(true);
+    const [isInView, setIsInView] = useState(false);
 
+    // Observe whether the thumbnail is visible; only then load/play the video.
+    useEffect(() => {
+      const el = wrapperRef.current;
+      if (!el) return;
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setIsInView(true);
+        });
+      }, { root: null, rootMargin: '200px', threshold: 0.25 });
+      obs.observe(el);
+      return () => obs.disconnect();
+    }, []);
+
+    // Only attempt to autoplay when actually in view. Use muted autoplay to satisfy mobile browsers.
     useEffect(() => {
       const el = vidRef.current;
       if (!el) return;
+      if (!isInView) {
+        try { el.pause(); } catch (_) {}
+        return;
+      }
+      // ask other players to pause before starting
+      const myId = `forYou-video-${video.id}`;
+      document.dispatchEvent(new CustomEvent('forYou:request-play', { detail: myId }));
       el.muted = true;
       el.play().catch(() => {
-        // play may be prevented by browser autoplay policy or navigation; ignore rejection
+        // Ignore play failures; user can tap to play.
       });
-
       return () => {
         try { el.pause(); } catch (_) {}
       };
-    }, [video.video_file, (video as any).video_url]);
+    }, [isInView, video.video_file, (video as any).video_url]);
 
     const toggleAudio = async (e?: React.SyntheticEvent) => {
       e?.stopPropagation();
@@ -190,53 +212,86 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
       setIsMuted(newMuted);
       el.muted = newMuted;
       try {
-        if (!newMuted) await el.play();
+        if (!newMuted) {
+          // before playing with audio, request other players pause
+          const myId = `forYou-video-${video.id}`;
+          document.dispatchEvent(new CustomEvent('forYou:request-play', { detail: myId }));
+          await el.play();
+        }
       } catch (err) {
-        // autoplay with audio may be blocked; keep muted until user interacts
         console.debug('Play with audio blocked', err);
         setIsMuted(true);
         if (el) el.muted = true;
       }
     };
 
-    return (
-      <>
-        <video
-          ref={vidRef}
-          src={video.video_file || (video as any).video_url}
-          poster={video.thumbnail || '/video-thumb-placeholder.png'}
-          className="w-full h-full object-cover"
-          muted={isMuted}
-          autoPlay
-          loop
-          playsInline
-          preload="metadata"
-          aria-label={video.title}
-          onClick={toggleAudio}
-        />
+    // listen for other players requesting play and pause if it's not this one
+    useEffect(() => {
+      const myId = `forYou-video-${video.id}`;
+      const handler = (e: Event) => {
+        try {
+          const otherId = (e as CustomEvent).detail;
+          if (otherId !== myId) {
+            const el = vidRef.current;
+            if (el && !el.paused) {
+              try { el.pause(); } catch (_) {}
+            }
+          }
+        } catch (_) {}
+      };
+      document.addEventListener('forYou:request-play', handler as EventListener);
+      return () => document.removeEventListener('forYou:request-play', handler as EventListener);
+    }, [video.id]);
 
-        <button
-          onClick={toggleAudio}
-          title={isMuted ? 'Tap to unmute' : 'Tap to mute'}
-          className="absolute right-3 top-3 z-40 p-2 rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition-colors"
-          aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-        >
-          {isMuted ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="inline-block">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
-              <path d="M19 9v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="inline-block">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
-              <path d="M15 9c1.333 1.333 1.333 3.667 0 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M19 7c2.667 2.667 2.667 6.667 0 9.333" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </button>
-      </>
+    return (
+      <div ref={wrapperRef} className="w-full h-full relative">
+        {!isInView ? (
+          <img
+            src={video.thumbnail || '/video-thumb-placeholder.png'}
+            alt={video.title || 'video thumbnail'}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <>
+            <video
+              ref={vidRef}
+              src={video.video_file || (video as any).video_url}
+              poster={video.thumbnail || '/video-thumb-placeholder.png'}
+              className="w-full h-full object-cover"
+              muted={isMuted}
+              autoPlay
+              loop
+              playsInline
+              preload="metadata"
+              aria-label={video.title}
+              onClick={toggleAudio}
+            />
+
+            <button
+              onClick={toggleAudio}
+              title={isMuted ? 'Tap to unmute' : 'Tap to mute'}
+              className="absolute right-3 top-3 z-40 p-2 rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition-colors"
+              aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+            >
+              {isMuted ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="inline-block">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
+                  <path d="M19 9v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="inline-block">
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" />
+                  <path d="M15 9c1.333 1.333 1.333 3.667 0 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M19 7c2.667 2.667 2.667 6.667 0 9.333" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+          </>
+        )}
+      </div>
     );
-  };
+  });
 
   return (
     <div className={wrapperClass}>
