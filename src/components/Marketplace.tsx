@@ -8,6 +8,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import FeaturedProducts from './FeaturedProducts';
+import BrandsSection from './BrandsSection';
 import CategoryMenu from './CategoryMenu';
 import SearchSuggestions from './SearchSuggestions';
 import ShoppableVideoFeed from './ShoppableVideoFeed';
@@ -1378,6 +1379,7 @@ const Marketplace: React.FC = () => {
         )}
 
       <FeaturedProducts/>
+      <BrandsSection />
 
       {/* Made in Nepal Section - Revamped */}
       <div className="relative py-16 overflow-hidden">

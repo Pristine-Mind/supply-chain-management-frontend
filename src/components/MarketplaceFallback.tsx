@@ -1,5 +1,6 @@
 import React from 'react';
 import FeaturedProducts from './FeaturedProducts';
+import BrandsSection from './BrandsSection';
 import { useNavigate } from 'react-router-dom';
 
 const MarketplaceFallback: React.FC = () => {
@@ -10,6 +11,7 @@ const MarketplaceFallback: React.FC = () => {
         <h1 className="text-2xl font-bold mb-4">Marketplace</h1>
         <p className="text-neutral-600 mb-6">A lightweight marketplace view (fallback). Featured products are shown below.</p>
         <FeaturedProducts />
+        <BrandsSection />
         <div className="mt-8 text-center">
           <button
             onClick={() => navigate('/marketplace/all-products')}
