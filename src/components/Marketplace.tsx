@@ -13,6 +13,7 @@ import CategoryMenu from './CategoryMenu';
 import SearchSuggestions from './SearchSuggestions';
 import ShoppableVideoFeed from './ShoppableVideoFeed';
 import { createSlug } from '../utils/slugUtils';
+import MadeForYou from './MadeForYou';
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -1113,6 +1114,8 @@ const Marketplace: React.FC = () => {
               <ChevronRight className="w-5 h-5 text-gray-600" />
             </button>
           </div>
+
+          <MadeForYou />
 
           {/* Flat 5% OFF Promotional Banner */}
           <div className="relative w-full bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 rounded-xl mt-6 overflow-hidden shadow-md">
