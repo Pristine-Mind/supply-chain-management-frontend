@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import FeaturedProducts from './FeaturedProducts';
+import BrandsSection from './BrandsSection';
 import logo from '../assets/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
@@ -71,6 +72,7 @@ const FeaturedSelectionPage: React.FC = () => {
 
       {/* Featured Products section */}
       <FeaturedProducts />
+      <BrandsSection />
 
       {/* Footer */}
     </div>
