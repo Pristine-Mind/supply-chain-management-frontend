@@ -402,7 +402,7 @@ const BrandProducts: React.FC = () => {
                   className={`bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group ${
                     viewMode === 'list' ? 'flex' : ''
                   }`}
-                  onClick={() => navigate(`/marketplace/${product.id}`)}
+                  onClick={() => navigate(`/marketplace/${product.marketplace_id}`)}
                 >
                   {/* Product Image */}
                   <div className={`${

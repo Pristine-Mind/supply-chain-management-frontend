@@ -83,6 +83,7 @@ export interface BrandProduct {
   b2b_price?: number;
   b2b_discounted_price?: number;
   b2b_min_quantity?: number;
+  marketplace_id?: string;
 }
 
 export interface BrandProductsResponse {
