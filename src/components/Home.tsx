@@ -23,6 +23,7 @@ import LedgerEntriesTable from './LedgerEntriesTable';
 import SidebarNav from './dashboard/SidebarNav';
 import TransporterOverview from './dashboard/TransporterOverview';
 import { InfoCard, InfoRow } from './dashboard/InfoBlocks';
+import B2BSearch from './b2b/B2BSearch';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -291,6 +292,8 @@ const Home: React.FC = () => {
 
   // Use profile business type if available, fallback to user business type
   const currentBusinessType = userProfile?.business_type || user?.businessType || businessType;
+
+  const [showB2BSearch, setShowB2BSearch] = useState(false);
 
   // Helper function to extract notification type from message
   const getNotificationType = (message: string) => {
@@ -626,6 +629,17 @@ const Home: React.FC = () => {
                     <span className="text-sm font-medium text-gray-700 text-center">Add Product</span>
                   </a>
                 )}
+                {/* Distributor-only: Find Business (B2B) */}
+                {currentBusinessType === 'distributor' && (
+                  <button
+                    onClick={() => setShowB2BSearch(true)}
+                    className="flex flex-col items-center p-4 rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-md transition-all group bg-white"
+                    title="Find Business"
+                  >
+                    <Users className="h-8 w-8 text-primary-600 mb-2 group-hover:scale-110 transition-transform" />
+                    <span className="text-sm font-medium text-gray-700 text-center">Find Business</span>
+                  </button>
+                )}
                 
                 {currentBusinessType === 'distributor' && (
                   <>
@@ -680,6 +694,10 @@ const Home: React.FC = () => {
                 )}
               </div>
             </div>
+
+            {showB2BSearch && (
+              <B2BSearch open={showB2BSearch} onClose={() => setShowB2BSearch(false)} />
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8">
               <div className={`p-4 rounded-lg shadow ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>

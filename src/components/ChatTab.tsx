@@ -33,8 +33,8 @@ const ChatTab: React.FC<ChatTabProps> = ({ productId, isAuthenticated }) => {
       }
       
       const response = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/chats/?product=${productId}`,
-        { headers }
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/chats/`,
+        { headers, params: { product: productId, _ts: Date.now() } }
       );
       setMessages(response.data.results || []);
     } catch (error) {

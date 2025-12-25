@@ -66,6 +66,7 @@ import TransporterLanding from './components/TransporterLanding';
 import MyOrders from './components/MyOrders';
 import UserProfile from './components/UserProfile';
 import UserAdminProfile from './components/UserAdminProfile';
+import FindBusinessPage from './components/FindBusinessPage';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -97,6 +98,8 @@ const protectedRoutes = [
   { path: '/documents', element: <TransporterDocuments /> },
   { path: '/support', element: <SupportComponent /> },
   { path: '/my-orders', element: <MyOrders /> },
+  { path: '/find-business', element: <FindBusinessPage /> },
+  { path: '/find-business/:userId', element: <FindBusinessPage /> },
 ];
 
 const publicRoutes = [
