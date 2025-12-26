@@ -59,6 +59,13 @@ export const getB2BUser = async (userId: number) => {
   return data?.data ?? data; // single user object (normalize wrapper)
 };
 
+export const getRecommendedBusinesses = async () => {
+  const res = await axios.get(`${API_BASE}/api/v1/recommendations/`, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+  });
+  return res.data; // expected array of { user_id, business_name, ... }
+};
+
 export default {
   listB2BUsers,
   listB2BUserProducts,
