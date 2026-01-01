@@ -25,8 +25,10 @@
 .modal-player { animation: pop 180ms cubic-bezier(.2,.9,.2,1); }
 @keyframes pop { from { transform: scale(.98); opacity:0 } to { transform: scale(1); opacity:1 } }
 
-.input-field { border: 1px solid rgba(15,23,42,0.06); padding: 10px 14px; }
-.btn-primary { background: linear-gradient(180deg,#0ea5a4,#0369a1); color: white; }
+/* Removed global input/button overrides so Tailwind component
+  styles from `src/index.css` take precedence. This prevents
+  padding and color conflicts (icons overlapping and blue buttons).
+*/
 
 /* CSS masonry */
 .masonry {

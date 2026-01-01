@@ -32,7 +32,8 @@ const SidebarNav: React.FC<Props> = ({ businessType }) => {
             <li><a href="/stats" className="flex items-center p-3 rounded-lg text-body font-medium text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"><BarChart3 className="h-5 w-5 mr-3" />{t('stats_and_analytics')}</a></li>
             <li><a href="/audit-logs" className="flex items-center p-3 rounded-lg text-body font-medium text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"><ClipboardList className="h-5 w-5 mr-3" />{t('audit_logs')}</a></li>
             <li><a href="/find-business" className="flex items-center p-3 rounded-lg text-body font-medium text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"><Users className="h-5 w-5 mr-3" />Find Business</a></li>
-
+            <li><a href="/marketplace-dashboard" className="flex items-center p-3 rounded-lg text-body font-medium text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"><BarChart3 className="h-5 w-5 mr-3" />Marketplace Dashboard</a></li>
+            <li><a href="/marketplace-dashboard/orders" className="flex items-center p-3 rounded-lg text-body font-medium text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"><FaFirstOrder className="h-5 w-5 mr-3" />Marketplace Orders</a></li>  
           </>
         ) : (
           <>
