@@ -72,7 +72,7 @@ const FeaturedSelectionPage: React.FC = () => {
 
       {/* Featured Products section */}
       <FeaturedProducts />
-      <BrandsSection />
+      {/* <BrandsSection /> */}
 
       {/* Footer */}
     </div>
