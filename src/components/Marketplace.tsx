@@ -17,6 +17,8 @@ import { createSlug } from '../utils/slugUtils';
 import MadeForYou from './MadeForYou';
 import ProductHubSections from './ProductHubSections';
 import TopBrands from './TopBrands';
+import MadeInNepal from './MadeInNepal';
+import FlashSale from './FlashSale';
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -364,29 +366,29 @@ const Marketplace: React.FC = () => {
     }
   };
 
-  const fetchMadeInNepal = async () => {
-    setMadeInNepalLoading(true);
-    setMadeInNepalError('');
+  // const fetchMadeInNepal = async () => {
+  //   setMadeInNepalLoading(true);
+  //   setMadeInNepalError('');
     
-    try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Token ${token}` } : {};
-      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/made-in-nepal/`;
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     const headers = token ? { Authorization: `Token ${token}` } : {};
+  //     const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/made-in-nepal/`;
       
-      const response = await axios.get(url, { timeout: 8000, headers });
+  //     const response = await axios.get(url, { timeout: 8000, headers });
       
-      if (response.data && response.data.results) {
+  //     if (response.data && response.data.results) {
       
-        setMadeInNepalProducts(response.data.results);
-      } else {
-        setMadeInNepalProducts([]);
-      }
-    } catch (error: any) {
-      setMadeInNepalError('Error fetching Made in Nepal products');
-    } finally {
-      setMadeInNepalLoading(false);
-    }
-  };
+  //       setMadeInNepalProducts(response.data.results);
+  //     } else {
+  //       setMadeInNepalProducts([]);
+  //     }
+  //   } catch (error: any) {
+  //     setMadeInNepalError('Error fetching Made in Nepal products');
+  //   } finally {
+  //     setMadeInNepalLoading(false);
+  //   }
+  // };
 
   const fetchBrands = async () => {
     setBrandsLoading(true);
@@ -450,7 +452,7 @@ const Marketplace: React.FC = () => {
   useEffect(() => {
     // Fetch all trending section data on component mount for immediate loading
     fetchDealsProducts();
-    fetchMadeInNepal();
+    // fetchMadeInNepal();
     fetchTodaysPick();
     fetchFlashSaleProducts();
     fetchBrands();
@@ -952,172 +954,7 @@ const Marketplace: React.FC = () => {
 
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
-          {/* Show any trending-related errors but continue rendering available content */}
-          {(flashSaleError || dealsError || todaysPickError || madeInNepalError) && (
-            <div className="mb-4 space-y-2">
-              {flashSaleError && <div className="text-sm text-red-600">{flashSaleError}</div>}
-              {dealsError && <div className="text-sm text-red-600">{dealsError}</div>}
-              {todaysPickError && <div className="text-sm text-red-600">{todaysPickError}</div>}
-              {madeInNepalError && <div className="text-sm text-red-600">{madeInNepalError}</div>}
-            </div>
-          )}
-          {/* Flash Sale Section - Revamped with auto-scroll */}
-          <div className="relative mb-12 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl p-4 sm:p-8 border border-orange-100 overflow-hidden">
-            {/* Decorative background elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-100 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-100 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
-
-            {/* Section Header with Timer */}
-            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-orange-100 p-2 rounded-lg">
-                  <svg className="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    Flash Sale
-                    <span className="text-sm font-normal text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full animate-pulse">
-                      Ending Soon
-                    </span>
-                  </h2>
-                  <p className="text-sm text-gray-500">Grab these deals before they're gone!</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Buttons */}
-            <button
-              onClick={() => scrollTrendingBy(-300)}
-              aria-label="Scroll left"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg border hover:bg-white hover:shadow-xl transition-all duration-300 hidden lg:inline-flex"
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
-            </button>
-
-            {/* Products Container */}
-            <div
-              ref={trendingRef}
-              className="flex gap-4 overflow-x-auto no-scrollbar py-2 scroll-smooth relative z-10"
-              style={{ scrollBehavior: 'smooth' }}
-            >
-              {flashSaleProducts && flashSaleProducts.length > 0 ? (
-                flashSaleProducts.slice(0, 12).map((p) => (
-                  <div
-                    key={p.id}
-                    className="min-w-[240px] bg-white rounded-2xl border border-gray-200 overflow-hidden group hover:shadow-xl hover:border-orange-200 transition-all duration-300 cursor-pointer flex flex-col relative"
-                    onClick={() => navigate(`/marketplace/${p.id}`)}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {/* Sale Badge */}
-                    {p.percent_off > 0 && (
-                      <div className="absolute top-3 left-3 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10 shadow-md">
-                        {Math.round(p.percent_off)}% OFF
-                      </div>
-                    )}
-                    
-                    {/* Product Image */}
-                    <div className="aspect-square w-full overflow-hidden flex-shrink-0 relative">
-                      <img 
-                        src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER} 
-                        alt={p.product_details?.name} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                      />
-                      
-                      {/* Overlay on hover */}
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-semibold text-gray-900 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                          Quick View
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Product Info */}
-                    <div className="p-4 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="text-sm font-bold line-clamp-2 text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
-                          {p.product_details?.name}
-                        </h3>
-                        
-                        {/* Price Section */}
-                        <div className="flex items-center gap-2 mb-2">
-                          {(() => {
-                            const pricing = getDisplayPrice(p, user);
-                            return (
-                              <>
-                                <span className="text-lg font-bold text-orange-600">
-                                  Rs. {pricing.currentPrice?.toLocaleString()}
-                                </span>
-                                {pricing.originalPrice && (
-                                  <span className="text-sm text-gray-500 line-through">
-                                    Rs. {pricing.originalPrice?.toLocaleString()}
-                                  </span>
-                                )}
-                                {pricing.isB2BPrice && (
-                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
-                                    B2B
-                                  </span>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-                        
-                        {/* B2B Minimum Quantity Info */}
-                        {(() => {
-                          const pricing = getDisplayPrice(p, user);
-                          return pricing.isB2BPrice && pricing.minQuantity > 1 ? (
-                            <div className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded-full inline-block">
-                              Min. order: {pricing.minQuantity} units
-                            </div>
-                          ) : null;
-                        })()}
-                        
-                        {/* Savings */}
-                        {(() => {
-                          const pricing = getDisplayPrice(p, user);
-                          return pricing.savings > 0 ? (
-                            <div className="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded-full inline-block">
-                              Save Rs. {pricing.savings?.toLocaleString()}
-                            </div>
-                          ) : null;
-                        })()}
-
-                        {/* Sold Progress Bar (Mock) */}
-                        <div className="mt-3">
-                          <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-500">Available: {p.product_details?.stock || 0}</span>
-                            <span className="text-orange-500 font-medium">Almost Gone!</span>
-                          </div>
-                          <div className="w-full bg-gray-100 rounded-full h-1.5">
-                            <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: '85%' }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                // Loading placeholders with shimmer effect
-                Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="min-w-[240px] bg-gray-100 rounded-2xl h-80 animate-pulse relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer"></div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <button
-              onClick={() => scrollTrendingBy(300)}
-              aria-label="Scroll right"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg border hover:bg-white hover:shadow-xl transition-all duration-300 hidden lg:inline-flex"
-            >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
-
+          <FlashSale /> 
           <MadeForYou />
           <ProductHubSections />
           {/* Flat 5% OFF Promotional Banner */}
@@ -1388,131 +1225,7 @@ const Marketplace: React.FC = () => {
       <BrandsSection />
 
       {/* Made in Nepal Section - Revamped */}
-      <div className="relative py-16 overflow-hidden">
-        {/* Background with gradient and pattern */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-yellow-50"></div>
-        
-        {/* Decorative elements - Abstract representation of mountains/flag triangles */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-5 pointer-events-none">
-            <div className="absolute -top-24 -left-24 w-96 h-96 bg-orange-600 rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 right-0 w-64 h-64 bg-yellow-500 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 mb-4 px-6 py-2 bg-white border border-orange-100 text-orange-700 rounded-full text-sm font-bold shadow-sm">
-              <span className="animate-pulse">🇳🇵</span>
-              <span className="tracking-wide uppercase">Authentic Nepali Products</span>
-            </div>
-            
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-              Crafted in <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-800">Nepal</span>
-            </h2>
-            
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
-              Discover unique products that tell a story of tradition, culture, and local craftsmanship. 
-              Directly from local artisans to your doorstep.
-            </p>
-            
-            {/* Decorative divider */}
-            <div className="flex items-center justify-center gap-2 mt-6 opacity-50">
-                <div className="h-1 w-12 bg-orange-600 rounded-full"></div>
-                <div className="h-1 w-2 bg-yellow-500 rounded-full"></div>
-                <div className="h-1 w-12 bg-orange-600 rounded-full"></div>
-            </div>
-          </div>
-
-          {(() => {
-            return madeInNepalProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {madeInNepalProducts.slice(0, 8).map((p) => (
-                <div
-                  key={p.id}
-                  className="bg-white rounded-2xl border-none shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group overflow-hidden relative transform hover:-translate-y-2"
-                  onClick={() => navigate(`/marketplace/${p.id}`)}
-                >
-                  {/* Card Border Gradient on Hover */}
-                  <div className="absolute inset-0 border-2 border-transparent group-hover:border-orange-100 rounded-2xl transition-colors z-20 pointer-events-none"></div>
-
-                  {/* Image Container */}
-                  <div className="aspect-[4/5] w-full overflow-hidden relative bg-gray-100">
-                    <img 
-                      src={p.product_details?.images?.[0]?.image ?? 'https://via.placeholder.com/150'} 
-                      alt={p.product_details?.name} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                    />
-                    
-                    {/* Overlay Gradient */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-                    
-                    {/* Floating Badge */}
-                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-orange-700 text-xs font-bold px-3 py-1 rounded-full shadow-sm z-10 flex items-center gap-1">
-                        <span>🇳🇵</span> Local
-                    </div>
-
-                    {/* Content Overlay at Bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-10 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                        <div className="text-xs font-medium text-orange-200 mb-1 uppercase tracking-wider">
-                            {p.product_details?.category_details || 'Handmade'}
-                        </div>
-                        <h3 className="text-lg font-bold leading-tight mb-2 line-clamp-2 group-hover:text-orange-100 transition-colors">
-                            {p.product_details?.name}
-                        </h3>
-                        <div className="flex items-center justify-between">
-                            <span className="text-xl font-bold">
-                                Rs. {getDisplayPrice(p, user).currentPrice?.toLocaleString()}
-                            </span>
-                            <button className="bg-white text-orange-600 p-2 rounded-full opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300 shadow-lg hover:bg-orange-50">
-                                <ShoppingCart className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : madeInNepalLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl h-96 shadow-sm animate-pulse overflow-hidden">
-                    <div className="h-2/3 bg-gray-200"></div>
-                    <div className="p-4 space-y-3">
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div className="text-4xl mb-4">🏔️</div>
-              <p className="text-gray-600 font-medium">
-                {madeInNepalError ? madeInNepalError : 'No Made in Nepal products available at the moment'}
-              </p>
-              <p className="text-neutral-400 text-xs mt-2">
-                Debug: Products array length: {madeInNepalProducts.length}, Loading: {madeInNepalLoading.toString()}, Error: {madeInNepalError || 'None'}
-              </p>
-            </div>
-          );
-          })()}
-
-          {madeInNepalProducts.length > 8 && (
-            <div className="text-center mt-12">
-              <button
-                onClick={() => navigate('/marketplace/all-products?made_in_nepal=true')}
-                className="group relative inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-orange-700 rounded-full overflow-hidden transition-all duration-300 hover:bg-orange-800 hover:shadow-lg hover:-translate-y-1"
-              >
-                <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
-                <span className="relative flex items-center gap-2">
-                    Explore All Nepali Products
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      <MadeInNepal />
       
       {/* Diaper Section */}
       <DiaperSection /> 
@@ -1678,7 +1391,6 @@ const Marketplace: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-2xl font-bold text-neutral-900">Just For You</h3>
         </div>
-
                 {/* Products Grid */}
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
