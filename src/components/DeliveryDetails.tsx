@@ -1,35 +1,23 @@
 import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
+import { motion } from 'framer-motion'
+import { 
+  MapPin, 
+  User, 
+  Phone, 
+  Mail, 
+  Map as MapIcon, 
+  Navigation, 
+  ChevronRight,
+  CheckCircle2
+} from 'lucide-react'
 import { CartContext } from '../context/CartContext'
 import LocationPicker from '../components/LocationPicker'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import { useAuth } from '../context/AuthContext'
 import LoginModal from './auth/LoginModal'
-
-interface FormValues {
-  name: string
-  phone: string
-  address: string
-  email: string
-  city: string
-  region: string
-  zip: string
-}
-
-interface Delivery {
-  cartId: number
-  customer_name: string
-  phone_number: string
-  email: string
-  address: string
-  city: string
-  state: string
-  zip_code: string
-  latitude: number
-  longitude: number
-}
 
 const DeliveryDetails: React.FC = () => {
   const navigate = useNavigate()
@@ -42,310 +30,216 @@ const DeliveryDetails: React.FC = () => {
     defaultValues: { name: '', phone: '', address: '', city: '', region: '', zip: '' }
   })
 
-  const [latLng, setLatLng] = useState<{ lat: number; lng: number }>({ lat: 27.7172, lng: 85.3240 })
-  const [error, setError] = useState<string | null>(null)
+  const [latLng, setLatLng] = useState({ lat: 27.7172, lng: 85.3240 })
   const [loading, setLoading] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [storedFormData, setStoredFormData] = useState<FormValues | null>(null)
 
-  const processDelivery = async (data: FormValues) => {
-    if (!latLng) {
-      setError('Please select a location on the map.')
+  const onSubmit = async (data: FormValues) => {
+    if (!isAuthenticated) {
+      setStoredFormData(data)
+      setShowLoginModal(true)
       return
     }
+    
     setLoading(true)
-    setError(null)
     try {
-      let cartId = cartState.cartId
-      if (!cartId) {
-        cartId = await createCartOnBackend()
-      }
-
-      const delivery: Delivery = {
-        cartId: cartId,
-        customer_name: data.name,
-        phone_number: data.phone,
-        email: data.email,
-        address: data.address,
-        city: data.city,
-        state: data.region,
-        zip_code: data.zip,
-        latitude: latLng.lat,
-        longitude: latLng.lng,
-      }
+      let cartId = cartState.cartId || await createCartOnBackend()
+      const delivery = { ...data, cartId, latitude: latLng.lat, longitude: latLng.lng }
       navigate('/payment', { state: { delivery } })
     } catch (err) {
       console.error(err)
-      setError('Failed to process delivery. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  const onSubmit = async (data: FormValues) => {
-    if (!isAuthenticated) {
-      setError('Please log in to continue to checkout.')
-      setStoredFormData(data)
-      setShowLoginModal(true)
-      return
-    }
-    await processDelivery(data)
-  }
-
   return (
-    <>
+    <div className="min-h-screen bg-[#F8F9FA]">
       <Navbar />
-      <div className="bg-neutral-50 py-6">
-        <div className="w-4/5 mx-auto bg-white rounded-xl border border-neutral-200 shadow-sm">
-          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
-                {error}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900 uppercase tracking-wide">
-                  Personal Information
-                </h2>
-                
-                <Controller
-                  name="name"
-                  control={control}
-                  rules={{ required: 'Full name is required' }}
-                  render={({ field }) => (
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
-                        Full Name
-                      </label>
-                      <input 
-                        {...field} 
-                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="Enter your full name"
-                      />
-                      {errors.name && (
-                        <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-                      )}
-                    </div>
-                  )}
-                />
-
-                <Controller
-                  name="phone"
-                  control={control}
-                  rules={{
-                    required: 'Phone number is required',
-                    minLength: { value: 10, message: 'Phone number must be at least 10 digits' }
-                  }}
-                  render={({ field }) => (
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
-                        Phone Number
-                      </label>
-                      <input 
-                        {...field} 
-                        type="tel" 
-                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="Your phone number"
-                      />
-                      {errors.phone && (
-                        <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
-                      )}
-                    </div>
-                  )}
-                />
-
-                <Controller
-                  name="email"
-                  control={control}
-                  rules={{
-                    required: 'Email is required',
-                  }}
-                  render={({ field }) => (
-                    <div>
-                      <label className="block text-sm font-medium text-neutral-700 mb-1">
-                        Email
-                      </label>
-                      <input 
-                        {...field} 
-                        type="email" 
-                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                        placeholder="Your email address"
-                      />
-                      {errors.email  && (
-                        <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-                      )}
-                    </div>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900 uppercase tracking-wide">
-                  Address Information
-                </h2>
-
-                <Controller
-                  name="address"
-                  control={control}
-                  rules={{ required: 'Address is required' }}
-                  render={({ field }) => (
-                    <div>
-                      <label className="block text-body font-medium text-gray-700 mb-1">
-                        Street Address
-                      </label>
-                      <textarea 
-                        {...field} 
-                        rows={2} 
-                        className="input-field w-full focus-ring resize-none"
-                        placeholder="Enter your street address"
-                      />
-                      {errors.address && (
-                        <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
-                      )}
-                    </div>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-3">
-                  <Controller
-                    name="city"
-                    control={control}
-                    rules={{ required: 'City is required' }}
-                    render={({ field }) => (
-                      <div>
-                        <label className="block text-caption font-medium text-neutral-700 mb-1">
-                          City
-                        </label>
-                        <input 
-                          {...field} 
-                          className="input-field w-full focus-ring"
-                          placeholder="City"
-                        />
-                        {errors.city && (
-                          <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>
-                        )}
-                      </div>
-                    )}
-                  />
-
-                  <Controller
-                    name="region"
-                    control={control}
-                    rules={{ required: 'State is required' }}
-                    render={({ field }) => (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          State
-                        </label>
-                        <input 
-                          {...field} 
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                          placeholder="State"
-                        />
-                        {errors.region && (
-                          <p className="text-red-500 text-xs mt-1">{errors.region.message}</p>
-                        )}
-                      </div>
-                    )}
-                  />
-                </div>
-
-                <Controller
-                  name="zip"
-                  control={control}
-                  rules={{
-                    required: 'ZIP code is required',
-                    minLength: { value: 5, message: 'ZIP code must be at least 5 digits' }
-                  }}
-                  render={({ field }) => (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        ZIP Code
-                      </label>
-                      <input 
-                        {...field} 
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                        placeholder="ZIP code"
-                      />
-                      {errors.zip && (
-                        <p className="text-red-500 text-xs mt-1">{errors.zip.message}</p>
-                      )}
-                    </div>
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-                Delivery Location
-              </h2>
-              
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
-                <div className="h-72 w-full">
-                  <LocationPicker
-                    initialCenter={latLng}
-                    zoom={13}
-                    onSelect={(lat, lng) => {
-                      setLatLng({ lat, lng })
-                    }}
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Latitude
-                  </label>
-                  <input
-                    readOnly
-                    value={latLng?.lat.toFixed(6) || ''}
-                    className="w-full border border-gray-200 rounded-md px-2 py-1.5 text-xs bg-gray-50 text-gray-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">
-                    Longitude
-                  </label>
-                  <input
-                    readOnly
-                    value={latLng?.lng.toFixed(6) || ''}
-                    className="w-full border border-gray-200 rounded-md px-2 py-1.5 text-xs bg-gray-50 text-gray-600"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 rounded-lg transition-colors duration-200 shadow-sm"
-              >
-                {loading ? 'Processing...' : 'Continue to Checkout'}
-              </button>
-            </div>
-          </form>
+      
+      <main className="max-w-7xl mx-auto px-4 py-12">
+        {/* Progress Header */}
+        <div className="flex flex-col items-center mb-12">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold shadow-lg shadow-orange-200">1</div>
+            <div className="h-[2px] w-12 bg-gray-200" />
+            <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center font-bold">2</div>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Delivery Logistics</h1>
+          <p className="text-slate-500 font-medium">Where should we send your treasures?</p>
         </div>
-      </div>
-      <Footer />
 
-      <LoginModal
-        isOpen={showLoginModal}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Side: The Form */}
+          <div className="lg:col-span-7 space-y-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              
+              {/* Section 1: Identity */}
+              <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="p-2.5 bg-orange-50 rounded-xl text-orange-600">
+                    <User size={20} />
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">Recipient Identity</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <InputWrapper label="Full Name" error={errors.name?.message}>
+                    <Controller
+                      name="name"
+                      control={control}
+                      rules={{ required: 'Required' }}
+                      render={({ field }) => (
+                        <div className="relative">
+                          <input {...field} className="form-input-premium pl-11" placeholder="John Doe" />
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        </div>
+                      )}
+                    />
+                  </InputWrapper>
+
+                  <InputWrapper label="Phone Connection" error={errors.phone?.message}>
+                    <Controller
+                      name="phone"
+                      control={control}
+                      rules={{ required: 'Required', minLength: 10 }}
+                      render={({ field }) => (
+                        <div className="relative">
+                          <input {...field} className="form-input-premium pl-11" placeholder="98XXXXXXXX" />
+                          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        </div>
+                      )}
+                    />
+                  </InputWrapper>
+                </div>
+              </div>
+
+              {/* Section 2: Destination */}
+              <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600">
+                    <MapPin size={20} />
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">Drop-off Point</h2>
+                </div>
+
+                <div className="space-y-6">
+                  <InputWrapper label="Detailed Street Address" error={errors.address?.message}>
+                    <Controller
+                      name="address"
+                      control={control}
+                      rules={{ required: 'Required' }}
+                      render={({ field }) => (
+                        <textarea {...field} rows={2} className="form-input-premium py-4" placeholder="House no, Street name, Landmark..." />
+                      )}
+                    />
+                  </InputWrapper>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <InputWrapper label="City">
+                      <Controller name="city" control={control} render={({ field }) => <input {...field} className="form-input-premium" />} />
+                    </InputWrapper>
+                    <InputWrapper label="Province">
+                      <Controller name="region" control={control} render={({ field }) => <input {...field} className="form-input-premium" />} />
+                    </InputWrapper>
+                    <InputWrapper label="Zip">
+                      <Controller name="zip" control={control} render={({ field }) => <input {...field} className="form-input-premium" />} />
+                    </InputWrapper>
+                  </div>
+                </div>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={loading}
+                className="w-full bg-orange-700 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-xl hover:bg-orange-600 transition-colors"
+              >
+                {loading ? 'Securing Logistics...' : 'Proceed to Payment'}
+                <ChevronRight size={18} />
+              </motion.button>
+            </form>
+          </div>
+
+          {/* Right Side: Visual Map Context */}
+          <div className="lg:col-span-5 sticky top-24">
+            <div className="bg-slate-900 rounded-[2.5rem] p-2 shadow-2xl overflow-hidden">
+              <div className="relative h-[500px] rounded-[2rem] overflow-hidden">
+                <LocationPicker
+                  initialCenter={latLng}
+                  zoom={14}
+                  onSelect={(lat, lng) => setLatLng({ lat, lng })}
+                />
+                
+                {/* Floating Map Overlay */}
+                <div className="absolute bottom-6 left-6 right-6">
+                  <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-2xl flex items-center gap-4 border border-white/20">
+                    <div className="bg-orange-500 p-3 rounded-xl text-white">
+                      <Navigation size={20} className="animate-pulse" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Precision Coordinates</p>
+                      <p className="text-sm font-bold text-slate-900">
+                        {latLng.lat.toFixed(4)}°N, {latLng.lng.toFixed(4)}°E
+                      </p>
+                    </div>
+                    <div className="ml-auto">
+                      <CheckCircle2 className="text-green-500" size={24} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex items-center gap-4 px-6 text-slate-400">
+              <MapIcon size={16} />
+              <p className="text-xs font-medium italic">Drag the marker to pinpoint your exact doorstep for faster delivery.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+      
+      <LoginModal 
+        isOpen={showLoginModal} 
         onClose={() => setShowLoginModal(false)}
-        onSuccess={async () => {
-          setShowLoginModal(false)
-          if (storedFormData) {
-            await processDelivery(storedFormData)
-            setStoredFormData(null)
-          }
-        }}
+        onSuccess={() => storedFormData && onSubmit(storedFormData)}
       />
-    </>
+
+      <style>{`
+        .form-input-premium {
+          width: 100%;
+          background: #fcfcfd;
+          border: 1px solid #e2e8f0;
+          padding: 0.875rem 1rem;
+          border-radius: 1rem;
+          font-weight: 600;
+          font-size: 0.95rem;
+          transition: all 0.2s ease;
+          color: #1e293b;
+        }
+        .form-input-premium:focus {
+          outline: none;
+          background: white;
+          border-color: #f97316;
+          box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+        }
+      `}</style>
+    </div>
   )
 }
+
+const InputWrapper = ({ label, children, error }: any) => (
+  <div className="space-y-2">
+    <div className="flex justify-between items-center px-1">
+      <label className="text-[11px] font-black uppercase tracking-widest text-slate-400">{label}</label>
+      {error && <span className="text-[10px] font-bold text-red-500">{error}</span>}
+    </div>
+    {children}
+  </div>
+)
 
 export default DeliveryDetails
