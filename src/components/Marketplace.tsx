@@ -16,6 +16,7 @@ import ShoppableVideoFeed from './ShoppableVideoFeed';
 import { createSlug } from '../utils/slugUtils';
 import MadeForYou from './MadeForYou';
 import ProductHubSections from './ProductHubSections';
+import TopBrands from './TopBrands';
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -1668,84 +1669,7 @@ const Marketplace: React.FC = () => {
       )}
 
       {/* Brands Section */}
-      <div className="bg-white py-12 border-t border-neutral-100">
-        <div className="container mx-auto px-4 relative group">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Top Brands
-            </h2>
-            <p className="text-gray-500">Shop from your favorite brands</p>
-          </div>
-
-          {/* Navigation Buttons */}
-          <button
-            onClick={() => scrollBrandsBy(-300)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 border border-neutral-200 text-neutral-600 hover:text-primary-600 hover:border-primary-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 hidden lg:block"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          
-          <button
-            onClick={() => scrollBrandsBy(300)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 border border-neutral-200 text-neutral-600 hover:text-primary-600 hover:border-primary-600 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-0 hidden lg:block"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          <div 
-            ref={brandsRef}
-            className="flex items-center gap-8 overflow-x-auto no-scrollbar py-4 px-4 scroll-smooth"
-          >
-            {brandsLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0">
-                  <div className="w-32 h-32 rounded-full bg-gray-100 animate-pulse"></div>
-                </div>
-              ))
-            ) : brandsError ? (
-              <div className="w-full text-center py-8">
-                <p className="text-red-600">{brandsError}</p>
-              </div>
-            ) : brands.length > 0 ? (
-              brands.map((brand) => (
-                <div
-                  key={brand.id}
-                  onClick={() => navigate(`/brand-products/${brand.id}`)}
-                  className="flex-shrink-0 cursor-pointer group/brand flex flex-col items-center gap-3"
-                >
-                  {/* Ring Container */}
-                  <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-b from-gray-200 via-gray-100 to-white shadow-inner relative transition-transform duration-300 group-hover/brand:scale-105">
-                     {/* Outer Ring Gradient */}
-                     <div className="absolute inset-0 rounded-full bg-gradient-to-b from-gray-300 to-gray-100 opacity-50"></div>
-                     
-                     {/* Inner White Circle */}
-                     <div className="relative w-full h-full bg-white rounded-full flex items-center justify-center p-4 shadow-sm group-hover/brand:shadow-md transition-all duration-300 border border-gray-100">
-                        {brand.logo_url ? (
-                          <img
-                            src={brand.logo_url}
-                            alt={brand.name}
-                            className="max-w-full max-h-full object-contain filter grayscale group-hover/brand:grayscale-0 transition-all duration-300"
-                          />
-                        ) : (
-                          <span className="text-xs font-bold text-center text-gray-400 group-hover/brand:text-gray-800 line-clamp-2">
-                            {brand.name}
-                          </span>
-                        )}
-                     </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="w-full text-center py-8">
-                <p className="text-gray-600">No brands available</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <TopBrands />
 
       <div className="container mx-auto px-4 py-3 sm:py-4">
         {/* Filters removed as requested */}
