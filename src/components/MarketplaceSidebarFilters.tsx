@@ -14,7 +14,6 @@ interface SidebarFiltersProps {
   onMaxPriceChange: (val: string) => void;
   onMinOrderChange: (val: string) => void;
   onCityChange: (val: string) => void;
-  onBusinessTypeChange: (val: string) => void;
   onCategoryChange?: (categoryId: number | null) => void;
   onSubcategoryChange?: (subcategoryId: number | null) => void;
   onSubSubcategoryChange?: (subSubcategoryId: number | null) => void;
@@ -34,32 +33,43 @@ const MarketplaceSidebarFilters: React.FC<SidebarFiltersProps> = ({
   onMaxPriceChange,
   onMinOrderChange,
   onCityChange,
-  onBusinessTypeChange,
   onCategoryChange,
   onSubcategoryChange,
   onSubSubcategoryChange,
   onClearFilters,
 }) => {
-  const hasActiveFilters = minPrice || maxPrice || minOrder || selectedCity || selectedBusinessType || selectedCategory || selectedSubcategory || selectedSubSubcategory;
+  const hasActiveFilters =
+    minPrice ||
+    maxPrice ||
+    minOrder ||
+    selectedCity ||
+    selectedBusinessType ||
+    selectedCategory ||
+    selectedSubcategory ||
+    selectedSubSubcategory;
+
+  // Input style class
+  const inputClass =
+    'w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors';
 
   return (
-    <div className="w-full md:w-64 bg-white rounded-2xl shadow-lg border border-neutral-200 p-6 flex flex-col gap-6 sticky top-8">
+    <div className="w-full lg:w-64 bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex flex-col gap-5 sticky top-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-xl text-gray-900">Filters</h2>
+        <h2 className="text-lg font-bold text-gray-900">Filters</h2>
         {hasActiveFilters && onClearFilters && (
           <button
             onClick={onClearFilters}
-            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            className="text-xs text-orange-600 hover:text-orange-700 font-medium transition-colors"
           >
-            Clear All
+            Clear all
           </button>
         )}
       </div>
 
-      {/* Category Filter */}
+      {/* Category */}
       <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Category</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">Category</h3>
         <CategorySelector
           selectedCategory={selectedCategory}
           selectedSubcategory={selectedSubcategory}
@@ -72,88 +82,53 @@ const MarketplaceSidebarFilters: React.FC<SidebarFiltersProps> = ({
         />
       </div>
 
-      {/* Price Range Filter */}
+      {/* Price Range */}
       <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Price Range</h3>
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Min Price (₹)
-            </label>
-            <input
-              type="number"
-              className="w-full border border-neutral-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              value={minPrice}
-              onChange={e => onMinPriceChange(e.target.value)}
-              placeholder="e.g. 100"
-              min="0"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Max Price (₹)
-            </label>
-            <input
-              type="number"
-              className="w-full border border-neutral-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              value={maxPrice}
-              onChange={e => onMaxPriceChange(e.target.value)}
-              placeholder="e.g. 1000"
-              min="0"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Minimum Order Quantity Filter */}
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Order Quantity</h3>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Min Order Quantity
-          </label>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">Price Range (Rs)</h3>
+        <div className="space-y-2">
           <input
             type="number"
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            value={minOrder}
-            onChange={e => onMinOrderChange(e.target.value)}
-            placeholder="e.g. 10"
-            min="1"
+            className={inputClass}
+            value={minPrice}
+            onChange={(e) => onMinPriceChange(e.target.value)}
+            placeholder="Min"
+            min="0"
           />
-        </div>
-      </div>
-
-      {/* City Filter */}
-      <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Location</h3>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            City
-          </label>
           <input
-            type="text"
-            className="w-full border border-neutral-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-            value={selectedCity}
-            onChange={e => onCityChange(e.target.value)}
-            placeholder="Enter city name"
+            type="number"
+            className={inputClass}
+            value={maxPrice}
+            onChange={(e) => onMaxPriceChange(e.target.value)}
+            placeholder="Max"
+            min="0"
           />
         </div>
       </div>
 
-      {/* Active Filters Summary */}
-      {hasActiveFilters && (
-        <div className="bg-neutral-50 rounded-lg p-4 border border-neutral-200">
-          <h4 className="font-medium text-gray-900 mb-2 text-sm">Active Filters:</h4>
-          <div className="space-y-1 text-xs text-gray-600">
-            {minPrice && <p>Min Price: ₹{minPrice}</p>}
-            {maxPrice && <p>Max Price: ₹{maxPrice}</p>}
-            {minOrder && <p>Min Order: {minOrder}</p>}
-            {selectedCity && <p>City: {selectedCity}</p>}
-            {selectedBusinessType && <p>Business Type: {selectedBusinessType}</p>}
-            {selectedCategory && <p>Category filter applied</p>}
-          </div>
-        </div>
-      )}
+      {/* Minimum Order */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">Min. Order Qty</h3>
+        <input
+          type="number"
+          className={inputClass}
+          value={minOrder}
+          onChange={(e) => onMinOrderChange(e.target.value)}
+          placeholder="e.g. 10"
+          min="1"
+        />
+      </div>
+
+      {/* Location */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2">City</h3>
+        <input
+          type="text"
+          className={inputClass}
+          value={selectedCity}
+          onChange={(e) => onCityChange(e.target.value)}
+          placeholder="Enter city"
+        />
+      </div>
     </div>
   );
 };
