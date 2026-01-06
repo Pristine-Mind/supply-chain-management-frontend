@@ -1,103 +1,151 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap, TrendingUp, ShoppingBag, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import Navbar from './Navbar';
-import Footer from './Footer';
 
-
-const PLACEHOLDER = 'https://via.placeholder.com/400';
+const PLACEHOLDER = 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?auto=format&fit=crop&q=80';
 
 const FlashSale: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchProducts = async () => {
       setLoading(true);
-      setError('');
       try {
         const base = import.meta.env.VITE_REACT_APP_API_URL || 'https://appmulyabazzar.com';
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Token ${token}` } : {};
-        
-        const { data } = await axios.get(`${base}/api/v1/marketplace-trending/fastest_selling/`, {
-          headers
-        });
+        const { data } = await axios.get(`${base}/api/v1/marketplace-trending/most_viewed/`);
         setProducts(data.results || data || []);
       } catch (err) {
-        setError('Failed to load flash sale products');
+        console.error('Failed to fetch products:', err);
       } finally {
         setLoading(false);
       }
     };
-    fetch();
+    fetchProducts();
   }, []);
 
-  // Show loading / error states first
-  if (loading) return <div className="py-12 flex justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary-600" /></div>;
-  if (error) return <div className="text-center py-8 text-status-error">{error}</div>;
-
-  // Empty state animation for FlashSale
-  const EmptyState: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => (
-    <div className="py-16 flex flex-col items-center justify-center">
-      <div className="w-24 h-24 rounded-full bg-primary-50 flex items-center justify-center mb-6 animate-pulse">
-        <svg className="w-10 h-10 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V5a4 4 0 118 0v2" />
-        </svg>
-      </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      {subtitle && <p className="text-sm text-neutral-500 mb-4">{subtitle}</p>}
-      <div className="space-x-2">
-        <button onClick={() => navigate('/')} className="px-4 py-2 bg-primary-600 text-white rounded-lg">Browse Marketplace</button>
-        <button onClick={() => window.location.reload()} className="px-4 py-2 border rounded-lg">Retry</button>
-      </div>
-    </div>
-  );
-
   return (
-    <>
-      <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Flash Sale - Fastest Selling</h2>
-          <div className="text-sm text-neutral-500">{products.length} items</div>
+    <div className="bg-[#ffffff] min-h-screen text-white pb-20">
+      <section className="relative pt-12 pb-8 overflow-hidden">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-500 text-[9px] font-black uppercase tracking-[0.3em] mb-4"
+          >
+            <Zap size={12} fill="currentColor" />
+            Limited velocity
+          </motion.div>
+
+          <h2 className="text-3xl md:text-4xl font-black tracking-tighter italic uppercase italic text-slate-900">
+            Flash <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-rose-600">Sale</span>
+          </h2>
         </div>
+      </section>
 
-        {(!products || products.length === 0) ? (
-          <EmptyState title="No flash sale products found" subtitle="We couldn't find any flash sale items right now." />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {products.map((item: any) => (
-              <article key={item.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(`/marketplace/${item.id}`)}>
-                <div className="relative aspect-square w-full overflow-hidden">
-                  <img src={item.product_details?.images?.[0]?.image ?? PLACEHOLDER} alt={item.product_details?.name ?? 'Product'} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs bg-neutral-100 text-neutral-700 px-2 py-1 rounded-full">{item.product_details?.category_details}</span>
-                    <div className="flex items-center gap-1 text-sm text-neutral-600"><Star className="w-4 h-4 text-yellow-400" />{(item.average_rating || 0).toFixed(1)}</div>
-                  </div>
-
-                  <h3 className="font-semibold text-neutral-900 line-clamp-2">{item.product_details?.name}</h3>
-
-                  <div className="flex items-center justify-between">
-                    <div className="font-bold text-lg">Rs. {item.discounted_price ?? item.listed_price}</div>
-                    <button onClick={(e) => { e.stopPropagation(); addToCart(item); }} className="bg-primary-600 text-white px-3 py-1 rounded-md text-sm">Add</button>
-                  </div>
-                </div>
-              </article>
+      <main className="container mx-auto px-4">
+        {loading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-64 bg-white/5 rounded-2xl animate-pulse" />
             ))}
           </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <AnimatePresence>
+              {products.map((item, idx) => (
+                <FlashCard
+                  key={item.id}
+                  item={item}
+                  idx={idx}
+                  onAdd={() => addToCart(item)}
+                  onNavigate={() => navigate(`/marketplace/${item.id}`)}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
         )}
+      </main>
+    </div>
+  );
+};
+
+const FlashCard = ({ item, idx, onAdd, onNavigate }: any) => {
+  const stockPercent = Math.floor(Math.random() * 30) + 5;
+  const imageUrl = item.product_details?.images?.[0]?.image || PLACEHOLDER;
+  const name = item.product_details?.name || 'Untitled';
+  const price = item.discounted_price || item.listed_price;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.03 }}
+      className="group relative bg-orange-200 border border-white/5 rounded-2xl p-3 transition-all hover:border-orange-500/30"
+    >
+      {/* Mini Badge */}
+      <div className="absolute top-4 left-4 z-20">
+        <div className="bg-orange-600 text-[8px] font-black text-white px-2 py-1 rounded-lg uppercase tracking-wider flex items-center gap-1">
+          <TrendingUp size={8} /> Hot
+        </div>
       </div>
-      <Footer />
-    </>
+
+      <div 
+        onClick={onNavigate} 
+        className="relative aspect-[4/3] rounded-xl overflow-hidden bg-black mb-3 cursor-pointer"
+      >
+        <img src={imageUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt={name} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <span className="text-[8px] font-bold text-orange-500 uppercase tracking-widest block mb-0.5">
+            {item.product_details?.category_details || 'Premium'}
+          </span>
+          <h3 className="text-xs font-bold line-clamp-1 group-hover:text-orange-400 transition-colors">
+            {name}
+          </h3>
+        </div>
+
+        {/* Compressed Progress Bar */}
+        <div className="space-y-1">
+          <div className="flex justify-between text-[8px] font-bold uppercase text-slate-500">
+            <span>Stock</span>
+            <span className="text-orange-500">{stockPercent}% left</span>
+          </div>
+          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${stockPercent}%` }}
+              className="h-full bg-gradient-to-r from-orange-600 to-rose-500"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            {item.discounted_price && (
+              <span className="text-[9px] text-slate-500 line-through">Rs. {item.listed_price}</span>
+            )}
+            <span className="text-sm font-black text-white">Rs. {price.toLocaleString()}</span>
+          </div>
+
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); onAdd(); }}
+            className="bg-white text-black p-2 rounded-xl hover:bg-orange-500 hover:text-white transition-all shadow-md"
+          >
+            <ShoppingBag size={14} />
+          </motion.button>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 

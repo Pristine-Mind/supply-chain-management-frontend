@@ -36,7 +36,6 @@ const TopBrands = () => {
     setBrandsError('');
     
     try {
-      // Replace with your actual API URL
       const apiUrl = "https://appmulyabazzar.com";
       if (!apiUrl) {
         console.error('VITE_REACT_APP_API_URL is not defined');
@@ -101,11 +100,11 @@ const TopBrands = () => {
   };
 
   return (
-    <div className="bg-[#FCFCFD] py-24 border-t border-neutral-100 overflow-hidden">
+    <div className="bg-[#FCFCFD] py-6 border-t border-neutral-100 overflow-hidden">
       <div className="container mx-auto px-4 relative group">
         
         {/* Editorial Title Section */}
-        <div className="flex flex-col items-center mb-16 text-center">
+        <div className="flex flex-col items-center mb-4 text-center">
           <div className="flex items-center gap-3 mb-3 opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]">
             <span className="h-[1px] w-8 bg-orange-400" />
             <span className="text-orange-500 font-bold text-[10px] tracking-[0.4em] uppercase">

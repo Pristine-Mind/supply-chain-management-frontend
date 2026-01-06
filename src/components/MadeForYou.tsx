@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ChevronRight, Star, Plus, Zap, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronRight, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
@@ -26,7 +26,7 @@ const MadeForYou: React.FC = () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const list = Array.isArray(data) ? data : data?.results ?? data?.items ?? [];
-        setItems(list.slice(0, 12)); // Fetch a dozen for a good grid
+        setItems(list.slice(0, 12));
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -51,7 +51,6 @@ const MadeForYou: React.FC = () => {
   return (
     <section className="py-10 bg-[#fbfbfd]">
       <div className="container mx-auto px-4">
-        {/* Modern Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <motion.div 
             initial={{ opacity: 0, x: -20 }} 
@@ -71,11 +70,8 @@ const MadeForYou: React.FC = () => {
           </button>
         </div>
 
-        {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[200px]">
           {items.map((p, index) => {
-            // Logic to make specific items "Big" (Featured)
-            // Item 0 is large, Item 5 is wide, etc.
             const isLarge = index === 0;
             const isWide = index === 5;
             
@@ -86,7 +82,7 @@ const MadeForYou: React.FC = () => {
                 index={index}
                 isLarge={isLarge}
                 isWide={isWide}
-                onAction={(e) => handleAction(e, p)}
+                onAction={(e: React.MouseEvent) => handleAction(e, p)}
                 onNavigate={() => navigate(`/marketplace/${p.id}`)}
               />
             );
@@ -114,7 +110,6 @@ const ProductCard = ({ product, index, isLarge, isWide, onAction, onNavigate }: 
   const name = product.product_details?.name ?? product.name ?? 'Premium Product';
   const price = product.discounted_price ?? product.listed_price ?? product.price;
 
-  // Bento Span Classes
   const spanClass = isLarge 
     ? "md:col-span-2 md:row-span-2" 
     : isWide 
@@ -131,10 +126,8 @@ const ProductCard = ({ product, index, isLarge, isWide, onAction, onNavigate }: 
       onClick={onNavigate}
       className={`${spanClass} group relative bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-orange-100 transition-all duration-500 cursor-pointer`}
     >
-      {/* Background Decor for Large Cards */}
       {isLarge && <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-110" />}
 
-      {/* Product Image */}
       <div className={`relative w-full ${isWide ? 'h-full flex' : 'h-3/5'} items-center justify-center p-8`}>
         <img
           src={image || '/placeholder.png'}
@@ -143,21 +136,19 @@ const ProductCard = ({ product, index, isLarge, isWide, onAction, onNavigate }: 
         />
       </div>
 
-      {/* Floating Price Tag for Large Cards */}
       {isLarge && (
         <div className="absolute top-8 left-8 bg-orange-500 text-white px-4 py-2 rounded-2xl font-black text-lg shadow-xl">
            Rs. {Number(price || 0).toLocaleString()}
         </div>
       )}
 
-      {/* Content Overlay/Section */}
       <div className={`${isWide ? 'w-2/3 flex flex-col justify-center' : 'absolute bottom-0 left-0 right-0'} p-8 bg-gradient-to-t from-white via-white/90 to-transparent`}>
         <div className="flex justify-between items-end">
           <div className="flex-1">
             <p className="text-orange-600 text-[10px] font-black uppercase tracking-widest mb-1">New Arrival</p>
-            <h4 className={`${isLarge ? 'text-2xl' : 'text-lg'} font-bold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors`}>
+            <h5 className={`${isLarge ? 'text-xs' : 'text-ls'} font-semibold text-slate-800 line-clamp-1 group-hover:text-orange-600 transition-colors`}>
               {name}
-            </h4>
+            </h5>
             {!isLarge && (
                 <span className="text-slate-900 font-black mt-1 block">
                     Rs. {Number(price || 0).toLocaleString()}
