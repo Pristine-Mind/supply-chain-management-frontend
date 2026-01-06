@@ -21,6 +21,7 @@ export interface MiniProduct {
   thumbnail?: string | null;
   description?: string | null;
   category_info?: { id: number; name: string } | null;
+  marketplace_id?: number | null;
 }
 
 export const listB2BUsers = async (q?: string, page = 1, page_size = 20) => {

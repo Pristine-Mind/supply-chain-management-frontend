@@ -1,205 +1,179 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { creatorsApi } from '../api/creatorsApi';
 import { shoppableVideosApi } from '../api/shoppableVideosApi';
 import { CreatorProfile, PaginatedCreators, ShoppableVideoBrief } from '../types/creator';
 import FollowButton from './FollowButton';
 import { useAuth } from '../context/AuthContext';
+import { Play, Heart, CheckCircle, Search } from 'lucide-react';
 
 const CreatorsList: React.FC = () => {
   const [creators, setCreators] = useState<CreatorProfile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<PaginatedCreators | null>(null);
   const [q, setQ] = useState('');
   const [videosByCreator, setVideosByCreator] = useState<Record<number, ShoppableVideoBrief[]>>({});
-  const navigate = useNavigate();
   const { user } = useAuth();
 
-  const load = async (p = 1) => {
-    const data = await creatorsApi.listCreators(q || undefined, p);
-    setPagination(data);
-    setCreators(data.results);
-    setPage(p);
-
-    // also fetch recent videos to show thumbnails
+  const load = useCallback(async (p = 1, isSearch = false) => {
+    if (isSearch) setLoading(true);
+    
     try {
-      const vidsResp: any = await shoppableVideosApi.getVideos(200);
-      const vids = Array.isArray(vidsResp) ? vidsResp : (vidsResp && vidsResp.results) ? vidsResp.results : [];
+      const data = await creatorsApi.listCreators(q || undefined, p);
+      
+      setCreators(prev => p === 1 ? data.results : [...prev, ...data.results]);
+      setPagination(data);
+      setPage(p);
+
+      const vidsResp: any = await shoppableVideosApi.getVideos(100);
+      const vids = Array.isArray(vidsResp) ? vidsResp : (vidsResp?.results || []);
+      
       const map: Record<number, ShoppableVideoBrief[]> = {};
       vids.forEach((v: any) => {
         const uid = v.uploader || v.uploader_id || v.uploader_profile?.id;
-        if (!uid) return;
-        map[uid] = map[uid] || [];
-        map[uid].push({
-          id: v.id,
-          title: v.title,
-          video_url: v.video_file || v.video_url || '',
-          thumbnail: v.thumbnail,
-          uploader_profile: undefined,
-          creator_profile: undefined,
-          product_tags: v.product_tags || [],
-          views_count: v.views_count || 0,
-          created_at: v.created_at,
-        });
+        if (uid) {
+          if (!map[uid]) map[uid] = [];
+          map[uid].push(v);
+        }
       });
       setVideosByCreator(map);
     } catch (err) {
-      console.error('Failed to load videos for creators', err);
+      console.error('Smooth load failed', err);
+    } finally {
+      setLoading(false);
     }
-
-    // If user is logged in, check each creator's followers to set follow state
-    if (user?.id) {
-      try {
-        await Promise.all(
-          data.results.map(async (c: CreatorProfile) => {
-            try {
-              const followersResp: any = await creatorsApi.getFollowers(c.id);
-              const list = Array.isArray(followersResp.results) ? followersResp.results : [];
-              const isFollowing = list.some((f: any) => Number(f.user) === Number(user.id));
-              if (isFollowing) {
-                setCreators((prev) => prev.map((p) => (p.id === c.id ? { ...p, is_following: true, following: true } : p)));
-              }
-            } catch (err) {
-              // ignore per-creator errors
-            }
-          })
-        );
-      } catch (err) {
-        console.error('Failed to determine follow status', err);
-      }
-    }
-  };
+  }, [q]);
 
   useEffect(() => {
     load(1);
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Search Bar at Top - Sticky */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3 mb-6 shadow-sm">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+    <div className="min-h-screen bg-neutral-50/50">
+      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-neutral-200/60 px-4 py-4 transition-all duration-300">
+        <div className="max-w-5xl mx-auto">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-neutral-400 group-focus-within:text-orange-500 transition-colors" />
             </div>
             <input
               type="text"
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 hover:bg-white transition-colors"
-              placeholder="Search creators"
+              className="w-full pl-12 pr-4 py-3 bg-neutral-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition-all outline-none"
+              placeholder="Search your favorite creators..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && load(1)}
+              onKeyDown={(e) => e.key === 'Enter' && load(1, true)}
             />
           </div>
         </div>
       </div>
-      <div className="mb-12 text-center text-orange-600 text-xl font-semibold">Explore Your Creators</div>
-      {/* Pinterest-style Masonry Grid */}
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
-          {creators.map((c: any) => {
-            const vids = videosByCreator[c.id] || videosByCreator[c.user] || [];
-            const thumb = vids[0]?.thumbnail || c.cover_image || '/video-thumb-placeholder.png';
-            return (
-              <div key={c.id} className="break-inside-avoid mb-4">
-                <div className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-                  {/* Video Thumbnail */}
-                  <Link to={`/creators/${c.id}`}>
-                    <img 
-                      src={thumb} 
-                      className="w-full h-auto object-cover"
-                      alt={c.display_name || c.username}
-                    />
-                  </Link>
 
-                  {/* Play Button Overlay - Shows on hover */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    <div className="bg-white rounded-full p-4 shadow-xl">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M8 5v14l11-7L8 5z" fill="#1f2937" />
-                      </svg>
-                    </div>
-                  </div>
+      <div className="max-w-7xl mx-auto px-4 pt-10 pb-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 text-center"
+        >
+          <h2 className="text-3xl font-black text-neutral-900 tracking-tight">
+            Explore <span className="text-orange-600">Creators</span>
+          </h2>
+          <p className="text-neutral-500 mt-2 font-medium">Discover trendsetters and shop their style</p>
+        </motion.div>
 
-                  {/* Like Button - Shows on hover */}
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path 
-                          d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
-                          stroke="#1f2937" 
-                          strokeWidth="2" 
-                          fill="none" 
+        {loading && page === 1 ? (
+          <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="mb-4 h-64 bg-neutral-200 animate-pulse rounded-3xl" />
+            ))}
+          </div>
+        ) : (
+          <motion.div 
+            layout
+            className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4"
+          >
+            <AnimatePresence>
+              {creators.map((c: any, index: number) => {
+                const vids = videosByCreator[c.id] || [];
+                const thumb = vids[0]?.thumbnail || c.cover_image || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop';
+                
+                return (
+                  <motion.div
+                    key={c.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="break-inside-avoid mb-4 group relative"
+                  >
+                    <div className="relative overflow-hidden rounded-[2rem] bg-white shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+                      {/* Image Content */}
+                      <Link to={`/creators/${c.id}`} className="block">
+                        <img 
+                          src={thumb} 
+                          loading="lazy"
+                          className="w-full h-auto object-cover min-h-[200px]"
+                          alt={c.display_name}
                         />
-                      </svg>
-                    </button>
-                  </div>
+                        {/* Smooth Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+                      </Link>
 
-                  {/* Creator Info Overlay - Always visible at bottom */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 pt-16">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <Link to={`/creators/${c.id}`}>
+                      {/* Interaction UI */}
+                      <div className="absolute top-4 right-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                        <button className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-black transition-all">
+                          <Heart size={20} />
+                        </button>
+                      </div>
+
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                         <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center scale-0 group-hover:scale-100 transition-transform duration-500 shadow-lg shadow-orange-600/40">
+                            <Play size={24} fill="white" className="text-white ml-1" />
+                         </div>
+                      </div>
+
+                      {/* Info Panel */}
+                      <div className="absolute bottom-0 left-0 right-0 p-5">
+                        <div className="flex items-center gap-3">
                           <img 
                             src={c.avatar || c.profile_image || '/placeholder-avatar.png'} 
-                            className="w-10 h-10 rounded-full object-cover border-2 border-white flex-shrink-0"
-                            alt={c.display_name || c.username}
+                            className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover"
+                            alt=""
                           />
-                        </Link>
-                        <div className="min-w-0 flex-1">
-                          <Link to={`/creators/${c.id}`} className="block">
-                            <div className="font-semibold text-white text-sm flex items-center gap-1.5 truncate">
-                              <span className="truncate">{c.display_name || c.username || c.handle}</span>
-                              {c.is_verified && (
-                                <svg className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                              )}
-                            </div>
-                          </Link>
-                          <div className="text-xs text-white/90 truncate">
-                            @{c.username || (c.handle && String(c.handle).replace(/^https?:\/\//, ''))}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-white font-bold text-sm flex items-center gap-1">
+                              <span className="truncate">{c.display_name}</span>
+                              {c.is_verified && <CheckCircle size={14} className="text-blue-400 fill-blue-400/20" />}
+                            </h4>
+                            <p className="text-white/70 text-xs truncate italic">@{c.username}</p>
                           </div>
                         </div>
+                        
+                        <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                           <FollowButton
+                              creatorId={c.id}
+                              initialFollowing={!!c.is_following}
+                              className="w-full !bg-white !text-black !rounded-xl !py-2 !text-xs !font-bold hover:!bg-orange-600 hover:!text-white transition-colors"
+                           />
+                        </div>
                       </div>
-                      <FollowButton
-                        creatorId={c.id}
-                        initialFollowing={!!(c.is_following || c.following)}
-                        onToggle={(following: boolean, follower_count?: number) => {
-                          setCreators((prev) =>
-                            prev.map((p) =>
-                              p.id === c.id
-                                ? {
-                                    ...p,
-                                    is_following: following,
-                                    following: following,
-                                    follower_count: follower_count ?? p.follower_count,
-                                  }
-                                : p
-                            )
-                          );
-                        }}
-                        className="text-xs px-4 py-1.5 flex-shrink-0 font-medium"
-                      />
                     </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
-        {/* Load More Button */}
-        {pagination && pagination.next && (
-          <div className="flex justify-center py-8">
+        {/* Load More - Premium Style */}
+        {pagination?.next && (
+          <div className="flex justify-center mt-16">
             <button
               onClick={() => load(page + 1)}
-              className="px-6 py-2.5 bg-gray-900 text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-md hover:shadow-lg"
+              className="group relative px-10 py-4 bg-black text-white rounded-2xl font-bold transition-all hover:bg-orange-600 hover:shadow-2xl hover:shadow-orange-600/30 overflow-hidden"
             >
-              Load More
+              <span className="relative z-10">Discover More</span>
+              <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             </button>
           </div>
         )}

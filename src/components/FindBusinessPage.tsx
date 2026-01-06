@@ -7,7 +7,7 @@ const FindBusinessPage: React.FC = () => {
   const { userId } = useParams<{ userId?: string }>();
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50">
       {!userId ? (
         <B2BSearch open={true} onClose={() => window.history.back()} />
       ) : (

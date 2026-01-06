@@ -11,6 +11,14 @@ export interface DistributorProductInsight {
   avg_rating: number;
 }
 
+export type DistributorProduct = {
+  id: string | number;
+  name: string;
+  views?: number;
+  total_sold?: number;
+  avg_rating?: number;
+};
+
 export interface DistributorProfileResponse {
   products: DistributorProductInsight[];
   orders_count: number;

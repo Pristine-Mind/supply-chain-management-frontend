@@ -1,104 +1,97 @@
 import React, { useEffect, useState } from 'react';
-import { Sparkles, AlertCircle } from 'lucide-react';
-import CosmeticImg from '../assets/costemtic.jpeg';
-import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import BrandTile from './BrandTile';
-
-type Brand = {
-  id?: number | string;
-  name?: string;
-  image?: string;
-  logo?: string;
-  thumbnail?: string;
-  [key: string]: any;
-};
+import CosmeticImg from '../assets/costemtic.jpeg';
 
 const BrandsSection: React.FC = () => {
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-    
     fetch('https://appmulyabazzar.com/api/v1/brands/?category_id=4')
-      .then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then((data) => {
-        const items = Array.isArray(data) ? data : data.results || data.data || [];
-        if (mounted) setBrands(items);
-      })
-      .catch((err) => {
-        console.error('Failed to load brands', err);
-        if (mounted) setError(true);
-      })
-      .finally(() => mounted && setLoading(false));
-
-    return () => {
-      mounted = false;
-    };
+      .then(res => res.json())
+      .then(data => {
+        const items = Array.isArray(data) ? data : data.results || [];
+        setBrands(items);
+        setLoading(false);
+      });
   }, []);
 
+  if (loading) return <div className="h-96 flex items-center justify-center">...</div>;
+
   return (
-    <section className="w-full py-12 bg-gradient-to-b from-white to-neutral-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-              <Sparkles className="w-7 h-7 text-orange-500" />
-              Brands — Beauty
+    <section className="w-full py-6 bg-[#FAFAFA] overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 mb-16">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            className="text-center md:text-left"
+          >
+            <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-none">
+              Beauty <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-rose-500">Ateliers.</span>
             </h2>
-            <p className="mt-2 text-sm text-gray-500">Shop from brands in the beauty category</p>
-          </div>
+          </motion.div>
+
+          <p className="max-w-xs text-slate-400 text-sm font-medium leading-relaxed">
+            Curated selection of the world's most prestigious beauty houses, delivered to your doorstep.
+          </p>
         </div>
+      </div>
 
-        {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg border border-gray-200 animate-pulse" />
-                <div className="mt-2 h-3 w-16 bg-gray-100 rounded animate-pulse" />
-              </div>
+      {/* Infinite Luxury Scroll */}
+      <div className="relative flex flex-col gap-12">
+        <div className="flex overflow-hidden group">
+          <motion.div 
+            animate={{ x: [0, -1920] }}
+            transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+            className="flex gap-8 px-4 whitespace-nowrap"
+          >
+            {[...brands, ...brands].map((b, i) => (
+              <BrandTile key={i} brand={b} img={b.logo_url || b.logo} />
             ))}
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <AlertCircle className="w-12 h-12 mb-3 text-gray-400" />
-            <p>Unable to load brands at this time</p>
-          </div>
-        ) : brands && brands.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-start">
-            {brands.slice(0, 12).map((b) => {
-              const img = b.logo_url || b.logo || b.image || b.thumbnail || b.img || b.avatar;
-              return (
-                <BrandTile key={b.id ?? b.name} brand={b} img={img} />
-              );
-            })}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <p>No brands available</p>
-          </div>
-        )}
+          </motion.div>
+        </div>
+      </div>
 
-        {/* Decorative cosmetic banner below brands */}
-        {brands.length > 0 && (
-          <div className="mt-12 w-full">
-            <div className="bg-gradient-to-r from-orange-200 to-orange-600 rounded-2xl overflow-hidden shadow-sm p-6 md:p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6">
-                <div className="text-center md:text-left">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Discover Beauty</h3>
-                  <p className="text-gray-600">Explore our curated collection of premium beauty brands</p>
-                </div>
-                <div className="w-full flex items-center justify-center">
-                  <img src={CosmeticImg} alt="Discover beauty" className="w-full max-w-xl h-64 md:h-64 object-cover rounded-lg shadow-md" />
-                </div>
-              </div>
-            </div>
+      <div className="max-w-7xl mx-auto px-6 mt-32">
+        <motion.div 
+          whileHover={{ scale: 0.99 }}
+          className="relative bg-orange-900 h-[450px] rounded-[3rem] overflow-hidden flex items-center shadow-2xl"
+        >
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10 select-none">
+            <h1 className="text-[20rem] font-black text-white italic">GLAM</h1>
           </div>
-        )}
+
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 w-full p-12 items-center">
+            <div className="space-y-8">
+              <h3 className="text-white text-5xl font-black tracking-tighter leading-tight">
+                Beyond <br /> Skincare.
+              </h3>
+              <p className="text-slate-400 text-lg max-w-sm">
+                Unlock exclusive access to limited edition releases and boutique-only collections.
+              </p>
+              <button className="bg-white text-black px-10 py-5 rounded-full font-black uppercase text-xs tracking-widest hover:bg-orange-500 hover:text-white transition-all duration-500 flex items-center gap-3">
+                Discover More <ArrowRight size={16} />
+              </button>
+            </div>
+
+            <motion.div 
+              animate={{ y: [0, -20, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="hidden md:flex justify-center"
+            >
+              <div className="w-80 h-96 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 p-4 rotate-6 group">
+                <img 
+                   src={CosmeticImg}
+                   className="w-full h-full object-cover rounded-xl"
+                   alt="Beauty"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
