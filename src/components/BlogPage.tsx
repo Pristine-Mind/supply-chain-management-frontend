@@ -1,71 +1,48 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import * as Separator from '@radix-ui/react-separator';
-import * as Tabs from '@radix-ui/react-tabs';
-import logo from '../assets/logo.png';
-import banner from '../assets/banner2.png';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Search, Calendar, User, ArrowRight, Tag, 
+  BookOpen, Hash, Newspaper 
+} from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import banner from '../assets/banner2.png';
 
 interface Post {
   id: number;
   title: string;
   excerpt: string;
-  content?: string;
   image: string;
   date: string;
   author: string;
   category?: string;
 }
 
-const fetchPosts = async (): Promise<Post[]> => {
-  const api = import.meta.env.VITE_REACT_APP_API_URL;
-  if (api) {
-    try {
-      const res = await fetch(`${api}/blog/posts/`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        return data.map((p: any, i: number) => ({
-          id: Number(p.id ?? i + 1),
-          title: String(p.title ?? 'Untitled'),
-          excerpt: String(p.excerpt ?? p.summary ?? ''),
-          content: typeof p.content === 'string' ? p.content : String(p.content ?? ''),
-          image: p.image || p.thumbnail || logo,
-          date: String(p.date ?? p.published_at ?? ''),
-          author: String(p.author ?? 'Admin'),
-          category: String((p.category ?? (Array.isArray(p.categories) ? p.categories[0] : '')) || ''),
-        })) as Post[];
-      }
-    } catch (e) {
-    }
-  }
-  return [
-    { id: 1, title: 'How to Sell Fresh Produce on MulyaBazzar', excerpt: 'Learn best listing practices for fruits and vegetables.', content: 'Full guide on listing best practices...', image: logo, date: 'Jul 10, 2025', author: 'Admin', category: 'Farming Tips' },
-    { id: 2, title: 'Understanding Marketplace Fees', excerpt: 'Breakdown of fees and profit tips.', content: 'We walk through fee structures...', image: logo, date: 'Jul 08, 2025', author: 'Finance Team', category: 'Finance' },
-    { id: 3, title: 'Tips for Packaging Deliveries', excerpt: 'Keep produce fresh with these strategies.', content: 'Packaging tactics for freshness...', image: logo, date: 'Jul 05, 2025', author: 'Logistics', category: 'Packaging' },
-  ];
-};
-
 export const BlogPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    (async () => {
+    const loadPosts = async () => {
+      const api = import.meta.env.VITE_REACT_APP_API_URL;
       try {
-        const data = await fetchPosts();
+        const res = await fetch(`${api}/blog/posts/`);
+        const data = await res.json();
         setPosts(data);
-      } catch (e: any) {
-        setError(e?.message || 'Failed to load blog posts');
+      } catch (e) {
+        // Fallback mock data if API fails
+        setPosts([
+          { id: 1, title: 'How to Sell Fresh Produce on MulyaBazzar', excerpt: 'Learn best listing practices for fruits and vegetables to maximize your revenue...', image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1740', date: 'Jul 10, 2025', author: 'Admin', category: 'Farming' },
+          { id: 2, title: 'Understanding Marketplace Fees', excerpt: 'A transparent breakdown of how we help you keep more profit in your pocket...', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1711', date: 'Jul 08, 2025', author: 'Finance', category: 'Finance' },
+        ]);
       } finally {
         setLoading(false);
       }
-    })();
+    };
+    loadPosts();
   }, []);
 
   const categories = useMemo(() => {
@@ -75,122 +52,122 @@ export const BlogPage: React.FC = () => {
   }, [posts]);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
     return posts.filter(p => {
-      const categoryPass = selectedCategory === 'All' || (p.category || '') === selectedCategory;
-      if (!q) return categoryPass;
-      const hay = `${p.title} ${p.excerpt} ${p.content ?? ''}`.toLowerCase();
-      return categoryPass && hay.includes(q);
+      const categoryPass = selectedCategory === 'All' || p.category === selectedCategory;
+      const searchPass = p.title.toLowerCase().includes(search.toLowerCase());
+      return categoryPass && searchPass;
     });
   }, [posts, search, selectedCategory]);
 
-  const toggleExpand = (id: number) => {
-    setExpanded(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
   return (
-    <div className="min-h-screen">
+    <div className="bg-[#fcfcfd] min-h-screen">
       <Navbar />
 
-      <div className="relative h-72 bg-cover bg-center mt-6" style={{ backgroundImage: `url(${banner})` }}>
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <h1 className="text-white text-4xl md:text-5xl font-bold">Insights & Updates</h1>
+      {/* Hero Section */}
+      <div className="relative h-[45vh] flex items-center justify-center overflow-hidden">
+        <motion.img 
+          initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 10 }}
+          src={banner} className="absolute inset-0 w-full h-full object-cover" alt="Banner" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#fcfcfd] via-black/40 to-black/60" />
+        <div className="relative text-center px-4 space-y-4">
+          <motion.h1 
+            initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+            className="text-5xl md:text-7xl font-black text-white tracking-tighter"
+          >
+            Mulya Journal
+          </motion.h1>
+          <p className="text-white/90 text-lg md:text-xl font-medium max-w-2xl mx-auto">
+            Insights from the heart of Nepal's agriculture.
+          </p>
         </div>
       </div>
 
-      <main className="max-w-6xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {loading ? (
-          <div className="lg:col-span-2 flex justify-center items-center">
-            <span>Loading...</span>
+      <main className="max-w-7xl mx-auto px-4 py-16 grid lg:grid-cols-12 gap-12">
+        {/* Main Feed */}
+        <div className="lg:col-span-8">
+          <div className="flex items-center gap-4 mb-10">
+            <Newspaper className="text-orange-500" />
+            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Latest Updates</h2>
+            <div className="flex-1 h-px bg-slate-200" />
           </div>
-        ) : error ? (
-          <div className="lg:col-span-2 text-red-600">{error}</div>
-        ) : (
-          <section className="lg:col-span-2 space-y-12">
-            {filtered.map(post => (
-              <article key={post.id} className="flex flex-col md:flex-row bg-white shadow-lg rounded-lg overflow-hidden">
-                <img src={post.image} alt={post.title} className="h-48 md:h-auto md:w-48 object-cover" />
-                <div className="p-6 flex flex-col justify-between">
-                  <div>
-                    <p className="text-caption text-neutral-500 mb-2">{post.date} &bull; by {post.author}</p>
-                    <h2 className="text-h2 font-semibold mb-2 hover:text-primary-600">
+
+          <div className="space-y-16">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((post) => (
+                <motion.article 
+                  layout initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  key={post.id} className="group grid md:grid-cols-12 gap-8 items-start"
+                >
+                  <div className="md:col-span-5 relative overflow-hidden rounded-[2rem]">
+                    <img 
+                      src={post.image} 
+                      className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-105" 
+                      alt={post.title} 
+                    />
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1 rounded-full text-xs font-black text-orange-600 uppercase">
+                      {post.category}
+                    </div>
+                  </div>
+                  <div className="md:col-span-7 space-y-4 pt-2">
+                    <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                      <span className="flex items-center gap-1.5"><Calendar size={14}/> {post.date}</span>
+                      <span className="flex items-center gap-1.5"><User size={14}/> {post.author}</span>
+                    </div>
+                    <h2 className="text-3xl font-black text-slate-900 group-hover:text-orange-500 transition-colors leading-tight">
                       <Link to={`/blog/${post.id}`}>{post.title}</Link>
                     </h2>
-                    <p className="text-body text-neutral-700 mb-4">
-                      {expanded.has(post.id) ? (post.content || post.excerpt) : post.excerpt}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <button
-                      className="text-primary-600 font-medium hover:underline"
-                      onClick={() => toggleExpand(post.id)}
-                    >
-                      {expanded.has(post.id) ? 'Read Less ←' : 'Read More →'}
-                    </button>
-                    <Link to={`/blog/${post.id}`} className="text-neutral-600 hover:text-neutral-900">
-                      Open Post
+                    <p className="text-slate-600 text-lg leading-relaxed line-clamp-2">{post.excerpt}</p>
+                    <Link to={`/blog/${post.id}`} className="inline-flex items-center gap-2 font-black text-orange-500 hover:gap-4 transition-all">
+                      Read Article <ArrowRight size={20} />
                     </Link>
                   </div>
-                </div>
-              </article>
-            ))}
-          </section>
-        )}
-
-        <aside className="space-y-8">
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Search Posts</h3>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="input-field w-full focus-ring"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+                </motion.article>
+              ))}
+            </AnimatePresence>
           </div>
+        </div>
 
-          <Separator.Root decorative orientation="horizontal" className="w-full h-px bg-gray-200" />
+        {/* Sidebar */}
+        <aside className="lg:col-span-4">
+          <div className="sticky top-24 space-y-8">
+            <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+              <div className="relative mb-8">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  type="text" placeholder="Search insights..."
+                  className="w-full h-14 pl-12 pr-4 rounded-2xl bg-slate-50 border-none focus:ring-2 focus:ring-orange-500 transition-all"
+                  value={search} onChange={(e) => setSearch(e.target.value)}
+                />
+              </div>
 
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Categories</h3>
-            <Tabs.Root value={selectedCategory} onValueChange={setSelectedCategory} className="flex flex-col space-y-2">
-              <Tabs.List className="grid grid-cols-2 gap-2 sm:flex sm:flex-col sm:space-y-1">
+              <h3 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+                <Hash size={20} className="text-orange-500" /> Categories
+              </h3>
+              <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
-                  <Tabs.Trigger
-                    key={cat}
-                    value={cat}
-                    className={`px-3 py-1 rounded-md text-caption ${selectedCategory === cat ? 'bg-primary-100 text-primary-700' : 'text-neutral-700 hover:bg-neutral-100'}`}
+                  <button
+                    key={cat} onClick={() => setSelectedCategory(cat)}
+                    className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
+                      selectedCategory === cat 
+                      ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
                   >
                     {cat}
-                  </Tabs.Trigger>
+                  </button>
                 ))}
-              </Tabs.List>
-            </Tabs.Root>
-          </div>
+              </div>
+            </div>
 
-          <Separator.Root decorative orientation="horizontal" className="w-full h-px bg-gray-200" />
-
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Recent Posts</h3>
-            <ul className="space-y-4">
-              {posts.slice(0, 3).map(post => (
-                <li key={post.id} className="flex items-center space-x-4">
-                  <img src={post.image} alt={post.title} className="w-16 h-16 object-cover rounded-md" />
-                  <div>
-                    <Link to={`/blog/${post.id}`} className="hover:text-orange-600 font-medium">
-                      {post.title}
-                    </Link>
-                    <p className="text-sm text-gray-500">{post.date}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white relative overflow-hidden">
+              <BookOpen className="absolute -right-6 -bottom-6 w-32 h-32 opacity-10 rotate-12" />
+              <h4 className="text-xl font-black mb-2">Weekly Harvest</h4>
+              <p className="text-slate-400 text-sm mb-6 leading-relaxed">Join 2,000+ farmers and entrepreneurs getting weekly market updates.</p>
+              <button className="w-full h-12 bg-orange-500 rounded-xl font-bold hover:bg-orange-600 transition-all active:scale-95">
+                Subscribe Now
+              </button>
+            </div>
           </div>
         </aside>
       </main>

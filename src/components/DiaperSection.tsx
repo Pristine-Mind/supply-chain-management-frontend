@@ -1,55 +1,108 @@
-import React from 'react';
-import BabyProductImg from '../assets/baby-diaper.png';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { 
+  Heart, ShieldCheck, Star, 
+  ArrowRight, Zap 
+} from 'lucide-react';
+
+import BabyProductImg from '../assets/baby-diaper.png';
+
+interface Product {
+  id: number;
+  name: string;
+  image: string;
+  price: string;
+  rating: number;
+  reviews: number;
+}
 
 const DiaperSection: React.FC = () => {
   const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const handleClick = () => {
-    navigate('/marketplace/categories/pet-baby-care');
+  const handleNavigate = () => navigate('/marketplace/categories/pet-baby-care');
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth / 2 : scrollLeft + clientWidth / 2;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
   };
 
   return (
-    <section className="w-full py-12 bg-gradient-to-b from-white to-blue-50">
+    <div className="w-full bg-[#fcfcfd] py-16 space-y-24 overflow-hidden">
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
-              Baby Products & Diapers
-            </h2>
-            <p className="mt-2 text-sm text-gray-500">Premium care essentials for your little one</p>
-          </div>
-        </div>
-
-        <div 
-          onClick={handleClick}
-          className="w-full cursor-pointer transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative group cursor-pointer"
+          onClick={handleNavigate}
         >
-          <div className="bg-gradient-to-r from-orange-200 to-orange-500 rounded-2xl overflow-hidden shadow-lg p-6 md:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6">
-              <div className="text-center md:text-left">
-                <h3 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3">
-                  Care for Your Little One
-                </h3>
-                <p className="text-gray-700 text-lg mb-4">
-                  Premium diapers and baby essentials from trusted brands
+          <div className="relative z-10 bg-white rounded-[3rem] overflow-hidden border border-slate-100 shadow-2xl shadow-blue-900/5">
+            <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
+              
+              <div className="lg:col-span-7 p-10 md:p-20 space-y-8">
+                <div className="flex items-center gap-2 px-4 py-1.5 bg-blue-50 text-orange-600 rounded-full w-fit">
+                  <Star size={16} fill="currentColor" />
+                  <span className="text-xs font-orange uppercase tracking-[0.2em]">Premium Baby Care</span>
+                </div>
+                
+                <h2 className="text-4xl md:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight">
+                  Cloud-Like <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-900 to-orange-500">
+                    Comfort.
+                  </span>
+                </h2>
+                
+                <p className="text-xl text-slate-500 max-w-md leading-relaxed font-medium">
+                  Ultra-absorbent protection designed for your baby's delicate skin. Happy baby, peaceful sleep.
                 </p>
-                <button className="bg-white text-blue-600 font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-50 transition-colors duration-200">
-                  Shop Now
-                </button>
+
+                <div className="flex flex-wrap gap-4 pt-2">
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 px-5 py-2.5 rounded-2xl">
+                    <ShieldCheck className="text-green-500" size={20} /> Safety Tested
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-bold text-slate-700 bg-slate-50 px-5 py-2.5 rounded-2xl">
+                    <Heart className="text-pink-500" size={20} /> Soft Cotton
+                  </div>
+                </div>
+
+                <motion.button 
+                  whileHover={{ scale: 1.05, x: 10 }}
+                  className="flex items-center gap-4 bg-orange-600 text-white px-10 py-5 rounded-3xl font-orange-600 text-lg shadow-xl shadow-slate-900/20"
+                >
+                  Shop Now <ArrowRight size={22} />
+                </motion.button>
               </div>
-              <div className="w-full flex items-center justify-center">
-                <img 
-                  src={BabyProductImg} 
-                  alt="Baby products collection" 
-                  className="w-full max-w-xl h-64 md:h-80 object-cover rounded-lg shadow-md" 
-                />
+
+              <div className="lg:col-span-5 relative h-full min-h-[450px] flex items-center justify-center bg-gradient-to-br from-blue-50/50 to-orange-50/50 lg:rounded-l-[5rem]">
+                <motion.div
+                  animate={{ y: [0, -20, 0] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative z-10 w-4/5 flex justify-center"
+                >
+                  <img 
+                    src={BabyProductImg} 
+                    alt="Premium Diapers" 
+                    className="w-full max-w-md drop-shadow-[0_45px_45px_rgba(59,130,246,0.25)]" 
+                  />
+                  <div className="absolute -top-6 -right-6 bg-orange-500 text-white p-5 rounded-[2rem] shadow-2xl rotate-12 flex flex-col items-center">
+                    <Zap size={20} fill="currentColor" />
+                    <span className="text-2xl font-black leading-none">20%</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Off</span>
+                  </div>
+                </motion.div>
               </div>
             </div>
           </div>
-        </div>
+          <div className="absolute -inset-2 bg-gradient-to-r from-blue-400 to-orange-400 rounded-[3.2rem] blur-2xl opacity-10 group-hover:opacity-20 transition-all duration-700" />
+        </motion.div>
       </div>
-    </section>
+    </div>
   );
 };
 

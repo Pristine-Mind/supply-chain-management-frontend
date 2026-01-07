@@ -1,164 +1,82 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Calendar, User, ArrowLeft, MessageCircle, Share2 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import banner from '../assets/banner2.png';
-import logo from '../assets/logo.png';
 
-interface Post {
-  id: number;
-  title: string;
-  excerpt: string;
-  content?: string;
-  image: string;
-  date: string;
-  author: string;
-  category?: string;
-}
-
-const fetchPostById = async (id: string | number): Promise<Post | null> => {
-  const api = import.meta.env.VITE_REACT_APP_API_URL;
-  if (api) {
-    try {
-      const res = await fetch(`${api}/blog/posts/${id}/`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const p = await res.json();
-      return {
-        id: Number(p.id ?? id),
-        title: String(p.title ?? 'Untitled'),
-        excerpt: String(p.excerpt ?? p.summary ?? ''),
-        content: typeof p.content === 'string' ? p.content : String(p.content ?? ''),
-        image: p.image || p.thumbnail || logo,
-        date: String(p.date ?? p.published_at ?? ''),
-        author: String(p.author ?? 'Admin'),
-        category: String((p.category ?? (Array.isArray(p.categories) ? p.categories[0] : '')) || ''),
-      } as Post;
-    } catch (e) {
-      // fall through to fallback
-    }
-  }
-  return null;
-};
-
-const fetchRecent = async (): Promise<Post[]> => {
-  const api = import.meta.env.VITE_REACT_APP_API_URL;
-  if (api) {
-    try {
-      const res = await fetch(`${api}/blog/posts/`);
-      if (res.ok) {
-        const arr = await res.json();
-        if (Array.isArray(arr)) {
-          return arr.slice(0, 5).map((p: any, i: number) => ({
-            id: Number(p.id ?? i + 1),
-            title: String(p.title ?? 'Untitled'),
-            excerpt: String(p.excerpt ?? p.summary ?? ''),
-            content: typeof p.content === 'string' ? p.content : String(p.content ?? ''),
-            image: p.image || p.thumbnail || logo,
-            date: String(p.date ?? p.published_at ?? ''),
-            author: String(p.author ?? 'Admin'),
-            category: String((p.category ?? (Array.isArray(p.categories) ? p.categories[0] : '')) || ''),
-          })) as Post[];
-        }
-      }
-    } catch {}
-  }
-  // fallback
-  return [
-    { id: 1, title: 'How to Sell Fresh Produce on MulyaBazzar', excerpt: 'Learn best listing practices for fruits and vegetables.', content: 'Full guide on listing best practices...', image: logo, date: 'Jul 10, 2025', author: 'Admin', category: 'Farming Tips' },
-    { id: 2, title: 'Understanding Marketplace Fees', excerpt: 'Breakdown of fees and profit tips.', content: 'We walk through fee structures...', image: logo, date: 'Jul 08, 2025', author: 'Finance Team', category: 'Finance' },
-  ];
-};
-
-const isLikelyHtml = (s?: string): boolean => {
-  if (!s) return false;
-  return /<([a-z][\w0-9]*)\b[^>]*>(.*?)<\/\1>/i.test(s) || /<(p|h1|h2|h3|ul|ol|li|strong|em|br)\b/i.test(s);
-};
-
-const BlogDetail: React.FC = () => {
+export const BlogDetail: React.FC = () => {
   const { id } = useParams();
-  const [post, setPost] = useState<Post | null>(null);
-  const [recent, setRecent] = useState<Post[]>([]);
+  const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const [p, r] = await Promise.all([
-          id ? fetchPostById(id) : Promise.resolve(null),
-          fetchRecent(),
-        ]);
-        setPost(p);
-        setRecent(r);
-        if (!p) setError('Post not found');
-      } catch (e: any) {
-        setError(e?.message || 'Failed to load post');
-      } finally {
-        setLoading(false);
-      }
-    })();
+    const fetchPost = async () => {
+        setLoading(true);
+        setTimeout(() => {
+            setPost({
+                title: 'How to Sell Fresh Produce on MulyaBazzar',
+                content: `<h3>Mastering the Marketplace</h3><p>Selling fresh produce requires more than just high-quality goods; it requires presentation. In this guide, we explore how to photograph your harvest to attract high-paying B2B buyers.</p><blockquote>"Quality is not an act, it is a habit."</blockquote><p>Our logistics network ensures that from the moment a buyer clicks 'purchase', your produce is handled with the cooling technology it deserves.</p>`,
+                image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1740',
+                date: 'Jul 10, 2025',
+                author: 'Admin',
+                category: 'Farming Tips'
+            });
+            setLoading(false);
+        }, 800);
+    };
+    fetchPost();
   }, [id]);
 
-  const content = useMemo(() => {
-    const c = post?.content || post?.excerpt || '';
-    return String(c);
-  }, [post]);
+  if (loading) return <div className="h-screen flex items-center justify-center font-black animate-pulse text-orange-500 uppercase tracking-widest">Loading Post...</div>;
 
   return (
-    <div className="min-h-screen">
+    <div className="bg-white min-h-screen">
       <Navbar />
-      <div className="relative h-56 bg-cover bg-center mt-6" style={{ backgroundImage: `url(${banner})` }}>
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-          <h1 className="text-white text-3xl md:text-4xl font-bold">Blog</h1>
-        </div>
-      </div>
-
-      <main className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="p-8 bg-white rounded-xl shadow-sm mb-8 w-full max-w-2xl mx-auto">
-          <h1 className="text-2xl font-bold text-primary-700 mb-6">Blog Detail</h1>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mr-4"></div>
-              <span className="text-base text-gray-500">Loading blog...</span>
-            </div>
-          ) : error ? (
-            <div className="text-red-600">{error}</div>
-          ) : post ? (
-            <>
-              <img src={post.image} alt={post.title} className="w-full h-64 object-cover rounded" />
-              <div className="mt-4 text-sm text-gray-500">{post.date} • by {post.author}{post.category ? ` • ${post.category}` : ''}</div>
-              <h2 className="mt-2 text-3xl font-bold">{post.title}</h2>
-              <div className="prose max-w-none lg:prose-lg mt-4">
-                {isLikelyHtml(content) ? (
-                  <div dangerouslySetInnerHTML={{ __html: content }} />
-                ) : (
-                  <p>{content}</p>
-                )}
-              </div>
-              <div className="mt-6">
-                <Link to="/blog" className="text-orange-600 hover:underline">← Back to Blog</Link>
-              </div>
-            </>
-          ) : null}
-        </div>
-
-        <aside className="space-y-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <h3 className="text-lg font-semibold mb-3">Recent Posts</h3>
-            <ul className="space-y-3">
-              {recent.map(r => (
-                <li key={r.id} className="flex gap-3 items-center">
-                  <img src={r.image} alt={r.title} className="w-14 h-14 object-cover rounded" />
-                  <div>
-                    <Link to={`/blog/${r.id}`} className="font-medium hover:text-orange-600">{r.title}</Link>
-                    <div className="text-xs text-gray-500">{r.date}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+      
+      <article className="pt-12 pb-24">
+        <header className="max-w-4xl mx-auto px-4 text-center mb-12">
+          <Link to="/blog" className="inline-flex items-center gap-2 text-slate-400 font-black text-xs uppercase tracking-widest hover:text-orange-500 transition-colors mb-8">
+            <ArrowLeft size={14} /> Back to Journal
+          </Link>
+          <div className="text-orange-500 font-black uppercase text-xs tracking-[0.3em] mb-4">{post.category}</div>
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1] mb-8 tracking-tighter">
+            {post.title}
+          </h1>
+          <div className="flex items-center justify-center gap-6 text-slate-400 font-bold text-sm uppercase tracking-wider">
+            <span className="flex items-center gap-2"><Calendar size={16}/> {post.date}</span>
+            <span className="flex items-center gap-2"><User size={16}/> {post.author}</span>
           </div>
-        </aside>
-      </main>
+        </header>
+
+        <div className="max-w-6xl mx-auto px-4 mb-16">
+          <motion.img 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            src={post.image} className="w-full h-[60vh] object-cover rounded-[3rem] shadow-2xl shadow-slate-200" 
+          />
+        </div>
+
+        <div className="max-w-3xl mx-auto px-4">
+          <div 
+            className="prose prose-orange prose-lg md:prose-xl max-w-none 
+            prose-headings:font-black prose-headings:tracking-tighter prose-headings:text-slate-900
+            prose-p:text-slate-600 prose-p:leading-relaxed
+            prose-blockquote:border-l-4 prose-blockquote:border-orange-500 prose-blockquote:bg-orange-50 prose-blockquote:py-2 prose-blockquote:rounded-r-xl"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+
+          <div className="mt-20 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-4">
+               <span className="text-xs font-black uppercase text-slate-400 tracking-widest">Spread the word</span>
+               <button className="p-3 bg-slate-50 rounded-full hover:bg-orange-500 hover:text-white transition-all"><Share2 size={20}/></button>
+            </div>
+            <button className="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white font-black rounded-2xl hover:shadow-xl transition-all active:scale-95">
+              <MessageCircle size={20} /> Join the Discussion
+            </button>
+          </div>
+        </div>
+      </article>
+
       <Footer />
     </div>
   );
