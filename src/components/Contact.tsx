@@ -240,7 +240,7 @@ const Contact: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-semibold text-neutral-900">Address</p>
-                    <p className="text-neutral-600">Baluwatar, Kathmandu</p>
+                    <p className="text-neutral-600">Panipokhari, Kathmandu</p>
                     <p className="text-neutral-600">Nepal</p>
                   </div>
                 </div>
