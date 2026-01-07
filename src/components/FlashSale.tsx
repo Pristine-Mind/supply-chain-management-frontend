@@ -108,7 +108,7 @@ const FlashCard = ({ item, idx, onAdd, onNavigate }: any) => {
           <span className="text-[8px] font-bold text-orange-500 uppercase tracking-widest block mb-0.5">
             {item.product_details?.category_details || 'Premium'}
           </span>
-          <h3 className="text-xs font-bold line-clamp-1 group-hover:text-orange-400 transition-colors">
+          <h3 className="text-xs text-orange-400 font-bold line-clamp-1 group-hover:text-orange-700 transition-colors">
             {name}
           </h3>
         </div>
@@ -131,9 +131,9 @@ const FlashCard = ({ item, idx, onAdd, onNavigate }: any) => {
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             {item.discounted_price && (
-              <span className="text-[9px] text-slate-500 line-through">Rs. {item.listed_price}</span>
+              <span className="text-[9px] text-orange-500 line-through">Rs. {item.listed_price}</span>
             )}
-            <span className="text-sm font-black text-white">Rs. {price.toLocaleString()}</span>
+            <span className="text-sm font-black text-orange-500">Rs. {price.toLocaleString()}</span>
           </div>
 
           <motion.button
