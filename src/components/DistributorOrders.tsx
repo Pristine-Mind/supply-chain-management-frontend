@@ -50,7 +50,6 @@ const DistributorOrders: React.FC = () => {
     loadOrders();
   }, []);
 
-  // --- Logic: Selection & Filters ---
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
       const matchesSearch = !searchQuery || o.order_number?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -70,7 +69,6 @@ const DistributorOrders: React.FC = () => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
-  // --- Logic: Downloads ---
   const handleDownload = async (id: number, num: string) => {
     setInvoiceLoading(id);
     try {
@@ -90,7 +88,6 @@ const DistributorOrders: React.FC = () => {
 
   const handleBulkDownload = async () => {
     setIsBulkLoading(true);
-    // Simulated bulk logic: In production, you'd ideally send IDs to a zip endpoint
     for (const id of selectedIds) {
       const order = orders.find(o => o.id === id);
       await handleDownload(id, order?.order_number || id.toString());
@@ -103,7 +100,6 @@ const DistributorOrders: React.FC = () => {
     <div className="min-h-screen bg-[#F8FAFC] py-8 px-4 sm:px-10">
       <div className="max-w-6xl mx-auto space-y-6">
         
-        {/* Top Action Bar */}
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Orders</h1>
@@ -127,10 +123,8 @@ const DistributorOrders: React.FC = () => {
           )}
         </div>
 
-        {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Main Table Area */}
           <div className="lg:col-span-2 space-y-4">
             <Card className="border-none shadow-sm overflow-hidden ring-1 ring-slate-200">
               <CardHeader className="bg-white p-4 flex flex-row items-center justify-between border-b">
@@ -165,7 +159,6 @@ const DistributorOrders: React.FC = () => {
             </Card>
           </div>
 
-          {/* Sidebar Stats */}
           <div className="space-y-6">
             <Card className="bg-orange-600 text-white border-none shadow-xl shadow-orange-200">
               <CardContent className="p-6">
@@ -201,7 +194,6 @@ const DistributorOrders: React.FC = () => {
   );
 };
 
-// --- Sub-component: Order List Item ---
 const OrderListItem = ({ order, isSelected, onSelect, onDownload, isDownloading }: any) => {
   return (
     <div className={`flex items-center p-4 gap-4 transition-colors ${isSelected ? 'bg-orange-50/30' : 'hover:bg-slate-50/50'}`}>

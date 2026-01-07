@@ -1,98 +1,60 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import {
-  useForm,
-  SubmitHandler,
-  Controller,
-} from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User, 
-  Mail, 
-  Phone, 
-  Lock, 
-  MapPin,
-  CheckCircle,
-  Shield,
-  Clock,
-  ArrowRight,
-  UserPlus
+  User, Mail, Phone, Lock, MapPin, CheckCircle, 
+  Shield, Clock, ArrowRight, UserPlus, ChevronLeft, Eye, EyeOff 
 } from 'lucide-react';
+
 import LocationPicker from './LocationPicker';
 import Footer from './Footer';
 import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import logo from '../assets/logo.png';
 
-
-
-interface City {
-  id: number;
-  name: string;
-}
-
-interface FormValues {
-  username: string;
-  email: string;
-  password: string;
-  password2: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  cityId: number;
-}
-
+// --- Validation Schema ---
 const schema = yup.object({
-  username: yup.string().required(),
-  email: yup.string().email().required(),
-  password: yup.string().min(6).required(),
-  password2: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Passwords must match')
-    .required(),
-  firstName: yup.string().required(),
-  lastName: yup.string().required(),
-  phone: yup
-    .string()
-    .matches(/^[0-9]{7,15}$/, 'Invalid phone')
-    .required(),
-  cityId: yup.number().required(),
+  username: yup.string().min(3, 'Username too short').required('Username is required'),
+  email: yup.string().email('Invalid email').required('Email is required'),
+  password: yup.string().min(6, 'Minimum 6 characters').required('Password is required'),
+  password2: yup.string().oneOf([yup.ref('password')], 'Passwords must match').required('Confirm your password'),
+  firstName: yup.string().required('First name required'),
+  lastName: yup.string().required('Last name required'),
+  phone: yup.string().matches(/^[0-9]{7,15}$/, 'Invalid phone number').required('Phone required'),
+  cityId: yup.number().transform((value) => (isNaN(value) ? 0 : value)).min(1, 'Please select a city').required(),
 }).required();
+
+type FormValues = yup.InferType<typeof schema>;
 
 const Register = () => {
   const navigate = useNavigate();
-  const [cities, setCities] = useState<City[]>([]);
+  const [step, setStep] = useState(1);
+  const [showPass, setShowPass] = useState(false);
+  const [cities, setCities] = useState<{ id: number; name: string }[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
-  const [errorCities, setErrorCities] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [position, setPosition] = useState<[number, number]>([27.7172, 85.3240]);
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<FormValues>({
+  const { register, handleSubmit, control, trigger, formState: { errors } } = useForm<FormValues>({
     resolver: yupResolver(schema),
-    defaultValues: {
-      cityId: 0,
-    },
+    mode: 'onChange',
+    defaultValues: { cityId: 0 }
   });
 
+  // Fetch Cities
   useEffect(() => {
     const fetchCities = async () => {
       setLoadingCities(true);
       try {
-        const { data } = await axios.get<City[]>(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/cities/`, {
-          headers: {},
-        });
+        const { data } = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/cities/`);
         setCities(data);
       } catch {
-        setErrorCities('Could not load cities');
+        setSubmitError('Failed to load cities. Please refresh the page.');
       } finally {
         setLoadingCities(false);
       }
@@ -100,11 +62,20 @@ const Register = () => {
     fetchCities();
   }, []);
 
+  const nextStep = async () => {
+    const fieldsByStep: any = {
+      1: ['username', 'email', 'password', 'password2'],
+      2: ['firstName', 'lastName', 'phone'],
+    };
+    const isStepValid = await trigger(fieldsByStep[step]);
+    if (isStepValid) setStep((s) => s + 1);
+  };
+
   const onSubmit: SubmitHandler<FormValues> = async (vals) => {
-    setSubmitError(null);
     setSubmitting(true);
+    setSubmitError(null);
     try {
-      const payload = {
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/register/user/`, {
         username: vals.username,
         email: vals.email,
         password: vals.password,
@@ -115,371 +86,200 @@ const Register = () => {
         city_id: vals.cityId,
         latitude: position[0],
         longitude: position[1],
-      };
-      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/register/user/`, payload, {
-        headers: {},
       });
       alert('Registration successful!');
-      navigate('/login'); 
+      navigate('/login');
     } catch (e: any) {
-      setSubmitError(
-        e.response?.data?.message || 'Failed to register'
-      );
+      setSubmitError(e.response?.data?.message || 'Failed to register. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleSelect = (lat: number, lng: number) => {
-    setPosition([lat, lng]);
-  };
-
   return (
-    <div className="min-h-screen bg-soft-gradient">
-      {/* Brand Logo */}
-      <div className="pt-8 pb-6 text-center">
-        <img src={logo} alt="MulyaBazzar Logo" className="w-20 h-20 mx-auto mb-4 rounded-xl shadow-soft" />
-        <h1 className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
-          MulyaBazzar
-        </h1>
-        <p className="text-body text-neutral-600 mt-2">
-          Join our community and start your journey
-        </p>
+    <div className="min-h-screen bg-[#F8FAFC] selection:bg-primary-100">
+      <div className="pt-12 pb-8 text-center">
+        <motion.img 
+          initial={{ scale: 0.8, opacity: 0 }} 
+          animate={{ scale: 1, opacity: 1 }}
+          src={logo} alt="MulyaBazzar Logo" 
+          className="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg" 
+        />
+        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">MulyaBazzar</h1>
+        <p className="text-slate-500 mt-2">Create your account in few easy steps</p>
       </div>
 
-      <div className="container mx-auto px-4 pb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {/* Left Sidebar - Benefits */}
-          <div className="hidden lg:flex lg:col-span-1">
-            <Card className="w-full bg-brand-gradient text-white border-0">
-              <CardHeader>
-                <CardTitle className="text-white text-xl">Join Our Community</CardTitle>
-                <p className="text-white/90">
-                  Create an account to access exclusive features and start your journey with us.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center">
-                  <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
-                    <CheckCircle className="w-5 h-5" />
+      <div className="container max-w-6xl mx-auto px-4 pb-20">
+        <div className="grid lg:grid-cols-12 gap-12 items-start">
+          
+          {/* Left Sidebar: Benefits */}
+          <div className="hidden lg:block lg:col-span-4 sticky top-8">
+            <div className="space-y-6">
+              {[
+                { icon: CheckCircle, title: "Quick Signup", desc: "Start exploring in under 2 minutes." },
+                { icon: Shield, title: "Privacy First", desc: "Your data is encrypted and secure." },
+                { icon: Clock, title: "24/7 Access", desc: "Manage your profile anytime, anywhere." }
+              ].map((item, i) => (
+                <motion.div 
+                  initial={{ x: -20, opacity: 0 }} 
+                  animate={{ x: 0, opacity: 1 }} 
+                  transition={{ delay: i * 0.1 }}
+                  key={i} 
+                  className="flex gap-4 p-5 rounded-2xl bg-white border border-slate-100 shadow-sm"
+                >
+                  <div className="bg-primary-50 p-3 rounded-xl">
+                    <item.icon className="w-6 h-6 text-primary-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold">Easy Registration</h4>
-                    <p className="text-body-sm opacity-80">Quick setup process</p>
+                    <h4 className="font-bold text-slate-800">{item.title}</h4>
+                    <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
                   </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
-                    <Shield className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Secure & Private</h4>
-                    <p className="text-body-sm opacity-80">Your data is protected</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <div className="bg-white/20 p-3 rounded-full mr-4 flex-shrink-0">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">24/7 Support</h4>
-                    <p className="text-body-sm opacity-80">We're here to help</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
-          {/* Registration Form */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-elevation-lg">
-              <CardHeader className="text-center">
-                <CardTitle className="flex items-center justify-center gap-2 text-neutral-900">
-                  <UserPlus className="w-5 h-5 text-primary-600" />
-                  Create Account
-                </CardTitle>
-                <p className="text-body text-neutral-600">
-                  Fill in your details to get started
-                </p>
-              </CardHeader>
-              <CardContent>
+          {/* Center: Registration Form */}
+          <div className="lg:col-span-8">
+            <Card className="border-none shadow-2xl shadow-slate-200/60 overflow-hidden bg-white">
+              {/* Progress Bar */}
+              <div className="h-1.5 bg-slate-100 w-full">
+                <motion.div 
+                  className="h-full bg-primary-600" 
+                  animate={{ width: `${(step / 3) * 100}%` }} 
+                  transition={{ duration: 0.4 }}
+                />
+              </div>
+              
+              <CardContent className="p-8 lg:p-12">
                 {submitError && (
-                  <div className="status-error mb-6 p-4 rounded-lg">
-                    <p className="text-body-sm font-medium">{submitError}</p>
-                  </div>
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                    className="mb-8 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded-r-lg"
+                  >
+                    {submitError}
+                  </motion.div>
                 )}
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                  {/* Username */}
-                  <div className="space-y-2">
-                    <label htmlFor="username" className="block text-body-sm font-semibold text-neutral-700">
-                      Username *
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
-                      <input
-                        {...register('username')}
-                        id="username"
-                        className="input-field pl-10"
-                        placeholder="Choose a username"
-                      />
-                    </div>
-                    {errors.username && (
-                      <p className="text-caption text-accent-error-600">{errors.username?.message}</p>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                  <AnimatePresence mode="wait">
+                    {step === 1 && (
+                      <motion.div 
+                        key="step1" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
+                        className="space-y-5"
+                      >
+                        <InputField label="Username" icon={<User size={18}/>} {...register('username')} error={errors.username?.message} placeholder="Choose a unique username" />
+                        <InputField label="Email Address" type="email" icon={<Mail size={18}/>} {...register('email')} error={errors.email?.message} placeholder="name@example.com" />
+                        <div className="grid sm:grid-cols-2 gap-5">
+                          <div className="relative">
+                            <InputField label="Password" type={showPass ? "text" : "password"} icon={<Lock size={18}/>} {...register('password')} error={errors.password?.message} placeholder="••••••••" />
+                            <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-4 top-10 text-slate-400 hover:text-primary-600 transition-colors">
+                              {showPass ? <EyeOff size={18}/> : <Eye size={18}/>}
+                            </button>
+                          </div>
+                          <InputField label="Confirm Password" type="password" icon={<Lock size={18}/>} {...register('password2')} error={errors.password2?.message} placeholder="••••••••" />
+                        </div>
+                      </motion.div>
                     )}
-                  </div>
 
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="block text-body-sm font-semibold text-neutral-700">
-                      Email Address *
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
-                      <input
-                        {...register('email')}
-                        id="email"
-                        type="email"
-                        className="input-field pl-10"
-                        placeholder="your.email@example.com"
-                      />
-                    </div>
-                    {errors.email && (
-                      <p className="text-caption text-accent-error-600">{errors.email?.message}</p>
+                    {step === 2 && (
+                      <motion.div 
+                        key="step2" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
+                        className="space-y-5"
+                      >
+                        <div className="grid sm:grid-cols-2 gap-5">
+                          <InputField label="First Name" {...register('firstName')} error={errors.firstName?.message} placeholder="John" />
+                          <InputField label="Last Name" {...register('lastName')} error={errors.lastName?.message} placeholder="Doe" />
+                        </div>
+                        <InputField label="Phone Number" icon={<Phone size={18}/>} {...register('phone')} error={errors.phone?.message} placeholder="98XXXXXXXX" />
+                      </motion.div>
                     )}
-                  </div>
 
-                  {/* Name Fields */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label htmlFor="firstName" className="block text-body-sm font-semibold text-neutral-700">
-                        First Name *
-                      </label>
-                      <input
-                        {...register('firstName')}
-                        id="firstName"
-                        className="input-field"
-                        placeholder="First name"
-                      />
-                      {errors.firstName && (
-                        <p className="text-caption text-accent-error-600">{errors.firstName?.message}</p>
-                      )}
-                    </div>
+                    {step === 3 && (
+                      <motion.div 
+                        key="step3" initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -20, opacity: 0 }}
+                        className="space-y-6"
+                      >
+                         <div className="space-y-2">
+                            <label className="text-sm font-semibold text-slate-700 ml-1 flex items-center gap-2">
+                              <MapPin size={16} className="text-primary-600"/> Select City
+                            </label>
+                            <Controller
+                              name="cityId"
+                              control={control}
+                              render={({ field }) => (
+                                <select 
+                                  {...field} 
+                                  disabled={loadingCities}
+                                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all cursor-pointer"
+                                >
+                                  <option value={0}>Search your city...</option>
+                                  {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                              )}
+                            />
+                            {errors.cityId && <p className="text-xs text-red-500 font-medium">{errors.cityId.message}</p>}
+                         </div>
 
-                    <div className="space-y-2">
-                      <label htmlFor="lastName" className="block text-body-sm font-semibold text-neutral-700">
-                        Last Name *
-                      </label>
-                      <input
-                        {...register('lastName')}
-                        id="lastName"
-                        className="input-field"
-                        placeholder="Last name"
-                      />
-                      {errors.lastName && (
-                        <p className="text-caption text-accent-error-600">{errors.lastName?.message}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="block text-body-sm font-semibold text-neutral-700">
-                      Phone Number *
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
-                      <input
-                        {...register('phone')}
-                        id="phone"
-                        className="input-field pl-10"
-                        placeholder="+977 98xxxxxxxx"
-                      />
-                    </div>
-                    {errors.phone && (
-                      <p className="text-caption text-accent-error-600">{errors.phone?.message}</p>
+                         <div className="space-y-3">
+                            <label className="text-sm font-semibold text-slate-700 ml-1">Pin Precise Location</label>
+                            <div className="h-[280px] rounded-2xl overflow-hidden border-2 border-slate-100 shadow-inner group">
+                              <LocationPicker 
+                                initialCenter={{ lat: position[0], lng: position[1] }} 
+                                zoom={13} 
+                                onSelect={(lat, lng) => setPosition([lat, lng])} 
+                              />
+                            </div>
+                            <div className="flex items-center justify-between px-2 text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+                              <span className="bg-slate-50 px-2 py-1 rounded">LAT: {position[0].toFixed(4)}</span>
+                              <span className="bg-slate-50 px-2 py-1 rounded">LNG: {position[1].toFixed(4)}</span>
+                            </div>
+                         </div>
+                      </motion.div>
                     )}
-                    <p className="text-caption text-neutral-500">
-                      We'll use this for important account updates
-                    </p>
-                  </div>
+                  </AnimatePresence>
 
-                  {/* Password */}
-                  <div className="space-y-2">
-                    <label htmlFor="password" className="block text-body-sm font-semibold text-neutral-700">
-                      Password *
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
-                      <input
-                        {...register('password')}
-                        id="password"
-                        type="password"
-                        className="input-field pl-10"
-                        placeholder="Create a strong password"
-                      />
-                    </div>
-                    {errors.password && (
-                      <p className="text-caption text-accent-error-600">{errors.password?.message}</p>
+                  <div className="flex gap-4 pt-6">
+                    {step > 1 && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setStep(step - 1)} 
+                        className="h-12 px-6 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+                      >
+                        <ChevronLeft className="mr-2 w-4 h-4"/> Back
+                      </Button>
                     )}
-                    <p className="text-caption text-neutral-500">
-                      Minimum 6 characters
-                    </p>
-                  </div>
-
-                  {/* Confirm Password */}
-                  <div className="space-y-2">
-                    <label htmlFor="password2" className="block text-body-sm font-semibold text-neutral-700">
-                      Confirm Password *
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
-                      <input
-                        {...register('password2')}
-                        id="password2"
-                        type="password"
-                        className="input-field pl-10"
-                        placeholder="Confirm your password"
-                      />
-                    </div>
-                    {errors.password2 && (
-                      <p className="text-caption text-accent-error-600">{errors.password2?.message}</p>
+                    
+                    {step < 3 ? (
+                      <Button 
+                        type="button" 
+                        onClick={nextStep} 
+                        className="flex-1 h-12 rounded-xl bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-200 transition-all active:scale-[0.98]"
+                      >
+                        Continue <ArrowRight className="ml-2 w-4 h-4"/>
+                      </Button>
+                    ) : (
+                      <Button 
+                        type="submit" 
+                        disabled={submitting} 
+                        className="flex-1 h-12 rounded-xl bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-200 transition-all active:scale-[0.98]"
+                      >
+                        {submitting ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Finalizing...
+                          </div>
+                        ) : "Complete Registration"}
+                      </Button>
                     )}
-                  </div>
-
-                  {/* City Selection */}
-                  <div className="space-y-2">
-                    <label htmlFor="cityId" className="block text-body-sm font-semibold text-neutral-700">
-                      City *
-                    </label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-4 h-4" />
-                      <Controller
-                        name="cityId"
-                        control={control}
-                        render={({ field }) => (
-                          <select
-                            {...field}
-                            id="cityId"
-                            disabled={loadingCities}
-                            className="input-field pl-10"
-                          >
-                            <option value={0}>Select your city</option>
-                            {cities.map(c => (
-                              <option key={c.id} value={c.id}>
-                                {c.name}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      />
-                    </div>
-                    {errors.cityId && (
-                      <p className="text-caption text-accent-error-600">{errors.cityId?.message}</p>
-                    )}
-                    {errorCities && (
-                      <p className="text-caption text-accent-error-600">{errorCities}</p>
-                    )}
-                  </div>
-
-                  {/* Location Selection */}
-                  <div className="space-y-2">
-                    <label className="block text-body-sm font-semibold text-neutral-700">
-                      Select Location
-                    </label>
-                    <div className="rounded-lg overflow-hidden border border-neutral-300" style={{ height: 200 }}>
-                      <LocationPicker
-                        initialCenter={{ lat: position[0], lng: position[1] }}
-                        zoom={13}
-                        onSelect={handleSelect}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        readOnly
-                        value={position[0].toFixed(6)}
-                        placeholder="Latitude"
-                        className="input-field text-center text-neutral-600"
-                      />
-                      <input
-                        readOnly
-                        value={position[1].toFixed(6)}
-                        placeholder="Longitude"
-                        className="input-field text-center text-neutral-600"
-                      />
-                    </div>
-                    <p className="text-caption text-neutral-500">
-                      Click on the map to select your precise location
-                    </p>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-4">
-                    <Button
-                      type="submit"
-                      disabled={submitting}
-                      className="w-full py-4"
-                      size="lg"
-                    >
-                      {submitting ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                          Creating Account...
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="w-4 h-4 mr-2" />
-                          Create Account
-                        </>
-                      )}
-                    </Button>
-                  </div>
-
-                  {/* Login Link */}
-                  <div className="text-center pt-4 border-t border-neutral-200">
-                    <p className="text-body-sm text-neutral-600">
-                      Already have an account?{' '}
-                      <a href="/login" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
-                        Sign in here
-                      </a>
-                    </p>
                   </div>
                 </form>
               </CardContent>
             </Card>
-          </div>
-          
-          {/* Right Sidebar - Security */}
-          <div className="hidden lg:flex lg:col-span-1">
-            <Card className="w-full bg-neutral-100 border-neutral-200">
-              <CardContent className="flex flex-col justify-center text-center py-12">
-                <div className="space-y-6">
-                  <div>
-                    <div className="bg-primary-100 p-6 rounded-full inline-block mb-6">
-                      <Shield className="w-12 h-12 text-primary-600" />
-                    </div>
-                    <h3 className="text-h3 font-semibold mb-3 text-neutral-900">Secure Registration</h3>
-                    <p className="text-body text-neutral-600 mb-8">
-                      Your information is protected with industry-standard security measures and encryption.
-                    </p>
-                  </div>
-                  
-                  <div className="pt-6 border-t border-neutral-200">
-                    <p className="text-body text-neutral-700 mb-4">
-                      Need help with registration?
-                    </p>
-                    <Button variant="outline" className="w-full" asChild>
-                      <a href="/contact">
-                        Contact Support
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <p className="text-center mt-8 text-slate-500 text-sm">
+              Already have an account? <a href="/login" className="text-primary-600 font-bold hover:text-primary-700 transition-colors">Sign In Here</a>
+            </p>
           </div>
         </div>
       </div>
@@ -487,5 +287,39 @@ const Register = () => {
     </div>
   );
 };
+
+// --- Custom Component with forwardRef to fix the warning ---
+const InputField = React.forwardRef(({ label, icon, error, type = "text", ...props }: any, ref: any) => (
+  <div className="space-y-1.5 w-full">
+    <label className="text-sm font-semibold text-slate-700 ml-1">{label}</label>
+    <div className="relative group">
+      {icon && (
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-500 transition-colors duration-200">
+          {icon}
+        </div>
+      )}
+      <input 
+        type={type} 
+        {...props} 
+        ref={ref}
+        className={`w-full h-12 ${icon ? 'pl-11' : 'px-4'} pr-4 rounded-xl border border-slate-200 bg-white focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all duration-200 placeholder:text-slate-300 shadow-sm`} 
+      />
+    </div>
+    <AnimatePresence>
+      {error && (
+        <motion.p 
+          initial={{ opacity: 0, y: -10 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          exit={{ opacity: 0, y: -10 }}
+          className="text-xs text-red-500 font-medium ml-1"
+        >
+          {error}
+        </motion.p>
+      )}
+    </AnimatePresence>
+  </div>
+));
+
+InputField.displayName = "InputField";
 
 export default Register;

@@ -38,7 +38,6 @@ const TopBrands = () => {
     try {
       const apiUrl = "https://appmulyabazzar.com";
       if (!apiUrl) {
-        console.error('VITE_REACT_APP_API_URL is not defined');
         setBrandsError('Configuration error: API URL not set');
         setBrands([]);
         setBrandsLoading(false);
@@ -62,24 +61,19 @@ const TopBrands = () => {
           data = await response.json();
         } catch (err) {
           const text = await response.text();
-          console.error('Failed to parse JSON response for brands:', text, err);
           throw new Error('Invalid JSON response from brands API');
         }
       } else {
-        // Not JSON (could be HTML error page, plain text, etc.) — read and report
         const text = await response.text();
-        console.error('Non-JSON response from brands API:', text);
         throw new Error('Non-JSON response from brands API');
       }
 
-      console.log('Fetched brands data:', data);
       if (data && data.results) {
         setBrands(data.results);
       } else {
         setBrands([]);
       }
     } catch (error) {
-      console.error('Error fetching brands:', error);
       setBrandsError('Error fetching brands');
       setBrands([]);
     } finally {
@@ -94,8 +88,6 @@ const TopBrands = () => {
   };
 
   const handleBrandClick = (brandId: string | number) => {
-    // Replace with your navigation logic
-    console.log('Navigate to brand:', brandId);
     navigate(`/brand-products/${brandId}`);
   };
 
