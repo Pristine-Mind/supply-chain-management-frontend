@@ -7,7 +7,7 @@ module.exports = {
   darkMode: 'class',
   theme: {
     fontFamily: {
-      sans: ['Open Sans', 'sans-serif'],
+      sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
     },
     extend: {
       // 8pt spacing grid system
