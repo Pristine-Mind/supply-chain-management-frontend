@@ -23,6 +23,7 @@ import FlashSale from './FlashSale';
 import logo from '../assets/logo.png';
 import Footer from './Footer';
 import BannerSaleImage from '../assets/banner_sale.png';
+import HeroBanner from './HeroBanner';
 
 interface ProductImage {
   id: number;
@@ -858,100 +859,7 @@ const Marketplace: React.FC = () => {
         </div>
 
         {/* CTA banner with categories overlapping */}
-        <div className="w-full relative">
-          <div className="relative w-full h-auto min-h-[250px] sm:min-h-[300px] md:min-h-[400px] overflow-hidden">
-            {/* Background Banner Image */}
-            <img src={BannerSaleImage} alt="Christmas Sale" className="w-full h-full object-cover absolute inset-0" />
-
-            {/* Gradient overlay for better readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40"></div>
-          </div>
-
-          {/* Categories positioned to overlap banner - only 10% inside */}
-          <div className="absolute bottom-0 left-0 right-0 z-0 transform translate-y-[90%]">
-            <div className="container mx-auto px-4 sm:px-8">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                {[
-                  {
-                    title: 'Shop Electronics',
-                    description: 'Shop the full selection now',
-                    image: 'https://himstar.com.np/Media/TV/ht-55u4ksdj.png',
-                    searchTerm: 'electronics',
-                    categoryName: 'Electronics & Gadgets'
-                  },
-                  {
-                    title: 'Everything for your home',
-                    description: 'See more',
-                    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&h=200&fit=crop',
-                    searchTerm: 'home',
-                    categoryName: 'Home & Living'
-                  },
-                  {
-                    title: 'Premium beauty',
-                    description: 'See more',
-                    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=200&fit=crop',
-                    searchTerm: 'beauty',
-                    categoryName: 'Health & Beauty'
-                  },
-                  {
-                    title: 'Shop pantry food',
-                    description: 'Shop now',
-                    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&h=200&fit=crop',
-                    searchTerm: 'food',
-                    categoryName: 'Food & Beverages'
-                  }
-                ].map((card, index) => {
-                  const handleCategoryClick = () => {
-                    // Try to find matching category in the hierarchy first
-                    const matchingCategory = categoryHierarchy.find(cat => 
-                      cat.name.toLowerCase().includes(card.searchTerm.toLowerCase()) ||
-                      card.categoryName.toLowerCase().includes(cat.name.toLowerCase())
-                    );
-
-                    if (matchingCategory) {
-                      // If we found a matching category, navigate to it
-                      const categorySlug = createSlug(matchingCategory.name);
-                      navigate(`/marketplace/categories/${categorySlug}`);
-                    } else {
-                      // Fallback to search-based filtering
-                      navigate(`/marketplace/all-products?search=${encodeURIComponent(card.searchTerm)}`);
-                    }
-                  };
-
-                  return (
-                    <div
-                      key={index}
-                      className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group"
-                      onClick={handleCategoryClick}
-                    >
-                      <div className="p-3">
-                        <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
-                          {card.title}
-                        </h3>
-                        
-                        <div className="aspect-[3/2] mb-2 overflow-hidden rounded">
-                          <img
-                            src={card.image}
-                            alt={card.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        </div>
-                        
-                        <button className="text-orange-600 hover:text-orange-700 hover:underline font-medium text-xm">
-                          {card.description}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Add spacing to account for overlapping categories */}
-        <div className="pt-96 sm:pt-80 md:pt-64"></div>
-
+        <HeroBanner/>
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
           <FlashSale /> 
