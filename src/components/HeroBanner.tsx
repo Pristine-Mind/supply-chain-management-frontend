@@ -1,7 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import BannerSaleImage from '../assets/banner_sale.png';
+import BannerElectronics from '../assets/banner_electronics.png';
+import BannerDecor from '../assets/banner_decor.png';
+
 
 interface Category {
   name: string;
@@ -15,6 +18,22 @@ interface HeroBannerProps {
 const HeroBanner: React.FC<HeroBannerProps> = ({ categoryHierarchy = [] }) => {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const slides = [
+    { url: BannerSaleImage, title: 'Mega Sale' },
+    { url: BannerDecor, title: 'New Arrivals' },
+    { url: BannerElectronics, title: 'Tech Week' },
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(timer);
+  }, [slides.length]);
 
   const categories = [
     {
@@ -49,77 +68,47 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ categoryHierarchy = [] }) => {
 
   const handleNavigation = (card: typeof categories[0]) => {
     const tokens = (s?: string) =>
-      (s || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, ' ')
-        .split(/\s+/)
-        .filter(Boolean);
-
-    if (!categoryHierarchy || categoryHierarchy.length === 0) {
-      console.debug('HeroBanner: categoryHierarchy is empty or undefined');
-    }
+      (s || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
 
     const matchingCategory = categoryHierarchy.find((cat) => {
       const catName = (cat?.name || '').toString();
       const catTokens = tokens(catName);
-      const searchTokens = tokens(card.searchTerm);
-      const cardCategoryTokens = tokens(card.categoryName);
-
-      if (catTokens.length === 0) return false;
-
-      const intersects = (a: string[], b: string[]) => a.some((t) => b.includes(t));
-
-      if (intersects(catTokens, searchTokens)) return true;
-      if (intersects(catTokens, cardCategoryTokens)) return true;
-      if (intersects(cardCategoryTokens, catTokens)) return true;
-
-      return false;
+      return intersects(catTokens, tokens(card.searchTerm)) || intersects(catTokens, tokens(card.categoryName));
     });
 
+    const intersects = (a: string[], b: string[]) => a.some((t) => b.includes(t));
+
     if (matchingCategory) {
-      const slug = matchingCategory.name
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-        .replace(/\s+/g, '-') // Replace spaces with dashes
-        .replace(/-+/g, '-') // Replace multiple dashes with single dash
-        .replace(/^-|-$/g, '') // Remove leading/trailing dashes
-        .trim();
-      
+      const slug = matchingCategory.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').trim();
       navigate(`/marketplace/categories/${slug}`);
     } else {
         const fallbackName = card.categoryName || card.title || '';
-        if (fallbackName) {
-          const fallbackSlug = fallbackName
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '')
-            .trim();
-
-          navigate(`/marketplace/categories/${fallbackSlug}`);
-        } else {
-          navigate(`/marketplace/all-products?search=${encodeURIComponent(card.searchTerm)}`);
-        }
+        const fallbackSlug = fallbackName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').trim();
+        navigate(`/marketplace/categories/${fallbackSlug}`);
     }
   };
 
   return (
     <div className="relative w-full overflow-hidden bg-white">
-      <div className="relative w-full h-[450px] md:h-[600px] lg:h-[700px] bg-gray-900">
-        <img 
-          src={BannerSaleImage} 
-          alt="Sale Banner" 
-          className="w-full h-full object-cover opacity-70 scale-105 animate-pulse-slow"
-        />
+      {/* BANNER SECTION */}
+      <div className="relative w-full h-[450px] md:h-[600px] lg:h-[700px] bg-gray-900 overflow-hidden">
+        {slides.map((slide, index) => (
+          <img 
+            key={index}
+            src={slide.url} 
+            alt={slide.title} 
+            className={`absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-1000 ease-in-out ${
+              index === currentSlide ? 'opacity-70' : 'opacity-0'
+            } animate-pulse-slow`}
+          />
+        ))}
         
         <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-black/30" />
-
       </div>
 
+      {/* CATEGORY CARDS SECTION */}
       <div className="relative -mt-32 md:-mt-44 z-20">
         <div className="container mx-auto px-4 md:px-10">
-          
           <div 
             ref={scrollRef}
             className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar md:grid md:grid-cols-4 gap-4 md:gap-6 lg:gap-8 pb-10"
@@ -131,7 +120,6 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ categoryHierarchy = [] }) => {
                 className="min-w-[85%] sm:min-w-[45%] md:min-w-0 snap-center group cursor-pointer"
               >
                 <div className="h-full bg-white/90 backdrop-blur-xl border border-white rounded-[2rem] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.1)] hover:shadow-orange-500/20 transition-all duration-500 group-hover:-translate-y-4">
-                  
                   <span className="inline-block text-[10px] font-bold text-orange-600 uppercase tracking-widest mb-4">
                     {card.tag}
                   </span>
@@ -166,7 +154,6 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ categoryHierarchy = [] }) => {
               </div>
             ))}
           </div>
-
         </div>
       </div>
 
@@ -175,8 +162,8 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ categoryHierarchy = [] }) => {
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         @keyframes pulse-slow {
-          0%, 100% { opacity: 0.7; transform: scale(1.05); }
-          50% { opacity: 0.8; transform: scale(1.08); }
+          0%, 100% { transform: scale(1.05); }
+          50% { transform: scale(1.08); }
         }
         .animate-pulse-slow {
           animation: pulse-slow 8s ease-in-out infinite;
