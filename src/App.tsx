@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -147,9 +148,25 @@ const publicRoutes = [
   { path: '/user-admin-profile', element: <UserAdminProfile /> },
 ];
 
+const GoogleAnalyticsTracker: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const trackingId = import.meta.env.VITE_GA_TRACKING_ID;
+    if (trackingId && typeof window.gtag === 'function') {
+      window.gtag('config', trackingId, {
+        page_path: location.pathname + location.search,
+      });
+    }
+  }, [location]);
+
+  return null;
+};
+
 const App: React.FC = () => {
   return (
     <Router>
+      <GoogleAnalyticsTracker />
       <AuthProvider>
         <ToastProvider>
           <CartProvider>

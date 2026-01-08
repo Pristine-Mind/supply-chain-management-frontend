@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Example props: categories = [{ name: 'Motors', subcategories: ['Parts & accessories', ...] }, ...]
 interface CategoryMenuProps {
   categories: Array<{
     id: number;

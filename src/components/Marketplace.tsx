@@ -560,8 +560,6 @@ const Marketplace: React.FC = () => {
     }
   };
 
-  // Do not block the whole screen on an API error — render available sections and show inline errors.
-
   return (
     <div className="marketplace-root">
       <div className="min-h-screen bg-neutral-50">
