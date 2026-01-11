@@ -20,6 +20,7 @@ export interface ShoppableVideo {
     views_count: number;
     likes_count: number;
     shares_count: number;
+    comments_count?: number;
     created_at: string;
     is_liked: boolean;
     is_saved: boolean;

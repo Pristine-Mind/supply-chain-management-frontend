@@ -6,12 +6,13 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import { getUserData } from '../utils/auth';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { Mic, ArrowLeft } from 'lucide-react';
+import { Mic, ArrowLeft, LayoutGrid, Smartphone } from 'lucide-react';
 import CreatorsList from './CreatorsList';
 
 const ForYouPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'for_you' | 'following' | 'store'>('for_you');
+  const [viewMode, setViewMode] = useState<'grid' | 'reels'>('reels');
   const [query, setQuery] = useState('');
   const { isAuthenticated, user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -55,6 +56,24 @@ const ForYouPage: React.FC = () => {
                 <ArrowLeft className="w-5 h-5 text-neutral-600" />
               </button>
               <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Just For You</h1>
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="inline-flex bg-neutral-200/50 backdrop-blur-sm p-1 rounded-xl shadow-inner border border-neutral-200 ml-0 md:ml-4">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-primary-600 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('reels')}
+                className={`p-1.5 rounded-lg transition-all ${viewMode === 'reels' ? 'bg-white text-primary-600 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                title="Reels View"
+              >
+                <Smartphone className="w-5 h-5" />
+              </button>
             </div>
 
             {/* Premium Tab Selector */}
@@ -108,7 +127,7 @@ const ForYouPage: React.FC = () => {
 
         {/* Content Display Area */}
         <div className="animate-in fade-in duration-500">
-          {activeTab === 'for_you' && <ForYouGrid query={query} />}
+          {activeTab === 'for_you' && <ForYouGrid query={query} viewMode={viewMode} />}
           {activeTab === 'following' && <MyFollowing />}
           {activeTab === 'store' && <CreatorsList />}
         </div>
