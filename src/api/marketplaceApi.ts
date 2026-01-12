@@ -89,3 +89,16 @@ export const createMarketplaceProductFromProduct = async (
     throw new Error('Network error occurred while creating marketplace product');
   }
 };
+
+/**
+ * Marketplace API object for unified access
+ */
+export const marketplaceApi = {
+  getProducts: async (params: { q?: string; category?: number }) => {
+    const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`, {
+      params
+    });
+    return response.data;
+  },
+  createMarketplaceProductFromProduct
+};
