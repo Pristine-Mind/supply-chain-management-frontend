@@ -16,9 +16,9 @@ const getAuthHeaders = () => {
 };
 
 export const creatorsApi = {
-  listCreators: async (q: string | undefined, page: number = 1): Promise<PaginatedCreators> => {
+  listCreators: async (q: string | undefined, page: number = 1, categorySearch?: string): Promise<PaginatedCreators> => {
     const response = await axios.get(CREATORS_URL, {
-      params: { q, page },
+      params: { q, page, category: categorySearch },
       headers: getAuthHeaders(),
     });
     return response.data;
@@ -33,6 +33,14 @@ export const creatorsApi = {
 
   getCreatorVideos: async (id: number, page: number = 1): Promise<PaginatedVideos> => {
     const response = await axios.get(`${CREATORS_URL}${id}/videos/`, {
+      params: { page },
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getCreatorProducts: async (id: number, page: number = 1): Promise<any> => {
+    const response = await axios.get(`${CREATORS_URL}${id}/products/`, {
       params: { page },
       headers: getAuthHeaders(),
     });

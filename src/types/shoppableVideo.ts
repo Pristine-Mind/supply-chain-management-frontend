@@ -29,6 +29,16 @@ export interface ShoppableVideo {
     trend_score: number;
 }
 
+export interface ShoppableCategory {
+    id: number;
+    name: string;
+    icon?: string | null;
+    image?: string | null; // Keep for backward compatibility if needed
+    slug?: string;
+    is_active?: boolean;
+    order?: number;
+}
+
 export interface VideoComment {
     id: number;
     video: number;

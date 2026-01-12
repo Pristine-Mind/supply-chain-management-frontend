@@ -1,8 +1,9 @@
 import axios from 'axios';
-import { ShoppableVideo, ShoppableVideoListResponse, VideoComment, VideoReportPayload, AddToCartPayload } from '../types/shoppableVideo';
+import { ShoppableVideo, ShoppableVideoListResponse, VideoComment, VideoReportPayload, AddToCartPayload, ShoppableCategory } from '../types/shoppableVideo';
 
 const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL || '';
 const VIDEOS_URL = `${API_BASE_URL}/api/v1/shoppable-videos/`.replace(/([^:]\/)\/+/g, "$1");
+const CATEGORIES_URL = `${API_BASE_URL}/api/v1/shoppable-video-categories/`.replace(/([^:]\/)\/+/g, "$1");
 const COMMENTS_URL = `${API_BASE_URL}/api/v1/video-comments/`.replace(/([^:]\/)\/+/g, "$1");
 const FOLLOWS_URL = `${API_BASE_URL}/api/v1/user-follows/`.replace(/([^:]\/)\/+/g, "$1");
 const REPORTS_URL = `${API_BASE_URL}/api/v1/video-reports/`.replace(/([^:]\/)\/+/g, "$1");
@@ -22,6 +23,13 @@ export const shoppableVideosApi = {
             headers: getAuthHeaders(),
         });
         return response.data;
+    },
+
+    getCategories: async (): Promise<ShoppableCategory[]> => {
+        const response = await axios.get(CATEGORIES_URL, {
+            headers: getAuthHeaders(),
+        });
+        return Array.isArray(response.data) ? response.data : response.data.results || [];
     },
 
     getVideoDetails: async (id: number): Promise<ShoppableVideo> => {

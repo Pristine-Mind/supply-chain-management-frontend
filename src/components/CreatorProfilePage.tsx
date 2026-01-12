@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import { creatorsApi } from '../api/creatorsApi';
 import { CreatorProfile } from '../types/creator';
 import CreatorVideos from './CreatorVideos';
-import axios from 'axios';
 import FollowButton from './FollowButton';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -40,22 +39,24 @@ const CreatorProfilePage: React.FC = () => {
   }, [id]);
 
   useEffect(() => {
-    // when products tab is active, fetch seller marketplace products with pagination
+    // when products tab is active, fetch creator products with pagination
     const fetchSellerProducts = async (p = 1) => {
-      if (!profile) return;
+      if (!id) return;
       setSellerLoading(true);
       try {
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Token ${token}` } : {};
-        const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`;
-        const params: any = { user_id: profile.user, limit: itemsPerPage, offset: (p - 1) * itemsPerPage };
-        const { data } = await axios.get(url, { params, headers });
+        const data = await creatorsApi.getCreatorProducts(Number(id), p);
         const results = data && Array.isArray(data.results) ? data.results : (Array.isArray(data) ? data : []);
         setSellerProducts(results);
-        setTotalCount(typeof data.count === 'number' ? data.count : (results.length < itemsPerPage ? (p - 1) * itemsPerPage + results.length : null));
+        
+        // Handle pagination from the new API
+        if (data && typeof data.count === 'number') {
+          setTotalCount(data.count);
+        } else {
+          setTotalCount(results.length < itemsPerPage ? (p - 1) * itemsPerPage + results.length : null);
+        }
         setPage(p);
       } catch (err) {
-        console.error('Failed to load seller marketplace products', err);
+        console.error('Failed to load creator products', err);
         setSellerProducts([]);
         setTotalCount(null);
       } finally {
@@ -64,7 +65,7 @@ const CreatorProfilePage: React.FC = () => {
     };
 
     if (activeTab === 'products') fetchSellerProducts(page);
-  }, [activeTab, profile, page]);
+  }, [activeTab, id, page]);
 
   if (loading) {
     return (

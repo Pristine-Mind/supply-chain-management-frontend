@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import ForYouGrid from './ForYouGrid';
 import MyFollowing from './MyFollowing';
 import { useNavigate } from 'react-router-dom';
@@ -8,23 +8,42 @@ import { getUserData } from '../utils/auth';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Mic, ArrowLeft, LayoutGrid, Smartphone } from 'lucide-react';
 import CreatorsList from './CreatorsList';
+import ShoppableCategories from './ShoppableCategories';
+import { shoppableVideosApi } from '../api/shoppableVideosApi';
+import { ShoppableCategory } from '../types/shoppableVideo';
 
 const ForYouPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'for_you' | 'following' | 'store'>('for_you');
   const [viewMode, setViewMode] = useState<'grid' | 'reels'>('reels');
   const [query, setQuery] = useState('');
+  const [categories, setCategories] = useState<ShoppableCategory[]>([
+    { id: 1, name: 'Trending', slug: 'trending', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200' },
+    { id: 2, name: 'Active', slug: 'active', image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' },
+    { id: 3, name: 'Beauty', slug: 'beauty', image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=200' },
+    { id: 4, name: 'Fashion', slug: 'fashion', image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=200' },
+    { id: 5, name: 'Home', slug: 'home', image: 'https://images.unsplash.com/photo-1484101403033-5710672509bb?w=200' }
+  ]);
+  const [selectedCategory, setSelectedCategory] = useState<ShoppableCategory | null>(null);
   const { isAuthenticated, user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  useEffect(() => {
+    shoppableVideosApi.getCategories()
+      .then(data => {
+        if (data && data.length > 0) {
+          setCategories(data);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch categories', err);
+      });
+  }, []);
+
   // Memoized navigation logic to prevent unnecessary re-renders
   const handleStoreClick = useCallback(() => {
-    if (!isAuthenticated) {
-      setShowLoginModal(true);
-      return;
-    }
     const creatorId = (user && (user.id || user.shopId)) || null;
-    if (creatorId) {
+    if (isAuthenticated && creatorId) {
       navigate(`/creators/${creatorId}`);
     } else {
       setActiveTab('store');
@@ -127,9 +146,39 @@ const ForYouPage: React.FC = () => {
 
         {/* Content Display Area */}
         <div className="animate-in fade-in duration-500">
-          {activeTab === 'for_you' && <ForYouGrid query={query} viewMode={viewMode} />}
+          {activeTab === 'for_you' && (
+            <>
+              {categories.length > 0 && (
+                <ShoppableCategories 
+                  categories={categories} 
+                  onSelect={(cat) => {
+                    if (cat.id === 0) setSelectedCategory(null);
+                    else {
+                      setSelectedCategory(cat);
+                      setActiveTab('store');
+                    }
+                  }}
+                  selectedCategoryId={selectedCategory?.id}
+                />
+              )}
+              <ForYouGrid query={query} viewMode={viewMode} />
+            </>
+          )}
           {activeTab === 'following' && <MyFollowing />}
-          {activeTab === 'store' && <CreatorsList />}
+          {activeTab === 'store' && (
+            <div>
+              {categories.length > 0 && (
+                <div className="mb-8 border-b border-neutral-100 pb-8">
+                  <ShoppableCategories 
+                    categories={categories} 
+                    onSelect={(cat) => setSelectedCategory(cat.id === 0 ? null : cat)}
+                    selectedCategoryId={selectedCategory?.id}
+                  />
+                </div>
+              )}
+              <CreatorsList selectedCategory={selectedCategory?.id ? String(selectedCategory.id) : undefined} />
+            </div>
+          )}
         </div>
 
         {/* Auth Modals */}

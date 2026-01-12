@@ -8,7 +8,11 @@ import FollowButton from './FollowButton';
 import { useAuth } from '../context/AuthContext';
 import { Play, Heart, CheckCircle, Search } from 'lucide-react';
 
-const CreatorsList: React.FC = () => {
+interface CreatorsListProps {
+  selectedCategory?: string;
+}
+
+const CreatorsList: React.FC<CreatorsListProps> = ({ selectedCategory }) => {
   const [creators, setCreators] = useState<CreatorProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -18,16 +22,16 @@ const CreatorsList: React.FC = () => {
   const { user } = useAuth();
 
   const load = useCallback(async (p = 1, isSearch = false) => {
-    if (isSearch) setLoading(true);
+    if (isSearch || p === 1) setLoading(true);
     
     try {
-      const data = await creatorsApi.listCreators(q || undefined, p);
+      const data = await creatorsApi.listCreators(q || undefined, p, selectedCategory);
       
       setCreators(prev => p === 1 ? data.results : [...prev, ...data.results]);
       setPagination(data);
       setPage(p);
 
-      const vidsResp: any = await shoppableVideosApi.getVideos(100);
+      const vidsResp: any = await shoppableVideosApi.getVideos();
       const vids = Array.isArray(vidsResp) ? vidsResp : (vidsResp?.results || []);
       
       const map: Record<number, ShoppableVideoBrief[]> = {};
@@ -44,11 +48,11 @@ const CreatorsList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [q]);
+  }, [q, selectedCategory]);
 
   useEffect(() => {
     load(1);
-  }, []);
+  }, [load]);
 
   return (
     <div className="min-h-screen bg-neutral-50/50">
@@ -107,49 +111,53 @@ const CreatorsList: React.FC = () => {
                     className="break-inside-avoid mb-4 group relative"
                   >
                     <div className="relative overflow-hidden rounded-[2rem] bg-white shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
-                      {/* Image Content */}
-                      <Link to={`/creators/${c.id}`} className="block">
+                      {/* Image Content - Now wraps the whole identity area as well for better UX */}
+                      <Link to={`/creators/${c.id}`} className="block relative group/card">
                         <img 
                           src={thumb} 
                           loading="lazy"
-                          className="w-full h-auto object-cover min-h-[200px]"
+                          className="w-full h-auto object-cover min-h-[250px]"
                           alt={c.display_name}
                         />
                         {/* Smooth Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Center Play Icon */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                           <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center scale-0 group-hover:scale-100 transition-transform duration-500 shadow-lg shadow-orange-600/40">
+                              <Play size={24} fill="white" className="text-white ml-1" />
+                           </div>
+                        </div>
+
+                        {/* Info Identity */}
+                        <div className="absolute bottom-0 left-0 right-0 p-5 pb-20">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src={c.avatar || c.profile_image || '/placeholder-avatar.png'} 
+                              className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover"
+                              alt=""
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-white font-bold text-sm flex items-center gap-1">
+                                <span className="truncate">{c.display_name}</span>
+                                {c.is_verified && <CheckCircle size={14} className="text-blue-400 fill-blue-400/20" />}
+                              </h4>
+                              <p className="text-white/70 text-xs truncate italic">@{c.username}</p>
+                            </div>
+                          </div>
+                        </div>
                       </Link>
 
-                      {/* Interaction UI */}
+                      {/* Interaction UI - Absolute but outside Link to handle separate clicks */}
                       <div className="absolute top-4 right-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                         <button className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-black transition-all">
                           <Heart size={20} />
                         </button>
                       </div>
 
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                         <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center scale-0 group-hover:scale-100 transition-transform duration-500 shadow-lg shadow-orange-600/40">
-                            <Play size={24} fill="white" className="text-white ml-1" />
-                         </div>
-                      </div>
-
-                      {/* Info Panel */}
-                      <div className="absolute bottom-0 left-0 right-0 p-5">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={c.avatar || c.profile_image || '/placeholder-avatar.png'} 
-                            className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover"
-                            alt=""
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-bold text-sm flex items-center gap-1">
-                              <span className="truncate">{c.display_name}</span>
-                              {c.is_verified && <CheckCircle size={14} className="text-blue-400 fill-blue-400/20" />}
-                            </h4>
-                            <p className="text-white/70 text-xs truncate italic">@{c.username}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+                      {/* Action Panel - Absolute bottom area */}
+                      <div className="absolute bottom-5 left-5 right-5 z-20">
+                        <div className="pt-4 border-t border-white/10">
                            <FollowButton
                               creatorId={c.id}
                               initialFollowing={!!c.is_following}
@@ -163,6 +171,22 @@ const CreatorsList: React.FC = () => {
               })}
             </AnimatePresence>
           </motion.div>
+        )}
+
+        {!loading && creators.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-[2.5rem] shadow-sm border border-neutral-100">
+            <div className="mb-4 flex justify-center text-neutral-300">
+              <Search size={64} strokeWidth={1} />
+            </div>
+            <h3 className="text-2xl font-black text-neutral-900">No curators matching this style</h3>
+            <p className="text-neutral-500 mt-2">Try exploring another category or check back soon!</p>
+            <button 
+              onClick={() => load(1)} 
+              className="mt-8 bg-neutral-900 text-white px-8 py-3 rounded-2xl font-bold hover:bg-orange-600 transition-colors shadow-lg shadow-neutral-900/10"
+            >
+              Show All Creators
+            </button>
+          </div>
         )}
 
         {/* Load More - Premium Style */}
