@@ -25,7 +25,8 @@ const CreatorsList: React.FC<CreatorsListProps> = ({ selectedCategory }) => {
     if (isSearch || p === 1) setLoading(true);
     
     try {
-      const data = await creatorsApi.listCreators(q || undefined, p, selectedCategory);
+      const videoCatId = selectedCategory ? parseInt(selectedCategory) : undefined;
+      const data = await creatorsApi.listCreators(q || undefined, p, videoCatId);
       
       setCreators(prev => p === 1 ? data.results : [...prev, ...data.results]);
       setPagination(data);

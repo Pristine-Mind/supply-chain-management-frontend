@@ -9,14 +9,18 @@ import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Mic, ArrowLeft, LayoutGrid, Smartphone } from 'lucide-react';
 import CreatorsList from './CreatorsList';
 import ShoppableCategories from './ShoppableCategories';
+import TrendingCreators from './TrendingCreators';
+import ShoppableUploadModal from './ShoppableUploadModal';
 import { shoppableVideosApi } from '../api/shoppableVideosApi';
 import { ShoppableCategory } from '../types/shoppableVideo';
+import { Plus } from 'lucide-react';
 
 const ForYouPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'for_you' | 'following' | 'store'>('for_you');
   const [viewMode, setViewMode] = useState<'grid' | 'reels'>('reels');
   const [query, setQuery] = useState('');
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [categories, setCategories] = useState<ShoppableCategory[]>([
     { id: 1, name: 'Trending', slug: 'trending', image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=200' },
     { id: 2, name: 'Active', slug: 'active', image: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200' },
@@ -115,6 +119,15 @@ const ForYouPage: React.FC = () => {
                 </button>
               ))}
             </div>
+
+            {/* Post Button (Mobile/Desktop) */}
+            <button 
+              onClick={() => isAuthenticated ? setShowUploadModal(true) : setShowLoginModal(true)}
+              className="bg-primary-600 hover:bg-primary-700 text-white p-2 md:px-5 md:py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-primary-600/20 active:scale-95 transition-all flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden md:inline">Post Content</span>
+            </button>
           </div>
 
           {/* Search Section */}
@@ -155,13 +168,18 @@ const ForYouPage: React.FC = () => {
                     if (cat.id === 0) setSelectedCategory(null);
                     else {
                       setSelectedCategory(cat);
-                      setActiveTab('store');
+                      // Track category interest for recommendation engine session boost
+                      shoppableVideosApi.trackInteraction(0, { 
+                        event_type: 'cta_click', 
+                        extra_data: { type: 'category_select', category_id: cat.id } 
+                      }).catch(() => {});
                     }
                   }}
                   selectedCategoryId={selectedCategory?.id}
                 />
               )}
-              <ForYouGrid query={query} viewMode={viewMode} />
+              {!selectedCategory && <TrendingCreators />}
+              <ForYouGrid query={query} viewMode={viewMode} categoryId={selectedCategory?.id} />
             </>
           )}
           {activeTab === 'following' && <MyFollowing />}
@@ -187,6 +205,14 @@ const ForYouPage: React.FC = () => {
             isOpen={showLoginModal}
             onClose={() => setShowLoginModal(false)}
             onSuccess={handlePostLoginNavigate}
+          />
+        )}
+
+        {showUploadModal && (
+          <ShoppableUploadModal
+            isOpen={showUploadModal}
+            onClose={() => setShowUploadModal(false)}
+            onSuccess={() => {/* Maybe refresh */}}
           />
         )}
       </div>

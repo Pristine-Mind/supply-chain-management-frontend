@@ -16,9 +16,16 @@ const getAuthHeaders = () => {
 };
 
 export const creatorsApi = {
-  listCreators: async (q: string | undefined, page: number = 1, categorySearch?: string): Promise<PaginatedCreators> => {
+  listCreators: async (q: string | undefined, page: number = 1, videoCategory?: number, productCategory?: number): Promise<PaginatedCreators> => {
     const response = await axios.get(CREATORS_URL, {
-      params: { q, page, category: categorySearch },
+      params: { q, page, video_category: videoCategory, category: productCategory },
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getTrendingCreators: async (): Promise<PaginatedCreators> => {
+    const response = await axios.get(`${CREATORS_URL}trending/`, {
       headers: getAuthHeaders(),
     });
     return response.data;
@@ -26,6 +33,13 @@ export const creatorsApi = {
 
   getCreator: async (id: number): Promise<CreatorProfile> => {
     const response = await axios.get(`${CREATORS_URL}${id}/`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  updateCreator: async (id: number, payload: Partial<CreatorProfile>): Promise<CreatorProfile> => {
+    const response = await axios.patch(`${CREATORS_URL}${id}/`, payload, {
       headers: getAuthHeaders(),
     });
     return response.data;
@@ -56,6 +70,13 @@ export const creatorsApi = {
 
   getFollowers: async (id: number): Promise<{ count: number; results: Array<{ user: number; username?: string }> }> => {
     const response = await axios.get(`${CREATORS_URL}${id}/followers/`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getFollowing: async (id: number): Promise<PaginatedCreators> => {
+    const response = await axios.get(`${CREATORS_URL}${id}/following/`, {
       headers: getAuthHeaders(),
     });
     return response.data;

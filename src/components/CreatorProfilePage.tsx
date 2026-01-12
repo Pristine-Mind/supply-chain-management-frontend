@@ -18,10 +18,13 @@ const CreatorProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'posts' | 'products'>('posts');
   const [sellerProducts, setSellerProducts] = useState<any[]>([]);
   const [sellerLoading, setSellerLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editBio, setEditBio] = useState('');
+  const [editDisplayName, setEditDisplayName] = useState('');
   const [page, setPage] = useState(1);
   const itemsPerPage = 24;
   const [totalCount, setTotalCount] = useState<number | null>(null);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,6 +32,8 @@ const CreatorProfilePage: React.FC = () => {
     setLoading(true);
     creatorsApi.getCreator(Number(id)).then((p) => {
       setProfile(p);
+      setEditBio(p.bio || '');
+      setEditDisplayName(p.display_name || '');
       // if authenticated, check whether current user follows this creator
       if (isAuthenticated) {
         creatorsApi.isFollowing(p.id).then((f) => setIsFollowing(f)).catch(() => setIsFollowing(false));
@@ -67,6 +72,21 @@ const CreatorProfilePage: React.FC = () => {
     if (activeTab === 'products') fetchSellerProducts(page);
   }, [activeTab, id, page]);
 
+  const handleUpdateProfile = async () => {
+    if (!profile) return;
+    try {
+      const updated = await creatorsApi.updateCreator(profile.id, {
+        bio: editBio,
+        display_name: editDisplayName,
+      });
+      setProfile(updated);
+      setIsEditing(false);
+      toast.success('Profile updated');
+    } catch (err) {
+      toast.error('Failed to update profile');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -101,32 +121,60 @@ const CreatorProfilePage: React.FC = () => {
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {profile.display_name || profile.handle}
-              </h1>
-              {isFollowing !== null && (
-                <FollowButton
-                  creatorId={profile.id}
-                  initialFollowing={!!isFollowing}
-                  onToggle={(following, follower_count) => {
-                    setIsFollowing(following);
-                    if (typeof follower_count === 'number') {
-                      setProfile((p) => (p ? { ...p, follower_count } : p));
-                    } else {
-                      // best-effort local adjust
-                      setProfile((p) => (p ? { ...p, follower_count: p.follower_count + (following ? 1 : -1) } : p));
-                    }
-                  }}
-                  className="px-6 py-1.5"
+              {isEditing ? (
+                <input 
+                  value={editDisplayName} 
+                  onChange={e => setEditDisplayName(e.target.value)}
+                  className="text-2xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none"
                 />
+              ) : (
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {profile.display_name || profile.handle}
+                </h1>
+              )}
+              {isAuthenticated && user && (user.id === profile.user) ? (
+                <button 
+                  onClick={() => isEditing ? handleUpdateProfile() : setIsEditing(true)}
+                  className="text-xs font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 px-3 py-1 rounded-full transition-colors"
+                >
+                  {isEditing ? 'Save Changes' : 'Edit Profile'}
+                </button>
+              ) : (
+                isFollowing !== null && (
+                  <FollowButton
+                    creatorId={profile.id}
+                    initialFollowing={!!isFollowing}
+                    onToggle={(following, follower_count) => {
+                      setIsFollowing(following);
+                      if (typeof follower_count === 'number') {
+                        setProfile((p) => (p ? { ...p, follower_count } : p));
+                      } else {
+                        // best-effort local adjust
+                        setProfile((p) => (p ? { ...p, follower_count: p.follower_count + (following ? 1 : -1) } : p));
+                      }
+                    }}
+                    className="px-6 py-1.5"
+                  />
+                )
               )}
             </div>
-            <div className="text-sm text-gray-600 mb-3">
-              {profile.follower_count || 0} followers
+            <div className="flex gap-4 text-sm text-gray-600 mb-3">
+              <span><strong>{profile.follower_count || 0}</strong> followers</span>
+              <span><strong>{profile.following_count || 0}</strong> following</span>
+              <span><strong>{profile.views_count || 0}</strong> views</span>
             </div>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {profile.bio || 'No bio available'}
-            </p>
+            {isEditing ? (
+              <textarea
+                value={editBio}
+                onChange={e => setEditBio(e.target.value)}
+                className="w-full text-sm text-gray-700 leading-relaxed border border-gray-200 rounded-lg p-2 focus:ring-1 focus:ring-primary-500 outline-none"
+                rows={3}
+              />
+            ) : (
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {profile.bio || 'No bio available'}
+              </p>
+            )}
           </div>
         </div>
 

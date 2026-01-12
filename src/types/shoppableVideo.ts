@@ -11,8 +11,13 @@ export interface ShoppableVideo {
     uploader: number;
     uploader_name: string;
     uploader_avatar?: string;
-    video_file: string;
+    content_type: 'VIDEO' | 'IMAGE' | 'COLLECTION';
+    video_file?: string | null;
+    image_file?: string | null;
+    items?: ShoppableVideoItem[];
     thumbnail: string | null;
+    category?: number;
+    category_details?: ShoppableCategory;
     title: string;
     description: string;
     product: ShoppableVideoProduct;
@@ -27,6 +32,20 @@ export interface ShoppableVideo {
     is_following?: boolean;
     tags: string[];
     trend_score: number;
+}
+
+export interface ShoppableVideoItem {
+    id: number;
+    video: number;
+    file: string;
+    order: number;
+    thumbnail?: string | null;
+}
+
+export interface InteractionPayload {
+    event_type: 'watch_time' | 'cta_click' | 'scroll_pause';
+    dwell_time?: number;
+    extra_data?: any;
 }
 
 export interface ShoppableCategory {

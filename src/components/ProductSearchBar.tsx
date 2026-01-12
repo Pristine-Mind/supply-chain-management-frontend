@@ -211,15 +211,6 @@ const ProductSearchBar: React.FC = () => {
 
   useEffect(() => {
     const fetchTrendingSearches = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/trending-searches/`,
-          { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
-        );
-        setTrendingSearches(response.data.results || []);
-      } catch (error) {
-        console.error('Failed to fetch trending searches:', error);
-      }
     };
 
     fetchTrendingSearches();

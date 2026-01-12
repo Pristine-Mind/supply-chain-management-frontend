@@ -1,13 +1,18 @@
 export interface CreatorProfile {
     id: number;
     user: number;
+    username?: string;
     handle: string;
     display_name: string;
     bio?: string | null;
     follower_count: number;
+    following_count?: number;
     views_count: number;
+    posts_count?: number;
     profile_image?: string | null;
+    avatar?: string | null; // same as profile_image, added for consistency with API docs
     social_links?: { [key: string]: string } | null;
+    uploader_profile_url?: string;
     // optional fields returned by some endpoints
     is_following?: boolean;
     following?: boolean;

@@ -10,7 +10,7 @@ import LoginModal from './auth/LoginModal';
 import { useCallback } from 'react';
 import ShoppableReels from './ShoppableReels';
 
-const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: number, viewMode?: 'grid' | 'reels' }> = ({ query, compact = false, creatorId, viewMode = 'grid' }) => {
+const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: number, viewMode?: 'grid' | 'reels', categoryId?: number }> = ({ query, compact = false, creatorId, viewMode = 'grid', categoryId }) => {
   const [videos, setVideos] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,7 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
         data = await creatorsApi.getCreatorVideos(creatorId, p);
         results = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
       } else {
-        data = await shoppableVideosApi.getVideos();
+        data = await shoppableVideosApi.getVideos(categoryId);
         results = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
       }
       if (p === 1) {
@@ -62,7 +62,7 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
 
   useEffect(() => {
     load(1);
-  }, []);
+  }, [categoryId, creatorId]);
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
