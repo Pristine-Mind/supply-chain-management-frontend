@@ -83,6 +83,7 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/find-business" icon={Users} label="Find Business" />
               <NavItem href="/marketplace-dashboard" icon={BarChart3} label="Marketplace Dashboard" />
               <NavItem href="/marketplace-dashboard/orders" icon={FaFirstOrder} label="Marketplace Orders" />
+              <NavItem href="/marketplace-dashboard/negotiations" icon={ClipboardList} label="Negotiations" />
             </>
           ) : (
             <>

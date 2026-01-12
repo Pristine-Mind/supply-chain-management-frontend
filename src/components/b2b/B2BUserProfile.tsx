@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { listB2BUserProducts, getB2BUser, B2BUser, MiniProduct } from '../../api/b2bApi';
-import { ArrowLeft, Search, Building2, Mail, User, Package, ShoppingBag, Send } from 'lucide-react';
+import { listB2BUserProducts, getB2BUser, B2BUser, MiniProduct, Negotiation, createNegotiation, getActiveNegotiation, updateNegotiation } from '../../api/b2bApi';
+import { ArrowLeft, Search, Building2, Mail, User, Package, ShoppingBag, Send, MessageCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
@@ -50,6 +50,13 @@ const B2BUserProfile: React.FC = () => {
 
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [pendingProductForAuth, setPendingProductForAuth] = useState<PendingProductAuth | null>(null);
+
+  const [activeNegotiation, setActiveNegotiation] = useState<Negotiation | null>(null);
+  const [negotiationLoading, setNegotiationLoading] = useState(false);
+  const [negotiationPrice, setNegotiationPrice] = useState<string>('');
+  const [negotiationQty, setNegotiationQty] = useState<string>('');
+  const [negotiationMsg, setNegotiationMsg] = useState('');
+  const [isNegotiating, setIsNegotiating] = useState(false);
 
   const pageSize = 24;
 
@@ -137,26 +144,33 @@ const B2BUserProfile: React.FC = () => {
   }, []);
 
   // Fetch product messages
-  const fetchProductMessages = useCallback(async (productId: number) => {
+  const fetchProductMessages = useCallback(async (productId: number, marketplaceId: number) => {
     if (!userId) return;
     
     setProdMsgsLoading(true);
+    setNegotiationLoading(true);
     try {
       const headers: Record<string, string> = {};
       const token = localStorage.getItem('token');
       if (token) headers['Authorization'] = `Token ${token}`;
 
-      const resp = await axios.get(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/b2b-verified-users-products/${userId}/products/${productId}/chat/`,
-        { headers }
-      );
-      const msgs: ProductMessage[] = resp.data.results || [];
+      const [msgResp, negResp] = await Promise.all([
+        axios.get(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/b2b-verified-users-products/${userId}/products/${productId}/chat/`,
+          { headers }
+        ),
+        getActiveNegotiation(marketplaceId).catch(() => null)
+      ]);
+
+      const msgs: ProductMessage[] = msgResp.data.results || [];
       setProductMessages(msgs);
+      setActiveNegotiation(negResp);
     } catch (err) {
-      console.error('fetchProductMessages error:', err);
+      console.error('fetchProductMessages or negotiation error:', err);
       setProductMessages([]);
     } finally {
       setProdMsgsLoading(false);
+      setNegotiationLoading(false);
     }
   }, [userId]);
 
@@ -183,26 +197,44 @@ const B2BUserProfile: React.FC = () => {
 
   const handleBuyNow = useCallback(async (e: React.MouseEvent, p: MiniProduct) => {
     e.stopPropagation();
-    const qty = quantities[p.id] || 0;
     
-    if (qty === 0) {
-      return; // Don't proceed if quantity is 0
+    // Check for active accepted negotiation for this product
+    let finalPrice = p.price || 0;
+    let finalQty = quantities[p.id] || 0;
+    
+    // If we're clicking from the modal and there's an accepted negotiation
+    if (activeNegotiation && activeNegotiation.product === p.id && activeNegotiation.status === 'ACCEPTED') {
+      finalPrice = activeNegotiation.proposed_price;
+      finalQty = activeNegotiation.proposed_quantity;
+    }
+
+    if (finalQty === 0) {
+      return; 
     }
     
     if (!isAuthenticated) {
-      setPendingProductForAuth({ product: p, quantity: qty, action: 'buy' });
+      setPendingProductForAuth({ product: p, quantity: finalQty, action: 'buy' });
       setShowLoginModal(true);
       return;
     }
 
     try {
       const mp = transformMiniToMarketplace(p);
-      await addToCart(mp as any, qty);
+      // Override price if negotiated
+      const marketplaceProduct = {
+        ...mp,
+        listed_price: finalPrice,
+        product_details: {
+          ...mp.product_details,
+          price: finalPrice
+        }
+      };
+      await addToCart(marketplaceProduct as any, finalQty);
       navigate('/delivery-details');
     } catch (err) {
       console.error('handleBuyNow error:', err);
     }
-  }, [quantities, isAuthenticated, transformMiniToMarketplace, addToCart, navigate]);
+  }, [quantities, isAuthenticated, transformMiniToMarketplace, addToCart, navigate, activeNegotiation]);
 
   const handleSendMessage = useCallback(async () => {
     if (!modalProduct || !chatMessage.trim() || !userId) return;
@@ -229,11 +261,71 @@ const B2BUserProfile: React.FC = () => {
     }
   }, [modalProduct, chatMessage, userId]);
 
+  const handleNegotiate = useCallback(async () => {
+    if (!modalProduct || !negotiationPrice || !negotiationQty) return;
+    
+    setNegotiationLoading(true);
+    const mid = modalProduct.marketplace_id || modalProduct.id;
+    try {
+      if (activeNegotiation) {
+        // Counter offer
+        const updated = await updateNegotiation(activeNegotiation.id, {
+          price: Number(negotiationPrice),
+          quantity: Number(negotiationQty),
+          message: negotiationMsg,
+          status: 'COUNTER_OFFER'
+        });
+        setActiveNegotiation(updated);
+      } else {
+        // New negotiation
+        const created = await createNegotiation(
+          mid,
+          Number(negotiationPrice),
+          Number(negotiationQty),
+          negotiationMsg
+        );
+        setActiveNegotiation(created);
+      }
+      setIsNegotiating(false);
+      setNegotiationMsg('');
+      setChatSentSuccess('Negotiation offer sent successfully!');
+      fetchProductMessages(modalProduct.id, mid);
+    } catch (err) {
+      console.error('handleNegotiate error:', err);
+      setChatSentSuccess('Failed to send negotiation offer.');
+    } finally {
+      setNegotiationLoading(false);
+    }
+  }, [modalProduct, negotiationPrice, negotiationQty, negotiationMsg, activeNegotiation, fetchProductMessages]);
+
+  const handleUpdateNegotiationStatus = useCallback(async (status: 'ACCEPTED' | 'REJECTED') => {
+    if (!activeNegotiation || !modalProduct) return;
+    
+    setNegotiationLoading(true);
+    const mid = modalProduct.marketplace_id || modalProduct.id;
+    try {
+      const updated = await updateNegotiation(activeNegotiation.id, { status });
+      setActiveNegotiation(updated);
+      setChatSentSuccess(`Negotiation ${status.toLowerCase()} successfully!`);
+      fetchProductMessages(modalProduct.id, mid);
+    } catch (err) {
+      console.error('handleUpdateNegotiationStatus error:', err);
+      setChatSentSuccess(`Failed to ${status.toLowerCase()} negotiation.`);
+    } finally {
+      setNegotiationLoading(false);
+    }
+  }, [activeNegotiation, modalProduct, fetchProductMessages]);
+
   const closeModal = useCallback(() => {
     setModalProduct(null);
     setChatMessage('');
     setChatSentSuccess(null);
     setProductMessages([]);
+    setActiveNegotiation(null);
+    setIsNegotiating(false);
+    setNegotiationPrice('');
+    setNegotiationQty('');
+    setNegotiationMsg('');
   }, []);
 
   const handleLoginSuccess = useCallback(async () => {
@@ -270,7 +362,7 @@ const B2BUserProfile: React.FC = () => {
 
   useEffect(() => {
     if (modalProduct) {
-      fetchProductMessages(modalProduct.id);
+      fetchProductMessages(modalProduct.id, modalProduct.marketplace_id || modalProduct.id);
     } else {
       setProductMessages([]);
       setProdMsgsLoading(false);
@@ -463,33 +555,43 @@ const B2BUserProfile: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center border rounded-lg overflow-hidden" role="group" aria-label="Quantity selector">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); decQty(p.id); }}
-                              className="px-3 py-2 text-sm bg-white hover:bg-gray-50 transition-colors"
-                              aria-label="Decrease quantity"
-                            >
-                              −
-                            </button>
-                            <div className="px-4 py-2 text-sm font-medium min-w-[3rem] text-center" aria-live="polite">
-                              {quantities[p.id] || 0}
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center border rounded-lg overflow-hidden" role="group" aria-label="Quantity selector">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); decQty(p.id); }}
+                                className="px-3 py-2 text-sm bg-white hover:bg-gray-50 transition-colors"
+                                aria-label="Decrease quantity"
+                              >
+                                −
+                              </button>
+                              <div className="px-4 py-2 text-sm font-medium min-w-[3rem] text-center" aria-live="polite">
+                                {quantities[p.id] || 0}
+                              </div>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); incQty(p.id); }}
+                                className="px-3 py-2 text-sm bg-white hover:bg-gray-50 transition-colors"
+                                aria-label="Increase quantity"
+                              >
+                                +
+                              </button>
                             </div>
+
                             <button
-                              onClick={(e) => { e.stopPropagation(); incQty(p.id); }}
-                              className="px-3 py-2 text-sm bg-white hover:bg-gray-50 transition-colors"
-                              aria-label="Increase quantity"
+                              onClick={(e) => handleBuyNow(e, p)}
+                              disabled={!quantities[p.id] || quantities[p.id] === 0}
+                              className="flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-colors bg-gradient-to-r from-orange-600 to-orange-700 text-white hover:from-orange-700 hover:to-orange-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              +
+                              Buy Now
                             </button>
                           </div>
-
+                          
                           <button
-                            onClick={(e) => handleBuyNow(e, p)}
-                            disabled={!quantities[p.id] || quantities[p.id] === 0}
-                            className="flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-colors bg-gradient-to-r from-orange-600 to-orange-700 text-white hover:from-orange-700 hover:to-orange-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={(e) => { e.stopPropagation(); setModalProduct(p); setIsNegotiating(true); }}
+                            className="w-full py-2 px-3 rounded-lg text-sm font-semibold border-2 border-orange-600 text-orange-600 hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
                           >
-                            Buy Now
+                            <MessageCircle className="w-4 h-4" />
+                            Negotiate Price
                           </button>
                         </div>
                       </div>
@@ -573,10 +675,147 @@ const B2BUserProfile: React.FC = () => {
                     {modalProduct.category_info.name}
                   </span>
                 )}
-                <span className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent">
-                  {modalProduct.price ? `NPR ${modalProduct.price.toLocaleString()}` : 'Price N/A'}
-                </span>
+                <div className="flex flex-col items-end">
+                  <span className={`text-2xl font-bold bg-gradient-to-r from-orange-600 to-orange-700 bg-clip-text text-transparent ${activeNegotiation?.status === 'ACCEPTED' ? 'line-through text-sm opacity-50' : ''}`}>
+                    {modalProduct.price ? `NPR ${modalProduct.price.toLocaleString()}` : 'Price N/A'}
+                  </span>
+                  {activeNegotiation?.status === 'ACCEPTED' && (
+                    <span className="text-2xl font-bold text-green-600">
+                      NPR {activeNegotiation.proposed_price.toLocaleString()} (Negotiated)
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* Negotiation Section */}
+              <section className="bg-orange-50 p-4 rounded-xl border-2 border-orange-100 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <MessageCircle className="w-5 h-5 text-orange-600" />
+                    Price Negotiation
+                  </h4>
+                  {activeNegotiation && (
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                      activeNegotiation.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
+                      activeNegotiation.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                      'bg-orange-100 text-orange-700'
+                    }`}>
+                      {activeNegotiation.status}
+                    </span>
+                  )}
+                </div>
+
+                {activeNegotiation ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white p-3 rounded-lg shadow-sm border">
+                        <p className="text-xs text-gray-500 mb-1">Proposed Price</p>
+                        <p className="font-bold text-lg">NPR {activeNegotiation.proposed_price.toLocaleString()}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg shadow-sm border">
+                        <p className="text-xs text-gray-500 mb-1">Proposed Quantity</p>
+                        <p className="font-bold text-lg">{activeNegotiation.proposed_quantity} units</p>
+                      </div>
+                    </div>
+
+                    {activeNegotiation.status === 'COUNTER_OFFER' && activeNegotiation.last_offer_by !== user?.id && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleUpdateNegotiationStatus('ACCEPTED')}
+                          className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors"
+                        >
+                          <CheckCircle2 className="w-5 h-5" /> Accept Offer
+                        </button>
+                        <button
+                          onClick={() => handleUpdateNegotiationStatus('REJECTED')}
+                          className="flex-1 py-3 bg-red-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-red-700 transition-colors"
+                        >
+                          <XCircle className="w-5 h-5" /> Reject
+                        </button>
+                        <button
+                          onClick={() => {
+                            setNegotiationPrice(activeNegotiation.proposed_price.toString());
+                            setNegotiationQty(activeNegotiation.proposed_quantity.toString());
+                            setIsNegotiating(true);
+                          }}
+                          className="flex-1 py-3 border-2 border-orange-600 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors"
+                        >
+                          Counter
+                        </button>
+                      </div>
+                    )}
+
+                    {activeNegotiation.status === 'ACCEPTED' && (
+                      <button
+                        onClick={(e) => handleBuyNow(e, modalProduct)}
+                        className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+                      >
+                        Buy at Negotiated Price
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  !isNegotiating && (
+                    <button
+                      onClick={() => setIsNegotiating(true)}
+                      className="w-full py-3 bg-white border-2 border-dashed border-orange-300 rounded-xl text-orange-700 font-semibold hover:bg-orange-100/50 transition-colors"
+                    >
+                      Start Negotiation
+                    </button>
+                  )
+                )}
+
+                {isNegotiating && (
+                  <div className="mt-4 space-y-4 bg-white p-4 rounded-xl border border-orange-200">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Proposed Price (per unit)</label>
+                        <input
+                          type="number"
+                          value={negotiationPrice}
+                          onChange={e => setNegotiationPrice(e.target.value)}
+                          placeholder="e.g. 500"
+                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Proposed Quantity</label>
+                        <input
+                          type="number"
+                          value={negotiationQty}
+                          onChange={e => setNegotiationQty(e.target.value)}
+                          placeholder="e.g. 10"
+                          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Note to seller (optional)</label>
+                      <textarea
+                        value={negotiationMsg}
+                        onChange={e => setNegotiationMsg(e.target.value)}
+                        placeholder="Explain why you're proposing this price..."
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none h-20 resize-none"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsNegotiating(false)}
+                        className="flex-1 py-2 text-gray-600 font-semibold hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleNegotiate}
+                        disabled={!negotiationPrice || !negotiationQty || negotiationLoading}
+                        className="flex-[2] py-2 bg-orange-600 text-white font-bold rounded-lg hover:bg-orange-700 transition-all disabled:opacity-50"
+                      >
+                        {negotiationLoading ? 'Sending...' : activeNegotiation ? 'Send Counter Offer' : 'Send Initial Offer'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
 
               {/* Message Seller Section */}
               <section className="border-t pt-6">
