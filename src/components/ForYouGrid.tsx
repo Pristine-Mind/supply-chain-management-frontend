@@ -8,8 +8,9 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import LoginModal from './auth/LoginModal';
 import { useCallback } from 'react';
+import ShoppableReels from './ShoppableReels';
 
-const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: number }> = ({ query, compact = false, creatorId }) => {
+const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: number, viewMode?: 'grid' | 'reels', categoryId?: number }> = ({ query, compact = false, creatorId, viewMode = 'grid', categoryId }) => {
   const [videos, setVideos] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
         data = await creatorsApi.getCreatorVideos(creatorId, p);
         results = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
       } else {
-        data = await shoppableVideosApi.getVideos();
+        data = await shoppableVideosApi.getVideos(categoryId);
         results = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
       }
       if (p === 1) {
@@ -61,7 +62,7 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
 
   useEffect(() => {
     load(1);
-  }, []);
+  }, [categoryId, creatorId]);
 
   // IntersectionObserver for infinite scroll
   useEffect(() => {
@@ -97,7 +98,27 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
 
   const displayList = compact ? filtered.slice(0, 30) : filtered;
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading && videos.length === 0) return <div className="p-6">Loading...</div>;
+
+  if (viewMode === 'reels') {
+    return (
+      <div className="w-full">
+        <ShoppableReels 
+          videos={displayList} 
+          loading={loading} 
+          hasMore={hasMore} 
+          onLoadMore={() => load(page + 1)} 
+        />
+        {showLoginModal && (
+          <LoginModal
+            isOpen={showLoginModal}
+            onClose={() => setShowLoginModal(false)}
+            onSuccess={() => setShowLoginModal(false)}
+          />
+        )}
+      </div>
+    );
+  }
 
   const wrapperClass = compact ? 'w-full px-2' : 'container mx-auto container-padding py-6';
 

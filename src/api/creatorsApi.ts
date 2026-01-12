@@ -16,9 +16,16 @@ const getAuthHeaders = () => {
 };
 
 export const creatorsApi = {
-  listCreators: async (q: string | undefined, page: number = 1): Promise<PaginatedCreators> => {
+  listCreators: async (q: string | undefined, page: number = 1, videoCategory?: number, productCategory?: number): Promise<PaginatedCreators> => {
     const response = await axios.get(CREATORS_URL, {
-      params: { q, page },
+      params: { q, page, video_category: videoCategory, category: productCategory },
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getTrendingCreators: async (): Promise<PaginatedCreators> => {
+    const response = await axios.get(`${CREATORS_URL}trending/`, {
       headers: getAuthHeaders(),
     });
     return response.data;
@@ -31,8 +38,23 @@ export const creatorsApi = {
     return response.data;
   },
 
+  updateCreator: async (id: number, payload: Partial<CreatorProfile>): Promise<CreatorProfile> => {
+    const response = await axios.patch(`${CREATORS_URL}${id}/`, payload, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
   getCreatorVideos: async (id: number, page: number = 1): Promise<PaginatedVideos> => {
     const response = await axios.get(`${CREATORS_URL}${id}/videos/`, {
+      params: { page },
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getCreatorProducts: async (id: number, page: number = 1): Promise<any> => {
+    const response = await axios.get(`${CREATORS_URL}${id}/products/`, {
       params: { page },
       headers: getAuthHeaders(),
     });
@@ -48,6 +70,13 @@ export const creatorsApi = {
 
   getFollowers: async (id: number): Promise<{ count: number; results: Array<{ user: number; username?: string }> }> => {
     const response = await axios.get(`${CREATORS_URL}${id}/followers/`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  },
+
+  getFollowing: async (id: number): Promise<PaginatedCreators> => {
+    const response = await axios.get(`${CREATORS_URL}${id}/following/`, {
       headers: getAuthHeaders(),
     });
     return response.data;
