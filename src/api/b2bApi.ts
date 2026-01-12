@@ -67,8 +67,88 @@ export const getRecommendedBusinesses = async () => {
   return res.data; // expected array of { user_id, business_name, ... }
 };
 
+export interface Negotiation {
+  id: number;
+  buyer: number;
+  seller: number;
+  product: number;
+  product_details?: {
+    name: string;
+    thumbnail: string;
+    price: number;
+  };
+  buyer_details?: {
+    username: string;
+    full_name: string;
+  };
+  proposed_price: number;
+  proposed_quantity: number;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COUNTER_OFFER';
+  last_offer_by: number;
+  created_at: string;
+  updated_at: string;
+  history?: NegotiationHistory[];
+}
+
+export interface NegotiationHistory {
+  id: number;
+  negotiation: number;
+  offer_by: number;
+  price: number;
+  quantity: number;
+  message: string;
+  timestamp: string;
+}
+
+export const createNegotiation = async (marketplaceId: number, price: number, quantity: number, message: string) => {
+  const res = await axios.post(`${API_BASE}/api/v1/negotiations/`, {
+    product: marketplaceId,
+    proposed_price: price,
+    proposed_quantity: quantity,
+    message,
+  }, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+  });
+  return res.data;
+};
+
+export const listNegotiations = async (params?: any) => {
+  const res = await axios.get(`${API_BASE}/api/v1/negotiations/`, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+    params,
+  });
+  return res.data;
+};
+
+export const getNegotiation = async (negotiationId: number) => {
+  const res = await axios.get(`${API_BASE}api/v1/negotiations/${negotiationId}/`, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+  });
+  return res.data;
+};
+
+export const updateNegotiation = async (negotiationId: number, data: { price?: number; quantity?: number; status?: string; message?: string }) => {
+  const res = await axios.patch(`${API_BASE}api/v1/negotiations/${negotiationId}/`, data, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+  });
+  return res.data;
+};
+
+export const getActiveNegotiation = async (marketplaceId: number) => {
+  const res = await axios.get(`${API_BASE}/api/v1/negotiations/active/`, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+    params: { product: marketplaceId },
+  });
+  return res.data;
+};
+
 export default {
   listB2BUsers,
   listB2BUserProducts,
   getB2BUser,
+  createNegotiation,
+  listNegotiations,
+  getNegotiation,
+  updateNegotiation,
+  getActiveNegotiation,
 };

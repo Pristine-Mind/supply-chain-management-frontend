@@ -10,7 +10,8 @@ import {
   LayoutDashboard,
   TrendingUp,
   ArrowUpRight,
-  Package
+  Package,
+  MessageCircle
 } from 'lucide-react';
 import { 
     getDistributorProfile, 
@@ -18,6 +19,7 @@ import {
     DistributorProfileResponse, 
     DistributorProduct 
 } from '../api/distributorApi';
+import { listNegotiations } from '../api/b2bApi';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import banner from '../assets/banner_new.png';
 
@@ -94,6 +96,7 @@ const ProductChart: React.FC<{ products: DistributorProduct[] }> = ({ products }
 // --- Main Component ---
 const DistributorProfile: React.FC = () => {
   const [profile, setProfile] = useState<DistributorProfileResponse | null>(null);
+  const [negotiationsCount, setNegotiationsCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -104,11 +107,14 @@ const DistributorProfile: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const [p] = await Promise.all([
+        const [p, negs] = await Promise.all([
           getDistributorProfile(),
-          listDistributorOrders()
+          listDistributorOrders(),
+          listNegotiations({ status: 'PENDING' }).catch(() => [])
         ]);
         setProfile(p);
+        const negResults = negs.results || negs || [];
+        setNegotiationsCount(negResults.length);
       } catch (e: any) {
         setError(e.message || 'Failed to load distributor data');
       } finally {
@@ -164,7 +170,7 @@ const DistributorProfile: React.FC = () => {
           )}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             <StatCard 
               icon={<Eye className="text-blue-600" />} 
               label="Total Views" 
@@ -183,6 +189,14 @@ const DistributorProfile: React.FC = () => {
               value={profile?.orders_count ?? 0} 
               color="bg-orange-50"
             />
+            <Link to="/marketplace-dashboard/negotiations" className="block">
+              <StatCard 
+                icon={<MessageCircle className="text-purple-600" />} 
+                label="Open Offers" 
+                value={negotiationsCount} 
+                color="bg-purple-50"
+              />
+            </Link>
           </div>
 
           {/* Visual Analytics */}
@@ -202,6 +216,7 @@ const DistributorProfile: React.FC = () => {
                     <tr>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Product Details</th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Views</th>
+                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Negotiations</th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Total Sold</th>
                       <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Rating</th>
                     </tr>
@@ -213,6 +228,16 @@ const DistributorProfile: React.FC = () => {
                       <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="px-6 py-4 font-bold text-slate-800 text-sm">{p.name}</td>
                         <td className="px-6 py-4 text-center text-slate-500 text-sm font-medium">{p.views ?? 0}</td>
+                        <td className="px-6 py-4 text-center">
+                          <Link 
+                            to="/marketplace-dashboard/negotiations" 
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-black transition-colors ${
+                              (p as any).bids > 0 ? 'bg-purple-100 text-purple-700 hover:bg-purple-200' : 'bg-slate-100 text-slate-400'
+                            }`}
+                          >
+                            {(p as any).bids || 0}
+                          </Link>
+                        </td>
                         <td className="px-6 py-4 text-center text-slate-900 text-sm font-black">{p.total_sold ?? 0}</td>
                         <td className="px-6 py-4 text-center">
                           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-black">
