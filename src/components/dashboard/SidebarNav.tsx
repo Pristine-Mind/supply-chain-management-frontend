@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   Building2, 
@@ -16,6 +16,8 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { FaFirstOrder } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+import { listNegotiations } from '../../api/b2bApi';
 
 interface Props {
   businessType: string | null;
@@ -25,17 +27,42 @@ interface Props {
 
 const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const [pendingNegCount, setPendingNegCount] = useState(0);
+
+  useEffect(() => {
+    if (businessType === 'distributor') {
+      const fetchCount = async () => {
+        try {
+          const data = await listNegotiations();
+          const results = data.results || data || [];
+          if (Array.isArray(results)) {
+            const count = results.filter((n: any) => 
+              n.last_offer_by !== user?.id && 
+              (n.status === 'PENDING' || n.status === 'COUNTER_OFFER')
+            ).length;
+            setPendingNegCount(count);
+          }
+        } catch (err) {
+          console.error('Failed to fetch negotiation count:', err);
+        }
+      };
+      fetchCount();
+      const interval = setInterval(fetchCount, 60000); // Pulse every minute
+      return () => clearInterval(interval);
+    }
+  }, [businessType, user?.id]);
 
   /**
    * Helper component for Navigation Links
    * Handles the logic for showing/hiding text and adjusting margins
    */
-  const NavItem = ({ href, icon: Icon, label }: { href: string; icon: any; label: string }) => (
+  const NavItem = ({ href, icon: Icon, label, badge }: { href: string; icon: any; label: string; badge?: number }) => (
     <li>
       <a
         href={href}
         title={isCollapsed ? label : ''}
-        className={`flex items-center p-3 rounded-lg font-medium text-orange-100 hover:bg-orange-700 hover:text-white transition-all duration-200 group`}
+        className={`flex items-center p-3 rounded-lg font-medium text-orange-100 hover:bg-orange-700 hover:text-white transition-all duration-200 group relative`}
       >
         <Icon 
           className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ${
@@ -43,10 +70,20 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
           }`} 
         />
         {!isCollapsed && (
-          <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-            {label}
-          </span>
+          <div className="flex-1 flex items-center justify-between min-w-0">
+            <span className="whitespace-nowrap overflow-hidden text-ellipsis">
+              {label}
+            </span>
+            {badge ? (
+              <span className="bg-white text-orange-700 text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-sm ml-2">
+                {badge}
+              </span>
+            ) : null}
+          </div>
         )}
+        {isCollapsed && badge ? (
+          <span className="absolute top-1 right-1 w-2 h-2 bg-white rounded-full shadow-sm animate-pulse" />
+        ) : null}
       </a>
     </li>
   );
@@ -93,7 +130,7 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/find-business" icon={Users} label="Find Business" />
               <NavItem href="/marketplace-dashboard" icon={BarChart3} label="Marketplace Dashboard" />
               <NavItem href="/marketplace-dashboard/orders" icon={FaFirstOrder} label="Marketplace Orders" />
-              <NavItem href="/marketplace-dashboard/negotiations" icon={ClipboardList} label="Negotiations" />
+              <NavItem href="/marketplace-dashboard/negotiations" icon={ClipboardList} label="Negotiations" badge={pendingNegCount} />
               
               <div className="pt-4 pb-2">
                 <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />

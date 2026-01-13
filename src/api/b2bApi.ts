@@ -22,6 +22,8 @@ export interface MiniProduct {
   description?: string | null;
   category_info?: { id: number; name: string } | null;
   marketplace_id?: number | null;
+  min_order?: number;
+  stock?: number;
 }
 
 export const listB2BUsers = async (q?: string, page = 1, page_size = 20) => {
@@ -82,9 +84,14 @@ export interface Negotiation {
     full_name: string;
   };
   proposed_price: number;
+  masked_price?: string;
   proposed_quantity: number;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COUNTER_OFFER';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COUNTER_OFFER' | 'ORDERED' | 'LOCKED';
   last_offer_by: number;
+  lock_owner?: number | null;
+  lock_expires_at?: string | null;
+  is_locked?: boolean;
+  lock_expires_in?: number;
   created_at: string;
   updated_at: string;
   history?: NegotiationHistory[];
@@ -121,14 +128,14 @@ export const listNegotiations = async (params?: any) => {
 };
 
 export const getNegotiation = async (negotiationId: number) => {
-  const res = await axios.get(`${API_BASE}api/v1/negotiations/${negotiationId}/`, {
+  const res = await axios.get(`${API_BASE}/api/v1/negotiations/${negotiationId}/`, {
     headers: { Authorization: `Token ${localStorage.getItem('token')}` },
   });
   return res.data;
 };
 
 export const updateNegotiation = async (negotiationId: number, data: { price?: number; quantity?: number; status?: string; message?: string }) => {
-  const res = await axios.patch(`${API_BASE}api/v1/negotiations/${negotiationId}/`, data, {
+  const res = await axios.patch(`${API_BASE}/api/v1/negotiations/${negotiationId}/`, data, {
     headers: { Authorization: `Token ${localStorage.getItem('token')}` },
   });
   return res.data;
@@ -142,6 +149,22 @@ export const getActiveNegotiation = async (marketplaceId: number) => {
   return res.data;
 };
 
+export const forceReleaseLock = async (negotiationId: number) => {
+  const res = await axios.post(`${API_BASE}/api/v1/negotiations/${negotiationId}/force_release_lock/`, {}, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+  });
+  return res.data;
+};
+
+export const extendLock = async (negotiationId: number, additionalSeconds: number = 300) => {
+  const res = await axios.post(`${API_BASE}/api/v1/negotiations/${negotiationId}/extend_lock/`, {
+    additional_seconds: additionalSeconds
+  }, {
+    headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+  });
+  return res.data;
+};
+
 export default {
   listB2BUsers,
   listB2BUserProducts,
@@ -151,4 +174,6 @@ export default {
   getNegotiation,
   updateNegotiation,
   getActiveNegotiation,
+  forceReleaseLock,
+  extendLock,
 };
