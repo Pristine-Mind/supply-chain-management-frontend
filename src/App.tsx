@@ -71,6 +71,11 @@ import FindBusinessPage from './components/FindBusinessPage';
 import DistributorProfile from './components/DistributorProfile';
 import DistributorOrders from './components/DistributorOrders';
 import DistributorNegotiations from './components/DistributorNegotiations';
+import WeeklyDigests from './components/reports/WeeklyDigests';
+import RFMSegments from './components/reports/RFMSegments';
+import LostSalesAnalysis from './components/reports/LostSalesAnalysis';
+import SystemHealth from './components/reports/SystemHealth';
+import CommandPalette from './components/CommandPalette';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -107,6 +112,10 @@ const protectedRoutes = [
   { path: '/marketplace-dashboard', element: <DistributorProfile /> },
   { path: '/marketplace-dashboard/orders', element: <DistributorOrders /> },
   { path: '/marketplace-dashboard/negotiations', element: <DistributorNegotiations /> },
+  { path: '/reports/weekly-digests', element: <WeeklyDigests /> },
+  { path: '/reports/rfm-segments', element: <RFMSegments /> },
+  { path: '/reports/lost-sales', element: <LostSalesAnalysis /> },
+  { path: '/system-health', element: <SystemHealth /> },
 ];
 
 const publicRoutes = [
@@ -173,6 +182,7 @@ const App: React.FC = () => {
         <ToastProvider>
           <CartProvider>
             <div className="p-4">
+              <CommandPalette />
               <Toaster />
               <ConditionalBackButton />
               <Routes>

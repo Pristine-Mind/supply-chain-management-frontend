@@ -9,7 +9,11 @@ import {
   Scale, 
   ClipboardList,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  Activity,
+  Zap,
+  TrendingDown
 } from 'lucide-react';
 import { FaFirstOrder } from 'react-icons/fa';
 
@@ -49,9 +53,6 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
 
   return (
     <div className="relative h-full flex flex-col">
-      {/* Toggle Button 
-        Positions itself on the border between sidebar and main content
-      */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="hidden md:flex absolute -right-3 top-8 bg-orange-700 border border-orange-600 rounded-full p-1 shadow-lg hover:bg-orange-500 transition-colors z-50 text-white"
@@ -68,6 +69,15 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/products" icon={ShoppingBag} label={t('product_management')} />
               <NavItem href="/sales" icon={DollarSign} label="Direct Sales" />
               <NavItem href="/stocks" icon={Scale} label={t('stock_management')} />
+              
+              <div className="pt-4 pb-2">
+                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
+                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Intelligence</p>}
+              </div>
+              <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
+              <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
+              <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
+              <NavItem href="/system-health" icon={Activity} label="System Health" />
             </>
           ) : businessType === 'distributor' ? (
             <>
@@ -84,6 +94,14 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/marketplace-dashboard" icon={BarChart3} label="Marketplace Dashboard" />
               <NavItem href="/marketplace-dashboard/orders" icon={FaFirstOrder} label="Marketplace Orders" />
               <NavItem href="/marketplace-dashboard/negotiations" icon={ClipboardList} label="Negotiations" />
+              
+              <div className="pt-4 pb-2">
+                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
+                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Intelligence</p>}
+              </div>
+              <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
+              <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
+              <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
             </>
           ) : (
             <>
@@ -96,6 +114,14 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/stats" icon={BarChart3} label={t('stats_and_analytics')} />
               <NavItem href="/audit-logs" icon={ClipboardList} label={t('audit_logs')} />
               <NavItem href="/stocks" icon={Scale} label={t('stock_management')} />
+
+              <div className="pt-4 pb-2">
+                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
+                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Intelligence</p>}
+              </div>
+              <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
+              <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
+              <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
             </>
           )}
         </ul>
