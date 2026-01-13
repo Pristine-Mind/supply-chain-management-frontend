@@ -67,6 +67,9 @@ interface MarketplaceProduct {
   total_reviews: number;
   view_count: number;
   rank_score: number;
+  b2b_price?: number | null;
+  b2b_min_quantity?: number | null;
+  is_b2b_eligible?: boolean;
 }
 
 interface CartItem {

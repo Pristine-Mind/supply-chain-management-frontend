@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { listB2BUserProducts, getB2BUser, B2BUser, MiniProduct, Negotiation, createNegotiation, getActiveNegotiation, updateNegotiation } from '../../api/b2bApi';
-import { ArrowLeft, Search, Building2, Mail, User, Package, ShoppingBag, Send, MessageCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { listB2BUserProducts, getB2BUser, B2BUser, MiniProduct, Negotiation, createNegotiation, getActiveNegotiation, updateNegotiation, forceReleaseLock, extendLock } from '../../api/b2bApi';
+import { ArrowLeft, Search, Building2, Mail, User, Package, ShoppingBag, Send, MessageCircle, CheckCircle2, XCircle, Lock, Clock, RefreshCcw, Unlock } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
 import { sendProductChat } from '../../api/chatApi';
 import axios from 'axios';
+import { useToast } from '../../context/ToastContext';
+import { mapErrorResponse } from '../../utils/errorMapper';
 
 interface ProductMessage {
   id: number;
@@ -28,7 +30,8 @@ const B2BUserProfile: React.FC = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { addToCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user: currentUser } = useAuth();
+  const { addToast } = useToast();
 
   const [user, setUser] = useState<B2BUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(false);
@@ -113,6 +116,7 @@ const B2BUserProfile: React.FC = () => {
       setUser(userObj as B2BUser);
     } catch (e) {
       console.error('fetchUser error:', e);
+      addToast('error', mapErrorResponse(e, 'Failed to load business profile.'));
     } finally {
       setLoadingUser(false);
     }
@@ -136,6 +140,7 @@ const B2BUserProfile: React.FC = () => {
       setPage(pageParam);
     } catch (e) {
       console.error('fetchProducts error:', e);
+      addToast('error', mapErrorResponse(e, 'Failed to load products.'));
       setProducts([]);
       setCount(0);
     } finally {
@@ -233,8 +238,9 @@ const B2BUserProfile: React.FC = () => {
       navigate('/delivery-details');
     } catch (err) {
       console.error('handleBuyNow error:', err);
+      addToast('error', mapErrorResponse(err, 'Failed to add item to checkout.'));
     }
-  }, [quantities, isAuthenticated, transformMiniToMarketplace, addToCart, navigate, activeNegotiation]);
+  }, [quantities, isAuthenticated, transformMiniToMarketplace, addToCart, navigate, activeNegotiation, addToast]);
 
   const handleSendMessage = useCallback(async () => {
     if (!modalProduct || !chatMessage.trim() || !userId) return;
@@ -255,7 +261,7 @@ const B2BUserProfile: React.FC = () => {
       setChatMessage('');
     } catch (e) {
       console.error('sendProductChat error:', e);
-      setChatSentSuccess('Failed to send message. Please try again.');
+      setChatSentSuccess(mapErrorResponse(e, 'Failed to send message. Please try again.'));
     } finally {
       setSendingChat(false);
     }
@@ -264,6 +270,29 @@ const B2BUserProfile: React.FC = () => {
   const handleNegotiate = useCallback(async () => {
     if (!modalProduct || !negotiationPrice || !negotiationQty) return;
     
+    // Client-side guardrails
+    const price = Number(negotiationPrice);
+    const qty = Number(negotiationQty);
+    const listedPrice = modalProduct.price || 0;
+    const minOrder = modalProduct.min_order || 1;
+    const stock = modalProduct.stock || Infinity;
+
+    if (price > listedPrice) {
+      addToast('error', 'Proposed price cannot exceed the listed price');
+      return;
+    }
+    if (price < listedPrice * 0.5) {
+      addToast('warning', 'Note: This price is 50%+ below list and may be rejected.');
+    }
+    if (qty < minOrder) {
+      addToast('error', `Minimum order for this product is ${minOrder} units`);
+      return;
+    }
+    if (qty > stock) {
+      addToast('error', `Only ${stock} units available in stock`);
+      return;
+    }
+
     setNegotiationLoading(true);
     const mid = modalProduct.marketplace_id || modalProduct.id;
     try {
@@ -292,11 +321,33 @@ const B2BUserProfile: React.FC = () => {
       fetchProductMessages(modalProduct.id, mid);
     } catch (err) {
       console.error('handleNegotiate error:', err);
-      setChatSentSuccess('Failed to send negotiation offer.');
+      setChatSentSuccess(mapErrorResponse(err, 'Failed to send negotiation offer.'));
     } finally {
       setNegotiationLoading(false);
     }
   }, [modalProduct, negotiationPrice, negotiationQty, negotiationMsg, activeNegotiation, fetchProductMessages]);
+
+  const handleForceReleaseLock = async (id: number) => {
+    try {
+      await forceReleaseLock(id);
+      addToast('success', 'Lock released successfully');
+      if (modalProduct) fetchProductMessages(modalProduct.id, modalProduct.marketplace_id || modalProduct.id);
+    } catch (err) {
+      console.error('Failed to release lock:', err);
+      addToast('error', mapErrorResponse(err, 'Failed to release lock'));
+    }
+  };
+
+  const handleExtendLock = async (id: number) => {
+    try {
+      await extendLock(id);
+      addToast('success', 'Lock extended for 5 minutes');
+      if (modalProduct) fetchProductMessages(modalProduct.id, modalProduct.marketplace_id || modalProduct.id);
+    } catch (err) {
+      console.error('Failed to extend lock:', err);
+      addToast('error', mapErrorResponse(err, 'Failed to extend lock'));
+    }
+  };
 
   const handleUpdateNegotiationStatus = useCallback(async (status: 'ACCEPTED' | 'REJECTED') => {
     if (!activeNegotiation || !modalProduct) return;
@@ -310,7 +361,7 @@ const B2BUserProfile: React.FC = () => {
       fetchProductMessages(modalProduct.id, mid);
     } catch (err) {
       console.error('handleUpdateNegotiationStatus error:', err);
-      setChatSentSuccess(`Failed to ${status.toLowerCase()} negotiation.`);
+      setChatSentSuccess(mapErrorResponse(err, `Failed to ${status.toLowerCase()} negotiation.`));
     } finally {
       setNegotiationLoading(false);
     }
@@ -372,6 +423,19 @@ const B2BUserProfile: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [productMessages]);
+
+  // Polling for negotiation lock status
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (modalProduct && activeNegotiation && (activeNegotiation.status === 'PENDING' || activeNegotiation.status === 'COUNTER_OFFER')) {
+      interval = setInterval(() => {
+        fetchProductMessages(modalProduct.id, modalProduct.marketplace_id || modalProduct.id);
+      }, 30000); // Poll every 30 seconds
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [modalProduct, activeNegotiation, fetchProductMessages]);
 
   // Computed values
   const totalPages = useMemo(() => Math.ceil(count / pageSize), [count]);
@@ -587,8 +651,20 @@ const B2BUserProfile: React.FC = () => {
                           </div>
                           
                           <button
-                            onClick={(e) => { e.stopPropagation(); setModalProduct(p); setIsNegotiating(true); }}
-                            className="w-full py-2 px-3 rounded-lg text-sm font-semibold border-2 border-orange-600 text-orange-600 hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (!currentUser?.b2b_verified) {
+                                addToast('error', 'Only B2B verified users can negotiate prices');
+                                return;
+                              }
+                              setModalProduct(p); 
+                              setIsNegotiating(true); 
+                            }}
+                            className={`w-full py-2 px-3 rounded-lg text-sm font-semibold border-2 transition-colors flex items-center justify-center gap-2 ${
+                              currentUser?.b2b_verified 
+                                ? 'border-orange-600 text-orange-600 hover:bg-orange-50' 
+                                : 'border-gray-300 text-gray-400 cursor-not-allowed'
+                            }`}
                           >
                             <MessageCircle className="w-4 h-4" />
                             Negotiate Price
@@ -695,70 +771,137 @@ const B2BUserProfile: React.FC = () => {
                     Price Negotiation
                   </h4>
                   {activeNegotiation && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                      activeNegotiation.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
-                      activeNegotiation.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                      'bg-orange-100 text-orange-700'
-                    }`}>
-                      {activeNegotiation.status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        activeNegotiation.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
+                        activeNegotiation.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                        activeNegotiation.status === 'ORDERED' ? 'bg-purple-100 text-purple-700' :
+                        'bg-orange-100 text-orange-700'
+                      }`}>
+                        {activeNegotiation.status}
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {activeNegotiation ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white p-3 rounded-lg shadow-sm border">
-                        <p className="text-xs text-gray-500 mb-1">Proposed Price</p>
-                        <p className="font-bold text-lg">NPR {activeNegotiation.proposed_price.toLocaleString()}</p>
-                      </div>
-                      <div className="bg-white p-3 rounded-lg shadow-sm border">
-                        <p className="text-xs text-gray-500 mb-1">Proposed Quantity</p>
-                        <p className="font-bold text-lg">{activeNegotiation.proposed_quantity} units</p>
-                      </div>
+                {activeNegotiation && (
+                  <>
+                    <div className="space-y-4 mb-4">
+                      {activeNegotiation.is_locked && activeNegotiation.lock_owner !== currentUser?.id && (
+                        <div className="flex items-center justify-between gap-2 text-xs font-bold text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                          <div className="flex items-center gap-2">
+                            <Lock size={14} /> Negotiation is locked by another user.
+                            {activeNegotiation.lock_expires_in && <span>({Math.ceil(activeNegotiation.lock_expires_in / 60)}m left)</span>}
+                          </div>
+                          {/* Force Unlock restricted to Seller/Admin - we omit it here for buyers */}
+                        </div>
+                      )}
+
+                      {activeNegotiation.is_locked && activeNegotiation.lock_owner === currentUser?.id && (
+                        <div className="flex items-center justify-between gap-2 text-xs font-bold text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                          <div className="flex items-center gap-2">
+                            <Clock size={14} /> You have the editing lock.
+                            {activeNegotiation.lock_expires_in && <span>({Math.ceil(activeNegotiation.lock_expires_in / 60)}m left)</span>}
+                          </div>
+                          <button 
+                            onClick={() => handleExtendLock(activeNegotiation.id)}
+                            className="bg-white px-2 py-1 rounded border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1"
+                          >
+                            <RefreshCcw size={12} /> Extend
+                          </button>
+                        </div>
+                      )}
                     </div>
 
-                    {activeNegotiation.status === 'COUNTER_OFFER' && activeNegotiation.last_offer_by !== user?.id && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleUpdateNegotiationStatus('ACCEPTED')}
-                          className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors"
-                        >
-                          <CheckCircle2 className="w-5 h-5" /> Accept Offer
-                        </button>
-                        <button
-                          onClick={() => handleUpdateNegotiationStatus('REJECTED')}
-                          className="flex-1 py-3 bg-red-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-red-700 transition-colors"
-                        >
-                          <XCircle className="w-5 h-5" /> Reject
-                        </button>
-                        <button
-                          onClick={() => {
-                            setNegotiationPrice(activeNegotiation.proposed_price.toString());
-                            setNegotiationQty(activeNegotiation.proposed_quantity.toString());
-                            setIsNegotiating(true);
-                          }}
-                          className="flex-1 py-3 border-2 border-orange-600 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors"
-                        >
-                          Counter
-                        </button>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white p-3 rounded-lg shadow-sm border">
+                          <p className="text-xs text-gray-500 mb-1">Proposed Price</p>
+                          <p className="font-bold text-lg">
+                            {activeNegotiation.masked_price || `NPR ${activeNegotiation.proposed_price.toLocaleString()}`}
+                          </p>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg shadow-sm border">
+                          <p className="text-xs text-gray-500 mb-1">Proposed Quantity</p>
+                          <p className="font-bold text-lg">{activeNegotiation.proposed_quantity} units</p>
+                        </div>
                       </div>
-                    )}
 
-                    {activeNegotiation.status === 'ACCEPTED' && (
-                      <button
-                        onClick={(e) => handleBuyNow(e, modalProduct)}
-                        className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
-                      >
-                        Buy at Negotiated Price
-                      </button>
-                    )}
-                  </div>
-                ) : (
+                      {activeNegotiation.status === 'COUNTER_OFFER' && activeNegotiation.last_offer_by !== currentUser?.id && (
+                        <div className="flex gap-2">
+                          <button
+                            disabled={activeNegotiation.is_locked && activeNegotiation.lock_owner !== currentUser?.id}
+                            onClick={() => handleUpdateNegotiationStatus('ACCEPTED')}
+                            className="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors disabled:opacity-50"
+                          >
+                            <CheckCircle2 className="w-5 h-5" /> Accept Offer
+                          </button>
+                          <button
+                            disabled={activeNegotiation.is_locked && activeNegotiation.lock_owner !== currentUser?.id}
+                            onClick={() => handleUpdateNegotiationStatus('REJECTED')}
+                            className="flex-1 py-3 bg-red-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-red-700 transition-colors disabled:opacity-50"
+                          >
+                            <XCircle className="w-5 h-5" /> Reject
+                          </button>
+                          <button
+                            disabled={activeNegotiation.is_locked && activeNegotiation.lock_owner !== currentUser?.id}
+                            onClick={() => {
+                              setNegotiationPrice(activeNegotiation.proposed_price.toString());
+                              setNegotiationQty(activeNegotiation.proposed_quantity.toString());
+                              setIsNegotiating(true);
+                            }}
+                            className="flex-1 py-3 border-2 border-orange-600 text-orange-600 rounded-lg font-bold hover:bg-orange-50 transition-colors disabled:opacity-50"
+                          >
+                            Counter
+                          </button>
+                        </div>
+                      )}
+
+                      {activeNegotiation.last_offer_by === currentUser?.id && (activeNegotiation.status === 'PENDING' || activeNegotiation.status === 'COUNTER_OFFER') && !activeNegotiation.is_locked && (
+                        <div className="flex flex-col gap-2">
+                          <div className="p-3 bg-blue-50 text-blue-700 text-xs font-bold rounded-lg border border-blue-100 flex items-center gap-2">
+                            <Clock size={14} /> Waiting for seller response.
+                          </div>
+                          <button
+                            onClick={() => {
+                              if (window.confirm('Are you sure you want to withdraw this negotiation? This will end the current deal.')) {
+                                handleUpdateNegotiationStatus('REJECTED');
+                              }
+                            }}
+                            className="w-full py-2 border-2 border-red-200 text-red-600 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <XCircle size={14} /> Withdraw Offer
+                          </button>
+                        </div>
+                      )}
+
+                      {activeNegotiation.status === 'ACCEPTED' && (
+                        <button
+                          onClick={(e) => handleBuyNow(e, modalProduct)}
+                          className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+                        >
+                          Buy at Negotiated Price
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {!activeNegotiation && (
                   !isNegotiating && (
                     <button
-                      onClick={() => setIsNegotiating(true)}
-                      className="w-full py-3 bg-white border-2 border-dashed border-orange-300 rounded-xl text-orange-700 font-semibold hover:bg-orange-100/50 transition-colors"
+                      onClick={() => {
+                        if (!currentUser?.b2b_verified) {
+                          addToast('error', 'Only B2B verified users can negotiate prices');
+                          return;
+                        }
+                        setIsNegotiating(true);
+                      }}
+                      className={`w-full py-3 border-2 border-dashed rounded-xl font-semibold transition-colors ${
+                        currentUser?.b2b_verified
+                          ? 'border-orange-300 text-orange-700 hover:bg-orange-100/50'
+                          : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
                     >
                       Start Negotiation
                     </button>

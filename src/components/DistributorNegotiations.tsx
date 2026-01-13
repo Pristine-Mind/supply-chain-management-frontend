@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { listNegotiations, updateNegotiation, Negotiation } from '../api/b2bApi';
+import { listNegotiations, updateNegotiation, forceReleaseLock, extendLock, Negotiation } from '../api/b2bApi';
 import { useAuth } from '../context/AuthContext';
 import { 
   ChevronLeft, 
@@ -13,10 +13,14 @@ import {
   ArrowRight,
   ExternalLink,
   History,
-  AlertCircle
+  AlertCircle,
+  Lock,
+  Unlock,
+  RefreshCcw
 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { useToast } from '../context/ToastContext';
+import { mapErrorResponse } from '../utils/errorMapper';
 
 const DistributorNegotiations: React.FC = () => {
   const navigate = useNavigate();
@@ -48,7 +52,7 @@ const DistributorNegotiations: React.FC = () => {
       setNegotiations(sorted);
     } catch (err) {
       console.error('Failed to fetch negotiations:', err);
-      addToast('error', 'Failed to load negotiations');
+      addToast('error', mapErrorResponse(err, 'Failed to load negotiations'));
     } finally {
       setLoading(false);
     }
@@ -56,6 +60,15 @@ const DistributorNegotiations: React.FC = () => {
 
   useEffect(() => {
     fetchNegotiations();
+    // Poll for updates every 30 seconds to refresh lock status
+    const interval = setInterval(fetchNegotiations, 30000);
+    
+    // Cleanup: try to release locks if held when navigating away
+    return () => {
+      clearInterval(interval);
+      // We don't have an explicit single "release all my locks" endpoint, 
+      // but in a production app you might call a cleanup endpoint here.
+    };
   }, [fetchNegotiations]);
 
   const handleStatusUpdate = async (id: number, status: 'ACCEPTED' | 'REJECTED') => {
@@ -65,7 +78,7 @@ const DistributorNegotiations: React.FC = () => {
       fetchNegotiations();
     } catch (err) {
       console.error('Failed to update status:', err);
-      addToast('error', 'Failed to update negotiation status');
+      addToast('error', mapErrorResponse(err, 'Failed to update negotiation status'));
     }
   };
 
@@ -90,9 +103,31 @@ const DistributorNegotiations: React.FC = () => {
       fetchNegotiations();
     } catch (err) {
       console.error('Failed to send counter offer:', err);
-      addToast('error', 'Failed to send counter offer');
+      addToast('error', mapErrorResponse(err, 'Failed to send counter offer'));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleForceReleaseLock = async (id: number) => {
+    try {
+      await forceReleaseLock(id);
+      addToast('success', 'Lock released successfully');
+      fetchNegotiations();
+    } catch (err) {
+      console.error('Failed to release lock:', err);
+      addToast('error', mapErrorResponse(err, 'Failed to release lock'));
+    }
+  };
+
+  const handleExtendLock = async (id: number) => {
+    try {
+      await extendLock(id);
+      addToast('success', 'Lock extended for 5 minutes');
+      fetchNegotiations();
+    } catch (err) {
+      console.error('Failed to extend lock:', err);
+      addToast('error', mapErrorResponse(err, 'Failed to extend lock'));
     }
   };
 
@@ -152,9 +187,15 @@ const DistributorNegotiations: React.FC = () => {
             {filteredNegotiations.map((neg) => {
               const isTurnToAct = neg.last_offer_by !== currentUser?.id;
               const hasHistory = neg.history && neg.history.length > 0;
+              const isLockedByOthers = neg.is_locked && neg.lock_owner !== currentUser?.id;
+              const isLockedByMe = neg.is_locked && neg.lock_owner === currentUser?.id;
 
               return (
-              <Card key={neg.id} className="border-none shadow-sm ring-1 ring-slate-200 hover:ring-orange-300 transition-all overflow-hidden bg-white">
+              <Card key={neg.id} className={`border-none shadow-sm ring-1 transition-all overflow-hidden bg-white ${
+                isLockedByOthers ? 'ring-red-200 opacity-80' : 
+                isLockedByMe ? 'ring-blue-300' : 
+                'ring-slate-200 hover:ring-orange-300'
+              }`}>
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row items-stretch">
                     {/* Status Indicator */}
@@ -162,6 +203,8 @@ const DistributorNegotiations: React.FC = () => {
                       neg.status === 'ACCEPTED' ? 'bg-green-500' :
                       neg.status === 'REJECTED' ? 'bg-red-500' :
                       neg.status === 'COUNTER_OFFER' ? 'bg-blue-500' :
+                      neg.status === 'ORDERED' ? 'bg-purple-500' :
+                      neg.status === 'LOCKED' ? 'bg-slate-500' :
                       'bg-orange-500'
                     }`} />
                     
@@ -179,16 +222,26 @@ const DistributorNegotiations: React.FC = () => {
                             <h3 className="text-lg font-black text-slate-900 leading-tight mb-1">
                               {neg.product_details?.name || `Product #${neg.product}`}
                             </h3>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest ${
                                 neg.status === 'ACCEPTED' ? 'bg-green-100 text-green-700' :
                                 neg.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
                                 neg.status === 'COUNTER_OFFER' ? 'bg-blue-100 text-blue-700' :
+                                neg.status === 'ORDERED' ? 'bg-purple-100 text-purple-700' :
                                 'bg-orange-100 text-orange-700'
                               }`}>
                                 {neg.status.replace('_', ' ')}
                               </span>
-                              {!isTurnToAct && neg.status !== 'ACCEPTED' && neg.status !== 'REJECTED' && (
+                              
+                              {neg.is_locked && (
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-widest flex items-center gap-1 ${
+                                  isLockedByMe ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
+                                }`}>
+                                  <Lock size={10} /> {isLockedByMe ? 'Your Session' : 'Locked by Other'}
+                                </span>
+                              )}
+
+                              {!isTurnToAct && neg.status !== 'ACCEPTED' && neg.status !== 'REJECTED' && neg.status !== 'ORDERED' && (
                                 <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                                   <Clock size={10} /> Waiting for Buyer
                                 </span>
@@ -197,11 +250,50 @@ const DistributorNegotiations: React.FC = () => {
                           </div>
                         </div>
                         <div className="text-right sm:text-right">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Proposed Value</p>
-                          <p className="text-2xl font-black text-slate-900">NPR {neg.proposed_price.toLocaleString()}</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Value</p>
+                          <p className="text-2xl font-black text-slate-900">
+                            {neg.masked_price || `NPR ${neg.proposed_price.toLocaleString()}`}
+                          </p>
                           <p className="text-xs font-bold text-orange-600 uppercase tracking-widest">{neg.proposed_quantity} units</p>
                         </div>
                       </div>
+
+                      {/* Lock Warning */}
+                      {isLockedByOthers && (
+                        <div className="mb-4 flex items-center justify-between gap-2 text-xs font-bold text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                          <div className="flex items-center gap-2">
+                            <Lock size={14} /> This negotiation is currently being viewed/edited by another user.
+                            {neg.lock_expires_in && <span>Expires in {Math.ceil(neg.lock_expires_in / 60)}m</span>}
+                          </div>
+                          <button 
+                            onClick={() => handleForceReleaseLock(neg.id)}
+                            className="bg-white px-2 py-1 rounded border border-red-200 hover:bg-red-100 transition-colors flex items-center gap-1"
+                          >
+                            <Unlock size={12} /> Force Unlock
+                          </button>
+                        </div>
+                      )}
+
+                      {isLockedByMe && (
+                        <div className={`mb-4 flex items-center justify-between gap-2 text-xs font-bold p-2 rounded-lg border transition-all ${
+                          neg.lock_expires_in && neg.lock_expires_in < 60 
+                            ? 'text-red-600 bg-red-50 border-red-200 animate-pulse' 
+                            : 'text-blue-600 bg-blue-50 border-blue-100'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <Clock size={14} /> 
+                            {neg.lock_expires_in && neg.lock_expires_in < 60 
+                              ? `Your session lock is about to expire! (${neg.lock_expires_in}s)` 
+                              : `Your session lock is active. (${Math.ceil((neg.lock_expires_in || 0) / 60)}m left)`}
+                          </div>
+                          <button 
+                            onClick={() => handleExtendLock(neg.id)}
+                            className="bg-white px-2 py-1 rounded border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1"
+                          >
+                            <RefreshCcw size={12} /> Extend
+                          </button>
+                        </div>
+                      )}
 
                       {/* Buyer Note */}
                       <div className="bg-slate-50 rounded-2xl p-4 flex items-start gap-4 mb-6">
@@ -224,7 +316,7 @@ const DistributorNegotiations: React.FC = () => {
                       </div>
 
                       {/* Turn-based Action Warning */}
-                      {!isTurnToAct && neg.status === 'PENDING' && (
+                      {!isTurnToAct && (neg.status === 'PENDING' || neg.status === 'COUNTER_OFFER') && !neg.is_locked && (
                         <div className="mb-4 flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100">
                           <AlertCircle size={14} /> You've already sent an offer. Awaiting buyer's response.
                         </div>
@@ -240,7 +332,8 @@ const DistributorNegotiations: React.FC = () => {
                                 type="number"
                                 value={counterPrice}
                                 onChange={(e) => setCounterPrice(e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none"
+                                disabled={isLockedByOthers}
+                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none disabled:bg-slate-50"
                               />
                             </div>
                             <div>
@@ -249,7 +342,8 @@ const DistributorNegotiations: React.FC = () => {
                                 type="number"
                                 value={counterQty}
                                 onChange={(e) => setCounterQty(e.target.value)}
-                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none"
+                                disabled={isLockedByOthers}
+                                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500/20 outline-none disabled:bg-slate-50"
                               />
                             </div>
                           </div>
@@ -258,13 +352,14 @@ const DistributorNegotiations: React.FC = () => {
                             <textarea
                               value={counterMsg}
                               onChange={(e) => setCounterMsg(e.target.value)}
+                              disabled={isLockedByOthers}
                               placeholder="e.g., We can offer this price if you buy 100 units..."
-                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm h-20 resize-none focus:ring-2 focus:ring-orange-500/20 outline-none"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm h-20 resize-none focus:ring-2 focus:ring-orange-500/20 outline-none disabled:bg-slate-50"
                             />
                           </div>
                           <div className="flex gap-2">
                             <button
-                              disabled={submitting}
+                              disabled={submitting || isLockedByOthers}
                               onClick={() => handleSendCounter(neg.id)}
                               className="flex-1 py-2 bg-orange-600 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:bg-orange-700 transition-all disabled:opacity-50"
                             >
@@ -285,24 +380,27 @@ const DistributorNegotiations: React.FC = () => {
                           {(neg.status === 'PENDING' || neg.status === 'COUNTER_OFFER') && isTurnToAct ? (
                             <>
                               <button
+                                disabled={isLockedByOthers}
                                 onClick={() => handleStatusUpdate(neg.id, 'ACCEPTED')}
-                                className="px-6 py-2 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-100 hover:bg-green-700 transition-all flex items-center gap-2"
+                                className="px-6 py-2 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-100 hover:bg-green-700 transition-all flex items-center gap-2 disabled:opacity-50 disabled:bg-slate-400"
                               >
                                 <CheckCircle2 size={16} /> Accept
                               </button>
                               <button
+                                disabled={isLockedByOthers}
                                 onClick={() => {
                                   setCounterId(neg.id);
                                   setCounterPrice(neg.proposed_price.toString());
                                   setCounterQty(neg.proposed_quantity.toString());
                                 }}
-                                className="px-6 py-2 bg-orange-100 text-orange-700 rounded-xl text-sm font-bold hover:bg-orange-200 transition-all flex items-center gap-2"
+                                className="px-6 py-2 bg-orange-100 text-orange-700 rounded-xl text-sm font-bold hover:bg-orange-200 transition-all flex items-center gap-2 disabled:opacity-50"
                               >
                                 <MessageCircle size={16} /> Counter
                               </button>
                               <button
+                                disabled={isLockedByOthers}
                                 onClick={() => handleStatusUpdate(neg.id, 'REJECTED')}
-                                className="px-6 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-red-50 hover:border-red-200 transition-all flex items-center gap-2"
+                                className="px-6 py-2 bg-white border-2 border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-red-50 hover:border-red-200 transition-all flex items-center gap-2 disabled:opacity-50"
                               >
                                 <XCircle size={16} /> Reject
                               </button>

@@ -319,9 +319,16 @@ const Cart: React.FC = () => {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h3 className="text-lg font-medium text-gray-900 mb-1">{item.name}</h3>
-                            <p className="text-lg font-semibold text-primary-600">
-                              Rs. {item.price.toLocaleString()}
-                            </p>
+                            <div className="flex items-center gap-3 mb-1">
+                              <p className="text-lg font-semibold text-primary-600">
+                                Rs. {item.price.toLocaleString()}
+                              </p>
+                              {item.product.listed_price !== item.price && (
+                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                  Negotiated Price
+                                </span>
+                              )}
+                            </div>
                           </div>
                           
                           {/* Remove Button */}
@@ -341,7 +348,18 @@ const Cart: React.FC = () => {
                             <span className="text-neutral-600">Quantity:</span>
                             <div className="flex items-center border border-neutral-300 rounded-lg">
                               <button
-                                onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                                onClick={() => {
+                                  const isNegotiated = item.product.listed_price !== item.price;
+                                  const minNegotiatedQty = item.product.b2b_min_quantity || 1;
+                                  
+                                  if (isNegotiated && item.quantity <= minNegotiatedQty) {
+                                    if (window.confirm('Decreasing quantity below the negotiated amount may reset the price to the standard marketplace rate. Continue?')) {
+                                      handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1));
+                                    }
+                                  } else {
+                                    handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1));
+                                  }
+                                }}
                                 disabled={loading[item.id] || cartLoading || item.quantity <= 1}
                                 className="p-2 text-neutral-500 hover:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title={item.quantity <= 1 ? "Use remove button to delete item" : "Decrease quantity"}
