@@ -3,30 +3,31 @@ import { categoryApi } from '../api/categoryApi';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, User, ShoppingCart, Heart, Star, ChevronLeft, ChevronRight, Menu, Mic } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Menu, Mic } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
-import FeaturedProducts from './FeaturedProducts';
-import BrandsSection from './BrandsSection';
-import DiaperSection from './DiaperSection';
 import CategoryMenu from './CategoryMenu';
 import SearchSuggestions from './SearchSuggestions';
-import ShoppableVideoFeed from './ShoppableVideoFeed';
 import { createSlug } from '../utils/slugUtils';
-import MadeForYou from './MadeForYou';
-import ProductHubSections from './ProductHubSections';
-import TopBrands from './TopBrands';
-import MadeInNepal from './MadeInNepal';
-import FlashSale from './FlashSale';
+
+const FlashSale = React.lazy(() => import('./FlashSale'));
+const MadeForYou = React.lazy(() => import('./MadeForYou'));
+const ProductHubSections = React.lazy(() => import('./ProductHubSections'));
+const BestDealsSection = React.lazy(() => import('./BestDealsSection'));
+const FeaturedProducts = React.lazy(() => import('./FeaturedProducts'));
+const BrandsSection = React.lazy(() => import('./BrandsSection'));
+const MadeInNepal = React.lazy(() => import('./MadeInNepal'));
+const DiaperSection = React.lazy(() => import('./DiaperSection'));
+const TopBrands = React.lazy(() => import('./TopBrands'));
+const ShoppableVideoFeed = React.lazy(() => import('./ShoppableVideoFeed'));
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
-import BannerSaleImage from '../assets/banner_sale.png';
 import HeroBanner from './HeroBanner';
 import PromoBanner from './PromoBanner';
-import BestDealsSection from './BestDealsSection';
 import FreeDeliveryBanner from './FreeDeliveryBanner';
+import LazySection from './ui/LazySection';
 
 interface ProductImage {
   id: number;
@@ -100,23 +101,6 @@ interface MarketplaceProduct {
   b2b_min_quantity?: number;
 }
 
-interface Brand {
-  id: number;
-  name: string;
-  description: string;
-  logo: string | null;
-  logo_url: string | null;
-  website: string;
-  country_of_origin: string;
-  is_active: boolean;
-  is_verified: boolean;
-  created_at: string;
-  updated_at: string;
-  manufacturer_info: string;
-  contact_email: string;
-  contact_phone: string;
-  products_count: number;
-}
 
 const PLACEHOLDER = 'https://via.placeholder.com/150';
 
@@ -188,40 +172,17 @@ const Marketplace: React.FC = () => {
   // Additional filter states for unified interface
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedBusinessType, setSelectedBusinessType] = useState('');
-  const [businessTypeDropdownOpen, setBusinessTypeDropdownOpen] = useState(false);
-  
   
   const [productsError, setProductsError] = useState('');
-  const [flashSaleError, setFlashSaleError] = useState('');
-  const [dealsError, setDealsError] = useState('');
-  const [todaysPickError, setTodaysPickError] = useState('');
-  const [madeInNepalError, setMadeInNepalError] = useState('');
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // start with no tab selected — only render For You when user explicitly clicks it
-  const [currentTab, setCurrentTab] = useState<'none' | 'for_you' | 'following'>('none');
   
-  // Initialize currentView based on URL parameters
-  // (view concept removed) we always render marketplace product grid
-  const [flashSaleProducts, setFlashSaleProducts] = useState<MarketplaceProduct[]>([]);
-  const [dealsProducts, setDealsProducts] = useState<MarketplaceProduct[]>([]);
-  const [todaysPickProducts, setTodaysPickProducts] = useState<MarketplaceProduct[]>([]);
-  const [madeInNepalProducts, setMadeInNepalProducts] = useState<MarketplaceProduct[]>([]);
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [brandsLoading, setBrandsLoading] = useState(false);
-  const [brandsError, setBrandsError] = useState('');
-  const [flashSaleLoading, setFlashSaleLoading] = useState(false);
-  const [dealsLoading, setDealsLoading] = useState(false);
-  const [todaysPickLoading, setTodaysPickLoading] = useState(false);
-  const [madeInNepalLoading, setMadeInNepalLoading] = useState(false);
   const { addToCart, distinctItemCount } = useCart();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const firstMenuItemRef = useRef<HTMLButtonElement | null>(null);
-  const trendingRef = useRef<HTMLDivElement | null>(null);
-  const brandsRef = useRef<HTMLDivElement | null>(null);
   const [pendingProduct, setPendingProduct] = useState<MarketplaceProduct | null>(null);
 
   // Close user menu on outside click or ESC
@@ -322,112 +283,6 @@ const Marketplace: React.FC = () => {
     }
   };
 
-  const fetchFlashSaleProducts = async () => {
-    setFlashSaleLoading(true);
-    setFlashSaleError('');
-    try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Token ${token}` } : {};
-      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/most_viewed/`;
-      const { data } = await axios.get(url, { timeout: 8000, headers });
-      setFlashSaleProducts(data.results);
-    } catch {
-      setFlashSaleError('Error fetching flash sale products');
-    } finally {
-      setFlashSaleLoading(false);
-    }
-  };
-
-  const fetchDealsProducts = async () => {
-    setDealsLoading(true);
-    setDealsError('');
-    try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Token ${token}` } : {};
-      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/deals/`;
-      const { data } = await axios.get(url, { timeout: 8000, headers });
-      setDealsProducts(data.results);
-    } catch {
-      setDealsError('Error fetching deals products');
-    } finally {
-      setDealsLoading(false);
-    }
-  };
-
-  const fetchTodaysPick = async () => {
-    setTodaysPickLoading(true);
-    setTodaysPickError('');
-    try {
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Token ${token}` } : {};
-      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/new_trending/`;
-      const { data } = await axios.get(url, { timeout: 8000, headers });
-      setTodaysPickProducts(data.results);
-    } catch {
-      setTodaysPickError('Error fetching todays pick products');
-    } finally {
-      setTodaysPickLoading(false);
-    }
-  };
-
-  // const fetchMadeInNepal = async () => {
-  //   setMadeInNepalLoading(true);
-  //   setMadeInNepalError('');
-    
-  //   try {
-  //     const token = localStorage.getItem('token');
-  //     const headers = token ? { Authorization: `Token ${token}` } : {};
-  //     const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/made-in-nepal/`;
-      
-  //     const response = await axios.get(url, { timeout: 8000, headers });
-      
-  //     if (response.data && response.data.results) {
-      
-  //       setMadeInNepalProducts(response.data.results);
-  //     } else {
-  //       setMadeInNepalProducts([]);
-  //     }
-  //   } catch (error: any) {
-  //     setMadeInNepalError('Error fetching Made in Nepal products');
-  //   } finally {
-  //     setMadeInNepalLoading(false);
-  //   }
-  // };
-
-  const fetchBrands = async () => {
-    setBrandsLoading(true);
-    setBrandsError('');
-    
-    try {
-      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/brands/`;
-      
-      const response = await axios.get(url, { timeout: 8000 });
-      
-      if (response.data && response.data.results) {
-        setBrands(response.data.results);
-      } else {
-        setBrands([]);
-      }
-    } catch (error: any) {
-      setBrandsError('Error fetching brands');
-    } finally {
-      setBrandsLoading(false);
-    }
-  };
-
-  // Helpers for trending strip scrolling
-  const scrollTrendingBy = (distance: number) => {
-    if (trendingRef.current) {
-      trendingRef.current.scrollBy({ left: distance, behavior: 'smooth' });
-    }
-  };
-
-  const scrollBrandsBy = (distance: number) => {
-    if (brandsRef.current) {
-      brandsRef.current.scrollBy({ left: distance, behavior: 'smooth' });
-    }
-  };
-  
   // Navigate to full results page when user presses Enter in search
   const handleSearchEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -453,97 +308,9 @@ const Marketplace: React.FC = () => {
     fetchMarketplaceProducts(1);
   }, [debouncedQuery, minPrice, maxPrice, minOrder, selectedCity, selectedBusinessType]);
 
-  useEffect(() => {
-    // Fetch all trending section data on component mount for immediate loading
-    fetchDealsProducts();
-    // fetchMadeInNepal();
-    fetchTodaysPick();
-    fetchFlashSaleProducts();
-    fetchBrands();
-  }, []);
-
   // Effect to handle URL parameter changes
   useEffect(() => {
   }, [searchParams]);
-
-  // Debug effect to track Made in Nepal products changes
-  useEffect(() => {
-  }, [madeInNepalProducts, madeInNepalLoading, madeInNepalError]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (!target.closest('.business-type-dropdown')) {
-        setBusinessTypeDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Auto-scroll for flash sale products
-  useEffect(() => {
-    const scrollContainer = trendingRef.current;
-    if (!scrollContainer || !flashSaleProducts.length) return;
-
-    let scrollDirection = 1;
-    const scrollSpeed = 50; // pixels per second
-    const intervalTime = 50; // milliseconds
-
-    const autoScroll = setInterval(() => {
-      const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-      
-      if (scrollContainer.scrollLeft >= maxScrollLeft) {
-        scrollDirection = -1;
-      } else if (scrollContainer.scrollLeft <= 0) {
-        scrollDirection = 1;
-      }
-      
-      scrollContainer.scrollLeft += scrollDirection * (scrollSpeed * intervalTime / 1000);
-    }, intervalTime);
-
-    // Pause auto-scroll on hover
-    const handleMouseEnter = () => clearInterval(autoScroll);
-    const handleMouseLeave = () => {
-      // Restart auto-scroll when mouse leaves
-      setTimeout(() => {
-        if (scrollContainer) {
-          const newAutoScroll = setInterval(() => {
-            const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-            
-            if (scrollContainer.scrollLeft >= maxScrollLeft) {
-              scrollDirection = -1;
-            } else if (scrollContainer.scrollLeft <= 0) {
-              scrollDirection = 1;
-            }
-            
-            scrollContainer.scrollLeft += scrollDirection * (scrollSpeed * intervalTime / 1000);
-          }, intervalTime);
-          
-          // Store the interval reference
-          scrollContainer.dataset.autoScrollInterval = newAutoScroll.toString();
-        }
-      }, 1000);
-    };
-
-    scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-    scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      clearInterval(autoScroll);
-      if (scrollContainer) {
-        scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
-        scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
-        const intervalId = scrollContainer.dataset.autoScrollInterval;
-        if (intervalId) {
-          clearInterval(parseInt(intervalId));
-        }
-      }
-    };
-  }, [flashSaleProducts]);
 
   
   const handleAddToCart = async (product: any, e: React.MouseEvent) => {
@@ -863,11 +630,24 @@ const Marketplace: React.FC = () => {
         <HeroBanner/>
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
-          <FlashSale /> 
-          <MadeForYou />
-          <ProductHubSections />
+          <LazySection>
+            <FlashSale /> 
+          </LazySection>
+          
+          <LazySection>
+            <MadeForYou />
+          </LazySection>
+
+          <LazySection>
+            <ProductHubSections />
+          </LazySection>
+
           <PromoBanner />
-          <BestDealsSection todaysPickProducts={todaysPickProducts} user={user} />          
+          
+          <LazySection>
+            <BestDealsSection user={user} />          
+          </LazySection>
+
           <FreeDeliveryBanner />
         </div>
 
@@ -950,168 +730,29 @@ const Marketplace: React.FC = () => {
           </div>
         )}
 
-      <FeaturedProducts/>
-      <BrandsSection />
+      <LazySection>
+        <FeaturedProducts/>
+      </LazySection>
+
+      <LazySection>
+        <BrandsSection />
+      </LazySection>
 
       {/* Made in Nepal Section - Revamped */}
-      <MadeInNepal />
+      <LazySection>
+        <MadeInNepal />
+      </LazySection>
       
       {/* Diaper Section */}
-      <DiaperSection /> 
-      {/* Trending Deals Section - Only show if deals are available */}
-      {dealsProducts.length > 0 && (
-        <div className="bg-neutral-50 py-8">
-          <div className="container mx-auto px-4">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg p-6 mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold flex items-center space-x-2">
-                    <span>🏷️</span>
-                    <span>Trending Deals & Discounts</span>
-                  </h2>
-                  <p className="text-green-100 mt-2">Save big on selected products!</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold">{dealsProducts.length}</div>
-                  <div className="text-sm text-green-100">Deals Available</div>
-                </div>
-              </div>
-            </div>
+      <LazySection>
+        <DiaperSection /> 
+      </LazySection>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {dealsProducts.slice(0, 8).map(item => (
-                <div
-                  key={item.id}
-                  onClick={() => navigate(`/marketplace/${item.id}`)}
-                  className="bg-white rounded-xl shadow-elevation-sm hover:shadow-elevation-md transition-all duration-300 cursor-pointer overflow-hidden group border border-neutral-200"
-                >
-                  <div className="relative aspect-square overflow-hidden">
-                    {item.percent_off > 0 && (
-                      <div className="absolute top-3 left-3 bg-accent-success-500 text-white px-2 py-1 rounded-md text-xs font-bold z-10 shadow-sm">
-                        {Math.round(item.percent_off)}% OFF
-                      </div>
-                    )}
-                    
-                    <img
-                      src={item.product_details.images?.[0]?.image ?? PLACEHOLDER}
-                      alt={item.product_details.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    
-                    {/* Quick View Overlay */}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <button className="bg-white text-neutral-900 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors shadow-sm">
-                        Quick View
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 space-y-3">
-                    {/* Category and Rating */}
-                    <div className="flex items-center justify-between">
-                      <span className="inline-block bg-neutral-100 text-neutral-600 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
-                        {item.product_details.category_details}
-                      </span>
-                      {item.average_rating > 0 && (
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-accent-warning-400 text-accent-warning-400" />
-                          <span className="text-sm font-medium text-neutral-700">
-                            {item.average_rating.toFixed(1)}
-                          </span>
-                          <span className="text-xs text-neutral-500">
-                            ({item.total_reviews})
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Product Title */}
-                    <h3 className="font-semibold text-neutral-900 line-clamp-2 text-body group-hover:text-accent-success-600 transition-colors leading-tight">
-                      {item.product_details.name}
-                    </h3>
-                    
-                    {/* Price Section */}
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        {(() => {
-                          const pricing = getDisplayPrice(item, user);
-                          return (
-                            <>
-                              <span className="text-h3 font-bold text-accent-success-600">
-                                Rs.{pricing.currentPrice}
-                              </span>
-                              {pricing.originalPrice && (
-                                <span className="text-body text-neutral-500 line-through">
-                                  Rs.{pricing.originalPrice}
-                                </span>
-                              )}
-                              {pricing.isB2BPrice && (
-                                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
-                                  B2B
-                                </span>
-                              )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                      {(() => {
-                        const pricing = getDisplayPrice(item, user);
-                        return pricing.savings > 0 ? (
-                          <div className="text-xs text-accent-success-600 font-medium bg-accent-success-50 px-2 py-1 rounded-full inline-block">
-                            You save Rs.{pricing.savings.toFixed(2)}
-                          </div>
-                        ) : null;
-                      })()}
-                    </div>
-                    
-                    {/* Stock Info */}
-                    <div className="flex items-center gap-1 text-xs text-neutral-600">
-                      <div className={`w-2 h-2 rounded-full ${item.product_details.stock > 10 ? 'bg-accent-success-500' : item.product_details.stock > 0 ? 'bg-accent-warning-500' : 'bg-accent-error-500'}`}></div>
-                      <span className="font-medium">
-                        {item.product_details.stock > 0 ? `${item.product_details.stock} in stock` : 'Out of stock'}
-                      </span>
-                    </div>
-                    
-                    {/* Action Button */}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddToCart(item, e);
-                      }}
-                      disabled={item.product_details.stock === 0}
-                      className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-                        item.product_details.stock === 0
-                          ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
-                          : 'bg-orange-600 text-white hover:bg-accent-success-700 hover:shadow-md'
-                      }`}
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      <span>{item.product_details.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* View All Deals Button */}
-            {dealsProducts.length > 8 && (
-              <div className="text-center mt-8">
-                <button
-                  onClick={() => {
-                    navigate('/deals');
-                  }}
-                  className="bg-accent-success-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-accent-success-700 transition-all duration-200 shadow-sm hover:shadow-md"
-                >
-                  View All {dealsProducts.length} Deals
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Brands Section */}
-      <TopBrands />
+      {/* Brands Section moved to LazySection below DiaperSection if desired, 
+          but TopBrands was here in original code */}
+      <LazySection>
+        <TopBrands />
+      </LazySection>
 
       <div className="container mx-auto px-4 py-3 sm:py-4">
         {/* Filters removed as requested */}

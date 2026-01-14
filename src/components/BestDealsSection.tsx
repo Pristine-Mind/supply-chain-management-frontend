@@ -1,15 +1,36 @@
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import { ArrowRight, Flame, ShoppingBag, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const PLACEHOLDER = 'https://via.placeholder.com/150';
 
 interface BestDealsSectionProps {
-  todaysPickProducts?: any[];
   user?: any;
 }
 
-const BestDealsSection = ({ todaysPickProducts, user }: BestDealsSectionProps) => {
+const BestDealsSection = ({ user }: BestDealsSectionProps) => {
   const navigate = useNavigate();
+  const [todaysPickProducts, setTodaysPickProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTodaysPick = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Token ${token}` } : {};
+        const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace-trending/new_trending/`;
+        const { data } = await axios.get(url, { timeout: 8000, headers });
+        setTodaysPickProducts(data.results || []);
+      } catch (err) {
+        console.error('Error fetching todays pick products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTodaysPick();
+  }, []);
 
   const getDisplayPrice = (product: any, user: any) => {
     const isB2BUser = user?.b2b_verified === true;
@@ -33,6 +54,13 @@ const BestDealsSection = ({ todaysPickProducts, user }: BestDealsSectionProps) =
       };
     }
   };
+
+  if (loading) return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-12 animate-pulse">
+      <div className="lg:col-span-4 h-[500px] bg-gray-200 rounded-[2.5rem]" />
+      <div className="lg:col-span-8 h-[500px] bg-gray-100 rounded-[2.5rem]" />
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-12">
@@ -102,7 +130,7 @@ const BestDealsSection = ({ todaysPickProducts, user }: BestDealsSectionProps) =
                         </div>
                      </div>
                   </div>
-                  
+
                   <div className="flex flex-col flex-grow">
                       <div className="flex items-center gap-1 mb-2">
                         {[1, 2, 3, 4, 5].map((s) => (
@@ -124,26 +152,15 @@ const BestDealsSection = ({ todaysPickProducts, user }: BestDealsSectionProps) =
                 </div>
               ))
             ) : (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-[2rem] p-5 h-full min-h-[350px] border border-gray-100 overflow-hidden relative">
-                  <div className="w-full aspect-square bg-gray-100 rounded-2xl mb-4 animate-pulse" />
-                  <div className="h-4 w-2/3 bg-gray-100 rounded mb-2 animate-pulse" />
-                  <div className="h-4 w-full bg-gray-100 rounded mb-6 animate-pulse" />
-                  <div className="h-8 w-1/3 bg-gray-100 rounded animate-pulse mt-auto" />
-                  <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                <div className="col-span-full h-full flex items-center justify-center text-gray-400 font-medium italic">
+                    Fresh selections arriving soon...
                 </div>
-              ))
             )}
         </div>
       </div>
-
-      <style>{`
-        @keyframes shimmer {
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
     </div>
   );
 };
 
 export default BestDealsSection;
+
