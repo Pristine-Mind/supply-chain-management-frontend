@@ -87,7 +87,6 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
       </a>
     </li>
   );
-
   return (
     <div className="relative h-full flex flex-col">
       <button
