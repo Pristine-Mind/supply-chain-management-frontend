@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
@@ -7,7 +7,7 @@ import * as yup from 'yup';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, Mail, Phone, Lock, MapPin, CheckCircle, 
-  Shield, Clock, ArrowRight, UserPlus, ChevronLeft, Eye, EyeOff 
+  Shield, Clock, ArrowRight, ChevronLeft, Eye, EyeOff 
 } from 'lucide-react';
 
 import LocationPicker from './LocationPicker';
@@ -16,7 +16,6 @@ import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import logo from '../assets/logo.png';
 
-// --- Validation Schema ---
 const schema = yup.object({
   username: yup.string().min(3, 'Username too short').required('Username is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
@@ -112,7 +111,6 @@ const Register = () => {
       <div className="container max-w-6xl mx-auto px-4 pb-20">
         <div className="grid lg:grid-cols-12 gap-12 items-start">
           
-          {/* Left Sidebar: Benefits */}
           <div className="hidden lg:block lg:col-span-4 sticky top-8">
             <div className="space-y-6">
               {[
@@ -139,10 +137,8 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Center: Registration Form */}
           <div className="lg:col-span-8">
             <Card className="border-none shadow-2xl shadow-slate-200/60 overflow-hidden bg-white">
-              {/* Progress Bar */}
               <div className="h-1.5 bg-slate-100 w-full">
                 <motion.div 
                   className="h-full bg-primary-600" 
@@ -288,7 +284,6 @@ const Register = () => {
   );
 };
 
-// --- Custom Component with forwardRef to fix the warning ---
 const InputField = React.forwardRef(({ label, icon, error, type = "text", ...props }: any, ref: any) => (
   <div className="space-y-1.5 w-full">
     <label className="text-sm font-semibold text-slate-700 ml-1">{label}</label>

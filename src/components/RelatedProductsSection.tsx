@@ -21,14 +21,14 @@ interface MarketplaceProduct {
   b2b_min_quantity?: number;
 }
 
-const RelatedProductsSection: React.FC<{ productId: number; category: string }> = ({ productId, category }) => {
+const RelatedProductsSection: React.FC<{ productId: number; category?: string }> = ({ productId }) => {
   const [related, setRelated] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!category) return;
+    if (!productId) return;
     
     const fetchRelated = async () => {
       try {
@@ -36,19 +36,13 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Token ${token}` } : {};
         
-        // Fetch products in the same category
         const response = await axios.get(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?category=${encodeURIComponent(category)}`,
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/${productId}/related/`,
           { headers }
         );
         
         const data = response.data.results || response.data || [];
-        // Filter out the current product and limit to 4 items
-        const filtered = data
-          .filter((p: MarketplaceProduct) => p.id !== productId)
-          .slice(0, 4);
-          
-        setRelated(filtered);
+        setRelated(Array.isArray(data) ? data.slice(0, 4) : []);
       } catch (error) {
         console.error("Error fetching related products:", error);
       } finally {
@@ -57,7 +51,7 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
     };
 
     fetchRelated();
-  }, [category, productId]);
+  }, [productId]);
 
   const renderPrice = (product: MarketplaceProduct) => {
     const isB2BUser = user?.b2b_verified === true;
@@ -121,7 +115,6 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
             className="group relative bg-white rounded-2xl transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] cursor-pointer"
             onClick={() => navigate(`/marketplace/${rel.id}`)}
           >
-            {/* Image Section */}
             <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gray-50 relative">
               <img
                 src={rel.product_details?.images?.[0]?.image || 'https://via.placeholder.com/400x500?text=No+Image'}
@@ -129,7 +122,6 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
                 className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
               />
               
-              {/* Badge Overlay */}
               <div className="absolute top-3 left-3">
                 <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/90 backdrop-blur-md text-gray-800 shadow-sm border border-gray-100 uppercase tracking-wider">
                   <Tag className="w-3 h-3 mr-1 text-orange-500" />
@@ -137,7 +129,6 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
                 </span>
               </div>
 
-              {/* Quick Action Button (Shows on Hover) */}
               <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                  <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300 bg-white p-3 rounded-full shadow-xl">
                     <ShoppingBag className="w-5 h-5 text-orange-600" />
@@ -145,7 +136,6 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
               </div>
             </div>
 
-            {/* Details Section */}
             <div className="pt-5 px-1 pb-2">
               <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[40px] group-hover:text-orange-600 transition-colors leading-relaxed">
                 {rel.product_details?.name}
@@ -162,7 +152,6 @@ const RelatedProductsSection: React.FC<{ productId: number; category: string }> 
   );
 };
 
-/* Skeleton Loader Component */
 const ProductSkeleton = () => (
   <div className="animate-pulse">
     <div className="aspect-[4/5] bg-gray-200 rounded-2xl mb-4" />
