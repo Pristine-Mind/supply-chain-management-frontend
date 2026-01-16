@@ -105,6 +105,8 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/products" icon={ShoppingBag} label={t('product_management')} />
               <NavItem href="/sales" icon={DollarSign} label="Direct Sales" />
               <NavItem href="/stocks" icon={Scale} label={t('stock_management')} />
+              <NavItem href="/marketplace/all-products" icon={ShoppingBag} label="Marketplace Products" />
+
               
               <div className="pt-4 pb-2">
                 <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
@@ -130,6 +132,7 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/marketplace-dashboard" icon={BarChart3} label="Marketplace Dashboard" />
               <NavItem href="/marketplace-dashboard/orders" icon={FaFirstOrder} label="Marketplace Orders" />
               <NavItem href="/marketplace-dashboard/negotiations" icon={ClipboardList} label="Negotiations" badge={pendingNegCount} />
+              <NavItem href="/marketplace/all-products" icon={ShoppingBag} label="Marketplace Products" />
               
               <div className="pt-4 pb-2">
                 <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
@@ -150,7 +153,7 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/stats" icon={BarChart3} label={t('stats_and_analytics')} />
               <NavItem href="/audit-logs" icon={ClipboardList} label={t('audit_logs')} />
               <NavItem href="/stocks" icon={Scale} label={t('stock_management')} />
-
+              <NavItem href="/marketplace/all-products" icon={ShoppingBag} label="Marketplace Products" />
               <div className="pt-4 pb-2">
                 <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
                 {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Intelligence</p>}

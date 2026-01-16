@@ -75,7 +75,10 @@ import WeeklyDigests from './components/reports/WeeklyDigests';
 import RFMSegments from './components/reports/RFMSegments';
 import LostSalesAnalysis from './components/reports/LostSalesAnalysis';
 import SystemHealth from './components/reports/SystemHealth';
-import CommandPalette from './components/CommandPalette';
+import { LoyaltyProvider } from './context/LoyaltyContext';
+import LoyaltyDashboard from './components/loyalty/LoyaltyDashboard';
+import LoyaltyHistory from './components/loyalty/LoyaltyHistory';
+import TierComparison from './components/loyalty/TierComparison';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -116,6 +119,9 @@ const protectedRoutes = [
   { path: '/reports/rfm-segments', element: <RFMSegments /> },
   { path: '/reports/lost-sales', element: <LostSalesAnalysis /> },
   { path: '/system-health', element: <SystemHealth /> },
+  { path: '/loyalty', element: <LoyaltyDashboard /> },
+  { path: '/loyalty/history', element: <LoyaltyHistory /> },
+  { path: '/loyalty/tiers', element: <TierComparison /> },
 ];
 
 const publicRoutes = [
@@ -181,22 +187,23 @@ const App: React.FC = () => {
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
-            <div className="p-4">
-              <CommandPalette />
-              <Toaster />
-              <ConditionalBackButton />
-              <Routes>
-                {publicRoutes.map((route, index) => (
-                  <Route key={`public-${index}`} path={route.path} element={route.element} />
-                ))}
-                <Route element={<ProtectedRoute />}>
-                  {protectedRoutes.map((route, index) => (
-                    <Route key={`protected-${index}`} path={route.path} element={route.element} />
+            <LoyaltyProvider>
+              <div className="p-4">
+                <Toaster />
+                <ConditionalBackButton />
+                <Routes>
+                  {publicRoutes.map((route, index) => (
+                    <Route key={`public-${index}`} path={route.path} element={route.element} />
                   ))}
-                </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
+                  <Route element={<ProtectedRoute />}>
+                    {protectedRoutes.map((route, index) => (
+                      <Route key={`protected-${index}`} path={route.path} element={route.element} />
+                    ))}
+                  </Route>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </div>
+            </LoyaltyProvider>
           </CartProvider>
         </ToastProvider>
       </AuthProvider>

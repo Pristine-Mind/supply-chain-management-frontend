@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getAuthToken, getUserData, removeAuthToken, setAuthToken } from '../utils/auth';
-import { useNavigate } from 'react-router-dom';
+import { useCart } from './CartContext';
 
 export interface User {
   id?: number;
@@ -21,7 +21,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   login: (token: string, userData: any) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   loading: boolean;
 }
 
@@ -30,7 +30,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const { clearCart } = useCart();
 
   useEffect(() => {
     const token = getAuthToken();
@@ -47,10 +47,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const logout = () => {
+  const logout = async () => {
     removeAuthToken();
     setUser(null);
-    navigate('/login');
+    await clearCart();
+    window.location.href = '/';
   };
 
   return (

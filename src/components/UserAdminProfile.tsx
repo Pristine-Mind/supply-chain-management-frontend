@@ -10,6 +10,7 @@ interface UserProfile {
   last_name: string;
   business_type: string;
   date_joined: string;
+  profile_picture?: string;
 }
 
 const UserAdminProfile: React.FC = () => {
@@ -76,7 +77,17 @@ const UserAdminProfile: React.FC = () => {
               {/* Avatar Initial Circle */}
               <div className="h-24 w-24 rounded-2xl bg-white p-1 shadow-lg">
                 <div className="h-full w-full rounded-xl bg-gray-100 flex items-center justify-center text-3xl font-bold text-orange-600">
-                  {profile.first_name[0]}{profile.last_name[0]}
+                  {profile.profile_picture ? (
+                    <img 
+                      src={profile.profile_picture}
+                      alt={`${profile.first_name} ${profile.last_name}`}
+                      className="h-full w-full rounded-xl object-cover"
+                    />
+                  ) : (
+                    <>
+                      {profile.first_name[0]}{profile.last_name[0]}
+                    </>
+                  )}
                 </div>
               </div>
               <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold uppercase tracking-wider rounded-full flex items-center">
