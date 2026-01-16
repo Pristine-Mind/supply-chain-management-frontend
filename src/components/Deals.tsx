@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -41,7 +40,6 @@ const Deals: React.FC = () => {
   if (error) return <div className="text-center py-8 text-status-error">{error}</div>;
   
 
-  // Empty state animation component
   const EmptyState: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => (
     <div className="py-16 flex flex-col items-center justify-center">
       <div className="w-24 h-24 rounded-full bg-primary-50 flex items-center justify-center mb-6 animate-pulse">

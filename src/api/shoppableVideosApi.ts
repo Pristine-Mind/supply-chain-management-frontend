@@ -14,11 +14,13 @@ const getAuthHeaders = () => {
 };
 
 export const shoppableVideosApi = {
-    getVideos: async (categoryId?: number): Promise<ShoppableVideoListResponse> => {
+    getVideos: async (categoryId?: number, page?: number): Promise<ShoppableVideoListResponse> => {
+        const params: any = {};
+        if (categoryId) params.category = categoryId;
+        if (page && page > 1) params.page = page;
+        
         const response = await axios.get(VIDEOS_URL, {
-            params: {
-                category: categoryId,
-            },
+            params,
             headers: getAuthHeaders(),
         });
         return response.data;

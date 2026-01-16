@@ -35,7 +35,7 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
         data = await creatorsApi.getCreatorVideos(creatorId, p);
         results = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
       } else {
-        data = await shoppableVideosApi.getVideos(categoryId);
+        data = await shoppableVideosApi.getVideos(categoryId, p);
         results = Array.isArray(data) ? data : (data && data.results) ? data.results : [];
       }
       if (p === 1) {

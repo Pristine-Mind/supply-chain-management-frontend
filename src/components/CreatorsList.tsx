@@ -28,11 +28,12 @@ const CreatorsList: React.FC<CreatorsListProps> = ({ selectedCategory }) => {
       const videoCatId = selectedCategory ? parseInt(selectedCategory) : undefined;
       const data = await creatorsApi.listCreators(q || undefined, p, videoCatId);
       
-      setCreators(prev => p === 1 ? data.results : [...prev, ...data.results]);
+      const results = data.results || (Array.isArray(data) ? data : []);
+      setCreators(prev => p === 1 ? results : [...prev, ...results]);
       setPagination(data);
       setPage(p);
 
-      const vidsResp: any = await shoppableVideosApi.getVideos();
+      const vidsResp: any = await shoppableVideosApi.getVideos(undefined, 1);
       const vids = Array.isArray(vidsResp) ? vidsResp : (vidsResp?.results || []);
       
       const map: Record<number, ShoppableVideoBrief[]> = {};

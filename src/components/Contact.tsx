@@ -19,7 +19,6 @@ const Contact: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading delay for contact info
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
@@ -65,11 +64,9 @@ const Contact: React.FC = () => {
     <div className="w-full bg-soft-gradient">
       <Navbar />
       
-      {/* Hero Section with F-pattern layout */}
       <div className="relative section-spacing bg-brand-gradient overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         
-        {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full -translate-x-16 -translate-y-16"></div>
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/10 rounded-full translate-x-24 translate-y-24"></div>
         
@@ -82,7 +79,6 @@ const Contact: React.FC = () => {
               Have questions or need assistance? Our dedicated support team is here to help you succeed on your journey.
             </p>
             
-            {/* Quick contact info */}
             <div className="flex flex-wrap justify-center gap-6 text-body-sm">
               <div className="flex items-center gap-2">
                 <FaPhone className="w-4 h-4" />
@@ -100,7 +96,6 @@ const Contact: React.FC = () => {
       <div className="max-w-7xl mx-auto container-padding section-spacing">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Contact Form - Primary focus (F-pattern) */}
           <div className="lg:col-span-2">
             <div className="card-elevated">
               <div className="mb-8">
@@ -207,7 +202,6 @@ const Contact: React.FC = () => {
             </div>
           </div>
 
-          {/* Contact Information Sidebar */}
           <div className="content-spacing">
             <div className="card-elevated">
               <h2 className="text-h3 font-bold text-neutral-900 mb-6">Contact Information</h2>
@@ -247,7 +241,6 @@ const Contact: React.FC = () => {
               </div>
             </div>
 
-            {/* Quick Help CTA */}
             <div className="card bg-brand-gradient text-white">
               <h3 className="text-h3 font-bold mb-4">Need Quick Help?</h3>
               <p className="text-body mb-6 opacity-90">
@@ -261,7 +254,6 @@ const Contact: React.FC = () => {
         </div>
       </div>
 
-      {/* Banner Section */}
       <div className="max-w-7xl mx-auto container-padding pb-16">
         <div className="rounded-xl overflow-hidden shadow-medium">
           <img 
@@ -272,7 +264,6 @@ const Contact: React.FC = () => {
         </div>
       </div>
 
-      {/* Success/Error Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4">
           <div className="card-elevated max-w-md w-full transform animate-slide-in">

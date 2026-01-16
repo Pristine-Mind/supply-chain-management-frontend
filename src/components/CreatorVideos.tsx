@@ -20,8 +20,9 @@ const CreatorVideos: React.FC<{ creatorId: number; compact?: boolean }> = ({ cre
     setLoading(true);
     try {
       const data = await creatorsApi.getCreatorVideos(creatorId, p);
+      const results = data.results || (Array.isArray(data) ? data : []);
       setPagination(data);
-      setVideos(data.results);
+      setVideos(results);
       setPage(p);
     } catch (err) {
       console.error('Failed to load creator videos', err);
