@@ -475,8 +475,16 @@ const Home: React.FC = () => {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-xl transition"
                 >
-                  <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {userProfile?.first_name?.[0] || user?.name?.[0] || 'U'}
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold">
+                    {userProfile?.profile_picture ? (
+                      <img
+                        src={userProfile.profile_picture}
+                        alt="Profile"
+                        className="w-full h-full object-cover rounded-full border-2 border-orange-500"
+                      />
+                    ) : (
+                      (userProfile?.first_name || user?.name?.charAt(0) || 'U').charAt(0).toUpperCase()
+                    )}
                   </div>
                   <span className="hidden md:block font-medium text-gray-700">
                     {userProfile?.first_name || user?.name?.split(' ')[0] || 'User'}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Calendar, ArrowRight } from 'lucide-react';
+import { FileText, Download, Calendar } from 'lucide-react';
 import { reportsApi } from '../../api/reportsApi';
+import CommandPalette from '../CommandPalette';
 
 interface WeeklyDigest {
   id: number;
@@ -37,6 +38,7 @@ const WeeklyDigests: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <CommandPalette />
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Weekly Business Health Digests</h2>

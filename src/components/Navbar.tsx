@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { useLoyalty } from '../context/LoyaltyContext';
 import { 
-  Menu, X, User, LogOut, ChevronDown, ShoppingBag, BadgeCheck 
+  Menu, X, User, LogOut, ChevronDown, ShoppingBag, BadgeCheck, Gift
 } from 'lucide-react';
 import logo from '../assets/logo.png';
 
@@ -41,6 +42,7 @@ const UserAvatar: React.FC<{ user: any }> = ({ user }) => {
 
 export const Navbar: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const { userLoyalty } = useLoyalty();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -120,8 +122,35 @@ export const Navbar: React.FC = () => {
                           )}
                         </div>
 
+                        {/* Loyalty Points Display */}
+                        {userLoyalty && userLoyalty.current_tier && (
+                          <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl mb-2 border border-amber-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-semibold text-gray-700">Loyalty Points</span>
+                              <span className="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                                {userLoyalty.current_tier.name}
+                              </span>
+                            </div>
+                            <p className="text-2xl font-bold text-amber-600 mb-1">{userLoyalty.current_points}</p>
+                            <p className="text-xs text-gray-600 mb-2">
+                              Earn {userLoyalty.current_tier.point_multiplier}x on purchases
+                            </p>
+                            <button
+                              onClick={() => {
+                                navigate('/loyalty');
+                                setIsUserMenuOpen(false);
+                              }}
+                              className="w-full text-xs font-bold text-amber-600 hover:text-amber-700 bg-white hover:bg-amber-50 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 border border-amber-200"
+                            >
+                              <Gift className="w-3 h-3" />
+                              View Details
+                            </button>
+                          </div>
+                        )}
+
                         <div className="space-y-1">
                           <DropdownItem to="/user-profile" icon={<User size={16}/>} label="My Profile" />
+                          <DropdownItem to="/loyalty" icon={<Gift size={16}/>} label="Loyalty Rewards" />
                           <DropdownItem to="/my-orders" icon={<ShoppingBag size={16}/>} label="Order History" />
                           <div className="h-px bg-slate-100 my-1" />
                           <button 
@@ -196,6 +225,30 @@ export const Navbar: React.FC = () => {
                         <p className="text-xs text-slate-500 truncate max-w-[150px]">{user?.email}</p>
                       </div>
                     </div>
+
+                    {/* Loyalty Points in Mobile Menu */}
+                    {userLoyalty && userLoyalty.current_tier && (
+                      <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-200 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-amber-700">Loyalty Points</span>
+                          <span className="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                            {userLoyalty.current_tier.name}
+                          </span>
+                        </div>
+                        <p className="text-2xl font-bold text-amber-600">{userLoyalty.current_points}</p>
+                        <button
+                          onClick={() => {
+                            navigate('/loyalty');
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="w-full text-sm font-bold text-amber-600 bg-white hover:bg-amber-50 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 border border-amber-200"
+                        >
+                          <Gift className="w-4 h-4" />
+                          View Dashboard
+                        </button>
+                      </div>
+                    )}
+
                     <button onClick={handleLogout} className="w-full py-4 text-red-500 font-bold flex items-center justify-center gap-2 bg-red-50 rounded-2xl">
                       <LogOut size={20} /> Sign Out
                     </button>

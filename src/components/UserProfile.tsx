@@ -30,7 +30,8 @@ import {
   CheckCircle,
   AlertCircle,
   Package,
-  ShoppingCart
+  ShoppingCart,
+  BarChart3
 } from 'lucide-react';
 
 interface EditMode {
@@ -927,7 +928,13 @@ const UserProfile: React.FC = () => {
                       label: 'My Cart', 
                       description: 'View cart items',
                       path: '/cart'
-                    }
+                    },
+                    ...(profile && (profile.business_type === 'distributor' || profile.business_type === 'retailer') ? [{
+                      icon: BarChart3,
+                      label: 'Dashboard',
+                      description: 'View analytics',
+                      path: '/home'
+                    }] : [])
                   ].map((action, index) => (
                     <button
                       key={index}

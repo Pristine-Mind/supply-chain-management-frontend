@@ -3,12 +3,14 @@ import { categoryApi } from '../api/categoryApi';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, User, ShoppingCart, Menu, Mic } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Menu, Mic, Gift } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useLoyalty } from '../context/LoyaltyContext';
 import LoginModal from './auth/LoginModal';
 import CategoryMenu from './CategoryMenu';
 import SearchSuggestions from './SearchSuggestions';
+import CommandPalette from './CommandPalette';
 import { createSlug } from '../utils/slugUtils';
 
 const FlashSale = React.lazy(() => import('./FlashSale'));
@@ -107,11 +109,12 @@ const PLACEHOLDER = 'https://via.placeholder.com/150';
 const Marketplace: React.FC = () => {
   
   const { isAuthenticated, user, logout } = useAuth();
+  const { userLoyalty } = useLoyalty();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isListening, setIsListening] = useState(false);
   const [showVideoFeed, setShowVideoFeed] = useState(false);
-  const [isPending, startTransition] = React.useTransition();
+  const [, startTransition] = React.useTransition();
 
   const startVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -331,6 +334,7 @@ const Marketplace: React.FC = () => {
 
   return (
     <div className="marketplace-root">
+      <CommandPalette />
       <div className="min-h-screen bg-neutral-50">
         {showLoginModal && (
           <LoginModal
@@ -428,6 +432,30 @@ const Marketplace: React.FC = () => {
                               {user?.name ? user.name.charAt(0).toUpperCase() : user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
                             </div>
                           </div>
+
+                          {/* Loyalty Points Display */}
+                          {userLoyalty && userLoyalty.current_tier && (
+                            <div className="px-3 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs font-bold text-amber-700">Loyalty Points</span>
+                                <span className="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
+                                  {userLoyalty.current_tier.name}
+                                </span>
+                              </div>
+                              <p className="text-xl font-bold text-amber-600 mb-1">{userLoyalty.current_points}</p>
+                              <p className="text-xs text-gray-600 mb-2">
+                                Earn {userLoyalty.current_tier.point_multiplier}x on purchases
+                              </p>
+                              <button
+                                onClick={() => { navigate('/loyalty'); setIsUserMenuOpen(false); }}
+                                className="w-full text-xs font-bold text-amber-600 hover:text-amber-700 bg-white hover:bg-amber-50 py-1.5 rounded transition-colors flex items-center justify-center gap-1 border border-amber-200"
+                              >
+                                <Gift className="w-3 h-3" />
+                                View Details
+                              </button>
+                            </div>
+                          )}
+
                           <button
                             ref={firstMenuItemRef}
                             onClick={() => { navigate('/user-profile'); setIsUserMenuOpen(false); }}
@@ -695,6 +723,29 @@ const Marketplace: React.FC = () => {
                           <p className="text-caption text-neutral-500">{user?.email}</p>
                         </div>
                       </div>
+
+                      {/* Loyalty Points Display - Mobile */}
+                      {userLoyalty && userLoyalty.current_tier && (
+                        <div className="px-3 py-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200 mx-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-amber-700">Loyalty Points</span>
+                            <span className="text-xs font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
+                              {userLoyalty.current_tier.name}
+                            </span>
+                          </div>
+                          <p className="text-lg font-bold text-amber-600 mb-1">{userLoyalty.current_points}</p>
+                          <p className="text-xs text-gray-600 mb-2">
+                            Earn {userLoyalty.current_tier.point_multiplier}x on purchases
+                          </p>
+                          <button
+                            onClick={() => { navigate('/loyalty'); setIsMobileMenuOpen(false); }}
+                            className="w-full text-xs font-bold text-amber-600 hover:text-amber-700 bg-white hover:bg-amber-50 py-1.5 rounded transition-colors flex items-center justify-center gap-1 border border-amber-200"
+                          >
+                            <Gift className="w-3 h-3" />
+                            View Dashboard
+                          </button>
+                        </div>
+                      )}
 
                       <button
                         onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
