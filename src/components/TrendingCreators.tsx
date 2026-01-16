@@ -12,7 +12,11 @@ const TrendingCreators: React.FC = () => {
   useEffect(() => {
     creatorsApi.getTrendingCreators()
       .then(data => {
-        setCreators(data.results.slice(0, 10));
+        if (data && data.results && Array.isArray(data.results)) {
+          setCreators(data.results.slice(0, 10));
+        } else if (Array.isArray(data)) {
+          setCreators(data.slice(0, 10));
+        }
       })
       .catch(err => console.error('Failed to load trending creators', err))
       .finally(() => setLoading(false));

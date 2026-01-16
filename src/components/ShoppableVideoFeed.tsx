@@ -512,7 +512,7 @@ const ShoppableVideoFeed: React.FC<{ onClose: () => void; onRequireLogin: () => 
 
   const fetchVideos = useCallback(async (pageNum: number) => {
     try {
-      const data: any = await shoppableVideosApi.getVideos(pageNum);
+      const data: any = await shoppableVideosApi.getVideos(undefined, pageNum);
       let newVideos: ShoppableVideo[] = [];
       if (Array.isArray(data)) {
         newVideos = data;

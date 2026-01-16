@@ -26,7 +26,7 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
   const [formData, setFormData] = useState({
     account_type: '',
     amount: '',
-    debit: true, // true = debit, false = credit
+    debit: true,
     reference_id: '',
     date: '',
     related_entity: '',
@@ -66,11 +66,9 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
         related_entity: Number(formData.related_entity),
       };
 
-      // Dynamic import to avoid circular dependencies / bundling issues
       const { addLedgerEntry } = await import('../api/ledgerApi');
       await addLedgerEntry(payload, token);
 
-      // Success: close modal & reset form
       setShowModal(false);
       setFormData({
         account_type: '',
@@ -80,9 +78,6 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
         date: '',
         related_entity: '',
       });
-
-      // Optional: trigger a refresh of entries from parent if needed
-      // window.location.reload(); or use callback prop
     } catch (err: any) {
       setError(err.message || 'Failed to add ledger entry');
     } finally {
@@ -92,7 +87,6 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
 
   return (
     <>
-      {/* Add custom fade animation */}
       <style jsx global>{`
         @keyframes fadeIn {
           from {
@@ -125,7 +119,6 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
           </button>
         </div>
 
-        {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -189,19 +182,16 @@ const LedgerEntriesTable: React.FC<LedgerEntriesTableProps> = ({ entries = [] })
         </div>
       </div>
 
-      {/* Add Ledger Entry Modal */}
       {showModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn"
           style={{ animationDuration: '0.3s' }}
         >
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60"
             onClick={() => setShowModal(false)}
           />
 
-          {/* Modal Card */}
           <div
             className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden animate-scaleIn"
             style={{ animationDuration: '0.4s' }}

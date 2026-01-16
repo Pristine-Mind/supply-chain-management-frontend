@@ -111,6 +111,7 @@ const Marketplace: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [isListening, setIsListening] = useState(false);
   const [showVideoFeed, setShowVideoFeed] = useState(false);
+  const [isPending, startTransition] = React.useTransition();
 
   const startVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -274,8 +275,9 @@ const Marketplace: React.FC = () => {
       // Regular marketplace endpoint for category filtering without search
       const marketplaceUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`;
       const { data } = await axios.get(marketplaceUrl, { params, headers });
-      setProducts(data.results);
-      setTotalCount(data.count || 0);
+      const results = data.results || (Array.isArray(data) ? data : []);
+      setProducts(results);
+      setTotalCount(data.count || results.length || 0);
     } catch {
       setProductsError('Error fetching marketplace products');
     } finally {
@@ -664,7 +666,12 @@ const Marketplace: React.FC = () => {
               <nav className="space-y-4">
                 <a href="/featured" className="block py-2 text-neutral-700 hover:text-primary-600">Featured Selection</a>
                 <button 
-                  onClick={() => { setShowVideoFeed(true); setIsMobileMenuOpen(false); }}
+                  onClick={() => { 
+                    startTransition(() => {
+                      setShowVideoFeed(true); 
+                    });
+                    setIsMobileMenuOpen(false); 
+                  }}
                   className="w-full text-left py-2 text-neutral-700 hover:text-primary-600 flex items-center gap-2"
                 >
                   <span className="relative flex h-2 w-2">
@@ -927,10 +934,12 @@ const Marketplace: React.FC = () => {
     </div>
     {/* Closing tag for marketplace-root */}
       {showVideoFeed && (
-        <ShoppableVideoFeed 
-          onClose={() => setShowVideoFeed(false)} 
-          onRequireLogin={() => setShowLoginModal(true)}
-        />
+        <React.Suspense fallback={<div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div></div>}>
+          <ShoppableVideoFeed 
+            onClose={() => setShowVideoFeed(false)} 
+            onRequireLogin={() => setShowLoginModal(true)}
+          />
+        </React.Suspense>
       )}
     </div>
   );

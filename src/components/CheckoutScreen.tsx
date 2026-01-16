@@ -116,7 +116,6 @@ const Checkout: React.FC = () => {
             </div>
           )}
 
-          {/* Order Items Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
@@ -168,7 +167,6 @@ const Checkout: React.FC = () => {
             </div>
           </div>
 
-          {/* Order Summary Section */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -197,7 +195,6 @@ const Checkout: React.FC = () => {
             </div>
           </div>
 
-          {/* Delivery Information */}
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
@@ -211,7 +208,6 @@ const Checkout: React.FC = () => {
 
         </div>
 
-        {/* Sticky Footer with CTA */}
         <div className="sticky bottom-0 bg-white border-t border-neutral-200 p-4">
           <button
             onClick={() =>
