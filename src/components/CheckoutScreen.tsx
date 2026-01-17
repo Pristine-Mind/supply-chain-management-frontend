@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, ShoppingBag, Receipt } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useCoupon } from '../hooks/useCoupon';
+import { AppliedCoupon } from '../types/coupon';
+import CouponInput from './CouponInput';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
@@ -60,14 +63,29 @@ const Checkout: React.FC = () => {
   const location = useLocation();
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const { cart: items, total, subTotal, shipping } = useCart();
+  const { appliedCoupon, applyCoupon, removeCoupon } = useCoupon();
+  const [displayTotal, setDisplayTotal] = useState(0);
+  const [cartId, setCartId] = useState<number | null>(null);
 
   useEffect(() => {
     const state = location.state as CheckoutLocationState | undefined;
     if (state?.delivery) {
       setDelivery(state.delivery);
+      setCartId(state.delivery.cart);
     } else {
-      setDelivery(null);}
+      setDelivery(null);
+      setCartId(null);
+    }
   }, [location.state]);
+
+  // Update display total based on applied coupon
+  useEffect(() => {
+    if (appliedCoupon) {
+      setDisplayTotal(appliedCoupon.finalAmount);
+    } else {
+      setDisplayTotal(total);
+    }
+  }, [appliedCoupon, total]);
 
   const itemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -167,6 +185,23 @@ const Checkout: React.FC = () => {
             </div>
           </div>
 
+          {/* Coupon Section */}
+          {cartId && (
+            <CouponInput
+              cartId={cartId}
+              cartTotal={total}
+              appliedCoupon={appliedCoupon}
+              onCouponApplied={(coupon: AppliedCoupon) => {
+                // Update display total when coupon is applied
+                setDisplayTotal(coupon.finalAmount);
+              }}
+              onCouponRemoved={() => {
+                removeCoupon();
+                setDisplayTotal(total);
+              }}
+            />
+          )}
+
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-center mb-4">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -186,10 +221,20 @@ const Checkout: React.FC = () => {
                   <span>Rs. {shipping.toLocaleString()}</span>
                 </div>
               )}
-              <div className="border-t border-blue-200 pt-3 mt-3">
-                <div className="flex justify-between font-bold text-lg text-gray-900">
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span>Coupon Discount ({appliedCoupon.code})</span>
+                  <span className="text-lg">-Rs. {appliedCoupon.discountAmount.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}</span>
+                </div>
+              )}
+              <div className={`border-t ${appliedCoupon ? 'border-green-200' : 'border-blue-200'} pt-3 mt-3`}>
+                <div className={`flex justify-between font-bold text-lg ${appliedCoupon ? 'text-green-900' : 'text-gray-900'}`}>
                   <span>Total Amount</span>
-                  <span>Rs. {total.toLocaleString()}</span>
+                  <span>Rs. {displayTotal.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}</span>
                 </div>
               </div>
             </div>
@@ -212,7 +257,15 @@ const Checkout: React.FC = () => {
           <button
             onClick={() =>
               delivery
-                ? navigate('/payment', { state: { delivery, total } })
+                ? navigate('/payment', { 
+                    state: { 
+                      delivery, 
+                      total: displayTotal,
+                      originalTotal: total,
+                      couponCode: appliedCoupon?.code,
+                      discountAmount: appliedCoupon?.discountAmount,
+                    } 
+                  })
                 : navigate('/delivery-details')
             }
             className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
@@ -223,7 +276,9 @@ const Checkout: React.FC = () => {
             disabled={!delivery}
           >
             {delivery 
-              ? `Proceed to Payment • Rs. ${total.toLocaleString()}` 
+              ? `Proceed to Payment • Rs. ${displayTotal.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}` 
               : 'Add Delivery Details First'
             }
           </button>
