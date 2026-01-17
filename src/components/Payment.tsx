@@ -59,6 +59,9 @@ interface PaymentGatewayResponse {
 interface LocationState {
   delivery?: Delivery;
   total?: number;
+  originalTotal?: number;
+  couponCode?: string;
+  discountAmount?: number;
 }
 
 const Payment: React.FC = () => {
@@ -139,6 +142,8 @@ const Payment: React.FC = () => {
         cart_id: orderCartId,
         delivery_info: deliveryInfo,
         payment_method: paymentMethod,
+        // Include coupon code if one was applied
+        ...(locState?.couponCode && { coupon_code: locState.couponCode }),
       };
 
       const order: OrderResponse = await createOrder(orderRequest);

@@ -69,6 +69,7 @@ export interface CreateOrderRequest {
   cart_id: number;
   delivery_info: DeliveryInfoRequest;
   payment_method?: string;
+  coupon_code?: string;
 }
 
 export interface OrderResponse {
