@@ -45,7 +45,7 @@ const PromoBanner = () => {
             </div>
           </div>
 
-=          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
             <div 
               onClick={handleCopy}
               className="group/code cursor-pointer relative flex items-center justify-between gap-4 bg-black/20 backdrop-blur-md border border-white/10 p-1 pl-4 rounded-xl w-full sm:w-64 transition-all hover:bg-black/30"
