@@ -27,21 +27,22 @@ import {
 
 import { fetchLedgerEntries, LedgerEntry } from '../api/ledgerApi';
 import { getTransporterStats, type TransporterStats } from '../api/transporterApi';
+import { 
+  fetchNotifications, 
+  markNotificationAsRead, 
+  markAllNotificationsAsRead,
+  deleteNotification,
+  type Notification 
+} from '../api/notificationsApi';
 import TransporterMenu from './TransporterMenu';
 import LedgerEntriesTable from './LedgerEntriesTable';
+import NotificationWidget from './NotificationWidget';
 import SidebarNav from './dashboard/SidebarNav';
 import TransporterOverview from './dashboard/TransporterOverview';
 import { InfoCard, InfoRow } from './dashboard/InfoBlocks';
 import B2BSearch from './b2b/B2BSearch';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-interface Notification {
-  id: number;
-  message: string;
-  is_read: boolean;
-  created_at: string;
-}
 
 interface UserProfile {
   username: string;
@@ -153,16 +154,31 @@ const Home: React.FC = () => {
     }
   };
 
-  const fetchNotifications = async () => {
+  const fetchNotificationsData = async () => {
     try {
       setNotificationsLoading(true);
-      const response = await axios.get<Notification[]>(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/notifications/`,
-        { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
-      );
-      setNotifications(response.data);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token available for fetching notifications');
+        setNotifications([]);
+        return;
+      }
+      console.log('Fetching notifications...');
+      const response = await fetchNotifications(token, 50, 0);
+      console.log('Notifications fetched:', response);
+      let notificationsData = Array.isArray(response) ? response : (response.results || []);
+      
+      notificationsData = notificationsData.map(notif => ({
+        ...notif,
+        type: notif.type || 'system',
+        severity: notif.severity || 'info',
+      }));
+      
+      console.log('Setting notifications:', notificationsData);
+      setNotifications(notificationsData);
     } catch (error) {
       console.error('Error fetching notifications', error);
+      setNotifications([]);
     } finally {
       setNotificationsLoading(false);
     }
@@ -183,33 +199,58 @@ const Home: React.FC = () => {
     }
   };
 
-  const markNotificationAsRead = async (id: number) => {
+  const handleMarkNotificationAsRead = async (id: number) => {
     try {
-      await axios.patch(
-        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/notifications/${id}/`,
-        { is_read: true },
-        { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
-      );
+      console.log('Marking notification as read:', id);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      const result = await markNotificationAsRead(token, id);
+      console.log('Mark as read result:', result);
       setNotifications(prev =>
-        prev.map(n => (n.id === id ? { ...n, is_read: true } : n))
+        Array.isArray(prev) ? prev.map(n => (n.id === id ? { ...n, is_read: true } : n)) : []
       );
     } catch (error) {
       console.error('Failed to mark as read', error);
     }
   };
 
-  const markAllNotificationsAsRead = async () => {
-    const unread = notifications.filter(n => !n.is_read);
-    await Promise.all(
-      unread.map(n =>
-        axios.patch(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/notifications/${n.id}/`,
-          { is_read: true },
-          { headers: { Authorization: `Token ${localStorage.getItem('token')}` } }
-        )
-      )
-    );
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+  const handleMarkAllNotificationsAsRead = async () => {
+    try {
+      console.log('Marking all notifications as read');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      const result = await markAllNotificationsAsRead(token);
+      console.log('Mark all as read result:', result);
+      setNotifications(prev => 
+        Array.isArray(prev) ? prev.map(n => ({ ...n, is_read: true })) : []
+      );
+    } catch (error) {
+      console.error('Failed to mark all as read', error);
+    }
+  };
+
+  const handleDeleteNotification = async (id: number) => {
+    try {
+      console.log('Deleting notification:', id);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+      const result = await deleteNotification(token, id);
+      console.log('Delete result:', result);
+      setNotifications(prev => 
+        Array.isArray(prev) ? prev.filter(n => n.id !== id) : []
+      );
+    } catch (error) {
+      console.error('Failed to delete notification', error);
+    }
   };
 
   useEffect(() => {
@@ -256,10 +297,10 @@ const Home: React.FC = () => {
       fetchTStats();
     }
 
-    fetchNotifications();
+    fetchNotificationsData();
     fetchUserProfile();
 
-    const notifInterval = setInterval(fetchNotifications, 30000);
+    const notifInterval = setInterval(fetchNotificationsData, 30000);
     const profileInterval = setInterval(fetchUserProfile, 300000);
 
     return () => {
@@ -268,7 +309,9 @@ const Home: React.FC = () => {
     };
   }, [isAuthenticated, authLoading, navigate, ledgerPage, ledgerPageSize, role, businessType]);
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications && Array.isArray(notifications) 
+    ? notifications.filter(n => !n.is_read).length 
+    : 0;
 
   const salesTrendsData = {
     labels: data.salesTrends.map(item => item.month),
@@ -384,6 +427,7 @@ const Home: React.FC = () => {
                 <button
                   onClick={() => setIsNotificationOpen(!isNotificationOpen)}
                   className="relative p-3 hover:bg-gray-100 rounded-xl transition"
+                  title="Open notifications"
                 >
                   <Bell className="h-5 w-5 text-gray-700" />
                   {unreadCount > 0 && (
@@ -393,80 +437,15 @@ const Home: React.FC = () => {
                   )}
                 </button>
 
-                {isNotificationOpen && (
-                <div className="absolute right-0 mt-3 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {/* Header */}
-                  <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-white">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 leading-none">Notifications</h3>
-                      <p className="text-xs text-gray-500 mt-1">You have {unreadCount} unread messages</p>
-                    </div>
-                    {unreadCount > 0 && (
-                      <button 
-                        onClick={markAllNotificationsAsRead} 
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full transition-colors"
-                      >
-                        Mark all read
-                      </button>
-                    )}
-                  </div>
-
-                  {/* List Body */}
-                  <div className="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
-                    {notificationsLoading ? (
-                      <div className="flex flex-col items-center justify-center p-12 space-y-3">
-                        <div className="w-8 h-8 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
-                        <p className="text-sm text-gray-400">Fetching updates...</p>
-                      </div>
-                    ) : notifications.length === 0 ? (
-                      <div className="p-12 text-center">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-50 mb-3">
-                          <span className="text-2xl text-gray-300">🔔</span>
-                        </div>
-                        <p className="text-sm font-medium text-gray-900">All caught up!</p>
-                        <p className="text-xs text-gray-500 mt-1">No new notifications at the moment.</p>
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-gray-50">
-                        {notifications.map(notif => (
-                          <div
-                            key={notif.id}
-                            onClick={() => markNotificationAsRead(notif.id)}
-                            className="group relative p-5 hover:bg-slate-50 cursor-pointer transition-all duration-200 flex gap-4"
-                          >
-                            {/* Unread Indicator Dot */}
-                            {!notif.is_read && (
-                              <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.6)]" />
-                            )}
-                            
-                            <div className="flex-1">
-                              <p className={`text-sm leading-snug ${!notif.is_read ? 'text-gray-900 font-semibold' : 'text-gray-600 font-normal'}`}>
-                                {notif.message}
-                              </p>
-                              <div className="flex items-center gap-2 mt-2">
-                                <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
-                                  {new Date(notif.created_at).toLocaleDateString()}
-                                </span>
-                                <span className="text-gray-300">•</span>
-                                <span className="text-[11px] text-gray-400">
-                                  {new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer Link (Optional) */}
-                  <div className="p-3 border-t border-gray-100 bg-gray-50 text-center">
-                    <button className="text-xs font-medium text-gray-500 hover:text-gray-700">
-                      View all activity
-                    </button>
-                  </div>
-                </div>
-              )}
+                <NotificationWidget
+                  notifications={notifications}
+                  isOpen={isNotificationOpen}
+                  onClose={() => setIsNotificationOpen(false)}
+                  onMarkAsRead={handleMarkNotificationAsRead}
+                  onMarkAllAsRead={handleMarkAllNotificationsAsRead}
+                  onDelete={handleDeleteNotification}
+                  loading={notificationsLoading}
+                />
               </div>
 
               {/* Profile */}
