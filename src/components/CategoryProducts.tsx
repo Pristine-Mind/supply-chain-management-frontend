@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { categoryApi, subcategoryApi, type Subcategory } from '../api/categoryApi';
 import { createSlug } from '../utils/slugUtils';
 import axios from 'axios';
@@ -98,7 +98,6 @@ interface MarketplaceProduct {
   b2b_min_quantity?: number;
 }
 
-// Constants
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Most Relevant' },
   { value: 'price_low', label: 'Price: Low to High' },
@@ -113,27 +112,31 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     categorySlug: string;
     subcategorySlug?: string;
   }>();
+  const location = useLocation();
+  const locationState = location.state as any || {};
+  
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart, distinctItemCount } = useCart();
   const { user } = useAuth();
 
-  // Helper function to get the appropriate price based on user's B2B status
+  const [preFilledCategoryId, setPreFilledCategoryId] = useState<number | null>(locationState?.categoryId || null);
+  const [preFilledSubcategoryId, setPreFilledSubcategoryId] = useState<number | null>(locationState?.subcategoryId || null);
+  const [preFilledSubSubcategoryId, setPreFilledSubSubcategoryId] = useState<number | null>(locationState?.subSubcategoryId || null);
+
   const getDisplayPrice = (product: MarketplaceProduct, user: any) => {
     const isB2BUser = user?.b2b_verified === true;
     const isB2BEligible = product.is_b2b_eligible === true;
     
     if (isB2BUser && isB2BEligible) {
-      // Show B2B pricing
       return {
         currentPrice: product.b2b_discounted_price || product.b2b_price || product.listed_price,
-        originalPrice: product.listed_price, // Always show listed price as crossed-out for B2B
+        originalPrice: product.listed_price,
         isB2BPrice: true,
         minQuantity: product.b2b_min_quantity || 1,
         savings: Math.max(0, product.listed_price - (product.b2b_discounted_price || product.b2b_price || product.listed_price))
       };
     } else {
-      // Show regular pricing
       return {
         currentPrice: product.discounted_price || product.listed_price,
         originalPrice: product.discounted_price ? product.listed_price : null,
@@ -144,7 +147,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     }
   };
 
-  // State
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -164,7 +166,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'info' } | null>(null);
   
-  // Filter state for sidebar
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [minOrder, setMinOrder] = useState('');
@@ -194,23 +195,21 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     }
   };
 
-  // Debounce the searchTerm so fetchProducts is called only after user pauses typing
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
     return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // Fetch products with comprehensive filtering, search, and category support
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Get category/subcategory IDs from slugs
-      let categoryId: number | null = null;
-      let subcategoryId: number | null = null;
+      let categoryId: number | null = preFilledCategoryId;
+      let subcategoryId: number | null = preFilledSubcategoryId;
+      let subSubcategoryId: number | null = preFilledSubSubcategoryId;
 
-      if (categorySlug) {
+      if (categorySlug && !preFilledCategoryId) {
         const category = await findCategoryBySlug(categorySlug);
         if (!category) {
           setNotFound(true);
@@ -232,7 +231,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         }
       }
 
-      // If debouncedSearchTerm is present, use the search endpoint (Elasticsearch-backed)
       if (debouncedSearchTerm && debouncedSearchTerm.trim() !== '') {
         const searchParams = new URLSearchParams();
         searchParams.append('keyword', debouncedSearchTerm.trim());
@@ -240,7 +238,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         searchParams.append('offset', offset.toString());
         searchParams.append('limit', productsPerPage.toString());
 
-        // Add category filters to search
         if (categoryId) {
           searchParams.append('category', categoryId.toString());
         }
@@ -273,31 +270,33 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         return;
       }
 
-      // Regular marketplace listing endpoint with filters
       const params = new URLSearchParams();
       
-      // Apply category filters from URL slugs
       if (categoryId) {
         params.append('category', categoryId.toString());
+        params.append('category_id', categoryId.toString());
         console.log('🔍 [CategoryProducts] Applied category filter:', categoryId);
       }
       
       if (subcategoryId) {
         params.append('subcategory', subcategoryId.toString());
+        params.append('subcategory_id', subcategoryId.toString());
         console.log('🔍 [CategoryProducts] Applied subcategory filter:', subcategoryId);
       }
+
+      if (subSubcategoryId) {
+        params.append('sub_subcategory_id', subSubcategoryId.toString());
+        console.log('🔍 [CategoryProducts] Applied sub-subcategory filter:', subSubcategoryId);
+      }
       
-      // Location filter
       if (selectedCity) {
         params.append('city', selectedCity);
       }
       
-      // Business type filter
       if (selectedBusinessType) {
         params.append('profile_type', selectedBusinessType);
       }
       
-      // Price filters - prioritize sidebar filters over legacy price ranges
       if (minPrice) {
         params.append('min_price', minPrice);
       } else if (selectedPriceRange !== 'all') {
@@ -316,18 +315,15 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         if (max) params.append('max_price', max);
       }
       
-      // Minimum order quantity
       if (minOrder) {
         params.append('min_order_quantity', minOrder);
       }
       
-      // Rating filter
       if (selectedRating !== 'all') {
         const rating = selectedRating.replace('+', '');
         params.append('min_rating', rating);
       }
       
-      // Pagination and sorting
       params.append('limit', productsPerPage.toString());
       params.append('offset', ((currentPage - 1) * productsPerPage).toString());
       
@@ -378,7 +374,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     }
   };
 
-  // Effects
   useEffect(() => {
     console.log('🔍 [CategoryProducts] fetchProducts triggered by state change:', {
       currentPage, 
@@ -418,15 +413,12 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     }
   }, [searchParams]);
 
-  // Keep the URL in sync with the current page and scroll grid into view on page change
   useEffect(() => {
-    // Update search params with page (remove if first page)
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     if (currentPage > 1) params.set('page', currentPage.toString());
     else params.delete('page');
     setSearchParams(params);
 
-    // Scroll products into view for better UX when paging
     if (productsGridRef.current) {
       productsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -441,7 +433,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     }
   }, [message]);
 
-  // Handlers
   const handleSearch = () => {
     setCurrentPage(1);
     const params = new URLSearchParams(Array.from(searchParams.entries()));
@@ -498,7 +489,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
 
     return (
       <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1">
-        {/* Image Container */}
         <div className="relative overflow-hidden bg-neutral-50 h-56 sm:h-64">
           <img
             src={mainImage}
@@ -509,7 +499,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             }}
           />
           
-          {/* Top Left Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {hasOffer && (
               <div className="bg-accent-error-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
@@ -523,7 +512,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             )}
           </div>
 
-          {/* Quick View Overlay */}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <button
               onClick={() => navigate(`/marketplace/${product.id}`)}
@@ -534,9 +522,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
           </div>
         </div>
 
-        {/* Content Section */}
         <div className="p-2 space-y-2 text-sm">
-          {/* Category & Rating */}
           <div className="flex items-center justify-between">
             <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
               {product.product_details.category_details}
@@ -553,12 +539,10 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             )}
           </div>
 
-          {/* Product Title */}
           <h3 className="font-semibold text-neutral-900 text-sm leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors cursor-pointer" onClick={() => navigate(`/marketplace/${product.id}`)}>
             {product.product_details.name}
           </h3>
 
-          {/* Price Section */}
           <div className="space-y-1">
             {(() => {
               const pricing = getDisplayPrice(product, user);
@@ -590,7 +574,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             })()}
           </div>
 
-          {/* Stock and Delivery Info */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${
@@ -615,7 +598,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             )}
           </div>
 
-          {/* Action Button */}
           <button
             onClick={() => handleAddToCart(product)}
             disabled={product.product_details.stock === 0}
@@ -674,17 +656,14 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Header Banner */}
       <div className="bg-primary-500 text-white py-2 px-4">
         <div className="max-w-7xl mx-auto text-center text-caption">
           Welcome to MulyaBazzar - Your Premium Marketplace
         </div>
       </div>
 
-      {/* Header */}
       <div className="bg-white shadow-elevation-sm border-b">
         <div className="w-full px-4 sm:px-6 lg:px-8">
-          {/* Top Header */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
               <button
@@ -722,7 +701,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
               </div>
             </div>
 
-            {/* Desktop Search and Cart */}
             <div className="hidden md:flex items-center gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
@@ -742,7 +720,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                 Search
               </button>
               
-              {/* Cart Icon */}
               <button
                 onClick={() => navigate('/cart')}
                 className="relative p-2 sm:p-3 text-neutral-600 hover:text-primary-500 transition-colors"
@@ -756,7 +733,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
               </button>
             </div>
 
-            {/* Mobile Icons */}
             <div className="md:hidden flex items-center gap-2">
               <button
                 onClick={() => navigate('/cart')}
@@ -780,10 +756,8 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
-          {/* Sidebar Filters */}
           <aside className="hidden lg:block">
             <MarketplaceSidebarFilters
               minPrice={minPrice}
@@ -806,9 +780,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             />
           </aside>
 
-          {/* Main Content Area */}
           <div className="flex-1">
-            {/* Active Filters */}
             {(selectedPriceRange !== 'all' || selectedRating !== 'all' || searchTerm || minPrice || maxPrice || minOrder || selectedCity || selectedBusinessType) && (
               <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                 <div className="flex flex-wrap items-center gap-2">
@@ -895,7 +867,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
               </div>
             ) : (
               <>
-                {/* Products Grid Toolbar */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <div className="text-sm text-neutral-600">
                     Showing {products.length} of {totalProducts} products
@@ -946,7 +917,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                   </div>
                 </div>
 
-                {/* Products Grid */}
                 <div ref={productsGridRef} className={`grid gap-6 ${
                   viewMode === 'grid'
                     ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5'
@@ -957,7 +927,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                   ))}
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="mt-12 flex items-center justify-center">
                     <div className="flex items-center gap-4">
@@ -1016,7 +985,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         </div>
       </div>
 
-      {/* Mobile Search Modal */}
       <Dialog.Root open={showMobileSearch} onOpenChange={setShowMobileSearch}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
@@ -1059,7 +1027,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         </Dialog.Portal>
       </Dialog.Root>
 
-      {/* Login Modal */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
@@ -1069,7 +1036,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         }}
       />
 
-      {/* Message Component */}
       {message && (
         <div className="fixed top-4 right-4 z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-center gap-3">
           <div className="text-green-600">
@@ -1087,7 +1053,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         </div>
       )}
 
-      {/* Footer */}
       <Footer />
     </div>
   );

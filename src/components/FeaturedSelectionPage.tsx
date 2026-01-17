@@ -13,7 +13,6 @@ const FeaturedSelectionPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Top bar (responsive) */}
       <div className="bg-white shadow-elevation-sm border-b border-neutral-200">
         <div className="container mx-auto container-padding flex flex-col md:flex-row items-center md:justify-between py-3 gap-2">
           <div className="w-full flex items-center justify-between">
@@ -40,7 +39,6 @@ const FeaturedSelectionPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile menu toggle */}
           <div className="w-full flex items-center justify-end md:hidden gap-2">
             <button
               className="relative p-2 text-neutral-600 hover:text-primary-500"
@@ -70,11 +68,7 @@ const FeaturedSelectionPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Featured Products section */}
       <FeaturedProducts />
-      {/* <BrandsSection /> */}
-
-      {/* Footer */}
     </div>
   );
 };

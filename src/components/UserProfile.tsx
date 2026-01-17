@@ -55,7 +55,6 @@ const UserProfile: React.FC = () => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
-  // Edit modes
   const [editMode, setEditMode] = useState<EditMode>({
     personal: false,
     contact: false,
@@ -64,7 +63,6 @@ const UserProfile: React.FC = () => {
     password: false
   });
 
-  // Form states
   const [personalForm, setPersonalForm] = useState({
     first_name: '',
     last_name: '',
@@ -101,7 +99,6 @@ const UserProfile: React.FC = () => {
     confirm: false
   });
 
-  // Shipping addresses (for future use)
   const [, setShippingAddresses] = useState<ShippingAddress[]>([]);
 
   const loadProfile = async () => {
@@ -117,7 +114,6 @@ const UserProfile: React.FC = () => {
       const profileData = await fetchUserProfile();
       setProfile(profileData);
       
-      // Initialize form data
       setPersonalForm({
         first_name: profileData.first_name || '',
         last_name: profileData.last_name || '',
@@ -356,13 +352,11 @@ const UserProfile: React.FC = () => {
       <Navbar />
       <div className="min-h-screen py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <div className="mb-10 text-center">
             <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">My Profile</h1>
             <p className="mt-2 text-lg text-gray-600">Manage your account settings and preferences</p>
           </div>
 
-          {/* Success Message */}
           {successMessage && (
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-8 shadow-sm">
               <div className="flex items-center">
@@ -372,7 +366,6 @@ const UserProfile: React.FC = () => {
             </div>
           )}
 
-          {/* Error Message */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-8 shadow-sm">
               <div className="flex items-center">
@@ -383,7 +376,6 @@ const UserProfile: React.FC = () => {
           )}
 
           <div className="space-y-8">
-            {/* Profile Picture & Basic Info */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-6 sm:space-y-0 sm:space-x-8">
@@ -436,7 +428,6 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
 
-            {/* Personal Information */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
@@ -571,7 +562,6 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
 
-            {/* Contact Information */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
@@ -719,7 +709,6 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
 
-            {/* Notification Preferences */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
@@ -808,7 +797,6 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
 
-            {/* Change Password */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
@@ -902,7 +890,6 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-5 flex items-center">

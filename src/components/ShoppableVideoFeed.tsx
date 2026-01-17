@@ -125,7 +125,6 @@ const CommentsSheet: React.FC<{
   );
 };
 
-// ===== VIDEO ITEM =====
 const VideoItem: React.FC<{
   video: ShoppableVideo;
   isActive: boolean;
@@ -151,16 +150,13 @@ const VideoItem: React.FC<{
       videoEl.muted = true;
       setIsMuted(true);
       videoEl.play().catch(() => {
-        // play may be blocked by autoplay policies or interrupted by navigation; ignore rejection
       });
       
-      // Avoid double-counting: track viewed video IDs in sessionStorage for the session
         try {
           const key = 'viewed_video_ids';
           const raw = sessionStorage.getItem(key);
           const seen: number[] = raw ? JSON.parse(raw) : [];
           if (!seen.includes(video.id)) {
-            // mark immediately so concurrent increments don't double-post
             seen.push(video.id);
             sessionStorage.setItem(key, JSON.stringify(seen));
             creatorsApi.incrementVideoView(video.id).catch((err) => {
@@ -168,7 +164,6 @@ const VideoItem: React.FC<{
             });
           }
         } catch (err) {
-          // fallback to direct increment if sessionStorage unavailable
           creatorsApi.incrementVideoView(video.id).catch(console.error);
         }
     } else {
@@ -190,7 +185,6 @@ const VideoItem: React.FC<{
     }
   };
 
-  // === Handlers (same as before) ===
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
@@ -577,13 +571,11 @@ const ShoppableVideoFeed: React.FC<{ onClose: () => void; onRequireLogin: () => 
     if (Math.abs(deltaY) > minSwipeDistance) {
       e.preventDefault();
       if (deltaY > 0 && activeVideoIndex < videos.length - 1) {
-        // Swipe up → next
         container.scrollTo({
           top: (activeVideoIndex + 1) * window.innerHeight,
           behavior: 'smooth',
         });
       } else if (deltaY < 0 && activeVideoIndex > 0) {
-        // Swipe down → previous
         container.scrollTo({
           top: (activeVideoIndex - 1) * window.innerHeight,
           behavior: 'smooth',

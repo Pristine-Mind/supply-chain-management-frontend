@@ -37,7 +37,6 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({ categories, onSelect }) => 
           </div>
         ))}
         </div>
-        {/* Optional: Add footer links */}
         <div className="flex justify-between mt-6 text-sm text-gray-500">
           <button type="button" className="hover:text-primary-600 font-medium" onClick={() => { /* TODO: wire to /brands */ }}>
             All Brands &gt;

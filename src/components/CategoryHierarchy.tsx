@@ -46,22 +46,18 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Dropdown states for custom styled dropdowns
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [subcategoryDropdownOpen, setSubcategoryDropdownOpen] = useState(false);
   const [subSubcategoryDropdownOpen, setSubSubcategoryDropdownOpen] = useState(false);
 
-  // Refs for dropdown containers
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const subcategoryDropdownRef = useRef<HTMLDivElement>(null);
   const subSubcategoryDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Effects
   useEffect(() => {
     loadCategories();
   }, []);
 
-  // Load subcategories when category changes
   useEffect(() => {
     if (selectedCategory) {
       loadSubcategories(selectedCategory);
@@ -71,7 +67,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
     }
   }, [selectedCategory]);
 
-  // Load sub-subcategories when subcategory changes
   useEffect(() => {
     if (selectedSubcategory) {
       loadSubSubcategories(selectedSubcategory);
@@ -80,22 +75,18 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
     }
   }, [selectedSubcategory]);
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       
-      // Check if click is outside category dropdown
       if (categoryDropdownOpen && categoryDropdownRef.current && !categoryDropdownRef.current.contains(target)) {
         setCategoryDropdownOpen(false);
       }
       
-      // Check if click is outside subcategory dropdown
       if (subcategoryDropdownOpen && subcategoryDropdownRef.current && !subcategoryDropdownRef.current.contains(target)) {
         setSubcategoryDropdownOpen(false);
       }
       
-      // Check if click is outside sub-subcategory dropdown
       if (subSubcategoryDropdownOpen && subSubcategoryDropdownRef.current && !subSubcategoryDropdownRef.current.contains(target)) {
         setSubSubcategoryDropdownOpen(false);
       }
@@ -124,7 +115,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   const loadSubcategories = async (categoryId: number) => {
     try {
       const data = await subcategoryApi.getSubcategories(categoryId);
-      // Use all subcategories since is_active might not be available
       setSubcategories(data);
     } catch (err) {
       console.error('Error loading subcategories:', err);
@@ -134,7 +124,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   const loadSubSubcategories = async (subcategoryId: number) => {
     try {
       const data = await subSubcategoryApi.getSubSubcategories(subcategoryId);
-      // Use all sub-subcategories since is_active might not be available
       setSubSubcategories(data);
     } catch (err) {
       console.error('Error loading sub-subcategories:', err);
@@ -156,7 +145,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
   const renderDropdownMode = () => (
     <div className={`space-y-2 ${className}`}>
-      {/* Category Selection */}
       <div className="relative" ref={categoryDropdownRef}>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Category {required && <span className="text-red-500">*</span>}
@@ -218,7 +206,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         )}
       </div>
 
-      {/* Subcategory Selection */}
       {selectedCategory && (
         <div className="relative" ref={subcategoryDropdownRef}>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -269,7 +256,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
               </div>
             )}
           </div>
-          {/* Debug info */}
           {subcategories.length > 0 && (
             <div className="text-xs text-gray-500 mt-1">
               {subcategories.length} subcategories loaded
@@ -283,8 +269,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         </div>
       )}
 
-      {/* Sub-subcategory Selection */}
-      {selectedSubcategory && (
+        {selectedSubcategory && (
         <div className="relative" ref={subSubcategoryDropdownRef}>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Sub-subcategory
@@ -334,7 +319,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
               </div>
             )}
           </div>
-          {/* Debug info */}
           {subSubcategories.length > 0 && (
             <div className="text-xs text-gray-500 mt-1">
               {subSubcategories.length} sub-subcategories loaded
@@ -348,7 +332,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         </div>
       )}
 
-      {/* Current Selection Display */}
       {showHierarchy && (selectedCategory || selectedSubcategory || selectedSubSubcategory) && (
         <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-3">
           <p className="text-sm text-gray-600 mb-1">Selected path:</p>
@@ -373,8 +356,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   if (mode === 'dropdown') {
     return renderDropdownMode();
   }
-
-  // Tree mode and breadcrumb mode can be implemented later
   return renderDropdownMode();
 };
 

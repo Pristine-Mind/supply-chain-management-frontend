@@ -40,7 +40,6 @@ const BrandsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Infinite Luxury Scroll */}
       <div className="relative flex flex-col gap-12">
         <div className="flex overflow-hidden group">
           <motion.div 

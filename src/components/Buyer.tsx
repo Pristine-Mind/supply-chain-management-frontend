@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 const Buyer: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
       <div className="bg-gradient-to-r from-orange-50 to-amber-50 py-16">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
@@ -40,7 +39,6 @@ const Buyer: React.FC = () => {
         </div>
       </div>
 
-      {/* Features Section */}
       <div className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Why Choose MulyaBazzar?</h2>
@@ -85,7 +83,6 @@ const Buyer: React.FC = () => {
         </div>
       </div>
 
-      {/* Categories Preview */}
       <div className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Shop by Category</h2>
@@ -125,7 +122,6 @@ const Buyer: React.FC = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
       <div className="bg-orange-600 text-white py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to start shopping?</h2>

@@ -23,7 +23,6 @@ export const getUserData = (): any => {
   return user ? JSON.parse(user) : null;
 };
 
-// Add token to all axios requests
 axios.interceptors.request.use(
   (config) => {
     const token = getAuthToken();
