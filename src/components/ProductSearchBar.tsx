@@ -95,7 +95,7 @@ const useSearchHistory = () => {
 
     setHistory(prev => {
       const filtered = prev.filter(item => item.query.toLowerCase() !== query.toLowerCase());
-      const updated = [newEntry, ...filtered].slice(0, 10); // Keep only 10 recent searches
+      const updated = [newEntry, ...filtered].slice(0, 10);
       localStorage.setItem('searchHistory', JSON.stringify(updated));
       return updated;
     });
@@ -122,7 +122,6 @@ const ProductSearchBar: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { distinctItemCount } = useCart();
 
-  // Helper function to get the appropriate price based on user's B2B status
   const getDisplayPrice = (product: MarketplaceProduct) => {
     const isB2BUser = user?.b2b_verified === true;
     const isB2BEligible = product.is_b2b_eligible === true;
@@ -175,7 +174,7 @@ const ProductSearchBar: React.FC = () => {
     recognition.lang = 'en-US';
 
     setIsListening(true);
-    setQuery(''); // Clear query when starting to listen
+    setQuery('');
 
     recognition.onresult = (event: any) => {
       let interimTranscript = '';

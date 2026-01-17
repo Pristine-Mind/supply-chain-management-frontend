@@ -20,7 +20,6 @@ const BrandProducts: React.FC = () => {
   const { addToCart } = useCart();
   const { isAuthenticated, user } = useAuth();
 
-  // State
   const [brand, setBrand] = useState<Brand | null>(null);
   const [products, setProducts] = useState<BrandProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +60,6 @@ const BrandProducts: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] selection:bg-orange-100">
-      {/* 1. Immersive Hero Section */}
       <section className="relative h-[45vh] w-full overflow-hidden bg-slate-900">
         <div className="absolute inset-0 opacity-40">
            <img src={brand?.logo_url} className="w-full h-full object-cover blur-3xl scale-110" alt="" />
@@ -103,7 +101,6 @@ const BrandProducts: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. Floating Glass Filter Bar */}
       <nav className="sticky top-6 z-50 container mx-auto px-6 mt-[-2rem]">
         <div className="bg-white/80 backdrop-blur-2xl border border-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[2rem] p-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4 flex-1">
@@ -138,7 +135,6 @@ const BrandProducts: React.FC = () => {
         </div>
       </nav>
 
-      {/* 3. Product Grid */}
       <main className="container mx-auto px-6 py-16">
         <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10' : 'flex flex-col gap-6'}`}>
           <AnimatePresence>
@@ -176,7 +172,6 @@ const ProductCard = ({ product, idx, user, viewMode, onAdd, onNavigate }: any) =
       onClick={onNavigate}
       className={`group relative bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)] transition-all duration-500 cursor-pointer ${viewMode === 'list' ? 'flex h-64' : ''}`}
     >
-      {/* Image Section */}
       <div className={`${viewMode === 'list' ? 'w-80' : 'h-72'} bg-slate-50 overflow-hidden relative`}>
         <img 
           src={product.images?.[0]?.image || PLACEHOLDER} 
@@ -190,7 +185,6 @@ const ProductCard = ({ product, idx, user, viewMode, onAdd, onNavigate }: any) =
         )}
       </div>
 
-      {/* Content Section */}
       <div className="p-8 flex flex-col justify-between flex-1">
         <div>
           <div className="flex justify-between items-start mb-2">

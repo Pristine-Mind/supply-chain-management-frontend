@@ -113,12 +113,10 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Import at the module level and create a safe wrapper
   let toast: any = null;
   try {
     toast = useToast();
   } catch (error) {
-    // Toast context not available, we'll use console logging as fallback
     console.warn('Toast context not available in CartProvider');
   }
   
@@ -154,7 +152,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.error(`${operation} failed:`, error);
     if (error.message?.includes('Authentication') || error.message?.includes('401')) {
       setError('Please login again to continue');
-      // Clear cart on auth error
       setCart([]);
       setState(prev => ({ ...prev, cartId: null }));
     } else if (error.message?.includes('Network') || !navigator.onLine) {
@@ -437,7 +434,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [cart]);
 
-  // Clean up cart items with zero quantity
   useEffect(() => {
     setCart(prevCart => prevCart.filter(item => item.quantity > 0));
   }, []);
@@ -464,7 +460,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw error;
     }
 
-    // Validate inputs
     if (!product || quantity <= 0) {
       const error = new Error('Invalid product or quantity');
       setError(error.message);
@@ -479,7 +474,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw error;
     }
 
-    // Optimistic update
     const tempId = Date.now();
     
     setCart(prevCart => {
@@ -495,7 +489,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         ...prevCart,
         {
           id: product.id,
-          backendItemId: tempId, // Temporary ID
+          backendItemId: tempId,
           product,
           quantity,
           price: product.discounted_price || product.listed_price,
@@ -508,7 +502,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const backendItemId = await addItemToBackendCart(productIdForBackend, quantity);
       
-      // Update with real backend ID
       setCart(prevCart => 
         prevCart.map(item => 
           item.backendItemId === tempId 
@@ -517,7 +510,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         )
       );
 
-      // Show success toast
       if (toast) {
         toast.showCartSuccess(
           'Added to cart!',
@@ -525,19 +517,16 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           {
             label: 'View Cart',
             onClick: () => {
-              // This will be handled by the component calling addToCart
               window.location.href = '/cart';
             }
           }
         );
       }
 
-      // Refresh cart data after a short delay to ensure backend is updated
       setTimeout(() => {
         fetchMyCart().catch(console.error);
       }, 100);
     } catch (error) {
-      // Rollback optimistic update
       setCart(prevCart => {
         const existingItem = prevCart.find(item => item.id === product.id);
         if (existingItem && existingItem.quantity > quantity) {
@@ -550,7 +539,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return prevCart.filter(item => item.backendItemId !== tempId);
       });
       
-      // Show error toast
       if (toast) {
         toast.showError(
           'Failed to add to cart',
@@ -579,7 +567,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const removedItem = cart.find(item => item.id === productId);
       setCart(prevCart => prevCart.filter(item => item.id !== productId));
       
-      // Show removal toast
       if (removedItem && toast) {
         toast.showInfo(
           'Removed from cart',
@@ -635,14 +622,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        // If not authenticated, just clear local cart
         setCart([]);
         localStorage.removeItem('cart');
         setIsLoading(false);
         return { success: true };
       }
 
-      // Clear all items from backend cart with detailed error tracking
       const currentCart = [...cart];
       const failedItems: number[] = [];
       const deletePromises = currentCart.map(async (item) => {
@@ -659,29 +644,24 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { success: true, itemId: item.id };
       });
 
-      // Wait for all delete operations to complete
       const results = await Promise.allSettled(deletePromises);
       
-      // Check for any failed operations
       const hasFailures = results.some(result => 
         result.status === 'rejected' || 
         (result.status === 'fulfilled' && !result.value.success)
       );
 
       if (hasFailures && failedItems.length > 0) {
-        // Partial failure - only clear successfully deleted items
         setCart(prevCart => prevCart.filter(item => failedItems.includes(item.id)));
         setError(`Failed to remove ${failedItems.length} item(s). Please try again.`);
         setIsLoading(false);
         return { success: false, failedItems };
       }
 
-      // All items cleared successfully
       setCart([]);
       setBackendTotals(null);
       localStorage.removeItem('cart');
       
-      // Show success toast
       if (toast) {
         toast.showSuccess(
           'Cart cleared',
@@ -689,7 +669,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         );
       }
       
-      // Refresh cart to ensure sync (but don't wait for it to complete)
       fetchMyCart().catch(error => {
         console.error('Failed to refresh cart after clearing:', error);
       });
@@ -699,7 +678,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
     } catch (error) {
       handleApiError(error, 'Clear cart');
-      // Still clear local cart even if backend fails completely
       setCart([]);
       localStorage.removeItem('cart');
       setIsLoading(false);

@@ -95,7 +95,6 @@ const TopBrands = () => {
     <div className="bg-[#FCFCFD] py-6 border-t border-neutral-100 overflow-hidden">
       <div className="container mx-auto px-4 relative group">
         
-        {/* Editorial Title Section */}
         <div className="flex flex-col items-center mb-4 text-center">
           <div className="flex items-center gap-3 mb-3 opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]">
             <span className="h-[1px] w-8 bg-orange-400" />
@@ -110,7 +109,6 @@ const TopBrands = () => {
           </h2>
         </div>
 
-        {/* Floating Glass Navigation Buttons */}
         <div className="absolute top-[60%] -translate-y-1/2 left-4 right-4 flex justify-between z-30 pointer-events-none">
           <button
             onClick={() => scrollBrandsBy(-400)}
@@ -127,7 +125,6 @@ const TopBrands = () => {
           </button>
         </div>
 
-        {/* Brand Scroller */}
         <div 
           ref={brandsRef}
           className="flex items-center gap-12 overflow-x-auto py-12 px-8 scroll-smooth"
@@ -147,16 +144,12 @@ const TopBrands = () => {
                 className="flex-shrink-0 cursor-pointer group/brand relative flex flex-col items-center opacity-0 animate-[fadeInUp_0.5s_ease-out_forwards]"
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
-                {/* Visual Orbit Container */}
                 <div className="relative w-40 h-40 flex items-center justify-center">
                   
-                  {/* Rotating Animated Background Ring */}
                   <div className="absolute inset-0 rounded-full border border-dashed border-slate-200 group-hover/brand:border-orange-500/50 group-hover/brand:rotate-180 transition-all duration-1000 ease-in-out" />
                   
-                  {/* Main Logo Sphere */}
                   <div className="relative w-32 h-32 bg-white rounded-full flex items-center justify-center p-7 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-slate-50 group-hover/brand:shadow-[0_25px_50px_rgba(249,115,22,0.2)] group-hover/brand:-translate-y-3 transition-all duration-500 z-10 overflow-hidden">
                     
-                    {/* Subtle Internal Glow */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-orange-400/5 opacity-0 group-hover/brand:opacity-100 transition-opacity duration-500" />
                     
                     {brand.logo_url ? (
@@ -172,13 +165,11 @@ const TopBrands = () => {
                     )}
                   </div>
 
-                  {/* Floating Action Badge */}
                   <div className="absolute bottom-2 right-4 bg-slate-900 text-white p-2 rounded-xl scale-0 group-hover/brand:scale-100 group-hover/brand:translate-y-[-12px] transition-all duration-300 delay-75 z-20 shadow-xl">
                     <ArrowUpRight size={14} />
                   </div>
                 </div>
 
-                {/* Brand Name with Reveal Effect */}
                 <div className="mt-2 text-center overflow-hidden">
                   <p className="text-[11px] font-black text-slate-400 group-hover/brand:text-slate-900 uppercase tracking-[0.2em] transition-colors duration-300">
                     {brand.name}

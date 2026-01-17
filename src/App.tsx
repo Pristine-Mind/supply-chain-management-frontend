@@ -131,6 +131,7 @@ const publicRoutes = [
   { path: '/deals', element: <Deals /> },
   { path: '/marketplace/categories/:categorySlug', element: <CategoryProducts /> },
   { path: '/marketplace/categories/:categorySlug/:subcategorySlug', element: <CategoryProducts /> },
+  { path: '/marketplace/categories/:categorySlug/:subcategorySlug/:subSubcategorySlug', element: <CategoryProducts /> },
   { path: '/marketplace/all-products', element: <MarketplaceAllProducts /> },
   { path: '/brand-products/:brandId', element: <BrandProducts /> },
   { path: '/marketplace/:productId', element: <ProductPage /> },

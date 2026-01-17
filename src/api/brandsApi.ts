@@ -93,7 +93,6 @@ export interface BrandProductsResponse {
   results: BrandProduct[];
 }
 
-// Fetch all brands
 export const fetchBrands = async (): Promise<Brand[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/brands/`, {
@@ -106,7 +105,6 @@ export const fetchBrands = async (): Promise<Brand[]> => {
   }
 };
 
-// Fetch brand details by ID
 export const fetchBrandById = async (brandId: number): Promise<Brand> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/brands/${brandId}/`, {
@@ -119,7 +117,6 @@ export const fetchBrandById = async (brandId: number): Promise<Brand> => {
   }
 };
 
-// Fetch products for a specific brand
 export const fetchBrandProducts = async (
   brandId: number,
   page: number = 1,

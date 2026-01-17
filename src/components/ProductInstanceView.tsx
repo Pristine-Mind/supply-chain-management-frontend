@@ -133,7 +133,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   const { addToCart, distinctItemCount, refreshCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   
-  // Initialize quantity based on B2B or regular minimum order
   const getInitialQuantity = () => {
     const isB2BVerified = user?.b2b_verified || false;
     const isB2BEligible = product.is_b2b_eligible || false;
@@ -147,7 +146,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   
   const [quantity, setQuantity] = useState(() => getInitialQuantity());
   
-  // Update quantity when user authentication changes or B2B status changes
   useEffect(() => {
     const newMinQuantity = getInitialQuantity();
     if (quantity < newMinQuantity) {
@@ -161,7 +159,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   const [fullScreenImageIndex, setFullScreenImageIndex] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
   
-  // Review-related state
   const [reviews, setReviews] = useState<Review[]>(product.reviews || []);
   const [userReview, setUserReview] = useState<ReviewData | null>(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -174,7 +171,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   const [reviewError, setReviewError] = useState<string>('');
 
 
-  // Helper function to determine the correct price to display
   const getDisplayPrice = () => {
     const isB2BVerified = user?.b2b_verified || false;
     const isB2BEligible = product.is_b2b_eligible || false;
@@ -188,7 +184,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
       };
     }
     
-    // Regular pricing logic
     if (product.is_offer_active && product.discounted_price < product.listed_price) {
       return {
         price: product.discounted_price,
@@ -246,7 +241,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
     );
   };
 
-  // Load user's existing review for this product
   useEffect(() => {
     const loadUserReview = async () => {
       if (isAuthenticated) {
@@ -268,7 +262,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
     loadUserReview();
   }, [isAuthenticated, product.id]);
 
-  // Handle review form submission
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
@@ -289,20 +282,16 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
       let updatedReview: ReviewData;
 
       if (editingReview) {
-        // Update existing review
         updatedReview = await updateReview(editingReview.id!, {
           rating: reviewFormData.rating,
           review_text: reviewFormData.review_text
         });
       } else {
-        // Create new review
         updatedReview = await createReview(reviewData);
       }
 
-      // Update local state
       setUserReview(updatedReview);
       
-      // Convert ReviewData to Review format for consistency
       const convertedReview: Review = {
         id: updatedReview.id,
         product: updatedReview.product,
@@ -314,14 +303,12 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
         created_at: updatedReview.created_at || new Date().toISOString()
       };
       
-      // Update reviews list
       const updatedReviews = editingReview 
         ? reviews.map(r => r.id === editingReview.id ? convertedReview : r)
         : [...reviews, convertedReview];
       
       setReviews(updatedReviews);
 
-      // Reset form
       setShowReviewForm(false);
       setEditingReview(null);
       setReviewFormData({ rating: 5, review_text: '' });
@@ -338,7 +325,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
     }
   };
 
-  // Handle review deletion
   const handleDeleteReview = async (reviewId: number) => {
     if (!window.confirm('Are you sure you want to delete your review?')) {
       return;
@@ -354,7 +340,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
     }
   };
 
-  // Handle edit review
   const handleEditReview = (review: ReviewData) => {
     setEditingReview(review);
     setReviewFormData({
@@ -485,7 +470,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   return (
     <>
       <div className="min-h-screen bg-gray-50">
-        {/* Sticky Header Bar */}
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
@@ -695,7 +679,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
 
                 <div className="space-y-3">
 
-                  {/* Trust Badges */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="bg-neutral-50 rounded-lg p-3 text-center border border-neutral-200">
                       <Shield className="w-5 h-5 text-primary-600 mx-auto mb-1" />
@@ -712,10 +695,8 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   </div>
                 </div>
 
-                {/* Divider */}
                 <div className="border-t border-gray-200"></div>
 
-                {/* Stock Status */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-neutral-700">Availability</span>
@@ -751,7 +732,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   )}
                 </div>
 
-                {/* Quantity Selector */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <label className="text-sm font-medium text-gray-700">Quantity</label>
@@ -804,7 +784,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="fixed bottom-0 left-0 right-0 z-50 bg-white p-4 border-t border-gray-200 shadow-lg space-y-3 md:static md:shadow-none md:p-0 md:space-y-3 md:sticky md:bottom-0 md:bg-white md:pt-4 md:border-t md:border-gray-200">
                   <button
                     onClick={handleAddToCart}
@@ -844,7 +823,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   </button>
                 </div>
 
-                {/* Bulk Pricing */}
                 {product.bulk_price_tiers?.length > 0 && (
                   <div className="bg-gradient-to-br from-primary-50 to-blue-50 border border-primary-200 rounded-xl p-4">
                     <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
@@ -870,10 +848,8 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
             </div>
           </div>
 
-          {/* Product Information Tabs */}
           <div className="mt-12">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-              {/* Tab Headers */}
               <div className="border-b border-gray-200 bg-gray-50">
                 <div className="flex">
                   {['Description', 'Reviews', 'Chat'].map((label, idx) => (
@@ -895,11 +871,9 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 </div>
               </div>
               
-              {/* Tab Content */}
               <div className="p-6 lg:p-8">
                 {tab === 0 && (
                   <div className="space-y-8">
-                    {/* Product Description */}
                     <div className="prose prose-lg max-w-none">
                       <div
                         className="text-gray-700 leading-relaxed"
@@ -907,7 +881,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       />
                     </div>
 
-                    {/* Product Specifications */}
                     {product.product_details?.sku && (
                       <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">Product Details</h3>
@@ -952,7 +925,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       </div>
                     )}
                     
-                    {/* Ratings Breakdown */}
                     {product.ratings_breakdown && Object.keys(product.ratings_breakdown).length > 0 && (
                       <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl p-6 border border-amber-200">
                         <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -983,7 +955,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                 
                 {tab === 1 && (
                   <div className="space-y-6">
-                    {/* Reviews Header */}
                     <div className="flex items-center justify-between flex-wrap gap-4">
                       <div>
                         <h2 className="text-2xl font-bold text-gray-900">Customer Reviews</h2>
@@ -1002,7 +973,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                         )}
                       </div>
                       
-                      {/* Write Review Button */}
                       {isAuthenticated && !userReview && (
                         <button
                           onClick={() => setShowReviewForm(true)}
@@ -1022,7 +992,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       )}
                     </div>
 
-                    {/* Review Form */}
                     {showReviewForm && (
                       <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -1049,7 +1018,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                         )}
 
                         <form onSubmit={handleReviewSubmit} className="space-y-4">
-                          {/* Rating */}
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Rating *
@@ -1077,7 +1045,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                             </div>
                           </div>
 
-                          {/* Review Text */}
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Review (optional)
@@ -1091,7 +1058,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                             />
                           </div>
 
-                          {/* Submit Button */}
                           <div className="flex gap-3 pt-2">
                             <button
                               type="submit"
@@ -1127,7 +1093,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       </div>
                     )}
 
-                    {/* User's Existing Review */}
                     {userReview && !showReviewForm && (
                       <div className="bg-primary-50 border border-primary-200 rounded-xl p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -1164,7 +1129,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       </div>
                     )}
                     
-                    {/* Reviews List */}
                     {reviews.length === 0 ? (
                       <div className="text-center py-16 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
                         <div className="text-6xl mb-4">⭐</div>
@@ -1189,16 +1153,14 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     ) : (
                       <div className="space-y-4">
                         {reviews
-                          .filter(review => review.id !== userReview?.id) // Don't show user's review in the general list
+                          .filter(review => review.id !== userReview?.id)
                           .map((review, idx) => (
                           <div key={review.id || idx} className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
                             <div className="flex items-start gap-4">
-                              {/* Avatar */}
                               <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center font-bold text-white text-lg flex-shrink-0">
                                 {(review.user?.[0] || review.username?.[0] || 'A').toUpperCase()}
                               </div>
                               
-                              {/* Review Content */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                                   <div>
@@ -1237,17 +1199,14 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
         </div>
       </div>
 
-      {/* Login Modal */}
       <LoginModal 
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
         onSuccess={handleLoginSuccess}
       />
 
-      {/* Full Screen Image Viewer */}
       {isFullScreenOpen && (
         <div className="fixed inset-0 z-50 bg-black/98 backdrop-blur-sm">
-          {/* Close Button */}
           <button
             onClick={closeFullScreen}
             className="absolute top-6 right-6 z-10 bg-white/10 backdrop-blur-md text-white p-3 rounded-full hover:bg-white/20 transition-all"
@@ -1256,12 +1215,10 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
             <X className="w-6 h-6" />
           </button>
 
-          {/* Image Counter */}
           <div className="absolute top-6 left-6 z-10 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full text-sm font-semibold">
             {fullScreenImageIndex + 1} / {images.length}
           </div>
 
-          {/* Navigation Buttons */}
           {images.length > 1 && (
             <>
               <button
@@ -1281,7 +1238,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
             </>
           )}
 
-          {/* Main Image */}
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <img
               src={images[fullScreenImageIndex]?.image || ''}
@@ -1290,7 +1246,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
             />
           </div>
 
-          {/* Thumbnail Navigation */}
           {images.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-3 rounded-2xl max-w-2xl overflow-x-auto">
@@ -1312,12 +1267,10 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
             </div>
           )}
 
-          {/* Keyboard Instructions */}
           <div className="absolute bottom-6 right-6 z-10 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-medium">
             Press ESC to close • Use arrow keys
           </div>
 
-          {/* Click Background to Close */}
           <div
             className="absolute inset-0"
             onClick={(e) => {

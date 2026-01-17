@@ -58,7 +58,6 @@ export const BusinessRegister: React.FC = () => {
   const [cityError, setCityError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // Initialize with default position
   const [position, setPosition] = useState<[number, number]>([27.7172, 85.3240]);
 
   const {
@@ -68,7 +67,7 @@ export const BusinessRegister: React.FC = () => {
     setValue,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: yupResolver(schema) as any, // Type assertion to fix the resolver type
+    resolver: yupResolver(schema) as any,
     defaultValues: {
       cityId: 0,
       latitude: 27.7172,
@@ -144,7 +143,6 @@ export const BusinessRegister: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex flex-col lg:flex-row">
-        {/* Left Banner */}
         <div className="hidden lg:flex lg:w-1/3 bg-gradient-to-br from-primary-500 to-primary-400 p-8 text-white">
           <div className="flex flex-col justify-center">
             <h2 className="text-3xl font-bold mb-4">Grow Your Business</h2>
@@ -172,7 +170,6 @@ export const BusinessRegister: React.FC = () => {
           </div>
         </div>
 
-        {/* Main Form */}
         <div className="w-full lg:w-1/3 p-6 bg-white shadow-lg">
           <div className="max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Business Registration</h2>
@@ -356,7 +353,6 @@ export const BusinessRegister: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Banner */}
         <div className="hidden lg:flex lg:w-1/3 bg-gray-100 p-8">
           <div className="flex flex-col justify-center text-center">
             <div className="mb-6">

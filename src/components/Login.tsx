@@ -17,18 +17,12 @@ const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Login Method State
   const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('password');
-  
-  // Password Login State
   const [formData, setFormData] = useState<LoginFormData>({ username: '', password: '' });
-  
-  // OTP Login State
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [otpStep, setOtpStep] = useState<'request' | 'verify'>('request');
   
-  // Common State
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -147,7 +141,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50">
-      {/* Brand Logo */}
       <div className="mb-8 text-center">
         <img src={logo} alt="MulyaBazzar Logo" className="w-24 h-24 mx-auto mb-4 rounded-xl shadow-sm" />
         <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">
@@ -158,10 +151,8 @@ const Login: React.FC = () => {
         </p>
       </div>
 
-      {/* Login Form */}
       <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-8 w-full max-w-md">
         
-        {/* Login Method Tabs */}
         <div className="flex mb-6 bg-neutral-100 p-1 rounded-lg">
           <button
             className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${

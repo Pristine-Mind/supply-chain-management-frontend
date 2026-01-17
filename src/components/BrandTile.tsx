@@ -7,7 +7,6 @@ const BrandTile = ({ brand, img }: any) => {
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   
-  // 3D Tilt Logic
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const mouseXSpring = useSpring(x);
@@ -38,13 +37,10 @@ const BrandTile = ({ brand, img }: any) => {
       onClick={() => navigate(`/brand-products/${brand.id}`)}
       className="relative group w-48 h-64 cursor-pointer"
     >
-      {/* Glow Effect Layer */}
       <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      {/* Main Card */}
       <div className="relative h-full w-full bg-white/80 backdrop-blur-md rounded-[2rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group-hover:shadow-[0_20px_50px_rgba(251,146,60,0.15)] transition-all duration-500">
         
-        {/* Floating Badges */}
         <div className="absolute top-4 left-4 z-20">
           {brand.is_trending && (
             <motion.div 
@@ -57,7 +53,6 @@ const BrandTile = ({ brand, img }: any) => {
           )}
         </div>
 
-        {/* Brand Logo Container */}
         <div className="h-2/3 w-full flex items-center justify-center p-8 transition-transform duration-500 group-hover:scale-110" style={{ transform: "translateZ(50px)" }}>
            <img
               src={img || 'https://via.placeholder.com/150'}
@@ -67,7 +62,6 @@ const BrandTile = ({ brand, img }: any) => {
            />
         </div>
 
-        {/* Brand Info Section */}
         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white via-white/80 to-transparent">
           <h3 className="text-sm font-black text-slate-800 tracking-tight text-center truncate uppercase">
             {brand.name}

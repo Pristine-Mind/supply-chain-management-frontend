@@ -33,7 +33,6 @@ export const BlogPage: React.FC = () => {
         const data = await res.json();
         setPosts(data);
       } catch (e) {
-        // Fallback mock data if API fails
         setPosts([
           { id: 1, title: 'How to Sell Fresh Produce on MulyaBazzar', excerpt: 'Learn best listing practices for fruits and vegetables to maximize your revenue...', image: 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1740', date: 'Jul 10, 2025', author: 'Admin', category: 'Farming' },
           { id: 2, title: 'Understanding Marketplace Fees', excerpt: 'A transparent breakdown of how we help you keep more profit in your pocket...', image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=1711', date: 'Jul 08, 2025', author: 'Finance', category: 'Finance' },
@@ -63,7 +62,6 @@ export const BlogPage: React.FC = () => {
     <div className="bg-[#fcfcfd] min-h-screen">
       <Navbar />
 
-      {/* Hero Section */}
       <div className="relative h-[45vh] flex items-center justify-center overflow-hidden">
         <motion.img 
           initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 10 }}
@@ -84,7 +82,6 @@ export const BlogPage: React.FC = () => {
       </div>
 
       <main className="max-w-7xl mx-auto px-4 py-16 grid lg:grid-cols-12 gap-12">
-        {/* Main Feed */}
         <div className="lg:col-span-8">
           <div className="flex items-center gap-4 mb-10">
             <Newspaper className="text-orange-500" />
@@ -128,7 +125,6 @@ export const BlogPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Sidebar */}
         <aside className="lg:col-span-4">
           <div className="sticky top-24 space-y-8">
             <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">

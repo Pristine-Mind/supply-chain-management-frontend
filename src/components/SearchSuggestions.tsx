@@ -36,7 +36,6 @@ const SearchSuggestions: React.FC<Props> = ({
   const lastQueryRef = useRef<string>('');
 
   useEffect(() => {
-    // Close on outside click
     function handleClick(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -59,7 +58,6 @@ const SearchSuggestions: React.FC<Props> = ({
     setOpen(true);
     setActiveIndex(-1);
 
-    // If we have exact cached results, use them immediately
     const cached = cacheRef.current.get(query);
     if (cached) {
       setSuggestions(cached);
@@ -69,7 +67,6 @@ const SearchSuggestions: React.FC<Props> = ({
       return;
     }
 
-    // If query extends lastQuery, try to filter lastResults locally for instant feedback
     if (lastQueryRef.current && query.startsWith(lastQueryRef.current) && lastResultsRef.current) {
       const local = lastResultsRef.current
         .filter((s) => s.query.toLowerCase().includes(query.toLowerCase()))
@@ -81,14 +78,12 @@ const SearchSuggestions: React.FC<Props> = ({
 
     setLoading(true);
 
-    // Cancel previous request
     if (controllerRef.current) controllerRef.current.abort();
     controllerRef.current = new AbortController();
     const signal = controllerRef.current.signal;
 
     const timer = setTimeout(async () => {
       try {
-        // Fetch both product suggestions and trending suggestions in parallel
         const apiUrl = import.meta.env.VITE_REACT_APP_API_URL || '';
         
         const [productResponse, trendingResponse] = await Promise.allSettled([
@@ -104,7 +99,6 @@ const SearchSuggestions: React.FC<Props> = ({
 
         const combinedSuggestions: Suggestion[] = [];
 
-        // Process product suggestions
         if (productResponse.status === 'fulfilled' && productResponse.value.ok) {
           const data = await productResponse.value.json();
           const results = Array.isArray(data.results) ? data.results : [];
@@ -122,7 +116,6 @@ const SearchSuggestions: React.FC<Props> = ({
           combinedSuggestions.push(...productNames);
         }
 
-        // Process trending suggestions
         if (trendingResponse.status === 'fulfilled' && trendingResponse.value.ok) {
           const data = await trendingResponse.value.json();
           const trendingSuggestions = data.suggestions || [];
@@ -136,20 +129,17 @@ const SearchSuggestions: React.FC<Props> = ({
           combinedSuggestions.push(...trending);
         }
 
-        // Remove duplicates and limit results
         const uniqueSuggestions = Array.from(
           new Map(combinedSuggestions.map(s => [s.query.toLowerCase(), s])).values()
         ).slice(0, maxResults);
 
         setSuggestions(uniqueSuggestions);
 
-        // Cache results
         try {
           cacheRef.current.set(query, uniqueSuggestions);
           lastResultsRef.current = uniqueSuggestions;
           lastQueryRef.current = query;
 
-          // Keep cache size in check
           if (cacheRef.current.size > 200) {
             const firstKey = cacheRef.current.keys().next().value;
             if (typeof firstKey === 'string') {
@@ -200,7 +190,6 @@ const SearchSuggestions: React.FC<Props> = ({
   const handleSelect = (suggestion: Suggestion) => {
     setOpen(false);
     if (suggestion.productId) {
-      // navigate to product page
       navigate(`/marketplace/${suggestion.productId}`);
       return;
     }

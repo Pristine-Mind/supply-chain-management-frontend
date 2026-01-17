@@ -14,7 +14,6 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// On hard refresh, clear any map tile caches and unregister SW so tiles don't persist
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {

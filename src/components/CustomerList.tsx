@@ -308,7 +308,6 @@ const CustomerList: React.FC = () => {
         const elementIndex = elements[0].index;
         const customerName = activeTab === 'top' ? topSalesCustomers[elementIndex]?.name : topOrdersCustomers[elementIndex]?.name;
         if (customerName) {
-          // Find and show customer details
           const customer = customers.find(c => c.name === customerName);
           if (customer) {
             handleCustomerClick(customer);
@@ -334,7 +333,6 @@ const CustomerList: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Navigation Tabs */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Customer Management</h1>
         <div className="border-b border-gray-200">
@@ -367,7 +365,6 @@ const CustomerList: React.FC = () => {
           </nav>
         </div>
       </div>
-      {/* Top Sales and Orders Section - Only show when on 'all' or 'top' tab */}
       {(activeTab === 'all' || activeTab === 'top') && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div className="bg-white shadow-sm rounded-xl border border-gray-200 p-6">
@@ -391,7 +388,6 @@ const CustomerList: React.FC = () => {
         </div>
       )}
 
-      {/* Customer List and Search */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">{t('customer_list')}</h2>
         <div className="flex items-center space-x-4 w-full sm:w-auto">
@@ -433,7 +429,6 @@ const CustomerList: React.FC = () => {
         </div>
       </div>
 
-      {/* Customer Table */}
       <div className="overflow-x-auto bg-white shadow-md rounded-lg mb-8">
         <table className="min-w-full text-sm text-gray-700">
           <thead className="text-xs uppercase bg-blue-500 text-white">
@@ -504,7 +499,6 @@ const CustomerList: React.FC = () => {
         </table>
       </div>
 
-      {/* Pagination Controls */}
       <div className="flex justify-between items-center">
         <button
           onClick={handlePreviousPage}
@@ -525,7 +519,6 @@ const CustomerList: React.FC = () => {
         </button>
       </div>
 
-      {/* Customer Detail Modal */}
       {isModalOpen && selectedCustomer && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
@@ -577,7 +570,6 @@ const CustomerList: React.FC = () => {
         </div>
       )}
 
-      {/* Add/Edit Customer Modal */}
       {formVisible && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">

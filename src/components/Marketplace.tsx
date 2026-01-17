@@ -30,6 +30,7 @@ import HeroBanner from './HeroBanner';
 import PromoBanner from './PromoBanner';
 import FreeDeliveryBanner from './FreeDeliveryBanner';
 import LazySection from './ui/LazySection';
+import CategoryCarousel from './CategoryCarousel';
 
 interface ProductImage {
   id: number;
@@ -788,6 +789,7 @@ const Marketplace: React.FC = () => {
           </div>
         )}
 
+      <CategoryCarousel />
       <LazySection>
         <FeaturedProducts/>
       </LazySection>
