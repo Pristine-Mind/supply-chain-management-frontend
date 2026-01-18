@@ -90,7 +90,17 @@ const ReelItem: React.FC<{ video: ShoppableVideo; isActive: boolean }> = ({ vide
     if (videoRef.current) {
       if (isActive && video.content_type === 'VIDEO') {
         videoRef.current.currentTime = 0;
-        videoRef.current.play().catch(err => console.debug('Autoplay blocked:', err));
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              // Autoplay succeeded
+            })
+            .catch(err => {
+              // Autoplay was blocked by browser policy
+              console.debug('Autoplay blocked:', err.message);
+            });
+        }
         
         // Auto-increment view
         const key = `viewed_${video.id}`;
@@ -295,6 +305,7 @@ const ReelItem: React.FC<{ video: ShoppableVideo; isActive: boolean }> = ({ vide
           className="h-full w-full object-contain"
           loop
           playsInline
+          autoPlay={isActive}
           muted={isMuted}
           onClick={toggleMute}
         />
