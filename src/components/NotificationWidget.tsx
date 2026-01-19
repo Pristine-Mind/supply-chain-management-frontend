@@ -78,22 +78,17 @@ const NotificationWidget: React.FC<NotificationWidgetProps> = ({
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   const handleNotificationClick = (notif: Notification) => {
-    console.log('Notification clicked:', notif);
     if (!notif.is_read) {
-      console.log('Calling onMarkAsRead for notification:', notif.id);
       onMarkAsRead(notif.id);
     }
     if (notif.data?.action_url) {
-      console.log('Navigating to:', notif.data.action_url);
       window.location.href = notif.data.action_url;
     }
   };
 
   const handleDelete = (e: React.MouseEvent, id: number) => {
-    console.log('Delete clicked for notification:', id);
     e.stopPropagation();
     if (onDelete) {
-      console.log('Calling onDelete');
       onDelete(id);
     }
   };

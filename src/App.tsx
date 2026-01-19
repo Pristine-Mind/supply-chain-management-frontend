@@ -7,6 +7,7 @@ import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Logout from './components/auth/Logout';
 import { Toaster } from './components/ui/toaster';
+import { useRouteHash } from './hooks/useRouteHash';
 import FeaturedSelectionPage from './components/FeaturedSelectionPage';
 import Deals from './components/Deals';
 import FlashSale from './components/FlashSale';
@@ -181,10 +182,28 @@ const GoogleAnalyticsTracker: React.FC = () => {
   return null;
 };
 
-const App: React.FC = () => {
+const RouteHashManager: React.FC = () => {  
+  const location = useLocation();
+  const { currentHash, isDuplicate } = useRouteHash({
+    autoClean: true,
+    cleanInterval: 24 * 60 * 60 * 1000,
+    enableLogging: true,
+  });
+
+  useEffect(() => {
+    if (currentHash) {
+      document.documentElement.setAttribute('data-route-hash', currentHash);
+    }
+  }, [currentHash]);
+
+  return null;
+};
+
+const AppContent: React.FC = () => {
   return (
-    <Router>
+    <>
       <GoogleAnalyticsTracker />
+      <RouteHashManager />
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
@@ -208,6 +227,14 @@ const App: React.FC = () => {
           </CartProvider>
         </ToastProvider>
       </AuthProvider>
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 };

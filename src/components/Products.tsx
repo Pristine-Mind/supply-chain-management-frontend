@@ -246,7 +246,6 @@ const Products: React.FC = () => {
       setTotalItems(response.data.count || 0);
       setTotalPages(Math.ceil((response.data.count || 0) / itemsPerPage));
     } catch (error) {
-      console.error(t('error_fetching_products'), error);
       setProducts([]);
       setTotalItems(0);
       setTotalPages(1);
@@ -260,10 +259,8 @@ const Products: React.FC = () => {
       const response = await axios.get(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/producers/`, {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` },
       });
-      console.log('Producers API response:', response.data);
       setProducers(response.data.results || response.data || []);
     } catch (error) {
-      console.error(t('error_fetching_producers'), error);
       setProducers([]); // Set empty array on error
     }
   };
@@ -292,10 +289,8 @@ const Products: React.FC = () => {
       link.parentNode?.removeChild(link);
     } catch (error: unknown) {
       if (isAxiosError(error)) {
-        console.error('Export error:', error.response?.data);
         setErrorMessages({ general: [t('error_exporting_data')] });
       } else {
-        console.error('Unexpected error:', error);
         setErrorMessages({ general: [t('error_exporting_data')] });
       }
     }
@@ -424,7 +419,6 @@ const Products: React.FC = () => {
       }, 3000);
 
     } catch (error) {
-      console.error('Error updating stock:', error);
       setStockUpdateError('Failed to update stock. Please try again.');
     } finally {
       setIsUpdatingStock(false);
@@ -558,7 +552,6 @@ const Products: React.FC = () => {
       document.body.removeChild(link);
 
     } catch (error) {
-      console.error('Error exporting product stats:', error);
     } finally {
       setExportingProductId(null);
     }
@@ -1136,7 +1129,6 @@ const Products: React.FC = () => {
                   name="producer"
                   value={formData.producer}
                   onChange={(e) => {
-                    console.log('Producer dropdown changed to:', e.target.value);
                     setFormData({ ...formData, producer: e.target.value });
                   }}
                   className={`w-full px-4 py-3 border rounded-lg text-body transition-colors focus:ring-1 focus:ring-primary-500 focus:border-primary-500 ${errorMessages.producer ? 'border-accent-error-300 focus:ring-accent-error-500 focus:border-accent-error-500' : 'border-neutral-300'}`}

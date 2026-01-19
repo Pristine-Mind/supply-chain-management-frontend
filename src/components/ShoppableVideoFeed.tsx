@@ -237,7 +237,6 @@ const VideoItem: React.FC<{
     try {
       await shoppableVideosApi.shareVideo(video.id);
     } catch (error) {
-      console.error('Failed to record share', error);
     }
 
     const shareUrl = `${window.location.origin}/marketplace/${video.product.id}`;
@@ -249,7 +248,6 @@ const VideoItem: React.FC<{
           url: shareUrl,
         });
       } catch (err) {
-        console.log('Share canceled or not supported');
       }
     } else {
       try {

@@ -136,7 +136,6 @@ const Home: React.FC = () => {
       await logout();
       navigate('/login');
     } catch (error) {
-      console.error('Logout failed:', error);
     }
   };
 
@@ -150,7 +149,7 @@ const Home: React.FC = () => {
       );
       setData(response.data);
     } catch (error) {
-      console.error('Error fetching dashboard data', error);
+
     }
   };
 
@@ -159,13 +158,10 @@ const Home: React.FC = () => {
       setNotificationsLoading(true);
       const token = localStorage.getItem('token');
       if (!token) {
-        console.warn('No token available for fetching notifications');
         setNotifications([]);
         return;
       }
-      console.log('Fetching notifications...');
       const response = await fetchNotifications(token, 50, 0);
-      console.log('Notifications fetched:', response);
       let notificationsData = Array.isArray(response) ? response : (response.results || []);
       
       notificationsData = notificationsData.map(notif => ({
@@ -174,10 +170,8 @@ const Home: React.FC = () => {
         severity: notif.severity || 'info',
       }));
       
-      console.log('Setting notifications:', notificationsData);
       setNotifications(notificationsData);
     } catch (error) {
-      console.error('Error fetching notifications', error);
       setNotifications([]);
     } finally {
       setNotificationsLoading(false);
@@ -193,7 +187,6 @@ const Home: React.FC = () => {
       );
       setUserProfile(response.data.data);
     } catch (error) {
-      console.error('Error fetching profile:', error);
     } finally {
       setProfileLoading(false);
     }
@@ -201,55 +194,43 @@ const Home: React.FC = () => {
 
   const handleMarkNotificationAsRead = async (id: number) => {
     try {
-      console.log('Marking notification as read:', id);
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No token found');
         return;
       }
       const result = await markNotificationAsRead(token, id);
-      console.log('Mark as read result:', result);
       setNotifications(prev =>
         Array.isArray(prev) ? prev.map(n => (n.id === id ? { ...n, is_read: true } : n)) : []
       );
     } catch (error) {
-      console.error('Failed to mark as read', error);
     }
   };
 
   const handleMarkAllNotificationsAsRead = async () => {
     try {
-      console.log('Marking all notifications as read');
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No token found');
         return;
       }
       const result = await markAllNotificationsAsRead(token);
-      console.log('Mark all as read result:', result);
       setNotifications(prev => 
         Array.isArray(prev) ? prev.map(n => ({ ...n, is_read: true })) : []
       );
     } catch (error) {
-      console.error('Failed to mark all as read', error);
     }
   };
 
   const handleDeleteNotification = async (id: number) => {
     try {
-      console.log('Deleting notification:', id);
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No token found');
         return;
       }
       const result = await deleteNotification(token, id);
-      console.log('Delete result:', result);
       setNotifications(prev => 
         Array.isArray(prev) ? prev.filter(n => n.id !== id) : []
       );
     } catch (error) {
-      console.error('Failed to delete notification', error);
     }
   };
 

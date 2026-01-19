@@ -47,7 +47,6 @@ export const LoyaltyProvider: React.FC<{ children: ReactNode }> = ({ children })
         loyaltyApi.getAllTiers(),
       ]);
 
-      console.log('Loyalty data loaded:', loyalty);
       setUserLoyalty(loyalty);
       setDashboardData(dashboard);
       setAllTiers(tiers);
@@ -55,7 +54,6 @@ export const LoyaltyProvider: React.FC<{ children: ReactNode }> = ({ children })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load loyalty data';
       setError(errorMessage);
-      console.error('Loyalty data error:', err);
       // Set mock data for development if API fails
       const mockLoyalty: UserLoyalty = {
         id: 1,
@@ -156,7 +154,6 @@ export const LoyaltyProvider: React.FC<{ children: ReactNode }> = ({ children })
       const result = await loyaltyApi.calculatePointsForPurchase(amount);
       return result.estimated_points;
     } catch (err) {
-      console.error('Error calculating points:', err);
       return 0;
     }
   };
