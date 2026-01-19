@@ -1213,12 +1213,6 @@ const SaleList: React.FC = () => {
                         <LocationPicker
                           initialCenter={{ 
                             lat: (() => {
-                              console.log('🗺️ Rendering LocationPicker with tracking data:', {
-                                lat: trackingData.latitude,
-                                lng: trackingData.longitude,
-                                showMarker: true,
-                                trackingData
-                              });
                               return trackingData.latitude;
                             })(), 
                             lng: trackingData.longitude 

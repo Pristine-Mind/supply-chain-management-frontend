@@ -180,7 +180,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
       const categories = await categoryApi.getCategories();
       return categories.find(cat => createSlug(cat.name) === slug || cat.code.toLowerCase() === slug);
     } catch (error) {
-      console.error('Error fetching categories:', error);
       return null;
     }
   };
@@ -190,7 +189,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
       const subcategories = await subcategoryApi.getSubcategories(categoryId);
       return subcategories.find((sub: Subcategory) => createSlug(sub.name) === slug || sub.code.toLowerCase() === slug);
     } catch (error) {
-      console.error('Error fetching subcategories:', error);
       return null;
     }
   };
@@ -246,7 +244,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         }
 
         const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?${searchParams.toString()}`;
-        console.log('🔍 [CategoryProducts] Searching products with:', searchUrl);
         const response = await axios.get(searchUrl);
 
         if (response.data && Array.isArray(response.data.results)) {
@@ -275,18 +272,15 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
       if (categoryId) {
         params.append('category', categoryId.toString());
         params.append('category_id', categoryId.toString());
-        console.log('🔍 [CategoryProducts] Applied category filter:', categoryId);
       }
       
       if (subcategoryId) {
         params.append('subcategory', subcategoryId.toString());
         params.append('subcategory_id', subcategoryId.toString());
-        console.log('🔍 [CategoryProducts] Applied subcategory filter:', subcategoryId);
       }
 
       if (subSubcategoryId) {
         params.append('sub_subcategory_id', subSubcategoryId.toString());
-        console.log('🔍 [CategoryProducts] Applied sub-subcategory filter:', subSubcategoryId);
       }
       
       if (selectedCity) {
@@ -332,16 +326,8 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
       }
 
       const apiUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?${params.toString()}`;
-      console.log('🔍 [CategoryProducts] Fetching products from:', apiUrl);
       
       const response = await axios.get(apiUrl);
-      
-      console.log('🔍 [CategoryProducts] API Response:', {
-        url: apiUrl,
-        resultCount: response.data?.results?.length || 0,
-        totalCount: response.data?.count || 0,
-        hasResults: Array.isArray(response.data?.results)
-      });
       
       if (response.data && Array.isArray(response.data.results)) {
         const results = response.data.results;
@@ -362,11 +348,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
         setTotalProducts(0);
       }
     } catch (error) {
-      console.error('🔍 [CategoryProducts] Error fetching products:', error);
-      if (axios.isAxiosError(error)) {
-        console.error('Response data:', error.response?.data);
-        console.error('Response status:', error.response?.status);
-      }
       setError('Failed to load products. Please try again.');
       setProducts([]);
     } finally {
@@ -375,15 +356,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
   };
 
   useEffect(() => {
-    console.log('🔍 [CategoryProducts] fetchProducts triggered by state change:', {
-      currentPage, 
-      sortBy, 
-      selectedPriceRange,
-      selectedRating,
-      debouncedSearchTerm,
-      categorySlug,
-      subcategorySlug
-    });
     fetchProducts();
   }, [
     currentPage, 

@@ -106,7 +106,6 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
       setCategories(data.filter(cat => cat.is_active));
     } catch (err) {
       setError('Failed to load categories');
-      console.error('Error loading categories:', err);
     } finally {
       setLoading(false);
     }
@@ -117,7 +116,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
       const data = await subcategoryApi.getSubcategories(categoryId);
       setSubcategories(data);
     } catch (err) {
-      console.error('Error loading subcategories:', err);
+      setError('Failed to load subcategories');
     }
   };
 
@@ -126,19 +125,17 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
       const data = await subSubcategoryApi.getSubSubcategories(subcategoryId);
       setSubSubcategories(data);
     } catch (err) {
-      console.error('Error loading sub-subcategories:', err);
+      setError('Failed to load sub-subcategories');
     }
   };
 
   const handleCategoryChange = (categoryId: number | null) => {
-    console.log('Category changed to:', categoryId);
     onCategoryChange?.(categoryId);
     onSubcategoryChange?.(null);
     onSubSubcategoryChange?.(null);
   };
 
   const handleSubcategoryChange = (subcategoryId: number | null) => {
-    console.log('Subcategory changed to:', subcategoryId);
     onSubcategoryChange?.(subcategoryId);
     onSubSubcategoryChange?.(null);
   };
