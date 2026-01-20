@@ -13,7 +13,11 @@ import {
   FileText,
   Activity,
   Zap,
-  TrendingDown
+  TrendingDown,
+  Shield,
+  AlertTriangle,
+  TrendingUp,
+  Target
 } from 'lucide-react';
 import { FaFirstOrder } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
@@ -116,6 +120,16 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
               <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
               <NavItem href="/system-health" icon={Activity} label="System Health" />
+              
+              <div className="pt-4 pb-2">
+                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
+                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Risk Management</p>}
+              </div>
+              <NavItem href="/risk-management" icon={Shield} label="Risk Dashboard" />
+              <NavItem href="/risk-management/scorecards" icon={Target} label="Supplier Scorecards" />
+              <NavItem href="/risk-management/kpis" icon={TrendingUp} label="Supply Chain KPIs" />
+              <NavItem href="/risk-management/alerts" icon={AlertTriangle} label="Alerts" />
+              <NavItem href="/risk-management/risks" icon={Shield} label="Risk Assessment" />
             </>
           ) : businessType === 'distributor' ? (
             <>
@@ -141,6 +155,16 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
               <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
               <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
+              
+              <div className="pt-4 pb-2">
+                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
+                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Risk Management</p>}
+              </div>
+              <NavItem href="/risk-management" icon={Shield} label="Risk Dashboard" />
+              <NavItem href="/risk-management/scorecards" icon={Target} label="Supplier Scorecards" />
+              <NavItem href="/risk-management/kpis" icon={TrendingUp} label="Supply Chain KPIs" />
+              <NavItem href="/risk-management/alerts" icon={AlertTriangle} label="Alerts" />
+              <NavItem href="/risk-management/risks" icon={Shield} label="Risk Assessment" />
             </>
           ) : (
             <>
@@ -161,6 +185,16 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
               <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
               <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
               <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
+              
+              <div className="pt-4 pb-2">
+                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
+                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Risk Management</p>}
+              </div>
+              <NavItem href="/risk-management" icon={Shield} label="Risk Dashboard" />
+              <NavItem href="/risk-management/scorecards" icon={Target} label="Supplier Scorecards" />
+              <NavItem href="/risk-management/kpis" icon={TrendingUp} label="Supply Chain KPIs" />
+              <NavItem href="/risk-management/alerts" icon={AlertTriangle} label="Alerts" />
+              <NavItem href="/risk-management/risks" icon={Shield} label="Risk Assessment" />
             </>
           )}
         </ul>

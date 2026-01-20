@@ -80,6 +80,16 @@ import { LoyaltyProvider } from './context/LoyaltyContext';
 import LoyaltyDashboard from './components/loyalty/LoyaltyDashboard';
 import LoyaltyHistory from './components/loyalty/LoyaltyHistory';
 import TierComparison from './components/loyalty/TierComparison';
+import RiskManagementDashboard from './components/risk-management/RiskManagementDashboard';
+import SupplierScorecardList from './components/risk-management/SupplierScorecardList';
+import SupplierScorecardDetail from './components/risk-management/SupplierScorecardDetail';
+import ScorecardComparison from './components/risk-management/ScorecardComparison';
+import SupplyChainKPIDashboard from './components/risk-management/SupplyChainKPIDashboard';
+import SupplyChainAlertsList from './components/risk-management/SupplyChainAlertsList';
+import AlertDetailPage from './components/risk-management/AlertDetailPage';
+import AlertStatisticsPage from './components/risk-management/AlertStatisticsPage';
+import RiskCategoryOverview from './components/risk-management/RiskCategoryOverview';
+import RiskDrillDownsPage from './components/risk-management/RiskDrillDownsPage';
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -123,6 +133,17 @@ const protectedRoutes = [
   { path: '/loyalty', element: <LoyaltyDashboard /> },
   { path: '/loyalty/history', element: <LoyaltyHistory /> },
   { path: '/loyalty/tiers', element: <TierComparison /> },
+  { path: '/risk-management', element: <RiskManagementDashboard /> },
+  { path: '/risk-management/scorecards', element: <SupplierScorecardList /> },
+  { path: '/risk-management/scorecards/comparison', element: <ScorecardComparison /> },
+  { path: '/risk-management/scorecards/:id', element: <SupplierScorecardDetail /> },
+  { path: '/risk-management/kpis', element: <SupplyChainKPIDashboard /> },
+  { path: '/risk-management/alerts', element: <SupplyChainAlertsList /> },
+  { path: '/risk-management/alerts/statistics', element: <AlertStatisticsPage /> },
+  { path: '/risk-management/alerts/:id', element: <AlertDetailPage /> },
+  { path: '/risk-management/risks', element: <RiskCategoryOverview /> },
+  { path: '/risk-management/risks/current/drill-downs', element: <RiskDrillDownsPage /> },
+  { path: '/risk-management/risks/:id/drill-downs', element: <RiskDrillDownsPage /> },
 ];
 
 const publicRoutes = [
@@ -203,7 +224,6 @@ const AppContent: React.FC = () => {
   return (
     <>
       <GoogleAnalyticsTracker />
-      <RouteHashManager />
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
