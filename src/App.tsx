@@ -4,9 +4,11 @@ import { useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { CartProvider } from './context/CartContext';
+import { LocationProvider } from './context/LocationContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Logout from './components/auth/Logout';
 import { Toaster } from './components/ui/toaster';
+import LocationPermissionBanner from './components/LocationPermissionBanner';
 import { useRouteHash } from './hooks/useRouteHash';
 import FeaturedSelectionPage from './components/FeaturedSelectionPage';
 import Deals from './components/Deals';
@@ -227,23 +229,26 @@ const AppContent: React.FC = () => {
       <AuthProvider>
         <ToastProvider>
           <CartProvider>
-            <LoyaltyProvider>
-              <div className="p-4">
-                <Toaster />
-                <ConditionalBackButton />
-                <Routes>
-                  {publicRoutes.map((route, index) => (
-                    <Route key={`public-${index}`} path={route.path} element={route.element} />
-                  ))}
-                  <Route element={<ProtectedRoute />}>
-                    {protectedRoutes.map((route, index) => (
-                      <Route key={`protected-${index}`} path={route.path} element={route.element} />
+            <LocationProvider autoRefresh={true} refreshInterval={45000}>
+              <LoyaltyProvider>
+                <div className="p-4">
+                  <Toaster />
+                  <ConditionalBackButton />
+                  <LocationPermissionBanner />
+                  <Routes>
+                    {publicRoutes.map((route, index) => (
+                      <Route key={`public-${index}`} path={route.path} element={route.element} />
                     ))}
-                  </Route>
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-              </div>
-            </LoyaltyProvider>
+                    <Route element={<ProtectedRoute />}>
+                      {protectedRoutes.map((route, index) => (
+                        <Route key={`protected-${index}`} path={route.path} element={route.element} />
+                      ))}
+                    </Route>
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </div>
+              </LoyaltyProvider>
+            </LocationProvider>
           </CartProvider>
         </ToastProvider>
       </AuthProvider>
