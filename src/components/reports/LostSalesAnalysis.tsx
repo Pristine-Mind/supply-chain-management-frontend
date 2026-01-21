@@ -45,7 +45,7 @@ const LostSalesAnalysis: React.FC = () => {
         </div>
         <div className="px-6 py-4 bg-red-50 border border-red-100 rounded-2xl text-right">
           <p className="text-xs font-bold text-red-400 uppercase tracking-wider">Total Revenue Impact</p>
-          <p className="text-2xl font-bold text-red-600">${totalLostRevenue.toLocaleString()}</p>
+          <p className="text-2xl font-bold text-red-600">Rs.{totalLostRevenue.toLocaleString()}</p>
         </div>
       </div>
 

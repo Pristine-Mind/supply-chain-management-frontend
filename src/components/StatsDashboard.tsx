@@ -287,7 +287,7 @@ const StatsDashboard: React.FC = () => {
               <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-8 text-white shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="text-lg font-medium mb-3">{t('total_revenue')}</h3>
                 <p className="text-3xl font-bold">
-                  {total_revenue !== null ? `$${total_revenue.toFixed(2)}` : t('na')}
+                  {total_revenue !== null ? `Rs.${total_revenue.toFixed(2)}` : t('na')}
                 </p>
               </div>
             </div>
