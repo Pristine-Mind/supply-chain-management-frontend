@@ -15,6 +15,7 @@ import {
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
+import ProductDeliverabilityCard from './ProductDeliverabilityCard';
 import Footer from './Footer';
 import logo from '../assets/logo.png';
 
@@ -395,6 +396,14 @@ const Cart: React.FC = () => {
                             <span>Updating...</span>
                           </div>
                         )}
+
+                        {/* Deliverability Info */}
+                        <div className="mt-4">
+                          <ProductDeliverabilityCard
+                            productId={item.product.id}
+                            productName={item.name}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

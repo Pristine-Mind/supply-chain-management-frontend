@@ -34,6 +34,8 @@ import {
   type ReviewData,
   type CreateReviewData 
 } from '../api/reviewsApi';
+import DeliverabilityInfo from './DeliverabilityInfo';
+import { useDeliverability } from '../hooks/useDeliverability';
 
 interface ProductImage {
   id: number;
@@ -132,6 +134,11 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   
   const { addToCart, distinctItemCount, refreshCart } = useCart();
   const { isAuthenticated, user } = useAuth();
+  const { deliverability, loading: deliverabilityLoading, error: deliverabilityError, checkDeliverability } = useDeliverability({
+    productId: product.id,
+    cacheEnabled: true,
+    maxCacheAge: 600000,
+  });
   
   const getInitialQuantity = () => {
     const isB2BVerified = user?.b2b_verified || false;
@@ -617,7 +624,14 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
                     {product.product_details?.name}
                   </h1>
-
+                  <div className="mt-8">
+                    <h3 className="text-xs font-semibold text-gray-900 mb-4">Delivery Information</h3>
+                    <DeliverabilityInfo 
+                      deliverability={deliverability}
+                      loading={deliverabilityLoading}
+                      error={deliverabilityError}
+                    />
+                  </div>
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
                       {buildStars(product.average_rating, 'lg')}
@@ -782,8 +796,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       )}
                     </span>
                   </div>
-                </div>
-
+                </div>                
                 <div className="fixed bottom-0 left-0 right-0 z-50 bg-white p-4 border-t border-gray-200 shadow-lg space-y-3 md:static md:shadow-none md:p-0 md:space-y-3 md:sticky md:bottom-0 md:bg-white md:pt-4 md:border-t md:border-gray-200">
                   <button
                     onClick={handleAddToCart}

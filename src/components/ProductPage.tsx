@@ -75,12 +75,12 @@ const ProductPage: React.FC = () => {
       })
       .then(res => {
         setProduct(res.data);
+        // Check deliverability after product is loaded
         logProductView(productId);
       })
       .catch(() => setError('Product not found'))
       .finally(() => setLoading(false));
   }, [productId]);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50">

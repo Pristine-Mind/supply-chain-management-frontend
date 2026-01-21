@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useCoupon } from '../hooks/useCoupon';
 import { AppliedCoupon } from '../types/coupon';
 import CouponInput from './CouponInput';
+import ProductDeliverabilityCard from './ProductDeliverabilityCard';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
@@ -147,39 +148,46 @@ const Checkout: React.FC = () => {
 
             <div className="space-y-3">
               {items.map(item => (
-                <div
-                  key={item.id}
-                  className="flex items-center bg-neutral-50 rounded-xl p-4 border border-neutral-100"
-                >
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-neutral-300 flex items-center justify-center">
-                        <ShoppingBag className="text-neutral-500" size={16} />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="ml-4 flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 line-clamp-2">
-                      {item.name}
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-neutral-500 mt-1">
-                      <span>Qty: {item.quantity}</span>
-                      {item.price > 0 && (
-                        <span>Rs. {item.price.toLocaleString()} each</span>
+                <div key={item.id} className="space-y-2">
+                  <div
+                    className="flex items-center bg-neutral-50 rounded-xl p-4 border border-neutral-100"
+                  >
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-neutral-200 flex-shrink-0">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-neutral-300 flex items-center justify-center">
+                          <ShoppingBag className="text-neutral-500" size={16} />
+                        </div>
                       )}
                     </div>
+
+                    <div className="ml-4 flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 line-clamp-2">
+                        {item.name}
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-neutral-500 mt-1">
+                        <span>Qty: {item.quantity}</span>
+                        {item.price > 0 && (
+                          <span>Rs. {item.price.toLocaleString()} each</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-lg font-semibold text-gray-900 ml-4">
+                      Rs. {(item.price * item.quantity).toLocaleString()}
+                    </div>
                   </div>
 
-                  <div className="text-lg font-semibold text-gray-900 ml-4">
-                    Rs. {(item.price * item.quantity).toLocaleString()}
-                  </div>
+                  {/* Deliverability Info */}
+                  <ProductDeliverabilityCard
+                    productId={item.product.id}
+                    productName={item.name}
+                  />
                 </div>
               ))}
             </div>
