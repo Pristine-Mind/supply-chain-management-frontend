@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { categoryApi } from '../api/categoryApi';
+import { voiceSearchByText } from '../api/voiceSearchApi';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
@@ -265,13 +266,26 @@ const Marketplace: React.FC = () => {
       if (selectedBusinessType) params.profile_type = selectedBusinessType;
 
 
-      // If there's a debounced query string, call the dedicated search endpoint
+      // If there's a debounced query string, use agentic voice search API
       if (debouncedQuery && debouncedQuery.trim() !== '') {
-        params.keyword = debouncedQuery.trim();
-        const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/`;
-        const { data } = await axios.get(searchUrl, { params, headers });
-        setProducts(data.results || []);
-        setTotalCount(data.count || (data.results || []).length || 0);
+        try {
+          // Try new voice search API first
+          const voiceResponse = await voiceSearchByText(
+            debouncedQuery.trim(),
+            1,
+            itemsPerPage
+          );
+          setProducts(voiceResponse.results);
+          setTotalCount(voiceResponse.metadata.total_results);
+        } catch (voiceErr) {
+          // Fallback to old API if new API fails
+          console.warn('Voice search API failed, falling back to old API:', voiceErr);
+          params.keyword = debouncedQuery.trim();
+          const searchUrl = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/`;
+          const { data } = await axios.get(searchUrl, { params, headers });
+          setProducts(data.results || []);
+          setTotalCount(data.count || (data.results || []).length || 0);
+        }
         setLoading(false);
         return;
       }

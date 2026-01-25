@@ -3,6 +3,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { voiceSearchByText } from '../api/voiceSearchApi';
 import { 
   FiSearch, 
   FiX, 
@@ -232,18 +233,25 @@ const ProductSearchBar: React.FC = () => {
 
         setIsLoading(true);
         
-        const response = await axios.get(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
-          {
-            params: { 
-              search: debouncedQuery,
-              limit: 8   
-            },
-            cancelToken: cancelTokenRef.current.token
-          }
-        );
-        
-        setRecommendations(response.data.results || []);
+        try {
+          // Try voice search API first
+          const voiceResponse = await voiceSearchByText(debouncedQuery, 1, 8);
+          setRecommendations(voiceResponse.results || []);
+        } catch (voiceErr) {
+          // Fallback to old API
+          console.warn('Voice search fallback:', voiceErr);
+          const response = await axios.get(
+            `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/`,
+            {
+              params: { 
+                search: debouncedQuery,
+                limit: 8   
+              },
+              cancelToken: cancelTokenRef.current.token
+            }
+          );
+          setRecommendations(response.data.results || []);
+        }
       } catch (err) {
         if (!axios.isCancel(err)) {
           setRecommendations([]);

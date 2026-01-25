@@ -28,6 +28,8 @@ import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
 import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
 import { categoryApi, subcategoryApi } from '../api/categoryApi';
+import { voiceSearchByText } from '../api/voiceSearchApi';
+import { parseSearchIntent, toSearchIntent } from '../services/intentParserService';
 import logo from '../assets/logo.png';
 
 // --- Interfaces (unchanged) ---
@@ -251,15 +253,35 @@ const MarketplaceAllProducts: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      let url = '';
-      const params = new URLSearchParams();
+      let results = [];
+      let count = 0;
 
+      // Use agentic voice search API if search term is present
       if (debouncedSearchTerm.trim()) {
-        params.append('keyword', debouncedSearchTerm.trim());
-        params.append('offset', ((currentPage - 1) * productsPerPage).toString());
-        params.append('limit', productsPerPage.toString());
-        url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?${params.toString()}`;
+        try {
+          const voiceResponse = await voiceSearchByText(
+            debouncedSearchTerm.trim(),
+            currentPage,
+            productsPerPage
+          );
+          
+          results = voiceResponse.results;
+          count = voiceResponse.metadata.total_results;
+        } catch (voiceErr) {
+          // Fallback to old API if new API fails
+          console.warn('Voice search API failed, falling back to old API:', voiceErr);
+          const params = new URLSearchParams();
+          params.append('keyword', debouncedSearchTerm.trim());
+          params.append('offset', ((currentPage - 1) * productsPerPage).toString());
+          params.append('limit', productsPerPage.toString());
+          const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?${params.toString()}`;
+          const response = await axios.get(url);
+          results = response.data.results || [];
+          count = response.data.count || 0;
+        }
       } else {
+        // For non-search queries, use old API for compatibility with filters
+        const params = new URLSearchParams();
         if (searchTerm) params.append('search', searchTerm);
         if (selectedCategoryId) params.append('category_id', selectedCategoryId.toString());
         else if (selectedCategory !== 'All') params.append('category', selectedCategory);
@@ -287,12 +309,12 @@ const MarketplaceAllProducts: React.FC = () => {
 
         params.append('limit', productsPerPage.toString());
         params.append('offset', ((currentPage - 1) * productsPerPage).toString());
-        url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?${params.toString()}`;
+        const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?${params.toString()}`;
+        
+        const response = await axios.get(url);
+        results = response.data.results || [];
+        count = response.data.count || 0;
       }
-
-      const response = await axios.get(url);
-      const results = response.data.results || [];
-      const count = response.data.count || 0;
 
       setProducts(results);
       setTotalProducts(count);
