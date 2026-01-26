@@ -385,11 +385,24 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     }
   }, [searchParams]);
 
+  // Safe wrapper for setSearchParams to handle insecure context errors
+  const safeSetSearchParams = (params: URLSearchParams | Record<string, any>) => {
+    try {
+      setSearchParams(params);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'SecurityError') {
+        console.warn('Unable to update search params: security context restriction');
+      } else {
+        throw error;
+      }
+    }
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     if (currentPage > 1) params.set('page', currentPage.toString());
     else params.delete('page');
-    setSearchParams(params);
+    safeSetSearchParams(params);
 
     if (productsGridRef.current) {
       productsGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -410,7 +423,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     if (searchTerm) params.set('search', searchTerm);
     else params.delete('search');
-    setSearchParams(params);
+    safeSetSearchParams(params);
   };
 
   const clearAllFilters = () => {
@@ -423,7 +436,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     setSelectedCity('');
     setSelectedBusinessType('');
     setCurrentPage(1);
-    setSearchParams({});
+    safeSetSearchParams({});
   };
 
   const handleAddToCart = async (product: MarketplaceProduct) => {

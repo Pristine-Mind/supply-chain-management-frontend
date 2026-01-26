@@ -45,6 +45,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const rating = product.average_rating || 0;
   const reviewCount = product.total_reviews || 0;
 
+  const handleImageContextMenu = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   const buildStars = (rating: number) => (
     <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
@@ -63,14 +68,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
   );
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1">
+    <a 
+      href={`/marketplace/${product.id}`}
+      className="block bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1 no-underline"
+    >
       {/* Image Section */}
       <div className="relative aspect-square overflow-hidden bg-neutral-50">
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[0].image}
             alt={product.images[0].alt_text || product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+            draggable={false}
+            onContextMenu={handleImageContextMenu}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 cursor-pointer pointer-events-none select-none"
             onClick={onViewProduct}
           />
         ) : (
@@ -204,7 +214,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </a>
   );
 };
 

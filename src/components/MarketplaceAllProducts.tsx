@@ -1,4 +1,3 @@
-// MarketplaceAllProducts.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
@@ -480,13 +479,23 @@ const MarketplaceAllProducts: React.FC = () => {
     const categoryName = product.product_details.category_details || 'Uncategorized';
     // const supplierName = product.producer?.business_name || 'Unknown Supplier';
 
+    const handleImageContextMenu = (e: React.MouseEvent<HTMLImageElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
     return (
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
+      <a
+        href={`/marketplace/${product.id}`}
+        className="block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-full no-underline text-inherit"
+      >
         <div className="relative h-48 bg-gray-50 overflow-hidden">
           <img
             src={mainImage}
             alt={product.product_details.name}
-            className="w-full h-full object-contain p-2"
+            draggable={false}
+            onContextMenu={handleImageContextMenu}
+            className="w-full h-full object-contain p-2 pointer-events-none select-none"
             onError={(e) => (e.currentTarget.src = '/api/placeholder/300/300')}
           />
           {hasOffer && (
@@ -586,7 +595,7 @@ const MarketplaceAllProducts: React.FC = () => {
             {product.product_details.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
           </button>
         </div>
-      </div>
+      </a>
     );
   };
 
