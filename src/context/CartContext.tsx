@@ -194,6 +194,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (!token) return;
 
       const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/my-cart/`, {
+        cache: 'no-store',
         headers: {
           'Authorization': `Token ${token}`
         }

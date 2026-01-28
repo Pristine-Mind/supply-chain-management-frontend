@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Trash2, 
   Plus, 
@@ -21,6 +21,7 @@ import logo from '../assets/logo.png';
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loading, setLoading] = useState<{ [key: number]: boolean }>({});
@@ -38,12 +39,12 @@ const Cart: React.FC = () => {
     refreshCart,
   } = useCart();
 
-  // Refresh cart data when component mounts
+  // Refresh cart data when component mounts or when navigating to cart page
   useEffect(() => {
     if (isAuthenticated) {
       refreshCart();
-    }
-  }, [isAuthenticated]); // Remove refreshCart from dependencies to avoid infinite loops
+    }location.pathname
+  }, [isAuthenticated, refreshCart]);
 
   const handleRemoveFromCart = async (productId: number) => {
     setLoading(prev => ({ ...prev, [productId]: true }));
