@@ -39,7 +39,7 @@ const HeroBanner: React.FC<HeroBannerProps> = ({ categoryHierarchy = [] }) => {
     {
       title: 'Smart Electronics',
       tag: 'Next Gen',
-      image: 'https://electromandu.com/wp-content/uploads/2022/11/Untitled-1000-x-1000-px-1.png',
+      image: 'https://img.drz.lazcdn.com/static/np/p/f4fa891b503b1a7e08ca8d9892bed253.png_200x200q90.avif',
       searchTerm: 'electronics',
       categoryName: 'Electronics & Gadgets'
     },
