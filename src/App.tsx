@@ -82,6 +82,13 @@ import { LoyaltyProvider } from './context/LoyaltyContext';
 import LoyaltyDashboard from './components/loyalty/LoyaltyDashboard';
 import LoyaltyHistory from './components/loyalty/LoyaltyHistory';
 import TierComparison from './components/loyalty/TierComparison';
+import { InventoryAnalyticsProvider } from './context/InventoryAnalyticsContext';
+import InventoryAnalyticsDashboard from './components/inventory-analytics/InventoryAnalyticsDashboard';
+import ProductAnalyticsDetail from './components/inventory-analytics/ProductAnalyticsDetail';
+import ReorderRecommendationsList from './components/inventory-analytics/ReorderRecommendationsList';
+import PortfolioView from './components/inventory-analytics/PortfolioView';
+import BatchForecast from './components/inventory-analytics/BatchForecast';
+import ProductsAnalyticsList from './components/inventory-analytics/ProductsAnalyticsList';
 import RiskManagementDashboard from './components/risk-management/RiskManagementDashboard';
 import SupplierScorecardList from './components/risk-management/SupplierScorecardList';
 import SupplierScorecardDetail from './components/risk-management/SupplierScorecardDetail';
@@ -146,6 +153,12 @@ const protectedRoutes = [
   { path: '/risk-management/risks', element: <RiskCategoryOverview /> },
   { path: '/risk-management/risks/current/drill-downs', element: <RiskDrillDownsPage /> },
   { path: '/risk-management/risks/:id/drill-downs', element: <RiskDrillDownsPage /> },
+  { path: '/inventory-analytics', element: <InventoryAnalyticsDashboard /> },
+  { path: '/inventory-analytics/products', element: <ProductsAnalyticsList /> },
+  { path: '/inventory-analytics/products/:productId', element: <ProductAnalyticsDetail /> },
+  { path: '/inventory-analytics/reorder-recommendations', element: <ReorderRecommendationsList /> },
+  { path: '/inventory-analytics/portfolio', element: <PortfolioView /> },
+  { path: '/inventory-analytics/batch-forecast', element: <BatchForecast /> },
 ];
 
 const publicRoutes = [
@@ -231,8 +244,9 @@ const AppContent: React.FC = () => {
           <CartProvider>
             <LocationProvider autoRefresh={true} refreshInterval={45000}>
               <LoyaltyProvider>
-                <div className="p-4">
-                  <Toaster />
+                <InventoryAnalyticsProvider>
+                  <div className="p-4">
+                    <Toaster />
                   <ConditionalBackButton />
                   <LocationPermissionBanner />
                   <Routes>
@@ -247,6 +261,7 @@ const AppContent: React.FC = () => {
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </div>
+                </InventoryAnalyticsProvider>
               </LoyaltyProvider>
             </LocationProvider>
           </CartProvider>
