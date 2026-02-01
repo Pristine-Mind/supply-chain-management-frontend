@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css';
 import axios, { isAxiosError } from 'axios';
 import { FaEdit, FaPlus, FaDownload, FaSearch, FaTimes, FaCheck, FaImage } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { CategorySelector } from './CategoryHierarchy';
 import { createMarketplaceProductFromProduct } from '../api/marketplaceApi';
 
@@ -843,6 +844,12 @@ const Products: React.FC = () => {
                     </>
                   )}
                 </button>
+                <Link
+                  to={`/inventory-analytics/products/${product.id}`}
+                  className="flex-1 bg-indigo-50 text-indigo-700 font-medium py-2 px-3 rounded-lg hover:bg-indigo-100 transition-colors text-sm flex items-center justify-center"
+                >
+                  📊 Analytics
+                </Link>
               </div>
             </div>
           </div>
