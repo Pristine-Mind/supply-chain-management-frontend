@@ -1,13 +1,8 @@
-// Predictive Inventory Analytics Types
-
 export type ForecastMethod = 'moving_average' | 'exponential_smoothing' | 'seasonal' | 'ensemble';
 export type RiskLevel = 'critical' | 'high' | 'medium' | 'low';
 export type ActionRequired = 'reorder_now' | 'plan_reorder' | 'monitor';
 export type TrendDirection = 'increasing' | 'decreasing' | 'stable';
 
-// ============================================================================
-// DEMAND FORECAST TYPES
-// ============================================================================
 
 export interface IndividualForecast {
   daily_forecast: number;
@@ -39,10 +34,6 @@ export interface ForecastQueryParams {
   days?: number;
   method?: ForecastMethod;
 }
-
-// ============================================================================
-// STOCKOUT PREDICTION TYPES
-// ============================================================================
 
 export interface StockoutPrediction {
   will_stockout: boolean;
@@ -85,10 +76,6 @@ export interface StockoutPredictionResponse {
   stockout_probability: StockoutProbability;
   risk_assessment: RiskAssessment;
 }
-
-// ============================================================================
-// INVENTORY OPTIMIZATION TYPES
-// ============================================================================
 
 export interface CurrentSettings {
   stock: number;
@@ -163,10 +150,6 @@ export interface ApplyOptimizationResponse {
   };
 }
 
-// ============================================================================
-// FULL ANALYTICS TYPES
-// ============================================================================
-
 export interface ProductInfo {
   id: number;
   name: string;
@@ -206,10 +189,6 @@ export interface FullProductAnalyticsResponse {
   trends: TrendData;
 }
 
-// ============================================================================
-// PORTFOLIO ANALYTICS TYPES
-// ============================================================================
-
 export interface AtRiskProduct {
   product_id: number;
   name: string;
@@ -231,10 +210,6 @@ export interface PortfolioAnalyticsResponse {
   portfolio_analytics: PortfolioAnalytics;
   generated_at: string;
 }
-
-// ============================================================================
-// REORDER RECOMMENDATIONS TYPES
-// ============================================================================
 
 export interface ReorderRecommendation {
   product_id: number;
@@ -261,9 +236,6 @@ export interface ReorderRecommendationsQueryParams {
   limit?: number;
 }
 
-// ============================================================================
-// BATCH FORECAST TYPES
-// ============================================================================
 
 export interface BatchForecastItem {
   product_id: number;
@@ -287,9 +259,6 @@ export interface BatchForecastResponse {
   forecast_days: number;
 }
 
-// ============================================================================
-// DASHBOARD SUMMARY TYPES
-// ============================================================================
 
 export interface InventoryDashboardSummary {
   timestamp: string;

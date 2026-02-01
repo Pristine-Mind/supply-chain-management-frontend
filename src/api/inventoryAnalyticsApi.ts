@@ -34,13 +34,6 @@ const buildQueryParams = (params: Record<string, any>) => {
   return filtered;
 };
 
-// ============================================================================
-// DEMAND FORECAST API
-// ============================================================================
-
-/**
- * Get ML-based demand forecast for a specific product
- */
 export const getDemandForecast = async (
   productId: number,
   params: ForecastQueryParams = {}
@@ -58,13 +51,6 @@ export const getDemandForecast = async (
   return response.data;
 };
 
-// ============================================================================
-// STOCKOUT PREDICTION API
-// ============================================================================
-
-/**
- * Predict when a product will run out of stock and assess risk level
- */
 export const getStockoutPrediction = async (
   productId: number
 ): Promise<StockoutPredictionResponse> => {
@@ -77,13 +63,7 @@ export const getStockoutPrediction = async (
   return response.data;
 };
 
-// ============================================================================
-// INVENTORY OPTIMIZATION API
-// ============================================================================
 
-/**
- * Get optimal reorder point, safety stock, and EOQ recommendations
- */
 export const getInventoryOptimization = async (
   productId: number
 ): Promise<InventoryOptimizationResponse> => {
@@ -96,9 +76,7 @@ export const getInventoryOptimization = async (
   return response.data;
 };
 
-/**
- * Apply optimization settings to a product
- */
+
 export const applyOptimization = async (
   productId: number,
   settings: ApplyOptimizationRequest
@@ -113,13 +91,7 @@ export const applyOptimization = async (
   return response.data;
 };
 
-// ============================================================================
-// FULL PRODUCT ANALYTICS API
-// ============================================================================
 
-/**
- * Get comprehensive analytics including forecast, stockout prediction, optimization, seasonality, and trends
- */
 export const getFullProductAnalytics = async (
   productId: number
 ): Promise<FullProductAnalyticsResponse> => {
@@ -132,13 +104,7 @@ export const getFullProductAnalytics = async (
   return response.data;
 };
 
-// ============================================================================
-// PORTFOLIO ANALYTICS API
-// ============================================================================
 
-/**
- * Get overview analytics for all products (for dashboard)
- */
 export const getPortfolioAnalytics = async (): Promise<PortfolioAnalyticsResponse> => {
   const response = await axios.get(`${API_BASE}/api/v1/producer/portfolio-analytics/`, {
     headers: getAuthHeader(),
@@ -146,13 +112,7 @@ export const getPortfolioAnalytics = async (): Promise<PortfolioAnalyticsRespons
   return response.data;
 };
 
-// ============================================================================
-// REORDER RECOMMENDATIONS API
-// ============================================================================
 
-/**
- * Get a prioritized list of products that need reordering
- */
 export const getReorderRecommendations = async (
   params: ReorderRecommendationsQueryParams = {}
 ): Promise<ReorderRecommendationsResponse> => {
@@ -163,13 +123,7 @@ export const getReorderRecommendations = async (
   return response.data;
 };
 
-// ============================================================================
-// BATCH FORECAST API
-// ============================================================================
 
-/**
- * Get forecasts for multiple products at once
- */
 export const getBatchForecast = async (
   data: BatchForecastRequest
 ): Promise<BatchForecastResponse> => {
@@ -179,13 +133,7 @@ export const getBatchForecast = async (
   return response.data;
 };
 
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
 
-/**
- * Get risk level color for UI styling
- */
 export const getRiskLevelColor = (level: RiskLevel | string): string => {
   switch (level) {
     case 'critical':
@@ -201,9 +149,7 @@ export const getRiskLevelColor = (level: RiskLevel | string): string => {
   }
 };
 
-/**
- * Get risk level background color class
- */
+
 export const getRiskLevelBgClass = (level: RiskLevel | string): string => {
   switch (level) {
     case 'critical':
@@ -219,9 +165,7 @@ export const getRiskLevelBgClass = (level: RiskLevel | string): string => {
   }
 };
 
-/**
- * Get action required color for UI styling
- */
+
 export const getActionColor = (action: ActionRequired | string): string => {
   switch (action) {
     case 'reorder_now':
@@ -235,9 +179,7 @@ export const getActionColor = (action: ActionRequired | string): string => {
   }
 };
 
-/**
- * Get action required background color class
- */
+
 export const getActionBgClass = (action: ActionRequired | string): string => {
   switch (action) {
     case 'reorder_now':
@@ -251,9 +193,7 @@ export const getActionBgClass = (action: ActionRequired | string): string => {
   }
 };
 
-/**
- * Get trend direction color
- */
+
 export const getTrendColor = (trend: string): string => {
   switch (trend) {
     case 'increasing':
@@ -269,9 +209,7 @@ export const getTrendColor = (trend: string): string => {
   }
 };
 
-/**
- * Get trend icon
- */
+
 export const getTrendIcon = (trend: string): string => {
   switch (trend) {
     case 'increasing':
@@ -287,9 +225,7 @@ export const getTrendIcon = (trend: string): string => {
   }
 };
 
-/**
- * Get forecast method display name
- */
+
 export const getForecastMethodDisplay = (method: ForecastMethod | string): string => {
   switch (method) {
     case 'moving_average':
@@ -305,9 +241,7 @@ export const getForecastMethodDisplay = (method: ForecastMethod | string): strin
   }
 };
 
-/**
- * Get forecast method description
- */
+
 export const getForecastMethodDescription = (method: ForecastMethod | string): string => {
   switch (method) {
     case 'moving_average':
@@ -323,9 +257,7 @@ export const getForecastMethodDescription = (method: ForecastMethod | string): s
   }
 };
 
-/**
- * Format days until stockout with appropriate styling
- */
+
 export const formatDaysUntilStockout = (days: number | null): string => {
   if (days === null || days === undefined) return 'N/A';
   if (days < 0) return 'Already stocked out';
@@ -334,9 +266,7 @@ export const formatDaysUntilStockout = (days: number | null): string => {
   return `${days} days`;
 };
 
-/**
- * Get urgency color class
- */
+
 export const getUrgencyColorClass = (urgency: string): string => {
   switch (urgency) {
     case 'high':
@@ -350,9 +280,7 @@ export const getUrgencyColorClass = (urgency: string): string => {
   }
 };
 
-/**
- * Get confidence level color
- */
+
 export const getConfidenceColor = (confidence: string): string => {
   switch (confidence) {
     case 'high':
