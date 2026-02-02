@@ -1,42 +1,21 @@
-/**
- * Voice & Agentic Search Types and Interfaces
- * Defines the data structures for LLM-style intent parsing and voice search
- */
-
-/**
- * Search Intent extracted from natural language queries
- * Uses LLM-style parsing to understand user intent beyond keyword matching
- */
 export interface SearchIntent {
-  /** Core query term after intent extraction */
   query: string;
-  
-  /** Price constraints extracted from query */
   min_price?: number;
   max_price?: number;
   
-  /** B2B context detection (bulk, wholesale, business keywords) */
   is_b2b: boolean;
   
-  /** Geographic preference for Nepal-made products */
   made_in_nepal: boolean;
   
-  /** Color preference extracted from query */
   color?: string;
   
-  /** Size preference extracted from query */
   size?: string;
   
-  /** Urgency level from query keywords (fast, today, urgent) */
   urgency: 'normal' | 'high' | 'very_high';
   
-  /** Sorting preference based on urgency keywords */
   sort_by: 'price_asc' | 'price_desc' | 'delivery_speed' | 'relevance';
 }
 
-/**
- * Response metadata for paginated voice search results
- */
 export interface PaginationMetadata {
   total_results: number;
   page: number;
@@ -46,9 +25,6 @@ export interface PaginationMetadata {
   page_size: number;
 }
 
-/**
- * Product result from voice search, includes both B2B and B2C pricing
- */
 export interface VoiceSearchProduct {
   id: number;
   name: string;
@@ -97,9 +73,6 @@ export interface VoiceSearchProduct {
   is_featured?: boolean;
 }
 
-/**
- * Complete voice search API response
- */
 export interface VoiceSearchResponse {
   /** Original query text (voice transcript or text input) */
   query: string;
@@ -114,9 +87,6 @@ export interface VoiceSearchResponse {
   results: VoiceSearchProduct[];
 }
 
-/**
- * User interaction history for hyper-personalization
- */
 export interface UserInteraction {
   user_id: number;
   
@@ -136,9 +106,6 @@ export interface UserInteraction {
   timestamp: string;
 }
 
-/**
- * Recommendation boost factor based on user history
- */
 export interface RecommendationBoost {
   product_id: number;
   
@@ -149,9 +116,7 @@ export interface RecommendationBoost {
   reason: 'category_match' | 'brand_match' | 'purchase_history' | 'recent_view';
 }
 
-/**
- * Request payload for voice search API
- */
+
 export interface VoiceSearchRequest {
   /** Text query (required if audio_file not provided) */
   query?: string;
@@ -169,9 +134,6 @@ export interface VoiceSearchRequest {
   user_id?: number;
 }
 
-/**
- * Error response from voice search API
- */
 export interface VoiceSearchError {
   error: string;
   code: 'MISSING_QUERY' | 'INVALID_AUDIO' | 'SPEECH_SERVICE_ERROR' | 'SERVER_ERROR';
@@ -179,9 +141,7 @@ export interface VoiceSearchError {
   timestamp: string;
 }
 
-/**
- * Intent parsing result before API call
- */
+
 export interface IntentParsingResult {
   /** Parsed core query */
   query: string;
@@ -214,9 +174,7 @@ export interface IntentParsingResult {
   confidence: number;
 }
 
-/**
- * Voice search statistics for analytics
- */
+
 export interface VoiceSearchStats {
   total_searches: number;
   avg_response_time_ms: number;

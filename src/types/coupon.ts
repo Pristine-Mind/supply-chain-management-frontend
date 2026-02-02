@@ -1,16 +1,5 @@
-/**
- * Coupon and Redemption System Types
- * Defines all interfaces and types for coupon validation and redemption
- */
-
-/**
- * Discount type for the coupon
- */
 export type DiscountType = 'percentage' | 'fixed';
 
-/**
- * Coupon model representing a discount code
- */
 export interface Coupon {
   code: string;
   discount_type: DiscountType;
@@ -27,17 +16,12 @@ export interface Coupon {
   updated_at?: string;
 }
 
-/**
- * Request body for coupon validation
- */
 export interface ValidateCouponRequest {
   code: string;
   cart_id: number;
 }
 
-/**
- * Validation response data with discount details
- */
+
 export interface CouponValidationData {
   original_amount: string;
   discount_amount: string;
@@ -46,33 +30,24 @@ export interface CouponValidationData {
   discount_type: DiscountType;
 }
 
-/**
- * Success response from coupon validation
- */
+
 export interface ValidateCouponSuccessResponse {
   valid: true;
   message: string;
   data: CouponValidationData;
 }
 
-/**
- * Error response from coupon validation
- */
+
 export interface ValidateCouponErrorResponse {
   valid: false;
   message: string;
 }
 
-/**
- * Union type for coupon validation response
- */
 export type ValidateCouponResponse =
   | ValidateCouponSuccessResponse
   | ValidateCouponErrorResponse;
 
-/**
- * Applied coupon details for checkout
- */
+
 export interface AppliedCoupon {
   code: string;
   discountAmount: number;
@@ -80,9 +55,7 @@ export interface AppliedCoupon {
   discountType: DiscountType;
 }
 
-/**
- * Coupon state in checkout context
- */
+
 export interface CouponState {
   appliedCoupon: AppliedCoupon | null;
   couponCode: string;
@@ -90,9 +63,7 @@ export interface CouponState {
   validationError: string | null;
 }
 
-/**
- * Coupon validation error types
- */
+
 export enum CouponErrorType {
   INVALID_CODE = 'INVALID_CODE',
   EXPIRED = 'EXPIRED',
@@ -105,18 +76,13 @@ export enum CouponErrorType {
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 }
 
-/**
- * Structured coupon error for better error handling
- */
+
 export interface CouponError extends Error {
   type: CouponErrorType;
   message: string;
   details?: Record<string, any>;
 }
 
-/**
- * Response for order creation with coupon
- */
 export interface CreateOrderWithCouponRequest {
   cart_id: number;
   delivery_info: {
@@ -133,9 +99,6 @@ export interface CreateOrderWithCouponRequest {
   coupon_code?: string;
 }
 
-/**
- * Order response with coupon discount applied
- */
 export interface OrderResponse {
   id: number;
   order_id: string;

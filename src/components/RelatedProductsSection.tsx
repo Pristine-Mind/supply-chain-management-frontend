@@ -4,21 +4,67 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Tag, ChevronRight, ShoppingBag } from 'lucide-react';
 
-interface ProductDetails {
+interface ProductImage {
+  id: number;
+  image: string;
+  alt_text: string | null;
+  created_at: string;
+}
+
+interface CategoryInfo {
+  id: number;
+  code: string;
   name: string;
-  images: { image: string }[];
-  category_details?: string;
+  description: string;
+  is_active: boolean;
+}
+
+interface ProductDetails {
+  id: number;
+  name: string;
+  images: ProductImage[];
+  category_details: string;
+  category_info?: CategoryInfo;
+  description?: string;
+  sku?: string;
+  price: number;
+  cost_price?: number;
+  stock?: number;
+  is_active?: boolean;
+}
+
+interface SimilarProductItem {
+  product: {
+    id: number;
+    product: number;
+    product_details: ProductDetails;
+    listed_price: number;
+    discounted_price?: number | null;
+    percent_off?: number;
+    is_available?: boolean;
+    is_b2b_eligible?: boolean;
+    b2b_price?: number | null;
+    b2b_discounted_price?: number | null;
+    b2b_min_quantity?: number | null;
+    average_rating?: number;
+    total_reviews?: number;
+  };
+}
+
+interface SimilarProductsResponse {
+  product_id: number;
+  similar_products: SimilarProductItem[];
 }
 
 interface MarketplaceProduct {
   id: number;
   product_details?: ProductDetails;
   listed_price: number;
-  discounted_price?: number;
+  discounted_price?: number | null;
   is_b2b_eligible?: boolean;
-  b2b_price?: number;
-  b2b_discounted_price?: number;
-  b2b_min_quantity?: number;
+  b2b_price?: number | null;
+  b2b_discounted_price?: number | null;
+  b2b_min_quantity?: number | null;
 }
 
 const RelatedProductsSection: React.FC<{ productId: number; category?: string }> = ({ productId }) => {
@@ -36,15 +82,30 @@ const RelatedProductsSection: React.FC<{ productId: number; category?: string }>
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Token ${token}` } : {};
         
-        const response = await axios.get(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/products/${productId}/related/`,
+        const response = await axios.get<SimilarProductsResponse>(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/products/${productId}/similar/`,
           { headers }
         );
         
-        const data = response.data.results || response.data || [];
-        setRelated(Array.isArray(data) ? data.slice(0, 4) : []);
+        // Transform similar_products to match MarketplaceProduct interface
+        const similarProducts = response.data?.similar_products || [];
+        const transformedProducts: MarketplaceProduct[] = similarProducts
+          .map((item: SimilarProductItem) => ({
+            id: item.product.id,
+            product_details: item.product.product_details,
+            listed_price: item.product.listed_price,
+            discounted_price: item.product.discounted_price,
+            is_b2b_eligible: item.product.is_b2b_eligible,
+            b2b_price: item.product.b2b_price,
+            b2b_discounted_price: item.product.b2b_discounted_price,
+            b2b_min_quantity: item.product.b2b_min_quantity,
+          }))
+          .slice(0, 4);
+        
+        setRelated(transformedProducts);
       } catch (error) {
-        console.error("Error fetching related products:", error);
+        console.error("Error fetching similar products:", error);
+        setRelated([]);
       } finally {
         setLoading(false);
       }
