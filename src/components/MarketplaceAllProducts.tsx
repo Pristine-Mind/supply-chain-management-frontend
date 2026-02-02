@@ -29,7 +29,53 @@ import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
 import { categoryApi, subcategoryApi } from '../api/categoryApi';
 import { voiceSearchByText } from '../api/voiceSearchApi';
 import { parseSearchIntent, toSearchIntent } from '../services/intentParserService';
+import { getFilterOptions, type FilterOptionsResponse } from '../api/marketplaceApi';
 import logo from '../assets/logo.png';
+
+// --- Facet Types ---
+interface FacetCategory {
+  id: number;
+  name: string;
+  count: number;
+}
+
+interface FacetBrand {
+  id: number;
+  name: string;
+  count: number;
+}
+
+interface FacetCount {
+  [key: string]: number;
+}
+
+interface SearchFacets {
+  price_ranges?: FacetCount;
+  categories?: FacetCategory[];
+  brands?: FacetBrand[];
+  ratings?: FacetCount;
+  stock_status?: FacetCount;
+  discounts?: FacetCount;
+  delivery_time?: FacetCount;
+}
+
+// API response with nested results structure
+interface AdvancedSearchResponse {
+  count?: number;  // Total count from outer pagination
+  next?: string | null;
+  previous?: string | null;
+  results: {
+    results: MarketplaceProduct[];  // Actual products array
+    facets: SearchFacets;
+    total_count: number;
+    total_pages: number;
+    current_page: number;
+  } | MarketplaceProduct[];  // Can be either nested or direct array
+  facets?: SearchFacets;
+  total_count?: number;
+  total_pages?: number;
+  current_page?: number;
+}
 
 // --- Interfaces (unchanged) ---
 interface ProductImage {
@@ -117,11 +163,12 @@ const CATEGORY_OPTIONS = [
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Most Relevant' },
-  { value: 'price_low', label: 'Price: Low to High' },
-  { value: 'price_high', label: 'Price: High to Low' },
+  { value: 'price_asc', label: 'Price: Low to High' },
+  { value: 'price_desc', label: 'Price: High to Low' },
   { value: 'rating', label: 'Highest Rated' },
   { value: 'newest', label: 'Newest First' },
   { value: 'popular', label: 'Most Popular' },
+  { value: 'discount', label: 'Biggest Discount' },
 ];
 
 const PRICE_RANGES = [
@@ -207,6 +254,30 @@ const MarketplaceAllProducts: React.FC = () => {
   const [selectedBusinessType, setSelectedBusinessType] = useState('');
   const [productsPerPage, setProductsPerPage] = useState<number>(50);
 
+  // Server-fetched filter options
+  const [filterOptions, setFilterOptions] = useState<FilterOptionsResponse | null>(null);
+  const [filterOptionsLoading, setFilterOptionsLoading] = useState(false);
+
+  // New filter selections from server
+  const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedPriceRangeValue, setSelectedPriceRangeValue] = useState('');
+  const [selectedStockStatus, setSelectedStockStatus] = useState('');
+  const [selectedDeliveryTime, setSelectedDeliveryTime] = useState('');
+
+  // Advanced search filter states
+  const [hasDiscount, setHasDiscount] = useState(false);
+  const [onSale, setOnSale] = useState(false);
+  const [b2bAvailable, setB2bAvailable] = useState(false);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [minReviews, setMinReviews] = useState('');
+  const [nearMe, setNearMe] = useState('');
+  const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+
+  // Facets from search response
+  const [facets, setFacets] = useState<SearchFacets | null>(null);
+
   const productsGridRef = useRef<HTMLDivElement | null>(null);
 
   // --- Voice Search ---
@@ -246,78 +317,147 @@ const MarketplaceAllProducts: React.FC = () => {
     return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // --- Fetch Products ---
+  // --- Fetch Products using Advanced Search API ---
   const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      let results = [];
-      let count = 0;
-
-      // Use agentic voice search API if search term is present
+      const params = new URLSearchParams();
+      
+      // Text search
       if (debouncedSearchTerm.trim()) {
-        try {
-          const voiceResponse = await voiceSearchByText(
-            debouncedSearchTerm.trim(),
-            currentPage,
-            productsPerPage
-          );
-          
-          results = voiceResponse.results;
-          count = voiceResponse.metadata.total_results;
-        } catch (voiceErr) {
-          // Fallback to old API if new API fails
-          console.warn('Voice search API failed, falling back to old API:', voiceErr);
-          const params = new URLSearchParams();
-          params.append('keyword', debouncedSearchTerm.trim());
-          params.append('offset', ((currentPage - 1) * productsPerPage).toString());
-          params.append('limit', productsPerPage.toString());
-          const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/search/?${params.toString()}`;
-          const response = await axios.get(url);
-          results = response.data.results || [];
-          count = response.data.count || 0;
-        }
-      } else {
-        // For non-search queries, use old API for compatibility with filters
-        const params = new URLSearchParams();
-        if (searchTerm) params.append('search', searchTerm);
-        if (selectedCategoryId) params.append('category_id', selectedCategoryId.toString());
-        else if (selectedCategory !== 'All') params.append('category', selectedCategory);
-
-        if (selectedSubcategoryId) params.append('subcategory_id', selectedSubcategoryId.toString());
-        if (selectedSubSubcategoryId) params.append('sub_subcategory_id', selectedSubSubcategoryId.toString());
-        if (selectedCity) params.append('city', selectedCity);
-        if (selectedBusinessType) params.append('profile_type', selectedBusinessType);
-        if (minPrice) params.append('min_price', minPrice);
-        else if (selectedPriceRange !== 'all' && selectedPriceRange !== '50000+') {
-          const [min] = selectedPriceRange.split('-');
-          if (min) params.append('min_price', min);
-        }
-        if (maxPrice) params.append('max_price', maxPrice);
-        else if (selectedPriceRange !== 'all' && selectedPriceRange !== '50000+') {
-          const [, max] = selectedPriceRange.split('-');
-          if (max) params.append('max_price', max);
-        }
-        if (minOrder) params.append('min_order_quantity', minOrder);
-        if (selectedRating !== 'all') {
-          const rating = selectedRating.replace('+', '');
-          params.append('min_rating', rating);
-        }
-        if (sortBy !== 'relevance') params.append('sort', sortBy);
-
-        params.append('limit', productsPerPage.toString());
-        params.append('offset', ((currentPage - 1) * productsPerPage).toString());
-        const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/?${params.toString()}`;
-        
-        const response = await axios.get(url);
-        results = response.data.results || [];
-        count = response.data.count || 0;
+        params.append('search', debouncedSearchTerm.trim());
       }
 
-      setProducts(results);
-      setTotalProducts(count);
-      setTotalPages(Math.max(1, Math.ceil(count / productsPerPage)));
+      // Category filters
+      if (selectedCategoryId) {
+        params.append('category_id', selectedCategoryId.toString());
+      } else if (selectedSubcategoryId) {
+        params.append('subcategory_id', selectedSubcategoryId.toString());
+      } else if (selectedSubSubcategoryId) {
+        params.append('sub_subcategory_id', selectedSubSubcategoryId.toString());
+      }
+
+      // Brand filters (multiple)
+      if (selectedBrandIds.length > 0) {
+        selectedBrandIds.forEach(id => params.append('brand_id', id.toString()));
+      }
+
+      // Price range - use preset or custom
+      if (selectedPriceRangeValue) {
+        params.append('price_range', selectedPriceRangeValue);
+      } else {
+        if (minPrice) params.append('min_price', minPrice);
+        if (maxPrice) params.append('max_price', maxPrice);
+      }
+
+      // Rating filter
+      if (selectedRating !== 'all') {
+        const rating = selectedRating.replace('+', '');
+        params.append('min_rating', rating);
+      }
+
+      // Min reviews
+      if (minReviews) {
+        params.append('min_reviews', minReviews);
+      }
+
+      // Stock status
+      if (inStockOnly) {
+        params.append('in_stock', 'true');
+      }
+      if (selectedStockStatus) {
+        params.append('stock_status', selectedStockStatus);
+      }
+
+      // Discount filters
+      if (hasDiscount) {
+        params.append('has_discount', 'true');
+      }
+      if (onSale) {
+        params.append('on_sale', 'true');
+      }
+
+      // B2B filter
+      if (b2bAvailable) {
+        params.append('b2b_available', 'true');
+      }
+
+      // Product attributes
+      if (selectedSizes.length > 0) {
+        selectedSizes.forEach(size => params.append('size', size));
+      }
+      if (selectedColors.length > 0) {
+        selectedColors.forEach(color => params.append('color', color));
+      }
+
+      // Location / Near me
+      if (nearMe) {
+        params.append('near_me', nearMe);
+      } else if (userLocation) {
+        params.append('near_me', `${userLocation.lat},${userLocation.lng},10`);
+      }
+
+      // City filter
+      if (selectedCity) {
+        params.append('city', selectedCity);
+      }
+
+      // Sort
+      if (sortBy !== 'relevance') {
+        params.append('sort_by', sortBy);
+      }
+
+      // Pagination
+      params.append('page', currentPage.toString());
+      params.append('limit', productsPerPage.toString());
+
+      const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/advanced-search/?${params.toString()}`;
+      
+      const response = await axios.get<AdvancedSearchResponse>(url);
+      
+      // Handle different possible response structures
+      const data = response.data;
+      
+      // Check for nested structure: response.results.results (actual API format)
+      const nestedResults = data?.results;
+      const isNested = nestedResults && typeof nestedResults === 'object' && 'results' in nestedResults && Array.isArray(nestedResults.results);
+      
+      const productsArray = isNested 
+        ? (nestedResults as { results: MarketplaceProduct[] }).results 
+        : Array.isArray(data?.results) 
+          ? data.results 
+          : [];
+      
+      setProducts(productsArray);
+      
+      // Handle pagination data with fallbacks
+      // Outer level: count, next, previous; Inner level: total_count, facets
+      const totalCount = isNested 
+        ? (nestedResults as { total_count: number }).total_count 
+        : data?.count ?? data?.total_count ?? productsArray.length;
+      
+      // Calculate total pages from count and limit
+      const calculatedTotalPages = Math.ceil((totalCount || productsArray.length) / productsPerPage);
+      
+      setTotalProducts(typeof totalCount === 'number' ? totalCount : productsArray.length);
+      setTotalPages(calculatedTotalPages > 0 ? calculatedTotalPages : 1);
+      
+      // Extract current page from URL or use state
+      const urlParams = new URLSearchParams(url.split('?')[1]);
+      const pageFromUrl = parseInt(urlParams.get('page') || '1', 10);
+      setCurrentPage(pageFromUrl);
+      
+      // Store facets for dynamic filter counts
+      const facetsData = isNested 
+        ? (nestedResults as { facets: SearchFacets }).facets 
+        : data?.facets;
+      if (facetsData && typeof facetsData === 'object') {
+        setFacets(facetsData);
+      } else {
+        setFacets(null);
+      }
     } catch (err) {
       console.error('Error fetching products:', err);
       setError('Failed to load products. Please try again.');
@@ -328,6 +468,23 @@ const MarketplaceAllProducts: React.FC = () => {
   };
 
   // --- Effects ---
+
+  // Fetch filter options on mount
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      try {
+        setFilterOptionsLoading(true);
+        const options = await getFilterOptions();
+        setFilterOptions(options);
+      } catch (err) {
+        console.error('Error loading filter options:', err);
+      } finally {
+        setFilterOptionsLoading(false);
+      }
+    };
+    loadFilterOptions();
+  }, []);
+
   useEffect(() => {
     fetchProducts();
   }, [
@@ -344,6 +501,19 @@ const MarketplaceAllProducts: React.FC = () => {
     minOrder,
     selectedCity,
     selectedBusinessType,
+    selectedBrandIds,
+    selectedSizes,
+    selectedColors,
+    selectedPriceRangeValue,
+    selectedStockStatus,
+    selectedDeliveryTime,
+    hasDiscount,
+    onSale,
+    b2bAvailable,
+    inStockOnly,
+    minReviews,
+    nearMe,
+    userLocation,
     debouncedSearchTerm,
     productsPerPage,
   ]);
@@ -427,6 +597,20 @@ const MarketplaceAllProducts: React.FC = () => {
     setMinOrder('');
     setSelectedCity('');
     setSelectedBusinessType('');
+    // Reset new server filter selections
+    setSelectedBrandIds([]);
+    setSelectedSizes([]);
+    setSelectedColors([]);
+    setSelectedPriceRangeValue('');
+    setSelectedStockStatus('');
+    setSelectedDeliveryTime('');
+    // Reset advanced search filters
+    setHasDiscount(false);
+    setOnSale(false);
+    setB2bAvailable(false);
+    setInStockOnly(false);
+    setMinReviews('');
+    setNearMe('');
     setCurrentPage(1);
     setSearchParams({});
   };
@@ -689,7 +873,6 @@ const MarketplaceAllProducts: React.FC = () => {
               maxPrice={maxPrice}
               minOrder={minOrder}
               selectedCity={selectedCity}
-              selectedBusinessType={selectedBusinessType}
               selectedCategory={selectedCategoryId}
               selectedSubcategory={selectedSubcategoryId}
               selectedSubSubcategory={selectedSubSubcategoryId}
@@ -697,11 +880,45 @@ const MarketplaceAllProducts: React.FC = () => {
               onMaxPriceChange={setMaxPrice}
               onMinOrderChange={setMinOrder}
               onCityChange={setSelectedCity}
-              onBusinessTypeChange={setSelectedBusinessType}
               onCategoryChange={setSelectedCategoryId}
               onSubcategoryChange={setSelectedSubcategoryId}
               onSubSubcategoryChange={setSelectedSubSubcategoryId}
               onClearFilters={clearAllFilters}
+              // Server filter options
+              categories={filterOptions?.categories}
+              brands={filterOptions?.brands}
+              sizes={filterOptions?.sizes}
+              colors={filterOptions?.colors}
+              priceRanges={filterOptions?.price_ranges}
+              stockStatuses={filterOptions?.stock_statuses}
+              deliveryTimes={filterOptions?.delivery_times}
+              // Selected filter values
+              selectedBrandIds={selectedBrandIds}
+              selectedSizes={selectedSizes}
+              selectedColors={selectedColors}
+              selectedPriceRange={selectedPriceRangeValue}
+              selectedStockStatus={selectedStockStatus}
+              selectedDeliveryTime={selectedDeliveryTime}
+              // Filter change handlers
+              onBrandChange={setSelectedBrandIds}
+              onSizeChange={setSelectedSizes}
+              onColorChange={setSelectedColors}
+              onPriceRangeChange={setSelectedPriceRangeValue}
+              onStockStatusChange={setSelectedStockStatus}
+              onDeliveryTimeChange={setSelectedDeliveryTime}
+              // Advanced filters
+              hasDiscount={hasDiscount}
+              onSale={onSale}
+              b2bAvailable={b2bAvailable}
+              inStockOnly={inStockOnly}
+              minReviews={minReviews}
+              onHasDiscountChange={setHasDiscount}
+              onOnSaleChange={setOnSale}
+              onB2bAvailableChange={setB2bAvailable}
+              onInStockOnlyChange={setInStockOnly}
+              onMinReviewsChange={setMinReviews}
+              // Facets from search response
+              facets={facets}
             />
           </aside>
 
@@ -717,7 +934,19 @@ const MarketplaceAllProducts: React.FC = () => {
               maxPrice ||
               minOrder ||
               selectedCity ||
-              selectedBusinessType) && (
+              selectedBusinessType ||
+              selectedBrandIds.length > 0 ||
+              selectedSizes.length > 0 ||
+              selectedColors.length > 0 ||
+              selectedPriceRangeValue ||
+              selectedStockStatus ||
+              selectedDeliveryTime ||
+              hasDiscount ||
+              onSale ||
+              b2bAvailable ||
+              inStockOnly ||
+              minReviews ||
+              nearMe) && (
               <div className="mb-6 flex flex-wrap gap-2">
                 {searchTerm && (
                   <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
@@ -748,10 +977,130 @@ const MarketplaceAllProducts: React.FC = () => {
                     </button>
                   </span>
                 )}
+                {selectedBrandIds.length > 0 && (
+                  <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    {selectedBrandIds.length} Brand{selectedBrandIds.length > 1 ? 's' : ''}
+                    <button onClick={() => { setSelectedBrandIds([]); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedPriceRangeValue && (
+                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    {filterOptions?.price_ranges.find(r => r.value === selectedPriceRangeValue)?.label || 'Price Range'}
+                    <button onClick={() => { setSelectedPriceRangeValue(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
                 {minPrice && (
                   <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     Min ₹{minPrice}
                     <button onClick={() => { setMinPrice(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {maxPrice && (
+                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    Max ₹{maxPrice}
+                    <button onClick={() => { setMaxPrice(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedSizes.length > 0 && (
+                  <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    Size: {selectedSizes.join(', ')}
+                    <button onClick={() => { setSelectedSizes([]); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedColors.length > 0 && (
+                  <span className="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    {selectedColors.length} Color{selectedColors.length > 1 ? 's' : ''}
+                    <button onClick={() => { setSelectedColors([]); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedStockStatus && (
+                  <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    {filterOptions?.stock_statuses.find(s => s.value === selectedStockStatus)?.label || 'Stock Status'}
+                    <button onClick={() => { setSelectedStockStatus(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedDeliveryTime && (
+                  <span className="bg-cyan-100 text-cyan-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    Delivery: {filterOptions?.delivery_times.find(d => d.value === selectedDeliveryTime)?.label || selectedDeliveryTime}
+                    <button onClick={() => { setSelectedDeliveryTime(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {minOrder && (
+                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    Min Qty: {minOrder}
+                    <button onClick={() => { setMinOrder(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedCity && (
+                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    City: {selectedCity}
+                    <button onClick={() => { setSelectedCity(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {hasDiscount && (
+                  <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    Has Discount
+                    <button onClick={() => { setHasDiscount(false); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {onSale && (
+                  <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    On Sale
+                    <button onClick={() => { setOnSale(false); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {b2bAvailable && (
+                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    B2B Available
+                    <button onClick={() => { setB2bAvailable(false); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {inStockOnly && (
+                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    In Stock Only
+                    <button onClick={() => { setInStockOnly(false); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {minReviews && (
+                  <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    Min {minReviews} Reviews
+                    <button onClick={() => { setMinReviews(''); setCurrentPage(1); }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                {nearMe && (
+                  <span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    <MapPin className="w-3 h-3" /> Near Me
+                    <button onClick={() => { setNearMe(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -825,7 +1174,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   <div key={i} className="bg-white h-80 rounded-lg animate-pulse" />
                 ))}
               </div>
-            ) : products.length === 0 ? (
+            ) : !Array.isArray(products) || products.length === 0 ? (
               <div className="text-center py-12">
                 <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>

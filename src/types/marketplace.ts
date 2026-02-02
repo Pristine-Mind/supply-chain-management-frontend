@@ -1,9 +1,3 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { FaHome, FaMapMarkerAlt } from 'react-icons/fa';
-import { useCart } from '../context/CartContext';
-
-
 export interface Delivery {
   id?: number;
   cartId: number;
