@@ -168,6 +168,7 @@ const Marketplace: React.FC = () => {
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [searchFocused, setSearchFocused] = useState(false);
   // Dynamic category hierarchy state
   const [categoryHierarchy, setCategoryHierarchy] = useState<any[]>([]);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
@@ -394,10 +395,13 @@ const Marketplace: React.FC = () => {
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       onKeyDown={handleSearchEnter}
+                      onFocus={() => setSearchFocused(true)}
+                      onBlur={() => setSearchFocused(false)}
                     />
                     <div className="absolute top-full left-0 right-0 z-40">
                       <SearchSuggestions
                         query={query}
+                        isFocused={searchFocused}
                         onSelect={(val) => {
                           navigate(`/marketplace/all-products?search=${encodeURIComponent(val)}`);
                         }}
