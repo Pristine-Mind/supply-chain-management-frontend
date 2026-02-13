@@ -4,6 +4,8 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Check, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '../context/ToastContext';
 import LocationPicker from './LocationPicker';
 
 
@@ -56,9 +58,11 @@ export const BusinessRegister: React.FC = () => {
   const [cities, setCities] = useState<City[]>([]);
   const [loadingCities, setLoadingCities] = useState(false);
   const [cityError, setCityError] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [position, setPosition] = useState<[number, number]>([27.7172, 85.3240]);
+  
+  const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
 
   const {
     register,
@@ -99,7 +103,6 @@ export const BusinessRegister: React.FC = () => {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
-    setSubmitError(null);
     setSubmitting(true);
 
     const formDataToSend = new FormData();
@@ -132,9 +135,43 @@ export const BusinessRegister: React.FC = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      alert('Business registered! Please login.');
+      
+      // Show success message
+      showSuccess(
+        'Registration Successful!', 
+        'Your business has been registered successfully. You can now login with your credentials.'
+      );
+      
+      // Redirect to login after a short delay
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      
     } catch (e: any) {
-      setSubmitError(e.response?.data?.error || 'Registration failed');
+      // Handle different types of errors
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (e.response?.data) {
+        if (typeof e.response.data === 'string') {
+          errorMessage = e.response.data;
+        } else if (e.response.data.error) {
+          errorMessage = e.response.data.error;
+        } else if (e.response.data.message) {
+          errorMessage = e.response.data.message;
+        } else if (e.response.data.detail) {
+          errorMessage = e.response.data.detail;
+        } else {
+          // Handle field-specific errors
+          const errors = Object.values(e.response.data).flat();
+          if (errors.length > 0) {
+            errorMessage = Array.isArray(errors[0]) ? errors[0][0] : errors[0];
+          }
+        }
+      } else if (e.message) {
+        errorMessage = e.message;
+      }
+      
+      showError('Registration Failed', errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -173,9 +210,6 @@ export const BusinessRegister: React.FC = () => {
         <div className="w-full lg:w-1/3 p-6 bg-white shadow-lg">
           <div className="max-w-md mx-auto">
             <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Business Registration</h2>
-            {submitError && (
-              <div className="mb-4 text-red-600">{submitError}</div>
-            )}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" encType="multipart/form-data">
               <div>
                 <label className="block font-medium text-gray-700 mb-1">Username</label>
