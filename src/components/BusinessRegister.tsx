@@ -127,7 +127,7 @@ export const BusinessRegister: React.FC = () => {
     }
 
     try {
-      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/register/business/`, formDataToSend, {
+      await axios.post(`${import.meta.env.VITE_REACT_APP_API_URL}/api/register/business/`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

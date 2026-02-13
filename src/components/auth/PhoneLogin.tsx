@@ -10,7 +10,6 @@ type FormData = {
   otp: string;
 };
 
-// Response types for API calls
 type APIResponse<T> = {
   data: T;
   status: number;
