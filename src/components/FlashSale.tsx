@@ -19,9 +19,22 @@ const FlashSale: React.FC = () => {
       try {
         const base = import.meta.env.VITE_REACT_APP_API_URL || 'https://appmulyabazzar.com';
         const { data } = await axios.get(`${base}/api/v1/marketplace-trending/most_viewed/`);
-        setProducts(data.results || data || []);
+        
+        // Extract products from all categories and flatten into a single array
+        let allProducts: any[] = [];
+        if (data.results && typeof data.results === 'object') {
+          allProducts = Object.values(data.results).reduce((acc: any[], category: any) => {
+            if (category.products && Array.isArray(category.products)) {
+              return acc.concat(category.products);
+            }
+            return acc;
+          }, []);
+        }
+        
+        setProducts(allProducts);
       } catch (err) {
         console.error('Failed to fetch products:', err);
+        setProducts([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
