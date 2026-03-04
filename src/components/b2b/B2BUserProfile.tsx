@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { listB2BUserProducts, getB2BUser, B2BUser, MiniProduct, Negotiation, createNegotiation, getActiveNegotiation, updateNegotiation, forceReleaseLock, extendLock } from '../../api/b2bApi';
-import { ArrowLeft, Search, Building2, Mail, User, Package, ShoppingBag, Send, MessageCircle, CheckCircle2, XCircle, Lock, Clock, RefreshCcw, Unlock } from 'lucide-react';
+import { listB2BUserProducts, getB2BUser, B2BUser, MiniProduct, Negotiation, createNegotiation, getActiveNegotiation, updateNegotiation, extendLock } from '../../api/b2bApi';
+import { ArrowLeft, Search, Building2, Package, ShoppingBag, Send, MessageCircle, CheckCircle2, XCircle, Lock, Clock, RefreshCcw, Star, MapPin, Phone, DollarSign, Calendar, Mail, User } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import LoginModal from '../auth/LoginModal';
@@ -31,7 +31,7 @@ const B2BUserProfile: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { addToCart } = useCart();
   const { isAuthenticated, user: currentUser } = useAuth();
-  const { addToast } = useToast();
+  const { showError, showSuccess, showWarning } = useToast();
 
   const [user, setUser] = useState<B2BUser | null>(null);
   const [loadingUser, setLoadingUser] = useState(false);
@@ -116,7 +116,7 @@ const B2BUserProfile: React.FC = () => {
       setUser(userObj as B2BUser);
     } catch (e) {
       console.error('fetchUser error:', e);
-      addToast('error', mapErrorResponse(e, 'Failed to load business profile.'));
+      showError('Failed to load business profile', mapErrorResponse(e));
     } finally {
       setLoadingUser(false);
     }
@@ -127,7 +127,7 @@ const B2BUserProfile: React.FC = () => {
     setProdLoading(true);
     try {
       const data = await listB2BUserProducts(id, qParam, pageParam, pageSize);
-      const payload = data?.data ?? data;
+      const payload = data;
       const results = Array.isArray(payload.results) 
         ? payload.results 
         : Array.isArray(payload) 
@@ -140,7 +140,7 @@ const B2BUserProfile: React.FC = () => {
       setPage(pageParam);
     } catch (e) {
       console.error('fetchProducts error:', e);
-      addToast('error', mapErrorResponse(e, 'Failed to load products.'));
+      showError('Failed to load products', mapErrorResponse(e));
       setProducts([]);
       setCount(0);
     } finally {
@@ -238,9 +238,9 @@ const B2BUserProfile: React.FC = () => {
       navigate('/delivery-details');
     } catch (err) {
       console.error('handleBuyNow error:', err);
-      addToast('error', mapErrorResponse(err, 'Failed to add item to checkout.'));
+      showError('Failed to add item to checkout', mapErrorResponse(err));
     }
-  }, [quantities, isAuthenticated, transformMiniToMarketplace, addToCart, navigate, activeNegotiation, addToast]);
+  }, [quantities, isAuthenticated, transformMiniToMarketplace, addToCart, navigate, activeNegotiation, showError, showWarning]);
 
   const handleSendMessage = useCallback(async () => {
     if (!modalProduct || !chatMessage.trim() || !userId) return;
@@ -278,18 +278,18 @@ const B2BUserProfile: React.FC = () => {
     const stock = modalProduct.stock || Infinity;
 
     if (price > listedPrice) {
-      addToast('error', 'Proposed price cannot exceed the listed price');
+      showError('Invalid Price', 'Proposed price cannot exceed the listed price');
       return;
     }
     if (price < listedPrice * 0.5) {
-      addToast('warning', 'Note: This price is 50%+ below list and may be rejected.');
+      showWarning('Price Warning', 'Note: This price is 50%+ below list and may be rejected.');
     }
     if (qty < minOrder) {
-      addToast('error', `Minimum order for this product is ${minOrder} units`);
+      showError('Invalid Quantity', `Minimum order for this product is ${minOrder} units`);
       return;
     }
     if (qty > stock) {
-      addToast('error', `Only ${stock} units available in stock`);
+      showError('Insufficient Stock', `Only ${stock} units available in stock`);
       return;
     }
 
@@ -327,25 +327,14 @@ const B2BUserProfile: React.FC = () => {
     }
   }, [modalProduct, negotiationPrice, negotiationQty, negotiationMsg, activeNegotiation, fetchProductMessages]);
 
-  const handleForceReleaseLock = async (id: number) => {
-    try {
-      await forceReleaseLock(id);
-      addToast('success', 'Lock released successfully');
-      if (modalProduct) fetchProductMessages(modalProduct.id, modalProduct.marketplace_id || modalProduct.id);
-    } catch (err) {
-      console.error('Failed to release lock:', err);
-      addToast('error', mapErrorResponse(err, 'Failed to release lock'));
-    }
-  };
-
   const handleExtendLock = async (id: number) => {
     try {
       await extendLock(id);
-      addToast('success', 'Lock extended for 5 minutes');
+      showSuccess('Lock Extended', 'Lock extended for 5 minutes');
       if (modalProduct) fetchProductMessages(modalProduct.id, modalProduct.marketplace_id || modalProduct.id);
     } catch (err) {
       console.error('Failed to extend lock:', err);
-      addToast('error', mapErrorResponse(err, 'Failed to extend lock'));
+      showError('Lock Extension Failed', mapErrorResponse(err));
     }
   };
 
@@ -444,59 +433,162 @@ const B2BUserProfile: React.FC = () => {
   if (!userId) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header with Back Button */}
-      <header className="bg-white border-b shadow-sm">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50/20 to-blue-50/20">
+      {/* Enhanced Header with Breadcrumbs */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-700 hover:text-orange-600 transition-colors group"
-            aria-label="Go back to businesses"
-          >
-            <div className="p-1.5 rounded-lg group-hover:bg-orange-50 transition-colors">
-              <ArrowLeft className="h-5 w-5" />
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-3 text-gray-700 hover:text-orange-600 transition-all duration-200 group bg-gray-50 hover:bg-orange-50 px-4 py-2 rounded-xl"
+              aria-label="Go back to businesses"
+            >
+              <div className="p-1.5 rounded-lg bg-white group-hover:bg-orange-100 transition-colors shadow-sm">
+                <ArrowLeft className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="font-semibold">Back to Directory</span>
+                <div className="text-xs text-gray-500">Find more businesses</div>
+              </div>
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
+                <span>Business Directory</span>
+                <span>/</span>
+                <span className="text-orange-600 font-medium">Profile</span>
+              </div>
             </div>
-            <span className="font-medium">Back to Businesses</span>
-          </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Business Profile Card */}
-        <section className="bg-gradient-to-r from-orange-400 to-orange-700 rounded-2xl shadow-xl p-8 mb-8 text-white">
-          {loadingUser ? (
-            <div className="animate-pulse">
-              <div className="h-8 bg-white/20 rounded w-64 mb-3"></div>
-              <div className="h-5 bg-white/20 rounded w-48"></div>
-            </div>
-          ) : user ? (
-            <>
-              <h1 className="text-3xl font-bold mb-3">
-                {user.registered_business_name || `${user.first_name} ${user.last_name}`}
-              </h1>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3">
-                  <User className="w-5 h-5" aria-hidden="true" />
-                  <div>
-                    <p className="text-xs text-white/70">Username</p>
-                    <p className="font-medium">@{user.username}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3">
-                  <Mail className="w-5 h-5" aria-hidden="true" />
-                  <div>
-                    <p className="text-xs text-white/70">Email</p>
-                    <p className="font-medium text-sm break-all">{user.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3">
-                  <Building2 className="w-5 h-5" aria-hidden="true" />
-                  <div>
-                    <p className="text-xs text-white/70">Business Type</p>
-                    <p className="font-medium">{user.business_type || 'N/A'}</p>
-                  </div>
+        {/* Enhanced Business Profile Card */}
+        <section className="relative overflow-hidden bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 rounded-3xl shadow-2xl mb-8">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-30"></div>
+          
+          <div className="relative p-8 md:p-12 text-white">
+            {loadingUser ? (
+              <div className="animate-pulse space-y-4">
+                <div className="h-10 bg-white/20 rounded w-80 max-w-full"></div>
+                <div className="h-6 bg-white/20 rounded w-64 max-w-full"></div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-20 bg-white/20 rounded-xl"></div>
+                  ))}
                 </div>
               </div>
+            ) : user ? (
+              <>
+                {/* Business Header */}
+                <div className="flex flex-col md:flex-row md:items-start gap-6 mb-8">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-3 bg-white/20 rounded-2xl">
+                        <Building2 className="w-8 h-8" />
+                      </div>
+                      {user.b2b_verified && (
+                        <span className="bg-green-500/90 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-4 h-4" />
+                          Verified Business
+                        </span>
+                      )}
+                    </div>
+                    
+                    <h1 className="text-4xl md:text-5xl font-bold mb-3 leading-tight">
+                      {user.registered_business_name || `${user.first_name} ${user.last_name}`}
+                    </h1>
+                    
+                    <div className="flex flex-wrap items-center gap-4 text-orange-100">
+                      <span className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        @{user.username}
+                      </span>
+                      {user.business_type && (
+                        <span className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4" />
+                          {user.business_type}
+                        </span>
+                      )}
+                      {user.location_name && (
+                        <span className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          {user.location_name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Quick Actions */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => {/* Handle contact */}}
+                      className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      Contact Business
+                    </button>
+                    <button
+                      onClick={() => {/* Handle favorite */}}
+                      className="bg-white text-orange-600 hover:bg-orange-50 px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 shadow-lg"
+                    >
+                      <Star className="w-5 h-5" />
+                      Add to Favorites
+                    </button>
+                  </div>
+                </div>
+
+                {/* Business Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5" />
+                      <div>
+                        <p className="text-xs text-white/70">Email</p>
+                        <p className="font-medium text-sm">{user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {user.phone_number && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                      <div className="flex items-center gap-3">
+                        <Phone className="w-5 h-5" />
+                        <div>
+                          <p className="text-xs text-white/70">Phone</p>
+                          <p className="font-medium text-sm">{user.phone_number}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {user.credit_limit && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                      <div className="flex items-center gap-3">
+                        <DollarSign className="w-5 h-5" />
+                        <div>
+                          <p className="text-xs text-white/70">Credit Limit</p>
+                          <p className="font-medium text-sm">NPR {typeof user.credit_limit === 'string' ? parseFloat(user.credit_limit).toLocaleString() : user.credit_limit.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {user.date_joined && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-5 h-5" />
+                        <div>
+                          <p className="text-xs text-white/70">Member Since</p>
+                          <p className="font-medium text-sm">{new Date(user.date_joined).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
               {user.description && (
                 <div className="mt-6 bg-white/10 backdrop-blur-sm p-4 rounded-lg">
@@ -524,37 +616,54 @@ const B2BUserProfile: React.FC = () => {
           ) : (
             <h1 className="text-3xl font-bold">Business Profile</h1>
           )}
+        </div>
         </section>
 
-        {/* Products Section */}
-        <section className="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-          {/* Section Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Package className="w-6 h-6 text-orange-600" aria-hidden="true" />
+        {/* Enhanced Products Section */}
+        <section className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/50 p-6 sm:p-8">
+          {/* Section Header with Stats */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl">
+                <Package className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900">Product Catalog</h2>
+                <p className="text-gray-600">Discover what this business has to offer</p>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800">Products</h2>
-            <div className="ml-auto px-4 py-1.5 bg-orange-50 text-orange-700 rounded-full text-sm font-semibold">
-              {count} Total
+            
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 px-4 py-2 rounded-xl">
+                <span className="text-sm font-medium text-orange-700">{count} Products</span>
+              </div>
+              <div className="bg-green-50 border border-green-200 px-4 py-2 rounded-xl">
+                <span className="text-sm font-medium text-green-700 flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  Available Now
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Enhanced Search Bar */}
           <div className="mb-8">
             <div className="relative max-w-2xl">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" aria-hidden="true" />
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <Search className="w-5 h-5" />
+              </div>
               <input
                 type="search"
                 value={q}
                 onChange={e => setQ(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Search products by name, brand, or SKU..."
-                className="w-full pl-12 pr-32 py-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-100 focus:outline-none transition-all text-lg shadow-sm"
+                placeholder="Search products by name, brand, or category..."
+                className="w-full pl-12 pr-16 py-4 text-gray-900 bg-white border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all shadow-sm"
                 aria-label="Search products"
               />
               <button
                 onClick={handleSearch}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-6 py-2.5 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg hover:shadow-lg transition-all font-medium"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl transition-colors font-medium"
               >
                 Search
               </button>
@@ -654,7 +763,7 @@ const B2BUserProfile: React.FC = () => {
                             onClick={(e) => { 
                               e.stopPropagation(); 
                               if (!currentUser?.b2b_verified) {
-                                addToast('error', 'Only B2B verified users can negotiate prices');
+                                showError('Access Restricted', 'Only B2B verified users can negotiate prices');
                                 return;
                               }
                               setModalProduct(p); 
@@ -892,7 +1001,7 @@ const B2BUserProfile: React.FC = () => {
                     <button
                       onClick={() => {
                         if (!currentUser?.b2b_verified) {
-                          addToast('error', 'Only B2B verified users can negotiate prices');
+                          showError('Access Restricted', 'Only B2B verified users can negotiate prices');
                           return;
                         }
                         setIsNegotiating(true);

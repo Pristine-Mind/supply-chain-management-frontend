@@ -71,6 +71,7 @@ import MyOrders from './components/MyOrders';
 import UserProfile from './components/UserProfile';
 import UserAdminProfile from './components/UserAdminProfile';
 import FindBusinessPage from './components/FindBusinessPage';
+import BusinessDirectory from './components/b2b/BusinessDirectory';
 import DistributorProfile from './components/DistributorProfile';
 import DistributorOrders from './components/DistributorOrders';
 import DistributorNegotiations from './components/DistributorNegotiations';
@@ -131,6 +132,7 @@ const protectedRoutes = [
   { path: '/support', element: <SupportComponent /> },
   { path: '/my-orders', element: <MyOrders /> },
   { path: '/find-business', element: <FindBusinessPage /> },
+  { path: '/find-business/directory', element: <BusinessDirectory /> },
   { path: '/find-business/:userId', element: <FindBusinessPage /> },
   { path: '/marketplace-dashboard', element: <DistributorProfile /> },
   { path: '/marketplace-dashboard/orders', element: <DistributorOrders /> },
