@@ -23,6 +23,7 @@ const BrandsSection = React.lazy(() => import('./BrandsSection'));
 const MadeInNepal = React.lazy(() => import('./MadeInNepal'));
 const DiaperSection = React.lazy(() => import('./DiaperSection'));
 const TopBrands = React.lazy(() => import('./TopBrands'));
+const NearbyProducts = React.lazy(() => import('./NearbyProducts'));
 const ShoppableVideoFeed = React.lazy(() => import('./ShoppableVideoFeed'));
 
 import logo from '../assets/logo.png';
@@ -808,6 +809,11 @@ const Marketplace: React.FC = () => {
         )}
 
       <CategoryCarousel />
+      
+      <LazySection>
+        <NearbyProducts radiusKm={50} limit={8} />
+      </LazySection>
+
       <LazySection>
         <FeaturedProducts/>
       </LazySection>

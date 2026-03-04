@@ -40,7 +40,6 @@ import NotificationWidget from './NotificationWidget';
 import SidebarNav from './dashboard/SidebarNav';
 import TransporterOverview from './dashboard/TransporterOverview';
 import { InfoCard, InfoRow } from './dashboard/InfoBlocks';
-import B2BSearch from './b2b/B2BSearch';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -95,7 +94,6 @@ const Home: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [showB2BSearch, setShowB2BSearch] = useState(false);
 
   const [data, setData] = useState<DashboardData>({
     totalProducts: 0,
@@ -530,7 +528,7 @@ const Home: React.FC = () => {
                     {/* Find Business - Distributor Only */}
                     {currentBusinessType === 'distributor' && (
                       <button
-                        onClick={() => setShowB2BSearch(true)}
+                        onClick={() => navigate('/find-business/directory')}
                         className="group text-center transform transition-all duration-300 hover:-translate-y-3 hover:shadow-2xl"
                       >
                         <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl group-hover:from-purple-100 group-hover:to-purple-200 transition-all duration-500">
@@ -619,9 +617,6 @@ const Home: React.FC = () => {
                     )}
                   </div>
                 </div>
-
-                {/* B2B Search Modal */}
-                {showB2BSearch && <B2BSearch open={showB2BSearch} onClose={() => setShowB2BSearch(false)} />}
 
                 {/* Charts & Pending Info */}
                 <div className="grid lg:grid-cols-2 gap-8 mb-10">
