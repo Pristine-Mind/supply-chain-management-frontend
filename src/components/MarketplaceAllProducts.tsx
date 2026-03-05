@@ -29,7 +29,7 @@ import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
 import { categoryApi, subcategoryApi } from '../api/categoryApi';
 import { voiceSearchByText } from '../api/voiceSearchApi';
 import { parseSearchIntent, toSearchIntent } from '../services/intentParserService';
-import { getFilterOptions, type FilterOptionsResponse } from '../api/marketplaceApi';
+import { getFilterOptions, setProductDiscount, getProductDiscountInfo, type FilterOptionsResponse } from '../api/marketplaceApi';
 import logo from '../assets/logo.png';
 
 // --- Facet Types ---
@@ -278,6 +278,12 @@ const MarketplaceAllProducts: React.FC = () => {
   // Facets from search response
   const [facets, setFacets] = useState<SearchFacets | null>(null);
 
+  // Discount management state
+  const [discountDialogOpen, setDiscountDialogOpen] = useState(false);
+  const [selectedProductForDiscount, setSelectedProductForDiscount] = useState<MarketplaceProduct | null>(null);
+  const [discountPercentage, setDiscountPercentage] = useState('');
+  const [discountLoading, setDiscountLoading] = useState(false);
+  const [discountInfo, setDiscountInfo] = useState<{ listed_price: number; discount_percentage: number; discounted_price: number; savings_amount: number } | null>(null);
   const productsGridRef = useRef<HTMLDivElement | null>(null);
 
   // --- Voice Search ---
@@ -640,6 +646,43 @@ const MarketplaceAllProducts: React.FC = () => {
     setMessage({ text: newWishlist.has(productId) ? 'Added to wishlist' : 'Removed from wishlist', type: 'info' });
   };
 
+  const handleOpenDiscountDialog = async (product: MarketplaceProduct) => {
+    if (!user) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    setSelectedProductForDiscount(product);
+    setDiscountPercentage(product.percent_off?.toString() || '');
+    setDiscountLoading(true);
+    try {
+      const response = await getProductDiscountInfo(product.id);
+      setDiscountInfo(response.discount_info);
+    } catch (error) {
+      console.error('Error fetching discount info:', error);
+    } finally {
+      setDiscountLoading(false);
+      setDiscountDialogOpen(true);
+    }
+  };
+
+  const handleApplyDiscount = async () => {
+    if (!selectedProductForDiscount || !discountPercentage) return;
+    
+    setDiscountLoading(true);
+    try {
+      const response = await setProductDiscount(selectedProductForDiscount.id, parseFloat(discountPercentage));
+      setMessage({ text: response.message, type: 'info' });
+      setDiscountDialogOpen(false);
+      // Refetch products to update the UI
+      await handleSearch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to set discount';
+      setMessage({ text: errorMessage, type: 'info' });
+    } finally {
+      setDiscountLoading(false);
+    }
+  };
+
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
@@ -668,6 +711,12 @@ const MarketplaceAllProducts: React.FC = () => {
       e.stopPropagation();
     };
 
+    const handleDiscountClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      handleOpenDiscountDialog(product);
+    };
+
     return (
       <a
         href={`/marketplace/${product.id}`}
@@ -687,8 +736,18 @@ const MarketplaceAllProducts: React.FC = () => {
               {product.percent_off}% OFF
             </div>
           )}
+          {product.percent_off > 0 && (
+            <div 
+              className="absolute top-2 right-2 bg-green-600 text-white text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1 cursor-pointer hover:bg-green-700 transition-colors"
+              onClick={handleDiscountClick}
+              title="Click to edit discount"
+            >
+              <Tag className="w-3 h-3" />
+              <span>{product.percent_off}% Discount</span>
+            </div>
+          )}
           {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
-            <div className="absolute top-2 right-2 bg-yellow-500 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
+            <div className="absolute bottom-2 right-2 bg-yellow-500 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
               {product.product_details.stock} left
             </div>
           )}
@@ -738,8 +797,13 @@ const MarketplaceAllProducts: React.FC = () => {
             </div>
 
             {pricing.savings > 0 && (
-              <div className="text-[10px] text-green-600 font-medium">
-                Save Rs. {pricing.savings?.toLocaleString()}
+              <div className="text-[10px] text-green-600 font-medium flex items-center gap-1">
+                <span>💚 Save Rs. {pricing.savings?.toLocaleString()}</span>
+                {product.percent_off > 0 && (
+                  <span className="text-[9px] bg-green-100 text-green-700 px-1 py-0.5 rounded">
+                    ({product.percent_off}% off)
+                  </span>
+                )}
               </div>
             )}
 
@@ -782,6 +846,101 @@ const MarketplaceAllProducts: React.FC = () => {
       </a>
     );
   };
+
+  // --- Discount Dialog ---
+  const DiscountDialog = () => (
+    <Dialog.Root open={discountDialogOpen} onOpenChange={setDiscountDialogOpen}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 max-w-md w-full z-50">
+          <Dialog.Title className="text-lg font-bold mb-4 flex items-center gap-2">
+            <Tag className="w-5 h-5 text-orange-600" />
+            Set Discount
+          </Dialog.Title>
+          
+          {selectedProductForDiscount && (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">
+                  {selectedProductForDiscount.product_details.name}
+                </h4>
+                <div className="text-sm text-gray-600">
+                  Listed Price: <span className="font-bold text-orange-600">Rs. {selectedProductForDiscount.listed_price?.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {discountInfo && (
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <h5 className="text-xs font-bold text-blue-900 mb-2">Current Discount Info</h5>
+                  <div className="space-y-1 text-xs text-blue-800">
+                    <div>Discount: {discountInfo.discount_percentage}%</div>
+                    <div>Discounted Price: Rs. {discountInfo.discounted_price?.toLocaleString()}</div>
+                    <div className="text-green-600 font-medium">Savings: Rs. {discountInfo.savings_amount?.toLocaleString()}</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Discount Percentage (%)
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={discountPercentage}
+                    onChange={(e) => setDiscountPercentage(e.target.value)}
+                    placeholder="Enter discount percentage"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    disabled={discountLoading}
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">%</span>
+                </div>
+              </div>
+
+              {discountPercentage && (
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <h5 className="text-xs font-bold text-green-900 mb-2">Preview</h5>
+                  <div className="space-y-1 text-xs text-green-800">
+                    <div>Discount: {parseFloat(discountPercentage)}%</div>
+                    <div>
+                      New Price: Rs. {(selectedProductForDiscount.listed_price * (1 - parseFloat(discountPercentage) / 100)).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </div>
+                    <div className="text-green-600 font-medium">
+                      Customer Saves: Rs. {((selectedProductForDiscount.listed_price * parseFloat(discountPercentage)) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-4">
+                <button
+                  onClick={() => setDiscountDialogOpen(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+                  disabled={discountLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApplyDiscount}
+                  disabled={!discountPercentage || discountLoading}
+                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {discountLoading ? 'Applying...' : 'Apply Discount'}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          <Dialog.Close className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+            <X className="w-5 h-5" />
+          </Dialog.Close>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
 
   // --- Render ---
   return (
@@ -1306,6 +1465,8 @@ const MarketplaceAllProducts: React.FC = () => {
           </button>
         </div>
       )}
+
+      <DiscountDialog />
 
       <Footer />
     </div>

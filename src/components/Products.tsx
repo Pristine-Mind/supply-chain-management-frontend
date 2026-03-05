@@ -3,10 +3,12 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import axios, { isAxiosError } from 'axios';
 import { FaEdit, FaPlus, FaDownload, FaSearch, FaTimes, FaCheck, FaImage } from 'react-icons/fa';
+import { Tag, AlertCircle, CheckCircle, Loader, X } from 'lucide-react';
+import * as Dialog from '@radix-ui/react-dialog';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { CategorySelector } from './CategoryHierarchy';
-import { createMarketplaceProductFromProduct } from '../api/marketplaceApi';
+import { createMarketplaceProductFromProduct, setProductDiscount, getProductDiscountInfo, type DiscountInfo } from '../api/marketplaceApi';
 
 interface ProductImage {
   id: number;
@@ -16,6 +18,7 @@ interface ProductImage {
 
 interface Product {
   id: number;
+  marketplace_id?: number;
   name: string;
   description: string;
   sku: string;
@@ -148,6 +151,15 @@ const Products: React.FC = () => {
   const [creatingMarketplaceProduct, setCreatingMarketplaceProduct] = useState<number | null>(null);
   const [marketplaceSuccess, setMarketplaceSuccess] = useState('');
   const [marketplaceError, setMarketplaceError] = useState('');
+  
+  // Discount management state
+  const [discountDialogOpen, setDiscountDialogOpen] = useState(false);
+  const [selectedProductForDiscount, setSelectedProductForDiscount] = useState<Product | null>(null);
+  const [discountPercentage, setDiscountPercentage] = useState('');
+  const [discountLoading, setDiscountLoading] = useState(false);
+  const [discountInfo, setDiscountInfo] = useState<DiscountInfo | null>(null);
+  const [discountError, setDiscountError] = useState('');
+  const [discountSuccess, setDiscountSuccess] = useState('');
 
   useEffect(() => {
     fetchProducts(searchQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, producerFilter);
@@ -485,6 +497,75 @@ const Products: React.FC = () => {
 
   const handleView = (product: Product) => {
     setViewingProductId(product);
+  };
+
+  const handleOpenDiscountDialog = async (product: Product) => {
+    setSelectedProductForDiscount(product);
+    setDiscountPercentage('');
+    setDiscountError('');
+    setDiscountSuccess('');
+    
+    const marketplaceId = product.marketplace_id || product.id;
+    
+    try {
+      setDiscountLoading(true);
+      const response = await getProductDiscountInfo(marketplaceId);
+      setDiscountInfo(response.discount_info);
+      if (response.discount_info.discount_percentage && response.discount_info.discount_percentage > 0) {
+        setDiscountPercentage(response.discount_info.discount_percentage.toString());
+      }
+    } catch (error) {
+      console.error('Failed to fetch discount info:', error);
+      // Continue with dialog open to allow setting new discount
+    } finally {
+      setDiscountLoading(false);
+    }
+    
+    setDiscountDialogOpen(true);
+  };
+
+  const handleApplyDiscount = async () => {
+    if (!selectedProductForDiscount) return;
+    
+    const percentageValue = parseFloat(discountPercentage);
+    const marketplaceId = selectedProductForDiscount.marketplace_id || selectedProductForDiscount.id;
+    
+    // Validation
+    if (isNaN(percentageValue) || percentageValue < 0 || percentageValue > 100) {
+      setDiscountError(t('discount.invalidPercentage') || 'Please enter a valid percentage between 0 and 100');
+      return;
+    }
+    
+    // Confirmation for 100% discount
+    if (percentageValue === 100) {
+      if (!window.confirm(t('discount.confirm100Percent') || 'Are you sure you want to apply a 100% discount?')) {
+        return;
+      }
+    }
+    
+    try {
+      setDiscountLoading(true);
+      setDiscountError('');
+      
+      await setProductDiscount(marketplaceId, percentageValue);
+      
+      setDiscountSuccess(t('discount.appliedSuccessfully') || 'Discount applied successfully!');
+      
+      // Refresh products list
+      await fetchProducts(searchQuery, selectedCategoryId, selectedSubcategoryId, selectedSubSubcategoryId, producerFilter);
+      
+      // Close dialog after short delay
+      setTimeout(() => {
+        setDiscountDialogOpen(false);
+        setSelectedProductForDiscount(null);
+        setDiscountPercentage('');
+        setDiscountInfo(null);
+      }, 1000);
+    } catch (error) {
+      setDiscountError((error as any).message || t('discount.applyError') || 'Failed to apply discount');
+    } finally {
+      setDiscountLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -843,6 +924,13 @@ const Products: React.FC = () => {
                       Push To Marketplace
                     </>
                   )}
+                </button>
+                <button
+                  onClick={() => handleOpenDiscountDialog(product)}
+                  className="flex-1 bg-yellow-50 text-yellow-700 font-medium py-2 px-3 rounded-lg hover:bg-yellow-100 transition-colors text-sm flex items-center justify-center"
+                >
+                  <Tag className="mr-1" size={14} />
+                  Discount
                 </button>
                 <Link
                   to={`/inventory-analytics/products/${product.id}`}
@@ -1416,6 +1504,138 @@ const Products: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Discount Dialog */}
+      <Dialog.Root open={discountDialogOpen} onOpenChange={setDiscountDialogOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
+          <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] bg-white rounded-xl shadow-lg p-6 max-w-md w-full z-50">
+            <Dialog.Title className="text-xl font-semibold text-gray-900 mb-4">
+              {t('manage_discount')} - {selectedProductForDiscount?.name}
+            </Dialog.Title>
+
+            {discountLoading && (
+              <div className="flex items-center justify-center py-8">
+                <Loader className="animate-spin mr-2" size={20} />
+                <span className="text-gray-600">Loading discount info...</span>
+              </div>
+            )}
+
+            {!discountLoading && (
+              <div className="space-y-4">
+                {discountInfo && discountInfo.discount_percentage > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-green-800">
+                      <CheckCircle className="inline mr-2" size={16} />
+                      Current discount: <strong>{discountInfo.discount_percentage}%</strong>
+                    </p>
+                    {discountInfo.listed_price && (
+                      <p className="text-xs text-green-700 mt-2">
+                        Price after discount: <strong>Rs. {discountInfo.discounted_price.toLocaleString()}</strong>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {discountError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-sm text-red-800">
+                      <AlertCircle className="inline mr-2" size={16} />
+                      {discountError}
+                    </p>
+                  </div>
+                )}
+
+                {discountSuccess && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p className="text-sm text-green-800">
+                      <CheckCircle className="inline mr-2" size={16} />
+                      {discountSuccess}
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Discount Percentage (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={discountPercentage}
+                    onChange={(e) => setDiscountPercentage(e.target.value)}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+                    placeholder="Enter discount percentage"
+                  />
+                  {discountPercentage && !isNaN(parseFloat(discountPercentage)) && (
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm">
+                      <p className="text-gray-600">
+                        {selectedProductForDiscount && (
+                          <>
+                            Original price: <strong>Rs. {selectedProductForDiscount.price.toLocaleString()}</strong>
+                            <br />
+                            Savings: <strong>Rs. {Math.round((selectedProductForDiscount.price * parseFloat(discountPercentage) / 100) * 100) / 100}</strong>
+                            <br />
+                            Final price: <strong>Rs. {Math.round((selectedProductForDiscount.price * (1 - parseFloat(discountPercentage) / 100)) * 100) / 100}</strong>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {discountPercentage && parseFloat(discountPercentage) > 50 && parseFloat(discountPercentage) < 100 && (
+                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                      ⚠️ High discount ({parseFloat(discountPercentage).toFixed(2)}%). Verify before applying.
+                    </div>
+                  )}
+                  
+                  {discountPercentage && parseFloat(discountPercentage) >= 80 && parseFloat(discountPercentage) < 100 && (
+                    <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800">
+                      ⚠️ Very high discount! Confirm you want to proceed.
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-neutral-200">
+                  <button
+                    onClick={() => {
+                      setDiscountDialogOpen(false);
+                      setSelectedProductForDiscount(null);
+                      setDiscountPercentage('');
+                      setDiscountInfo(null);
+                      setDiscountError('');
+                      setDiscountSuccess('');
+                    }}
+                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleApplyDiscount}
+                    disabled={discountLoading || !discountPercentage}
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 rounded-lg transition-colors flex items-center justify-center"
+                  >
+                    {discountLoading ? (
+                      <>
+                        <Loader className="animate-spin mr-2" size={16} />
+                        Applying...
+                      </>
+                    ) : (
+                      'Apply Discount'
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <Dialog.Close className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+              <X size={20} />
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 };

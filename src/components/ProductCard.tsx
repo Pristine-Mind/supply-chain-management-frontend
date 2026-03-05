@@ -9,6 +9,7 @@ interface ProductImage {
 
 interface Product {
   id: number;
+  marketplace_id?: number;
   name: string;
   description: string;
   sku: string;
@@ -69,7 +70,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   return (
     <a 
-      href={`/marketplace/${product.id}`}
+      href={`/marketplace/${product.marketplace_id || product.id}`}
       className="block bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1 no-underline"
     >
       {/* Image Section */}
