@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const FacebookIcon = ({ className = "" }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -180,9 +181,9 @@ const Footer: React.FC = () => {
           {/* Brand Section */}
           <div className="lg:col-span-4 content-spacing">
             <div>
-              <h3 className="text-h2 font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent mb-3">
-                MulyaBazzar
-              </h3>
+              <div className="flex items-center mb-4">
+                <img src={logo} alt="Logo" className="h-16 w-auto object-contain mr-3" />
+              </div>
               <p className="text-body text-neutral-600 leading-relaxed">
                 Connecting you to quality products with trusted sellers across Nepal. Your satisfaction is our priority.
               </p>

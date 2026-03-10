@@ -14,9 +14,7 @@ import {
   Search,
   ArrowLeft
 } from 'lucide-react';
-import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import Modal from 'react-modal';
 import { toast } from 'react-toastify';
 import Navbar from './Navbar';
 import Footer from './Footer';

@@ -6,7 +6,6 @@ import {
   ShoppingBag, 
   MapPin, 
   Calendar, 
-  ArrowRight, 
   Package, 
   ChevronRight, 
   Printer,

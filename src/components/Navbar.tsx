@@ -82,9 +82,6 @@ export const Navbar: React.FC = () => {
               <div className="relative p-1">
                 <img src={logo} alt="Logo" className="w-10 h-10 group-hover:rotate-12 transition-transform duration-300" />
               </div>
-              <span className="text-2xl font-orange tracking-tighter bg-gradient-to-r from-orange-700 to-orange-900 bg-clip-text text-bold text-transparent">
-                MulyaBazzar
-              </span>
             </Link>
 
             <div className="hidden md:flex items-center bg-slate-100/50 p-1 rounded-2xl border border-slate-200/50">

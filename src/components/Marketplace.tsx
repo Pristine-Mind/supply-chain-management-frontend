@@ -380,8 +380,8 @@ const Marketplace: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-3">
               {/* Logo / Brand */}
               <div className="flex items-center justify-start">
-                <img src={logo} alt="Logo" className="w-8 h-8 sm:w-12 sm:h-12 mr-2 sm:mr-3" />
-                <span className="font-bold text-h2 sm:text-h1 text-primary-500">MulyaBazzar</span>
+                <img src={logo} alt="Logo" className="h-16 w-auto sm:h-16 mr-3 object-contain" />
+                {/* <span className="font-bold text-h2 sm:text-h1 text-primary-500">MulyaBazzar</span> */}
               </div>
 
               {/* Centered large search on desktop */}
