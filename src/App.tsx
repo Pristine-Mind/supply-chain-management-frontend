@@ -100,6 +100,13 @@ import AlertDetailPage from './components/risk-management/AlertDetailPage';
 import AlertStatisticsPage from './components/risk-management/AlertStatisticsPage';
 import RiskCategoryOverview from './components/risk-management/RiskCategoryOverview';
 import RiskDrillDownsPage from './components/risk-management/RiskDrillDownsPage';
+import ChampionsPage from './components/reports/rfm/Championspage';
+import AtRiskPage from './components/reports/rfm/Astriskpage';
+import DormantPage from './components/reports/rfm/Dormantpage';
+import CampaignMatrixPage from './components/reports/rfm/Campaignmatrixpage';
+import { RFMDashboard } from './components/reports/rfm';
+
+
 
 const protectedRoutes = [
   { path: '/home', element: <Home /> },
@@ -139,6 +146,16 @@ const protectedRoutes = [
   { path: '/marketplace-dashboard/negotiations', element: <DistributorNegotiations /> },
   { path: '/reports/weekly-digests', element: <WeeklyDigests /> },
   { path: '/reports/rfm-segments', element: <RFMSegments /> },
+
+{ path: '/reports/champions', element: <ChampionsPage /> },
+{ path: '/reports/at-risk', element: <AtRiskPage /> },
+{ path: '/reports/dormant', element: <DormantPage /> },
+{ path: '/reports/campaigns', element: <CampaignMatrixPage /> },
+{ path: '/reports/rFM-dashboard', element: <RFMDashboard /> },
+
+
+
+
   { path: '/reports/lost-sales', element: <LostSalesAnalysis /> },
   { path: '/system-health', element: <SystemHealth /> },
   { path: '/loyalty', element: <LoyaltyDashboard /> },
@@ -161,6 +178,9 @@ const protectedRoutes = [
   { path: '/inventory-analytics/reorder-recommendations', element: <ReorderRecommendationsList /> },
   { path: '/inventory-analytics/portfolio', element: <PortfolioView /> },
   { path: '/inventory-analytics/batch-forecast', element: <BatchForecast /> },
+
+  // RMF_section
+
 ];
 
 const publicRoutes = [

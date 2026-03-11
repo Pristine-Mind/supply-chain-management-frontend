@@ -18,7 +18,9 @@ import {
   AlertTriangle,
   TrendingUp,
   Target,
-  PackageSearch
+  PackageSearch,
+  BedDouble,
+  LayoutDashboard,
 } from 'lucide-react';
 import { FaFirstOrder } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
@@ -53,32 +55,24 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
         }
       };
       fetchCount();
-      const interval = setInterval(fetchCount, 60000); // Pulse every minute
+      const interval = setInterval(fetchCount, 60000);
       return () => clearInterval(interval);
     }
   }, [businessType, user?.id]);
 
-  /**
-   * Helper component for Navigation Links
-   * Handles the logic for showing/hiding text and adjusting margins
-   */
   const NavItem = ({ href, icon: Icon, label, badge }: { href: string; icon: any; label: string; badge?: number }) => (
     <li>
       <a
         href={href}
         title={isCollapsed ? label : ''}
-        className={`flex items-center p-3 rounded-lg font-medium text-orange-100 hover:bg-orange-700 hover:text-white transition-all duration-200 group relative`}
+        className="flex items-center p-3 rounded-lg font-medium text-orange-100 hover:bg-orange-700 hover:text-white transition-all duration-200 group relative"
       >
         <Icon 
-          className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ${
-            isCollapsed ? 'mx-auto' : 'mr-3'
-          }`} 
+          className={`h-5 w-5 flex-shrink-0 transition-all duration-200 ${isCollapsed ? 'mx-auto' : 'mr-3'}`} 
         />
         {!isCollapsed && (
           <div className="flex-1 flex items-center justify-between min-w-0">
-            <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-              {label}
-            </span>
+            <span className="whitespace-nowrap overflow-hidden text-ellipsis">{label}</span>
             {badge ? (
               <span className="bg-white text-orange-700 text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-sm ml-2">
                 {badge}
@@ -92,136 +86,133 @@ const SidebarNav: React.FC<Props> = ({ businessType, isCollapsed, setIsCollapsed
       </a>
     </li>
   );
+
+  // Identical to existing divider pattern in the original file
+  const SectionDivider = ({ label }: { label: string }) => (
+    <div className="pt-4 pb-2">
+      <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
+      {!isCollapsed && (
+        <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">
+          {label}
+        </p>
+      )}
+    </div>
+  );
+
+  // ── Shared section blocks ─────────────────────────────────────────────────
+
+  const IntelligenceSection = (
+    <>
+      <SectionDivider label="Intelligence" />
+      <NavItem href="/reports/weekly-digests" icon={FileText}     label="Weekly Digests" />
+      <NavItem href="/reports/rfm-segments"   icon={Zap}          label="Customer RFM" />
+      <NavItem href="/reports/lost-sales"     icon={TrendingDown} label="Lost Sales Analysis" />
+    </>
+  );
+
+  // RFM section — same heading + list style as Risk Management
+  const RFMSection = (
+    <>
+      <SectionDivider label="Customer RFM" />
+     <NavItem href="/reports/rfm-dashboard" icon={LayoutDashboard} label="RFM Dashboard" />
+      <NavItem href="/reports/champions"     icon={TrendingUp}      label="Champions" />
+      <NavItem href="/reports/at-risk"       icon={AlertTriangle}   label="At Risk" />
+      <NavItem href="/reports/dormant"       icon={BedDouble}       label="Dormant" />
+      <NavItem href="/reports/campaigns"     icon={Target}          label="Campaign Matrix" />
+    </>
+  );
+
+  const InventorySection = (
+    <>
+      <SectionDivider label="Inventory Analytics" />
+      <NavItem href="/inventory-analytics"                          icon={PackageSearch} label="Analytics Dashboard" />
+      <NavItem href="/inventory-analytics/reorder-recommendations" icon={AlertTriangle}  label="Reorder Alerts" />
+      <NavItem href="/inventory-analytics/portfolio"               icon={BarChart3}      label="Portfolio View" />
+    </>
+  );
+
+  const RiskSection = (
+    <>
+      <SectionDivider label="Risk Management" />
+      <NavItem href="/risk-management"            icon={Shield}        label="Risk Dashboard" />
+      <NavItem href="/risk-management/scorecards" icon={Target}        label="Supplier Scorecards" />
+      <NavItem href="/risk-management/kpis"       icon={TrendingUp}    label="Supply Chain KPIs" />
+      <NavItem href="/risk-management/alerts"     icon={AlertTriangle} label="Alerts" />
+      <NavItem href="/risk-management/risks"      icon={Shield}        label="Risk Assessment" />
+    </>
+  );
+
   return (
     <div className="relative h-full flex flex-col">
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="hidden md:flex absolute -right-3 top-8 bg-orange-700 border border-orange-600 rounded-full p-1 shadow-lg hover:bg-orange-500 transition-colors z-50 text-white"
-        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
       </button>
 
       <nav className="p-4 flex-1 overflow-y-auto overflow-x-hidden">
         <ul className="space-y-2">
+
+          {/* ── RETAILER ───────────────────────────────────────────────── */}
           {businessType === 'retailer' ? (
             <>
-              <NavItem href="/producers" icon={Building2} label={t('producer_management')} />
-              <NavItem href="/products" icon={ShoppingBag} label={t('product_management')} />
-              <NavItem href="/sales" icon={DollarSign} label="Direct Sales" />
-              <NavItem href="/stocks" icon={Scale} label={t('stock_management')} />
+              <NavItem href="/producers"                icon={Building2}   label={t('producer_management')} />
+              <NavItem href="/products"                 icon={ShoppingBag} label={t('product_management')} />
+              <NavItem href="/sales"                    icon={DollarSign}  label="Direct Sales" />
+              <NavItem href="/stocks"                   icon={Scale}       label={t('stock_management')} />
               <NavItem href="/marketplace/all-products" icon={ShoppingBag} label="Marketplace Products" />
-
-              
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Intelligence</p>}
-              </div>
-              <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
-              <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
-              <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
-              <NavItem href="/system-health" icon={Activity} label="System Health" />
-              
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Inventory Analytics</p>}
-              </div>
-              <NavItem href="/inventory-analytics" icon={PackageSearch} label="Analytics Dashboard" />
-              <NavItem href="/inventory-analytics/reorder-recommendations" icon={AlertTriangle} label="Reorder Alerts" />
-              <NavItem href="/inventory-analytics/portfolio" icon={BarChart3} label="Portfolio View" />
-
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Risk Management</p>}
-              </div>
-              <NavItem href="/risk-management" icon={Shield} label="Risk Dashboard" />
-              <NavItem href="/risk-management/scorecards" icon={Target} label="Supplier Scorecards" />
-              <NavItem href="/risk-management/kpis" icon={TrendingUp} label="Supply Chain KPIs" />
-              <NavItem href="/risk-management/alerts" icon={AlertTriangle} label="Alerts" />
-              <NavItem href="/risk-management/risks" icon={Shield} label="Risk Assessment" />
+              <NavItem href="/system-health"            icon={Activity}    label="System Health" />
+              {IntelligenceSection}
+              {RFMSection}
+              {InventorySection}
+              {RiskSection}
             </>
+
+          /* ── DISTRIBUTOR ─────────────────────────────────────────────── */
           ) : businessType === 'distributor' ? (
             <>
-              <NavItem href="/producers" icon={Building2} label={t('producer_management')} />
-              <NavItem href="/products" icon={ShoppingBag} label={t('product_management')} />
-              <NavItem href="/customers" icon={Users} label="Customer Management" />
-              <NavItem href="/orders" icon={FaFirstOrder} label={t('order_management')} />
-              <NavItem href="/purchase-orders" icon={ClipboardList} label="Purchase Order Management" />
-              <NavItem href="/sales" icon={DollarSign} label={t('sales_management')} />
-              <NavItem href="/stocks" icon={Scale} label={t('stock_management')} />
-              <NavItem href="/stats" icon={BarChart3} label={t('stats_and_analytics')} />
-              <NavItem href="/audit-logs" icon={ClipboardList} label={t('audit_logs')} />
-              <NavItem href="/find-business" icon={Users} label="Find Business" />
-              <NavItem href="/marketplace-dashboard" icon={BarChart3} label="Marketplace Dashboard" />
-              <NavItem href="/marketplace-dashboard/orders" icon={FaFirstOrder} label="Marketplace Orders" />
+              <NavItem href="/producers"                          icon={Building2}     label={t('producer_management')} />
+              <NavItem href="/products"                           icon={ShoppingBag}   label={t('product_management')} />
+              <NavItem href="/customers"                          icon={Users}         label="Customer Management" />
+              <NavItem href="/orders"                             icon={FaFirstOrder}  label={t('order_management')} />
+              <NavItem href="/purchase-orders"                    icon={ClipboardList} label="Purchase Order Management" />
+              <NavItem href="/sales"                              icon={DollarSign}    label={t('sales_management')} />
+              <NavItem href="/stocks"                             icon={Scale}         label={t('stock_management')} />
+              <NavItem href="/stats"                              icon={BarChart3}     label={t('stats_and_analytics')} />
+              <NavItem href="/audit-logs"                         icon={ClipboardList} label={t('audit_logs')} />
+              <NavItem href="/find-business"                      icon={Users}         label="Find Business" />
+              <NavItem href="/marketplace-dashboard"              icon={BarChart3}     label="Marketplace Dashboard" />
+              <NavItem href="/marketplace-dashboard/orders"       icon={FaFirstOrder}  label="Marketplace Orders" />
               <NavItem href="/marketplace-dashboard/negotiations" icon={ClipboardList} label="Negotiations" badge={pendingNegCount} />
-              <NavItem href="/marketplace/all-products" icon={ShoppingBag} label="Marketplace Products" />
-              
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Intelligence</p>}
-              </div>
-              <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
-              <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
-              <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
-              
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Inventory Analytics</p>}
-              </div>
-              <NavItem href="/inventory-analytics" icon={PackageSearch} label="Analytics Dashboard" />
-              <NavItem href="/inventory-analytics/reorder-recommendations" icon={AlertTriangle} label="Reorder Alerts" />
-              <NavItem href="/inventory-analytics/portfolio" icon={BarChart3} label="Portfolio View" />
-
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Risk Management</p>}
-              </div>
-              <NavItem href="/risk-management" icon={Shield} label="Risk Dashboard" />
-              <NavItem href="/risk-management/scorecards" icon={Target} label="Supplier Scorecards" />
-              <NavItem href="/risk-management/kpis" icon={TrendingUp} label="Supply Chain KPIs" />
-              <NavItem href="/risk-management/alerts" icon={AlertTriangle} label="Alerts" />
-              <NavItem href="/risk-management/risks" icon={Shield} label="Risk Assessment" />
+              <NavItem href="/marketplace/all-products"           icon={ShoppingBag}   label="Marketplace Products" />
+              {IntelligenceSection}
+              {RFMSection}
+              {InventorySection}
+              {RiskSection}
             </>
+
+          /* ── DEFAULT ─────────────────────────────────────────────────── */
           ) : (
             <>
-              <NavItem href="/producers" icon={Building2} label={t('producer_management')} />
-              <NavItem href="/products" icon={ShoppingBag} label={t('product_management')} />
-              <NavItem href="/customers" icon={Users} label={t('customer_management')} />
-              <NavItem href="/orders" icon={FaFirstOrder} label={t('order_management')} />
-              <NavItem href="/purchase-orders" icon={ClipboardList} label="Purchase Order Management" />
-              <NavItem href="/sales" icon={DollarSign} label={t('sales_management')} />
-              <NavItem href="/stats" icon={BarChart3} label={t('stats_and_analytics')} />
-              <NavItem href="/audit-logs" icon={ClipboardList} label={t('audit_logs')} />
-              <NavItem href="/stocks" icon={Scale} label={t('stock_management')} />
-              <NavItem href="/marketplace/all-products" icon={ShoppingBag} label="Marketplace Products" />
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Intelligence</p>}
-              </div>
-              <NavItem href="/reports/weekly-digests" icon={FileText} label="Weekly Digests" />
-              <NavItem href="/reports/rfm-segments" icon={Zap} label="Customer RFM" />
-              <NavItem href="/reports/lost-sales" icon={TrendingDown} label="Lost Sales Analysis" />
-              
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Inventory Analytics</p>}
-              </div>
-              <NavItem href="/inventory-analytics" icon={PackageSearch} label="Analytics Dashboard" />
-              <NavItem href="/inventory-analytics/reorder-recommendations" icon={AlertTriangle} label="Reorder Alerts" />
-              <NavItem href="/inventory-analytics/portfolio" icon={BarChart3} label="Portfolio View" />
-
-              <div className="pt-4 pb-2">
-                <div className={`h-px bg-orange-600/50 mb-4 ${isCollapsed ? 'mx-2' : ''}`} />
-                {!isCollapsed && <p className="px-3 text-[10px] font-bold text-orange-300 uppercase tracking-widest mb-2">Risk Management</p>}
-              </div>
-              <NavItem href="/risk-management" icon={Shield} label="Risk Dashboard" />
-              <NavItem href="/risk-management/scorecards" icon={Target} label="Supplier Scorecards" />
-              <NavItem href="/risk-management/kpis" icon={TrendingUp} label="Supply Chain KPIs" />
-              <NavItem href="/risk-management/alerts" icon={AlertTriangle} label="Alerts" />
-              <NavItem href="/risk-management/risks" icon={Shield} label="Risk Assessment" />
+              <NavItem href="/producers"                icon={Building2}     label={t('producer_management')} />
+              <NavItem href="/products"                 icon={ShoppingBag}   label={t('product_management')} />
+              <NavItem href="/customers"                icon={Users}         label={t('customer_management')} />
+              <NavItem href="/orders"                   icon={FaFirstOrder}  label={t('order_management')} />
+              <NavItem href="/purchase-orders"          icon={ClipboardList} label="Purchase Order Management" />
+              <NavItem href="/sales"                    icon={DollarSign}    label={t('sales_management')} />
+              <NavItem href="/stats"                    icon={BarChart3}     label={t('stats_and_analytics')} />
+              <NavItem href="/audit-logs"               icon={ClipboardList} label={t('audit_logs')} />
+              <NavItem href="/stocks"                   icon={Scale}         label={t('stock_management')} />
+              <NavItem href="/marketplace/all-products" icon={ShoppingBag}   label="Marketplace Products" />
+              {IntelligenceSection}
+              {RFMSection}
+              {InventorySection}
+              {RiskSection}
             </>
           )}
+
         </ul>
       </nav>
     </div>
