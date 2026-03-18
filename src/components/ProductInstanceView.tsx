@@ -109,6 +109,7 @@ interface MarketplaceProductInstance {
   estimated_delivery_days: number;
   shipping_cost: string;
   is_free_shipping: boolean;
+  is_delivery_free: boolean;
   recent_purchases_count: number;
   listed_date: string;
   is_available: boolean;
@@ -191,7 +192,8 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
       };
     }
     
-    if (product.is_offer_active && product.discounted_price < product.listed_price) {
+    // Show discounted price if available and less than listed price
+    if (product.discounted_price && product.discounted_price < product.listed_price) {
       return {
         price: product.discounted_price,
         isB2BPrice: false,
@@ -429,6 +431,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
         estimated_delivery_days: product.estimated_delivery_days,
         shipping_cost: product.shipping_cost,
         is_free_shipping: product.is_free_shipping,
+        is_delivery_free: product.is_delivery_free,
         recent_purchases_count: product.recent_purchases_count,
         listed_date: product.listed_date,
         is_available: product.is_available,
@@ -471,7 +474,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   };
 
   const { price: currentPrice = product.listed_price, isB2BPrice, minQuantity } = getDisplayPrice();
-  const showOffer = !isB2BPrice && product.is_offer_active && product.discounted_price < product.listed_price;
+  const showOffer = !isB2BPrice && product.discounted_price && product.discounted_price < product.listed_price;
   const stockLevel = product.product_details?.stock || 0;
 
   return (
@@ -631,6 +634,15 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       loading={deliverabilityLoading}
                       error={deliverabilityError}
                     />
+                    {product.is_delivery_free && (
+                      <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
+                        <span className="text-xl">🚚</span>
+                        <div>
+                          <p className="text-sm font-semibold text-green-900">Free Delivery Offer</p>
+                          <p className="text-xs text-green-700">This seller offers free delivery on this product</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">

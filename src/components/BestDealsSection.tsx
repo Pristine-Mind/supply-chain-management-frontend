@@ -160,11 +160,18 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
                       <h4 className="font-bold text-gray-900 text-sm mb-3 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors">
                           {p.product_details?.name}
                       </h4>
-                      <div className="mt-auto flex items-center justify-between">
-                          <span className="text-base font-black text-gray-900">
-                              Rs. {getDisplayPrice(p, user).currentPrice?.toLocaleString()}
-                          </span>
-                          <span className="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md">
+                      <div className="mt-auto flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                              <span className="text-base font-black text-gray-900">
+                                  Rs. {getDisplayPrice(p, user).currentPrice?.toLocaleString()}
+                              </span>
+                              {getDisplayPrice(p, user).originalPrice && (
+                                <span className="text-xs text-gray-500 line-through">
+                                  Rs. {getDisplayPrice(p, user).originalPrice?.toLocaleString()}
+                                </span>
+                              )}
+                          </div>
+                          <span className="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md whitespace-nowrap">
                             In Stock
                           </span>
                       </div>

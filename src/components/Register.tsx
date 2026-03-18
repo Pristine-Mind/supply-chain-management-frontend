@@ -17,14 +17,52 @@ import { Card, CardContent } from './ui/card';
 import logo from '../assets/logo.png';
 
 const schema = yup.object({
-  username: yup.string().min(3, 'Username too short').required('Username is required'),
-  email: yup.string().email('Invalid email').required('Email is required'),
-  password: yup.string().min(6, 'Minimum 6 characters').required('Password is required'),
-  password2: yup.string().oneOf([yup.ref('password')], 'Passwords must match').required('Confirm your password'),
-  firstName: yup.string().required('First name required'),
-  lastName: yup.string().required('Last name required'),
-  phone: yup.string().matches(/^[0-9]{7,15}$/, 'Invalid phone number').required('Phone required'),
-  cityId: yup.number().transform((value) => (isNaN(value) ? 0 : value)).min(1, 'Please select a city').required(),
+  username: yup.string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must not exceed 20 characters')
+    .matches(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens')
+    .required('Username is required'),
+  email: yup.string()
+    .email('Please enter a valid email address')
+    .test('email-domain', 'Email domain must be valid', function(value) {
+      if (!value) return false;
+      const parts = value.split('@');
+      return parts.length === 2 && parts[1].includes('.');
+    })
+    .required('Email is required'),
+  password: yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .matches(/[0-9]/, 'Password must contain at least one number')
+    .matches(/[@$!%*?&_-]/, 'Password must contain at least one special character (@$!%*?&_-)')
+    .required('Password is required'),
+  password2: yup.string()
+    .oneOf([yup.ref('password')], 'Passwords must match')
+    .required('Please confirm your password'),
+  firstName: yup.string()
+    .min(2, 'First name must be at least 2 characters')
+    .max(50, 'First name must not exceed 50 characters')
+    .matches(/^[a-zA-Z\s'-]+$/, 'First name can only contain letters, spaces, hyphens, and apostrophes')
+    .required('First name is required'),
+  lastName: yup.string()
+    .min(2, 'Last name must be at least 2 characters')
+    .max(50, 'Last name must not exceed 50 characters')
+    .matches(/^[a-zA-Z\s'-]+$/, 'Last name can only contain letters, spaces, hyphens, and apostrophes')
+    .required('Last name is required'),
+  phone: yup.string()
+    .matches(/^[0-9]{7,15}$/, 'Phone number must be between 7 and 15 digits')
+    .test('valid-phone', 'Please enter a valid phone number', function(value) {
+      if (!value) return false;
+      // Remove common phone formatting characters for validation
+      const cleanedPhone = value.replace(/[\s\-\+()]/g, '');
+      return /^[0-9]{7,15}$/.test(cleanedPhone);
+    })
+    .required('Phone number is required'),
+  cityId: yup.number()
+    .transform((value) => (isNaN(value) ? 0 : value))
+    .min(1, 'Please select a valid city')
+    .required('City selection is required'),
 }).required();
 
 type FormValues = yup.InferType<typeof schema>;

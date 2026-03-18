@@ -76,6 +76,7 @@ interface MarketplaceProduct {
   estimated_delivery_days: number | null;
   shipping_cost: string;
   is_free_shipping: boolean;
+  is_delivery_free: boolean;
   recent_purchases_count: number;
   listed_date: string;
   is_available: boolean;
@@ -493,6 +494,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
               <div className="bg-accent-warning-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm">
                 Only {product.product_details.stock} left
+              </div>
+            )}
+            {product.is_delivery_free && (
+              <div className="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
+                <span>🚚</span> Free Delivery
               </div>
             )}
           </div>

@@ -158,7 +158,12 @@ const ForYouGrid: React.FC<{ query?: string, compact?: boolean, creatorId?: numb
               className="inline-flex items-center gap-2 sm:gap-3 bg-white rounded-full px-3 py-1 shadow-md cursor-pointer"
               onClick={(e) => { e.stopPropagation(); navigate(`/marketplace/${v.product.id}`); }}
             >
-              <div className="text-[12px] sm:text-sm font-bold text-primary-600">Rs. {v.product.discounted_price || v.product.listed_price}</div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[12px] sm:text-sm font-bold text-primary-600">Rs. {v.product.discounted_price || v.product.listed_price}</span>
+                {v.product.discounted_price && (
+                  <span className="text-[10px] sm:text-xs text-gray-500 line-through">Rs. {v.product.listed_price}</span>
+                )}
+              </div>
               <button
                 onClick={async (e) => {
                   e.stopPropagation();

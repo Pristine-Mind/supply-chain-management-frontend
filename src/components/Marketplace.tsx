@@ -84,6 +84,7 @@ interface MarketplaceProduct {
   estimated_delivery_days: number | null;
   shipping_cost: string;
   is_free_shipping: boolean;
+  is_delivery_free: boolean;
   recent_purchases_count: number;
   listed_date: string;
   is_available: boolean;
@@ -887,6 +888,11 @@ const Marketplace: React.FC = () => {
                         {item.percent_off > 0 && (
                           <div className="absolute top-3 left-3 bg-accent-error-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm z-10">
                             {Math.round(item.percent_off)}% OFF
+                          </div>
+                        )}
+                        {item.is_delivery_free && (
+                          <div className="absolute top-3 right-3 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm z-10 flex items-center gap-1">
+                            <span>🚚</span> Free Delivery
                           </div>
                         )}
                         

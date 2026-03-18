@@ -488,7 +488,12 @@ const ReelItem: React.FC<{ video: ShoppableVideo; isActive: boolean }> = ({ vide
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white text-[10px] sm:text-xs font-medium truncate">{video.product.name}</p>
-                <p className="text-primary-400 text-xs sm:text-sm font-bold">Rs. {video.product.discounted_price || video.product.listed_price}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-primary-400 text-xs sm:text-sm font-bold">Rs. {video.product.discounted_price || video.product.listed_price}</p>
+                  {video.product.discounted_price && (
+                    <span className="text-gray-300 text-[9px] sm:text-xs line-through">Rs. {video.product.listed_price}</span>
+                  )}
+                </div>
               </div>
               <div className="bg-primary-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-bold">
                 View
@@ -505,7 +510,12 @@ const ReelItem: React.FC<{ video: ShoppableVideo; isActive: boolean }> = ({ vide
                     className="flex items-center gap-2 bg-black/40 backdrop-blur-md p-1.5 rounded-xl border border-white/10 cursor-pointer hover:bg-black/60 shrink-0"
                    >
                      <img src={ap.images?.[0]?.image || '/product-placeholder.png'} className="w-7 h-7 rounded-md object-cover" alt="" />
-                     <span className="text-white text-[9px] font-bold pr-1">Rs. {ap.discounted_price || ap.listed_price}</span>
+                     <div className="flex items-center gap-1 flex-wrap">
+                       <span className="text-white text-[9px] font-bold">Rs. {ap.discounted_price || ap.listed_price}</span>
+                       {ap.discounted_price && (
+                         <span className="text-gray-300 text-[8px] line-through">Rs. {ap.listed_price}</span>
+                       )}
+                     </div>
                    </div>
                 ))}
               </div>
