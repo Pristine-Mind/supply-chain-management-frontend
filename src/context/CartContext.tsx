@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useToast } from './ToastContext';
 
 interface ProductImage {
@@ -51,6 +51,7 @@ interface MarketplaceProduct {
   estimated_delivery_days: number | null;
   shipping_cost: string;
   is_free_shipping: boolean;
+  is_delivery_free: boolean;
   recent_purchases_count: number;
   listed_date: string;
   is_available: boolean;
@@ -188,7 +189,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const fetchMyCart = async () => {
+  const fetchMyCart = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
@@ -218,8 +219,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           id: listingId,
           product: Number(pd.id ?? listingId),
           product_details: pd,
-          listed_price: Number(it.unit_price ?? pd.price ?? 0),
-          discounted_price: it.discounted_price ?? null,
+          listed_price: Number(it.listed_price ?? it.unit_price ?? pd.price ?? 0),
+          discounted_price: it.discounted_price && it.discounted_price > 0 ? it.discounted_price : null,
           percent_off: it.percent_off ?? 0,
           savings_amount: it.savings_amount ?? 0,
           offer_start: it.offer_start ?? null,
@@ -229,6 +230,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           estimated_delivery_days: it.estimated_delivery_days ?? null,
           shipping_cost: String(it.shipping_cost ?? '0'),
           is_free_shipping: Boolean(it.is_free_shipping ?? false),
+          is_delivery_free: Boolean(it.is_delivery_free ?? false),
           recent_purchases_count: Number(it.recent_purchases_count ?? 0),
           listed_date: it.listed_date ?? new Date().toISOString(),
           is_available: Boolean(it.is_available ?? true),
@@ -254,7 +256,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           backendItemId: Number(it.id),
           product: marketplaceProduct,
           quantity: Number(it.quantity ?? 1),
-          price: parseFloat(String(it.unit_price ?? marketplaceProduct.listed_price ?? 0)),
+          price: it.discounted_price && it.discounted_price > 0 ? parseFloat(String(it.discounted_price)) : parseFloat(String(it.unit_price ?? marketplaceProduct.listed_price ?? 0)),
           image: pd?.images?.[0]?.image || '',
           name: pd?.name || 'Product',
         };
@@ -270,7 +272,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Failed to fetch my cart:', error);
     }
-  };
+  }, []);
 
   const addItemToBackendCart = async (productId: number, quantity: number): Promise<number> => {
     try {

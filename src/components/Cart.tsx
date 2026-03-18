@@ -43,8 +43,8 @@ const Cart: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       refreshCart();
-    }location.pathname
-  }, [isAuthenticated, refreshCart]);
+    }
+  }, [isAuthenticated]);
 
   const handleRemoveFromCart = async (productId: number) => {
     setLoading(prev => ({ ...prev, [productId]: true }));
@@ -321,14 +321,19 @@ const Cart: React.FC = () => {
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <h3 className="text-lg font-medium text-gray-900 mb-1">{item.name}</h3>
-                            <div className="flex items-center gap-3 mb-1">
+                            <div className="flex items-center gap-3 mb-1 flex-wrap">
                               <p className="text-lg font-semibold text-primary-600">
                                 Rs. {item.price.toLocaleString()}
                               </p>
                               {item.product.listed_price !== item.price && (
-                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
-                                  Negotiated Price
-                                </span>
+                                <>
+                                  <span className="text-sm text-gray-500 line-through">
+                                    Rs. {item.product.listed_price.toLocaleString()}
+                                  </span>
+                                  <span className="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                    Negotiated Price
+                                  </span>
+                                </>
                               )}
                             </div>
                           </div>
@@ -386,8 +391,11 @@ const Cart: React.FC = () => {
                           <div className="text-right">
                             <p className="text-lg font-bold text-gray-900">
                               Rs. {(item.price * item.quantity).toLocaleString()}
+                            </p>                          {item.product.is_delivery_free && (
+                            <p className="text-xs text-green-600 font-medium mt-1 flex items-center justify-end gap-1">
+                              <span>🚚</span> Free Delivery
                             </p>
-                          </div>
+                          )}                          </div>
                         </div>
 
                         {/* Loading State */}

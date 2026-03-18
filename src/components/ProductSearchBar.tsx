@@ -362,10 +362,15 @@ const ProductSearchBar: React.FC = () => {
                         <div className="font-medium text-gray-900 line-clamp-1">
                           {product.product_details?.name}
                         </div>
-                        <div className="flex items-center mt-1">
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
                           <span className="text-lg font-bold text-primary-600">
                             Rs. {getDisplayPrice(product).toLocaleString()}
                           </span>
+                          {product.discounted_price && (
+                            <span className="text-sm text-gray-500 line-through">
+                              Rs. {product.listed_price?.toLocaleString()}
+                            </span>
+                          )}
                           {user?.b2b_verified && product.is_b2b_eligible && (
                             <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full font-medium ml-2">
                               B2B

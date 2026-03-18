@@ -98,6 +98,7 @@ export interface MarketplaceProductResponse {
     is_featured: boolean;
     is_made_in_nepal: boolean;
     listed_date: string;
+    is_delivery_free?: boolean;
     [key: string]: any;
   };
 }
