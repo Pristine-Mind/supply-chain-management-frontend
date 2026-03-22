@@ -202,9 +202,57 @@ export const cancelMarketplaceOrder = async (orderId: number, reason?: string): 
     );
 
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error cancelling marketplace order:', error);
+    // Extract meaningful error message from response
+    const detail =
+      error?.response?.data?.detail ||
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      (typeof error?.response?.data === 'string' ? error.response.data : null);
+    if (detail) {
+      throw new Error(detail);
+    }
     throw error;
+  }
+};
+
+export const downloadMarketplaceOrderInvoice = async (orderId: number): Promise<Blob | { message: string }> => {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('Authentication required');
+
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/marketplace/orders/${orderId}/invoice/`,
+      {
+        headers: { Authorization: `Token ${token}`, Accept: 'application/pdf' },
+        responseType: 'blob',
+      }
+    );
+
+    const contentType = response.headers['content-type'] || '';
+    if (contentType.includes('application/pdf')) {
+      return response.data as Blob;
+    }
+
+    // Server returned a JSON message blob (e.g., not ready yet)
+    const text = await new Response(response.data).text();
+    try {
+      return JSON.parse(text) as { message: string };
+    } catch {
+      throw new Error('Unexpected response when fetching invoice');
+    }
+  } catch (err: any) {
+    if (err.response && err.response.data) {
+      try {
+        const text = await new Response(err.response.data).text();
+        const json = JSON.parse(text);
+        throw new Error(json.error || json.message || 'Invoice not available for this order');
+      } catch {
+        throw new Error('Invoice not available for this order');
+      }
+    }
+    throw err;
   }
 };
 

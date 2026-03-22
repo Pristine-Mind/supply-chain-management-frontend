@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { createSafeRecognitionInstance } from '../utils/voiceSearchBrowserPolyfill';
 import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
 import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
@@ -289,15 +290,17 @@ const MarketplaceAllProducts: React.FC = () => {
 
   // --- Voice Search ---
   const startVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Voice search is not supported in your browser');
+    const { recognition, error: initError } = createSafeRecognitionInstance();
+
+    if (!recognition) {
+      const message = initError || 'Voice search is not supported in your browser. Please use text search instead.';
+      alert(message);
       return;
     }
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.language = 'en-US';
     setIsListening(true);
     setSearchTerm('');
     recognition.onresult = (event: any) => {
@@ -313,7 +316,11 @@ const MarketplaceAllProducts: React.FC = () => {
         setDebouncedSearchTerm(finalTranscript);
       }
     };
-    recognition.onerror = () => setIsListening(false);
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      alert(`Voice search error: ${event.error}. Please try text search instead.`);
+    };
     recognition.onend = () => setIsListening(false);
     recognition.start();
   };
@@ -966,7 +973,7 @@ const MarketplaceAllProducts: React.FC = () => {
                 <Home className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-2">
-                <img src={logo} alt="Logo" className="w-8 h-8" />
+                <img src={logo} alt="Logo" className="w-32 h-16" />
                 <div>
                   <h1 className="text-lg font-bold text-orange-600">All Products</h1>
                   {selectedCategory !== 'All' && (
@@ -1340,13 +1347,28 @@ const MarketplaceAllProducts: React.FC = () => {
                 ))}
               </div>
             ) : !Array.isArray(products) || products.length === 0 ? (
-              <div className="text-center py-12">
-                <Search className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-                <p className="text-gray-600 mb-4">Try adjusting your search or filters.</p>
-                <button onClick={clearAllFilters} className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
-                  Clear Filters
-                </button>
+              <div className="text-center py-16 px-4">
+                <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+                {debouncedSearchTerm ? (
+                  <p className="text-gray-600 mb-2">
+                    No results for <span className="font-medium text-gray-800">&ldquo;{debouncedSearchTerm}&rdquo;</span>.
+                  </p>
+                ) : null}
+                <p className="text-gray-500 mb-6 text-sm">Try a different keyword, check your spelling, or browse by category.</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {debouncedSearchTerm && (
+                    <button
+                      onClick={() => { setSearchTerm(''); setDebouncedSearchTerm(''); }}
+                      className="bg-orange-600 text-white px-5 py-2 rounded-lg hover:bg-orange-700"
+                    >
+                      Clear Search
+                    </button>
+                  )}
+                  <button onClick={clearAllFilters} className="bg-white border border-gray-300 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-50">
+                    Clear All Filters
+                  </button>
+                </div>
               </div>
             ) : (
               <div

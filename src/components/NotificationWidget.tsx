@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, Trash2, Settings } from 'lucide-react';
 import {
-  Notification,
-  NotificationType,
+  type Notification,
+  type NotificationType,
   getNotificationIcon,
   getNotificationColor,
 } from '../api/notificationsApi';
@@ -30,6 +30,43 @@ const NotificationWidget: React.FC<NotificationWidgetProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<NotificationTab>('all');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  // Track which notification IDs have already triggered a browser push, keyed by id
+  const shownPushIds = useRef<Set<number>>(new Set());
+
+  // Request browser notification permission and fire push on new order/delivery notifications
+  useEffect(() => {
+    if (!('Notification' in window)) return;
+
+    const orderTypes = ['order', 'delivery'];
+    const newNotifs = notifications.filter(
+      n => !n.is_read && orderTypes.includes(n.type) && !shownPushIds.current.has(n.id)
+    );
+    if (newNotifs.length === 0) return;
+
+    const fireNotifications = () => {
+      newNotifs.forEach(notif => {
+        try {
+          new Notification('Order Update — Mulya Bazzar', {
+            body: notif.message,
+            icon: '/favicon.ico',
+          });
+          shownPushIds.current.add(notif.id);
+        } catch {
+          // Notification constructor can throw in some environments; ignore silently
+        }
+      });
+    };
+
+    if (Notification.permission === 'granted') {
+      fireNotifications();
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          fireNotifications();
+        }
+      });
+    }
+  }, [notifications]);
 
   const tabs: { id: NotificationTab; label: string; icon: string; count: number }[] = [
     {

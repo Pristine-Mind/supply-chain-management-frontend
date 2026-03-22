@@ -14,6 +14,7 @@ import LocationPicker from './LocationPicker';
 import Footer from './Footer';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
+import RegistrationSuccessModal from './auth/RegistrationSuccessModal';
 import logo from '../assets/logo.png';
 
 const schema = yup.object({
@@ -76,6 +77,8 @@ const Register = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [position, setPosition] = useState<[number, number]>([27.7172, 85.3240]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [registeredUsername, setRegisteredUsername] = useState<string>('');
 
   const { register, handleSubmit, control, trigger, formState: { errors } } = useForm<FormValues>({
     resolver: yupResolver(schema),
@@ -124,8 +127,10 @@ const Register = () => {
         latitude: position[0],
         longitude: position[1],
       });
-      alert('Registration successful!');
-      navigate('/login');
+      
+      // Show success modal instead of alert
+      setRegisteredUsername(vals.username);
+      setShowSuccessModal(true);
     } catch (e: any) {
       setSubmitError(e.response?.data?.message || 'Failed to register. Please try again.');
     } finally {
@@ -318,6 +323,15 @@ const Register = () => {
         </div>
       </div>
       <Footer />
+      
+      {/* Registration Success Modal */}
+      <RegistrationSuccessModal
+        isOpen={showSuccessModal}
+        username={registeredUsername}
+        autoRedirectDelay={5000}
+        onRedirect={() => navigate('/login')}
+        onManualRedirect={() => navigate('/login')}
+      />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { categoryApi } from '../api/categoryApi';
 import { voiceSearchByText } from '../api/voiceSearchApi';
+import { createSafeRecognitionInstance } from '../utils/voiceSearchBrowserPolyfill';
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
@@ -121,17 +122,17 @@ const Marketplace: React.FC = () => {
   const [, startTransition] = React.useTransition();
 
   const startVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Voice search is not supported in your browser');
+    const { recognition, error: initError } = createSafeRecognitionInstance();
+
+    if (!recognition) {
+      const message = initError || 'Voice search is not supported in your browser. Please use text search instead.';
+      alert(message);
       return;
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.language = 'en-US';
 
     setIsListening(true);
     setQuery('');
@@ -157,8 +158,10 @@ const Marketplace: React.FC = () => {
       }
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
       setIsListening(false);
+      alert(`Voice search error: ${event.error}. Please try text search instead.`);
     };
 
     recognition.onend = () => {

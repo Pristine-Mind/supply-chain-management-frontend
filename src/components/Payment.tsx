@@ -68,7 +68,22 @@ const Payment: React.FC = () => {
   const delivery = locState?.delivery;
 
   const { cart, state: cartState, clearCart, createCartOnBackend } = useCart();
-  const cartId = cartState.cartId;
+  // TC-017: support both `cart` (from CheckoutScreen Delivery) and `cartId` field names
+  const cartId = cartState.cartId || (delivery as any)?.cart || delivery?.cartId;
+
+  // TC-017: guard — if no delivery info, redirect back
+  useEffect(() => {
+    if (!delivery) {
+      navigate('/delivery-details', { replace: true });
+    }
+  }, [delivery, navigate]);
+
+  // TC-019: guard — if cart is empty, prevent order placement
+  useEffect(() => {
+    if (cart.length === 0) {
+      navigate('/cart', { replace: true });
+    }
+  }, [cart.length, navigate]);
 
   // Calculate totals
   const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -118,9 +133,10 @@ const Payment: React.FC = () => {
         return;
       }
 
-      const orderCartId = delivery.cartId || cartId;
+      // TC-017: resolve cartId from multiple possible field names
+      const orderCartId = cartState.cartId || (delivery as any).cart || delivery.cartId || cartId;
       if (!orderCartId) {
-        toast.error('Cart not found.');
+        toast.error('Cart not found. Please add items to your cart and try again.');
         return;
       }
 

@@ -540,7 +540,15 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   <div className="relative w-full h-80 sm:h-96 lg:h-[640px]">
                     <img
                       src={images[currentImage]?.image || ''}
-                      alt={product.product_details?.name}
+                      alt={product.product_details?.name || 'Product image'}
+                      onError={(e) => {
+                        // TC-011: fallback when CDN image fails to load
+                        const target = e.currentTarget as HTMLImageElement;
+                        if (!target.dataset.errorHandled) {
+                          target.dataset.errorHandled = 'true';
+                          target.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect width=%22400%22 height=%22300%22 fill=%22%23f3f4f6%22/%3E%3Ctext x=%22200%22 y=%22155%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2216%22%3EImage unavailable%3C/text%3E%3C/svg%3E';
+                        }
+                      }}
                       className="w-full h-full object-contain p-6 cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
                       onClick={() => openFullScreen(currentImage)}
                     />
@@ -1285,7 +1293,12 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                     }`}
                     aria-label={`Go to image ${idx + 1}`}
                   >
-                    <img src={img.image} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={img.image} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const t = e.currentTarget as HTMLImageElement;
+                        if (!t.dataset.err) { t.dataset.err = '1'; t.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22%3E%3Crect width=%2264%22 height=%2264%22 fill=%22%23f3f4f6%22/%3E%3C/svg%3E'; }
+                      }}
+                    />
                   </button>
                 ))}
               </div>

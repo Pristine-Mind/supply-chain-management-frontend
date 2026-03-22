@@ -70,6 +70,7 @@ import TransporterLanding from './components/TransporterLanding';
 import MyOrders from './components/MyOrders';
 import UserProfile from './components/UserProfile';
 import UserAdminProfile from './components/UserAdminProfile';
+import Unsubscribe from './components/Unsubscribe';
 import FindBusinessPage from './components/FindBusinessPage';
 import BusinessDirectory from './components/b2b/BusinessDirectory';
 import DistributorProfile from './components/DistributorProfile';
@@ -203,6 +204,7 @@ const publicRoutes = [
   { path: '/my-orders', element: <MyOrders /> },
   { path: '/user-profile', element: <UserProfile /> },
   { path: '/user-admin-profile', element: <UserAdminProfile /> },
+  { path: '/unsubscribe', element: <Unsubscribe /> },
 ];
 
 const GoogleAnalyticsTracker: React.FC = () => {

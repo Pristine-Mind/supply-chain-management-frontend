@@ -349,6 +349,7 @@ const NearbyProducts: React.FC<NearbyProductsProps> = ({
       discounted_price: product.discounted_price || null,
       percent_off: typeof product.percent_off === 'number' ? product.percent_off : 0,
       is_available: product.is_available !== false,
+      is_delivery_free: product.is_delivery_free || false,
       distance_km: (typeof product.distance_km === 'number') ? product.distance_km : null,
     }));
   }, [products]);
@@ -480,8 +481,30 @@ const NearbyProducts: React.FC<NearbyProductsProps> = ({
     );
   }
 
-  if (products.length === 0) {
-    return null;
+  if (products.length === 0 && !loading) {
+    return (
+      <section className="py-8 bg-gradient-to-b from-orange-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-2 mb-6">
+            <MapPin className="w-5 h-5 text-orange-600" />
+            <h2 className="text-2xl font-bold text-neutral-900">Products Near You</h2>
+          </div>
+          <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-8 text-center max-w-2xl mx-auto">
+            <MapPin className="w-12 h-12 text-neutral-400 mx-auto mb-4 opacity-50" />
+            <h3 className="text-lg font-semibold text-neutral-900 mb-2">No Products Found Nearby</h3>
+            <p className="text-neutral-600 mb-6">
+              There are no products available within {radiusKm}km of your location. Try expanding your search radius or browsing other categories.
+            </p>
+            <button
+              onClick={() => navigate('/marketplace/all-products')}
+              className="px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors"
+            >
+              Browse All Products
+            </button>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -548,7 +571,13 @@ const NearbyProducts: React.FC<NearbyProductsProps> = ({
                         </div>
                       )}
 
-                      {distance_km && !isNaN(distance_km) && (
+                      {product.is_delivery_free && (
+                        <div className="absolute top-3 right-3 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm z-10 flex items-center gap-1">
+                          <span>🚚</span> Free Delivery
+                        </div>
+                      )}
+
+                      {distance_km && !isNaN(distance_km) && !product.is_delivery_free && (
                         <div className="absolute top-3 right-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium z-10 flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
                           {distance_km.toFixed(1)}km

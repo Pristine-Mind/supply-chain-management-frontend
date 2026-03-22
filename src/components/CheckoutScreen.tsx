@@ -90,6 +90,28 @@ const Checkout: React.FC = () => {
 
   const itemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  if (items.length === 0) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
+          <div className="text-center space-y-4 max-w-sm">
+            <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto" />
+            <h2 className="text-xl font-semibold text-gray-900">Your cart is empty</h2>
+            <p className="text-neutral-600">Add items to your cart before proceeding to checkout.</p>
+            <button
+              onClick={() => navigate('/marketplace')}
+              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-medium"
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
     <Navbar/>

@@ -158,13 +158,14 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   );
 };
 
-const ProductItem = ({ item, index, user, onAdd, onNavigate }: any) => {
+const ProductItem = React.forwardRef<HTMLDivElement, any>(({ item, index, user, onAdd, onNavigate }, ref) => {
   const isB2BVerified = user?.b2b_verified && item.is_b2b_eligible;
   const displayPrice = isB2BVerified ? item.b2b_price : (item.discounted_price || item.listed_price);
   const image = item.product_details?.images?.[0]?.image ?? PLACEHOLDER;
 
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -236,7 +237,8 @@ const ProductItem = ({ item, index, user, onAdd, onNavigate }: any) => {
       </div>
     </motion.div>
   );
-};
+});
+ProductItem.displayName = 'ProductItem';
 
 const FeaturedSkeleton = () => (
     <div className="max-w-7xl mx-auto px-6 py-24">
