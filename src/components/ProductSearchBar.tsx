@@ -4,6 +4,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { voiceSearchByText } from '../api/voiceSearchApi';
+import { createSafeRecognitionInstance } from '../utils/voiceSearchBrowserPolyfill';
 import { 
   FiSearch, 
   FiX, 
@@ -75,6 +76,11 @@ const useDebounce = (value: string, delay: number) => {
 
   return debouncedValue;
 };
+
+/** TC-009: Strip HTML/script tags from search input to prevent XSS */
+function sanitizeSearchQuery(input: string): string {
+  return input.replace(/<[^>]*>/g, '').replace(/[<>]/g, '').trim();
+}
 
 const useSearchHistory = () => {
   const [history, setHistory] = useState<SearchHistory[]>([]);
@@ -162,17 +168,17 @@ const ProductSearchBar: React.FC = () => {
   }, [navigate]);
 
   const startVoiceSearch = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Voice search is not supported in your browser');
+    const { recognition, error: initError } = createSafeRecognitionInstance();
+
+    if (!recognition) {
+      const message = initError || 'Voice search is not supported in your browser. Please use text search instead.';
+      alert(message);
       return;
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-
     recognition.continuous = false;
     recognition.interimResults = true;
-    recognition.lang = 'en-US';
+    recognition.language = 'en-US';
 
     setIsListening(true);
     setQuery('');
@@ -198,8 +204,10 @@ const ProductSearchBar: React.FC = () => {
       }
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
       setIsListening(false);
+      alert(`Voice search error: ${event.error}. Please try text search instead.`);
     };
 
     recognition.onend = () => {
@@ -266,7 +274,7 @@ const ProductSearchBar: React.FC = () => {
   }, [debouncedQuery]);
 
   const handleSearch = useCallback((searchQuery: string) => {
-    const trimmedQuery = searchQuery.trim();
+    const trimmedQuery = sanitizeSearchQuery(searchQuery.trim());
     if (!trimmedQuery) return;
 
     addToHistory(trimmedQuery, recommendations.length);
@@ -500,7 +508,7 @@ const ProductSearchBar: React.FC = () => {
                 placeholder={isListening ? "Listening..." : "Search for products, brands, categories..."}
                 value={query}
                 onChange={(e) => {
-                  setQuery(e.target.value);
+                  setQuery(sanitizeSearchQuery(e.target.value));
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}

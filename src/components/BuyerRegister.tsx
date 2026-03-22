@@ -37,21 +37,64 @@ const BuyerRegister: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [cities, setCities] = useState<City[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({});
 
   const api = import.meta.env.VITE_REACT_APP_API_URL as string | undefined;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+
+    // Inline validation on change
+    setFieldErrors(prev => {
+      const updated = { ...prev };
+      if (name === 'email') {
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          updated.email = 'Enter a valid email address';
+        } else {
+          delete updated.email;
+        }
+      }
+      if (name === 'password') {
+        if (value && value.length > 0) {
+          if (value.length < 8) {
+            updated.password = 'Password must be at least 8 characters';
+          } else if (!/[A-Z]/.test(value)) {
+            updated.password = 'Password must contain at least one uppercase letter';
+          } else if (!/[0-9]/.test(value)) {
+            updated.password = 'Password must contain at least one number';
+          } else if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value)) {
+            updated.password = 'Password must contain at least one special character';
+          } else {
+            delete updated.password;
+          }
+        } else {
+          delete updated.password;
+        }
+      }
+      if (name === 'password2') {
+        if (value && value !== form.password) {
+          updated.password2 = 'Passwords do not match';
+        } else {
+          delete updated.password2;
+        }
+      }
+      return updated;
+    });
   };
 
   const validate = (): string | null => {
     if (!form.first_name.trim()) return 'Please enter your first name';
     if (!form.last_name.trim()) return 'Please enter your last name';
     if (!form.username.trim()) return 'Please choose a username';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Please enter a valid email address';
+    if (!form.email.trim()) return 'Please enter your email address';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Enter a valid email address';
     if (form.phone_number && !/^\+?[0-9\-\s]{7,15}$/.test(form.phone_number)) return 'Please enter a valid phone number';
-    if (form.password.length < 6) return 'Password should be at least 6 characters';
+    // TC-003: strong password policy
+    if (form.password.length < 8) return 'Password must be at least 8 characters';
+    if (!/[A-Z]/.test(form.password)) return 'Password must contain at least one uppercase letter';
+    if (!/[0-9]/.test(form.password)) return 'Password must contain at least one number';
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(form.password)) return 'Password must contain at least one special character';
     if (form.password !== form.password2) return 'Passwords do not match';
     return null;
   };
@@ -122,7 +165,16 @@ const BuyerRegister: React.FC = () => {
         });
         if (!res.ok) {
           const data = await res.json().catch(() => null);
-          throw new Error(data?.detail || `Registration failed (HTTP ${res.status})`);
+          // TC-001: parse structured field-level errors (e.g. duplicate email/username)
+          if (data && typeof data === 'object') {
+            const msgs: string[] = [];
+            for (const [, value] of Object.entries(data)) {
+              if (Array.isArray(value)) msgs.push(...value.map(String));
+              else if (typeof value === 'string') msgs.push(value);
+            }
+            if (msgs.length > 0) throw new Error(msgs[0]);
+          }
+          throw new Error(`Registration failed (HTTP ${res.status})`);
         }
       } else {
         // No API configured, simulate success
@@ -206,10 +258,11 @@ const BuyerRegister: React.FC = () => {
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${fieldErrors.email ? 'border-red-400' : ''}`}
                   placeholder="you@example.com"
                   required
                 />
+                {fieldErrors.email && <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Phone</label>
@@ -270,9 +323,13 @@ const BuyerRegister: React.FC = () => {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${fieldErrors.password ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldErrors.password
+                  ? <p className="mt-1 text-xs text-red-600">{fieldErrors.password}</p>
+                  : <p className="mt-1 text-xs text-gray-500">8+ chars with uppercase, number &amp; special character</p>
+                }
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Confirm Password</label>
@@ -281,9 +338,10 @@ const BuyerRegister: React.FC = () => {
                   name="password2"
                   value={form.password2}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 ${fieldErrors.password2 ? 'border-red-400' : ''}`}
                   required
                 />
+                {fieldErrors.password2 && <p className="mt-1 text-xs text-red-600">{fieldErrors.password2}</p>}
               </div>
             </div>
 

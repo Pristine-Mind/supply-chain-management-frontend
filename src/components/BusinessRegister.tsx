@@ -6,6 +6,7 @@ import * as yup from 'yup';
 import { Check, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
+import RegistrationSuccessModal from './auth/RegistrationSuccessModal';
 import LocationPicker from './LocationPicker';
 
 
@@ -60,9 +61,11 @@ export const BusinessRegister: React.FC = () => {
   const [cityError, setCityError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [position, setPosition] = useState<[number, number]>([27.7172, 85.3240]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [registeredUsername, setRegisteredUsername] = useState<string>('');
   
   const navigate = useNavigate();
-  const { showSuccess, showError } = useToast();
+  const { showError } = useToast();
 
   const {
     register,
@@ -136,16 +139,9 @@ export const BusinessRegister: React.FC = () => {
         },
       });
       
-      // Show success message
-      showSuccess(
-        'Registration Successful!', 
-        'Your business has been registered successfully. You can now login with your credentials.'
-      );
-      
-      // Redirect to login after a short delay
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      // Show success modal instead of toast
+      setRegisteredUsername(data.username);
+      setShowSuccessModal(true);
       
     } catch (e: any) {
       // Handle different types of errors
@@ -405,6 +401,15 @@ export const BusinessRegister: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Registration Success Modal */}
+      <RegistrationSuccessModal
+        isOpen={showSuccessModal}
+        username={registeredUsername}
+        autoRedirectDelay={5000}
+        onRedirect={() => navigate('/login')}
+        onManualRedirect={() => navigate('/login')}
+      />
     </div>
   );
 };

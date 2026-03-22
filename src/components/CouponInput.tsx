@@ -114,6 +114,13 @@ const CouponInput: React.FC<CouponInputProps> = ({
           onCouponApplied?.(appliedCoupon);
           setCouponCode('');
           setIsExpanded(false);
+        } else {
+          // TC-016: explicitly handle valid: false (e.g. expired coupon returned without throwing)
+          const reason: string =
+            response.data?.message ||
+            (response as any).message ||
+            'This coupon has expired or is no longer valid.';
+          setError(reason);
         }
       } catch (err: any) {
         const errorType = err.type || CouponErrorType.UNKNOWN_ERROR;

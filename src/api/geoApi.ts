@@ -126,6 +126,7 @@ export interface NearbyProductItem {
   discounted_price?: number | null;
   percent_off: number;
   is_available: boolean;
+  is_delivery_free: boolean;
   latitude: number;
   longitude: number;
   distance_km?: number | null;

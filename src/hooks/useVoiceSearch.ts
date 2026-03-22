@@ -15,6 +15,7 @@ import {
 import * as voiceSearchApi from '../api/voiceSearchApi';
 import * as intentParser from '../services/intentParserService';
 import * as recommendationEngine from '../services/recommendationEngineService';
+import { createSafeRecognitionInstance, getVoiceSearchCapabilities } from '../utils/voiceSearchBrowserPolyfill';
 
 export interface UseVoiceSearchOptions {
   /** Enable automatic speech-to-text via Web Speech API */
@@ -115,20 +116,22 @@ export const useVoiceSearch = (options: UseVoiceSearchOptions = {}): UseVoiceSea
   const recognitionRef = useRef<any>(null);
   const interimTranscriptRef = useRef('');
 
-  // Initialize speech recognition
+  // Initialize speech recognition with cross-browser support
   useEffect(() => {
     if (!enableSpeechRecognition) return;
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const { recognition, error: initError } = createSafeRecognitionInstance();
 
-    if (!SpeechRecognition) {
-      const err = new Error('Speech recognition not supported in this browser');
-      setError(err);
-      onError?.(err);
+    if (!recognition) {
+      if (initError) {
+        const err = new Error(initError);
+        setError(err);
+        onError?.(err);
+      }
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    // Configure recognition
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.language = language;
@@ -167,7 +170,8 @@ export const useVoiceSearch = (options: UseVoiceSearchOptions = {}): UseVoiceSea
     };
 
     recognition.onerror = (event: any) => {
-      const err = new Error(`Speech recognition error: ${event.error}`);
+      const errorMessage = `Speech recognition error: ${event.error}. Please try using text search instead.`;
+      const err = new Error(errorMessage);
       setError(err);
       onError?.(err);
       setIsListening(false);
@@ -185,7 +189,12 @@ export const useVoiceSearch = (options: UseVoiceSearchOptions = {}): UseVoiceSea
    */
   const startListening = useCallback(() => {
     if (!recognitionRef.current) {
-      const err = new Error('Speech recognition not available');
+      const capabilities = getVoiceSearchCapabilities();
+      const errorMessage = capabilities.canUseAudioFile 
+        ? `Voice search not available in ${capabilities.browserName}. Use text search or upload audio instead.`
+        : 'Speech recognition not available. Please use text search instead.';
+      
+      const err = new Error(errorMessage);
       setError(err);
       onError?.(err);
       return;

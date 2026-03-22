@@ -5,7 +5,30 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { requestOtp, verifyOtp } from '../api/authApi';
-import { Phone, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Phone, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { AuthErrorDisplay } from './auth/AuthErrorDisplay';
+import { categorizeLoginError, sanitizeInput } from '../utils/authValidation';
+import type { AuthError } from '../utils/authValidation';
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+
+function getLockoutState(): { attempts: number; lockedUntil: number } {
+  try {
+    const raw = localStorage.getItem('loginLockout');
+    return raw ? JSON.parse(raw) : { attempts: 0, lockedUntil: 0 };
+  } catch {
+    return { attempts: 0, lockedUntil: 0 };
+  }
+}
+
+function saveLockoutState(state: { attempts: number; lockedUntil: number }) {
+  localStorage.setItem('loginLockout', JSON.stringify(state));
+}
+
+function clearLockoutState() {
+  localStorage.removeItem('loginLockout');
+}
 
 interface LoginFormData {
   username: string;
@@ -23,64 +46,173 @@ const Login: React.FC = () => {
   const [otp, setOtp] = useState('');
   const [otpStep, setOtpStep] = useState<'request' | 'verify'>('request');
   
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [error, setError] = useState<AuthError | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [lockout, setLockout] = useState(() => getLockoutState());
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: sanitizeInput(value),
     });
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors({
+        ...fieldErrors,
+        [name]: '',
+      });
+    }
+  };
+
+  const validatePasswordForm = (): boolean => {
+    const newFieldErrors: Record<string, string> = {};
+
+    if (!formData.username.trim()) {
+      newFieldErrors.username = 'Username or email is required';
+    }
+
+    if (!formData.password) {
+      newFieldErrors.password = 'Password is required';
+    }
+
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      return false;
+    }
+
+    return true;
   };
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
+    setError(null);
+    setFieldErrors({});
+
+    if (!validatePasswordForm()) {
+      return;
+    }
+
+    // TC-008: check account lockout before attempting login
+    const now = Date.now();
+    const currentLockout = getLockoutState();
+    if (currentLockout.lockedUntil > now) {
+      const remainingMins = Math.ceil((currentLockout.lockedUntil - now) / 60000);
+      setError({ type: 'auth', message: `Account locked. Too many failed attempts. Try again in ${remainingMins} minute(s).` });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const loginResponse = await axios.post<{ token: string }>(
         `${import.meta.env.VITE_REACT_APP_API_URL}/api/login/`,
-        formData
+        formData,
+        { timeout: 10000 }
       );
       
       const { token } = loginResponse.data;
+      // Successful login — clear lockout
+      clearLockoutState();
+      setLockout({ attempts: 0, lockedUntil: 0 });
       await handleLoginSuccess(token);
-    } catch (error) {
-      console.error('Login error:', error);
-      setErrorMessage(t('invalid_credentials'));
+    } catch (err) {
+      // TC-008: track failed attempts
+      const stored = getLockoutState();
+      const newAttempts = stored.attempts + 1;
+      if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+        const lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
+        const newState = { attempts: newAttempts, lockedUntil };
+        saveLockoutState(newState);
+        setLockout(newState);
+        setError({ type: 'auth', message: `Account locked for 30 minutes after ${MAX_LOGIN_ATTEMPTS} failed attempts.` });
+      } else {
+        const newState = { attempts: newAttempts, lockedUntil: 0 };
+        saveLockoutState(newState);
+        setLockout(newState);
+        const categorizedError = categorizeLoginError(err);
+        const remaining = MAX_LOGIN_ATTEMPTS - newAttempts;
+        setError({ ...categorizedError, message: `${categorizedError.message} (${remaining} attempt${remaining !== 1 ? 's' : ''} remaining before lockout)` });
+      }
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const validatePhoneNumber = (): boolean => {
+    const newFieldErrors: Record<string, string> = {};
+
+    if (!phoneNumber.trim()) {
+      newFieldErrors.phone = 'Phone number is required';
+    } else if (!/^[0-9]{7,15}$/.test(phoneNumber.replace(/[\s\-]/g, ''))) {
+      newFieldErrors.phone = 'Phone number must be between 7 and 15 digits';
+    }
+
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      return false;
+    }
+
+    return true;
+  };
+
   const handleOtpRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
+    setError(null);
+    setFieldErrors({});
+
+    if (!validatePhoneNumber()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       await requestOtp(phoneNumber);
       setOtpStep('verify');
-    } catch (error: any) {
-      console.error('OTP Request error:', error);
-      setErrorMessage(error.response?.data?.error || 'Failed to send OTP');
+    } catch (err: any) {
+      const categorizedError = categorizeLoginError(err);
+      setError(categorizedError);
+      console.error('OTP Request error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const validateOtp = (): boolean => {
+    if (!otp.trim()) {
+      setFieldErrors({ otp: 'OTP is required' });
+      return false;
+    }
+
+    if (!/^[0-9]{6}$/.test(otp)) {
+      setFieldErrors({ otp: 'OTP must be a 6-digit number' });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
+    setError(null);
+    setFieldErrors({});
+
+    if (!validateOtp()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const response = await verifyOtp(phoneNumber, otp);
       await handleLoginSuccess(response.token);
-    } catch (error: any) {
-      console.error('OTP Verify error:', error);
-      setErrorMessage(error.response?.data?.error || 'Invalid OTP');
+    } catch (err: any) {
+      const categorizedError = categorizeLoginError(err);
+      setError(categorizedError);
+      console.error('OTP Verify error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +225,8 @@ const Login: React.FC = () => {
         {
           headers: {
             'Authorization': `Token ${token}`
-          }
+          },
+          timeout: 10000
         }
       );
       
@@ -133,9 +266,10 @@ const Login: React.FC = () => {
       } else {
         navigate('/home');
       }
-    } catch (error) {
-      console.error('User info fetch error:', error);
-      setErrorMessage('Failed to retrieve user information');
+    } catch (err) {
+      const categorizedError = categorizeLoginError(err);
+      setError(categorizedError);
+      console.error('User info fetch error:', err);
     }
   };
 
@@ -160,7 +294,11 @@ const Login: React.FC = () => {
                 ? 'bg-white text-primary-600 shadow-sm' 
                 : 'text-neutral-500 hover:text-neutral-700'
             }`}
-            onClick={() => setLoginMethod('password')}
+            onClick={() => {
+              setLoginMethod('password');
+              setError(null);
+              setFieldErrors({});
+            }}
           >
             Username
           </button>
@@ -170,7 +308,11 @@ const Login: React.FC = () => {
                 ? 'bg-white text-primary-600 shadow-sm' 
                 : 'text-neutral-500 hover:text-neutral-700'
             }`}
-            onClick={() => setLoginMethod('otp')}
+            onClick={() => {
+              setLoginMethod('otp');
+              setError(null);
+              setFieldErrors({});
+            }}
           >
             Mobile Number
           </button>
@@ -180,10 +322,12 @@ const Login: React.FC = () => {
           {loginMethod === 'password' ? t('login') : 'Mobile Login'}
         </h2>
 
-        {errorMessage && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-sm font-medium text-red-700">{errorMessage}</p>
-          </div>
+        {error && (
+          <AuthErrorDisplay 
+            error={error.message} 
+            type={error.type === 'auth' || error.type === 'validation' ? 'error' : error.type === 'network' ? 'warning' : 'error'}
+            onDismiss={() => setError(null)}
+          />
         )}
 
         {loginMethod === 'password' ? (
@@ -202,11 +346,18 @@ const Login: React.FC = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:border-primary-500 transition-all ${
+                    fieldErrors.username ? 'border-red-500 focus:ring-red-500' : 'border-neutral-300 focus:ring-primary-500'
+                  }`}
                   placeholder="Enter your username or email"
-                  required
                 />
               </div>
+              {fieldErrors.username && (
+                <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {fieldErrors.username}
+                </p>
+              )}
             </div>
 
             <div>
@@ -223,12 +374,19 @@ const Login: React.FC = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:border-primary-500 transition-all ${
+                    fieldErrors.password ? 'border-red-500 focus:ring-red-500' : 'border-neutral-300 focus:ring-primary-500'
+                  }`}
                   placeholder="Enter your password"
-                  required
                 />
               </div>
-              <p className="text-xs text-neutral-500 mt-1 text-right">
+              {fieldErrors.password && (
+                <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {fieldErrors.password}
+                </p>
+              )}
+              <p className="text-xs text-neutral-500 mt-2 text-right">
                 <button
                   type="button"
                   className="text-primary-600 hover:text-primary-700 font-medium"
@@ -242,7 +400,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
+              className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-semibold py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
             >
               {isLoading ? 'Logging in...' : t('login')}
               {!isLoading && <ArrowRight className="w-4 h-4" />}
@@ -263,12 +421,24 @@ const Login: React.FC = () => {
                     type="tel"
                     id="phone"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    onChange={(e) => {
+                      setPhoneNumber(e.target.value.replace(/[^\d]/g, '').slice(0, 15));
+                      if (fieldErrors.phone) {
+                        setFieldErrors({ ...fieldErrors, phone: '' });
+                      }
+                    }}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:border-primary-500 transition-all ${
+                      fieldErrors.phone ? 'border-red-500 focus:ring-red-500' : 'border-neutral-300 focus:ring-primary-500'
+                    }`}
                     placeholder="Enter your mobile number"
-                    required
                   />
                 </div>
+                {fieldErrors.phone && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {fieldErrors.phone}
+                  </p>
+                )}
               </div>
             ) : (
               <div>
@@ -283,17 +453,35 @@ const Login: React.FC = () => {
                     type="text"
                     id="otp"
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                    onChange={(e) => {
+                      setOtp(e.target.value.replace(/[^\d]/g, '').slice(0, 6));
+                      if (fieldErrors.otp) {
+                        setFieldErrors({ ...fieldErrors, otp: '' });
+                      }
+                    }}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:border-primary-500 transition-all ${
+                      fieldErrors.otp ? 'border-red-500 focus:ring-red-500' : 'border-neutral-300 focus:ring-primary-500'
+                    }`}
                     placeholder="Enter 6-digit OTP"
-                    required
+                    maxLength={6}
                   />
                 </div>
+                {fieldErrors.otp && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {fieldErrors.otp}
+                  </p>
+                )}
                 <p className="text-xs text-neutral-500 mt-2">
                   OTP sent to {phoneNumber}. {' '}
                   <button 
                     type="button" 
-                    onClick={() => setOtpStep('request')}
+                    onClick={() => {
+                      setOtpStep('request');
+                      setOtp('');
+                      setError(null);
+                      setFieldErrors({});
+                    }}
                     className="text-primary-600 hover:text-primary-700 font-medium"
                   >
                     Change number
@@ -305,7 +493,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
+              className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-semibold py-4 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2"
             >
               {isLoading ? 'Processing...' : (otpStep === 'request' ? 'Send OTP' : 'Verify & Login')}
               {!isLoading && <ArrowRight className="w-4 h-4" />}

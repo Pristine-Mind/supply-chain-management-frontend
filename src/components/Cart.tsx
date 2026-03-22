@@ -96,8 +96,24 @@ const Cart: React.FC = () => {
   };
 
   const handleCheckout = () => {
+    if (cart.length === 0) {
+      // TC-019: prevent checkout with empty cart
+      alert('Your cart is empty. Please add items before checking out.');
+      navigate('/marketplace');
+      return;
+    }
     if (!isAuthenticated) {
       setShowLoginModal(true);
+      return;
+    }
+    navigate('/delivery-details');
+  };
+
+  // TC-018: allow guest to proceed to checkout without logging in
+  const handleGuestCheckout = () => {
+    if (cart.length === 0) {
+      alert('Your cart is empty. Please add items before checking out.');
+      navigate('/marketplace');
       return;
     }
     navigate('/delivery-details');
@@ -312,7 +328,10 @@ const Cart: React.FC = () => {
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-20 h-20 object-cover rounded-lg border border-neutral-200"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22%3E%3Crect width=%2280%22 height=%2280%22 fill=%22%23f3f4f6%22/%3E%3Ctext x=%2240%22 y=%2244%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2210%22%3ENo Img%3C/text%3E%3C/svg%3E';
+                          }}
+                          className="w-20 h-20 object-contain rounded-lg border border-neutral-200 bg-neutral-50"
                         />
                       </div>
 
@@ -342,6 +361,7 @@ const Cart: React.FC = () => {
                           <button
                             onClick={() => handleRemoveFromCart(item.id)}
                             disabled={loading[item.id]}
+                            aria-label={`Remove ${item.name} from cart`}
                             className="p-2 text-neutral-400 hover:text-accent-error-600 transition-colors disabled:opacity-50"
                             title="Remove item"
                           >
@@ -353,7 +373,7 @@ const Cart: React.FC = () => {
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center space-x-3">
                             <span className="text-neutral-600">Quantity:</span>
-                            <div className="flex items-center border border-neutral-300 rounded-lg">
+                            <div className="flex items-center border border-neutral-300 rounded-lg" role="group" aria-label={`Quantity for ${item.name}`}>
                               <button
                                 onClick={() => {
                                   const isNegotiated = item.product.listed_price !== item.price;
@@ -368,23 +388,29 @@ const Cart: React.FC = () => {
                                   }
                                 }}
                                 disabled={loading[item.id] || cartLoading || item.quantity <= 1}
-                                className="p-2 text-neutral-500 hover:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                aria-label={`Decrease quantity of ${item.name}`}
+                                className="p-2 text-neutral-500 hover:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 title={item.quantity <= 1 ? "Use remove button to delete item" : "Decrease quantity"}
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
-                              <span className="px-4 py-2 text-center font-medium min-w-[3rem]">
+                              <span className="px-4 py-2 text-center font-medium min-w-[3rem]" aria-live="polite" aria-atomic="true">
                                 {item.quantity}
                               </span>
+                              {/* TC-015: enforce max quantity of 99 */}
                               <button
-                                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                                disabled={loading[item.id] || cartLoading}
-                                className="p-2 text-neutral-500 hover:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Increase quantity"
+                                onClick={() => handleUpdateQuantity(item.id, Math.min(item.quantity + 1, 99))}
+                                disabled={loading[item.id] || cartLoading || item.quantity >= 99}
+                                aria-label={`Increase quantity of ${item.name}`}
+                                className="p-2 text-neutral-500 hover:text-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                title={item.quantity >= 99 ? "Maximum quantity reached" : "Increase quantity"}
                               >
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
+                            {item.quantity >= 99 && (
+                              <span className="text-xs text-amber-600 font-medium">Max: 99</span>
+                            )}
                           </div>
                           
                           {/* Item Total */}
@@ -451,6 +477,17 @@ const Cart: React.FC = () => {
                   <CreditCard className="w-5 h-5" />
                   {cartLoading ? 'Updating...' : clearingCart ? 'Clearing...' : 'Proceed to Checkout'}
                 </button>
+
+                {/* TC-018: Guest Checkout option for unauthenticated users */}
+                {!isAuthenticated && cart.length > 0 && (
+                  <button
+                    onClick={handleGuestCheckout}
+                    disabled={cartLoading || clearingCart}
+                    className="w-full mt-2 bg-white border border-primary-300 text-primary-700 py-3 px-4 rounded-lg hover:bg-primary-50 disabled:opacity-50 flex items-center justify-center gap-2 font-medium transition-colors"
+                  >
+                    Continue as Guest
+                  </button>
+                )}
                 
                 <button
                   onClick={() => navigate('/marketplace')}

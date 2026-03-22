@@ -72,16 +72,21 @@ const ProductCard: React.FC<ProductCardProps> = ({
     <a 
       href={`/marketplace/${product.marketplace_id || product.id}`}
       className="block bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1 no-underline"
+      aria-label={`View ${product.name}, Rs. ${displayPrice?.toLocaleString()}`}
     >
-      {/* Image Section */}
-      <div className="relative aspect-square overflow-hidden bg-neutral-50">
+      {/* Image Section — TC-005: consistent 4:3 aspect ratio with object-contain to prevent distortion */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-50">
         {product.images && product.images.length > 0 ? (
           <img
             src={product.images[0].image}
             alt={product.images[0].alt_text || product.name}
             draggable={false}
             onContextMenu={handleImageContextMenu}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 cursor-pointer pointer-events-none select-none"
+            onError={(e) => {
+              // TC-011: fallback when CDN image fails to load
+              (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23f3f4f6%22/%3E%3Ctext x=%22100%22 y=%2280%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2212%22%3ENo Image%3C/text%3E%3C/svg%3E';
+            }}
+            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 cursor-pointer pointer-events-none select-none"
             onClick={onViewProduct}
           />
         ) : (
@@ -106,10 +111,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
         
-        {/* Quick Actions */}
+        {/* Quick Actions — TC-006/007: keyboard accessible with aria-labels */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200">
           <button
             onClick={onToggleWishlist}
+            aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
             className={`p-2 rounded-full shadow-lg transition-all duration-200 ${
               isInWishlist 
                 ? 'bg-accent-error-500 text-white hover:bg-accent-error-600' 
@@ -193,18 +199,20 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </span>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons — TC-006: Tab+Enter keyboard navigation, TC-007: aria-labels */}
         <div className="flex gap-2 pt-2">
           <button
             onClick={onViewProduct}
-            className="flex-1 py-2.5 px-4 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-200 text-neutral-700 font-medium text-sm"
+            aria-label={`View details for ${product.name}`}
+            className="flex-1 py-2.5 px-4 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-200 text-neutral-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             View Details
           </button>
           <button
             onClick={onAddToCart}
             disabled={product.stock <= 0}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
+            aria-label={product.stock <= 0 ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 ${
               product.stock === 0
                 ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
                 : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'

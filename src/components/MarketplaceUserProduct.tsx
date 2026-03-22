@@ -16,7 +16,7 @@ const schema = yup
     price: yup
       .number()
       .typeError("Price must be a number")
-      .positive("Price must be > 0")
+      .min(0.01, "Price must be greater than 0")
       .required("Price is required"),
     stock: yup
       .number()
@@ -80,7 +80,7 @@ const MarketplaceUserProduct: React.FC = () => {
     defaultValues: {
       name: "",
       description: "",
-      price: 0,
+      price: undefined,
       stock: 0,
       category: "FR",
       unit: "KG",
@@ -116,6 +116,12 @@ const MarketplaceUserProduct: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     setSubmitError(null);
+
+    if (!data.price || data.price <= 0) {
+      setSubmitError('Price is required and must be greater than 0');
+      return;
+    }
+
     const formData = new FormData();
     
     // Append basic fields

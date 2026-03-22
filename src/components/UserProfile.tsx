@@ -207,6 +207,11 @@ const UserProfile: React.FC = () => {
   };
 
   const handleChangePassword = async () => {
+    if (!passwordForm.current_password.trim()) {
+      setError('Current password is required to change your password');
+      return;
+    }
+
     if (passwordForm.new_password !== passwordForm.confirm_password) {
       setError('New passwords do not match');
       return;
@@ -242,8 +247,11 @@ const UserProfile: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file');
+    const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Please select a valid image file (JPEG, PNG, GIF, or WebP only)');
+      // Reset the input so the same invalid file cannot be resubmitted
+      event.target.value = '';
       return;
     }
 
@@ -405,7 +413,7 @@ const UserProfile: React.FC = () => {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                       onChange={handleProfilePictureUpload}
                       className="hidden"
                     />

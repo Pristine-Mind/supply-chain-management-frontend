@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getAuthToken, getUserData, removeAuthToken, setAuthToken } from '../utils/auth';
-import { useCart } from './CartContext';
 
 export interface User {
   id?: number;
@@ -30,7 +29,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { clearCart } = useCart();
 
   useEffect(() => {
     const token = getAuthToken();
@@ -50,7 +48,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     removeAuthToken();
     setUser(null);
-    await clearCart();
+    // TC-014: do NOT call clearCart() which deletes backend cart items.
+    // Cart is preserved server-side so user finds it on next login.
+    // CartContext will reset its local state automatically on page reload (no token found).
+    localStorage.removeItem('cart');
     window.location.href = '/';
   };
 

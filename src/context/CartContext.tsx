@@ -477,6 +477,42 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw error;
     }
 
+    // TC-013: if product already in cart, update quantity instead of creating duplicate item
+    const existingItem = cart.find(item => item.id === product.id);
+    if (existingItem) {
+      const newQuantity = existingItem.quantity + quantity;
+      // Optimistic update
+      setBackendTotals(null);
+      setCart(prevCart =>
+        prevCart.map(item =>
+          item.id === product.id ? { ...item, quantity: newQuantity } : item
+        )
+      );
+      if (existingItem.backendItemId) {
+        try {
+          await updateCartItem(existingItem.backendItemId, newQuantity);
+          if (toast) {
+            toast.showCartSuccess(
+              'Cart updated!',
+              `${product.product_details?.name} quantity updated to ${newQuantity}.`,
+              { label: 'View Cart', onClick: () => { window.location.href = '/cart'; } }
+            );
+          }
+          setTimeout(() => fetchMyCart().catch(console.error), 100);
+        } catch (error) {
+          // Rollback
+          setCart(prevCart =>
+            prevCart.map(item =>
+              item.id === product.id ? { ...item, quantity: existingItem.quantity } : item
+            )
+          );
+          handleApiError(error, 'Update cart quantity');
+          throw error;
+        }
+      }
+      return;
+    }
+
     const tempId = Date.now();
     
     setCart(prevCart => {
@@ -608,6 +644,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
+      // TC-012: clear stale backend totals so computed total reflects the new quantity immediately
+      setBackendTotals(null);
       setCart(prevCart =>
         prevCart.map(item => (item.id === productId ? { ...item, quantity } : item))
       );

@@ -5,6 +5,7 @@ import {
   fetchMarketplaceOrders,
   fetchMarketplaceOrderById,
   cancelMarketplaceOrder,
+  downloadMarketplaceOrderInvoice,
   type MarketplaceOrder,
   type OrderFilters
 } from '../api/marketplaceOrderApi';
@@ -24,7 +25,8 @@ import {
   Phone,
   Clock,
   CreditCard,
-  X
+  X,
+  Download
 } from 'lucide-react';
 
 interface FilterState {
@@ -155,9 +157,37 @@ const MyOrders: React.FC = () => {
       await cancelMarketplaceOrder(orderId, 'Cancelled by customer');
       await loadOrders(currentPage, false); // Refresh current page
       alert('Order cancelled successfully.');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error cancelling order:', err);
-      alert('Failed to cancel order. Please try again.');
+      const message =
+        err?.message ||
+        err?.response?.data?.detail ||
+        'Failed to cancel order. Please contact support if the problem persists.';
+      alert(message);
+    } finally {
+      setActionLoading(prev => ({ ...prev, [orderId]: false }));
+    }
+  };
+
+  const handleDownloadInvoice = async (orderId: number, orderNumber: string) => {
+    try {
+      setActionLoading(prev => ({ ...prev, [orderId]: true }));
+      const result = await downloadMarketplaceOrderInvoice(orderId);
+      if (result instanceof Blob) {
+        const url = URL.createObjectURL(result);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `invoice-${orderNumber}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      } else {
+        alert(result.message || 'Invoice is not available yet for this order.');
+      }
+    } catch (err: any) {
+      console.error('Error downloading invoice:', err);
+      alert(err?.message || 'Failed to download invoice. Please try again.');
     } finally {
       setActionLoading(prev => ({ ...prev, [orderId]: false }));
     }
@@ -554,6 +584,21 @@ const MyOrders: React.FC = () => {
                         )}
                         Reorder
                       </button>
+
+                      {['delivered', 'completed'].includes(order.order_status.toLowerCase()) && (
+                        <button
+                          onClick={() => handleDownloadInvoice(order.id, order.order_number)}
+                          disabled={actionLoading[order.id]}
+                          className="flex items-center justify-center px-4 py-2 text-sm text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50 w-full lg:w-24"
+                        >
+                          {actionLoading[order.id] ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-700 mr-2"></div>
+                          ) : (
+                            <Download className="h-4 w-4 mr-2" />
+                          )}
+                          Invoice
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -730,6 +775,15 @@ const MyOrders: React.FC = () => {
                     className="px-4 py-2 text-sm text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
                   >
                     Cancel Order
+                  </button>
+                )}
+                {['delivered', 'completed'].includes(selectedOrder.order_status.toLowerCase()) && (
+                  <button
+                    onClick={() => handleDownloadInvoice(selectedOrder.id, selectedOrder.order_number)}
+                    className="flex items-center px-4 py-2 text-sm text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Invoice
                   </button>
                 )}
                 <button
