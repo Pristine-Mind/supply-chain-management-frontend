@@ -87,7 +87,7 @@ const Payment: React.FC = () => {
 
   // Calculate totals
   const subTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = 100; 
+  const shipping = 0;
   const cartTotal = subTotal + shipping;
 
   const [method, setMethod] = useState<string>('COD');
