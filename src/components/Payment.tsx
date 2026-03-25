@@ -198,7 +198,7 @@ const Payment: React.FC = () => {
         customer_email: delivery?.email || "customer@example.com",
         customer_phone: delivery?.phone_number || "9800000001",
         tax_amount: 0,
-        shipping_cost: 100,
+        shipping_cost: 0,
         return_url: `${window.location.origin}/payment/success/`,
       };
 
