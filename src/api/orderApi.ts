@@ -66,10 +66,22 @@ export interface DeliveryTrackingResponse {
 }
 
 export interface CreateOrderRequest {
-  cart_id: number;
+  cart_id?: number; // Optional - if not provided, order will be created without reference to a backend cart
   delivery_info: DeliveryInfoRequest;
   payment_method?: string;
   coupon_code?: string;
+  // Cart items - send along with order (in case cart doesn't exist on backend)
+  cart_items?: Array<{
+    product_id: number;
+    quantity: number;
+    price?: number;
+  }>;
+  // Payment verification fields (for external gateways like Khalti, Connect IPS)
+  payment_token?: string; // Khalti token
+  payment_transaction_id?: string; // Khalti transaction ID
+  payment_amount?: number; // Amount in paisa
+  payment_pidx?: string; // Connect IPS pidx
+  payment_purchase_order_id?: string; // Connect IPS purchase order ID
 }
 
 export interface OrderResponse {
@@ -94,13 +106,16 @@ export interface OrderItem {
 // API service for order creation
 export const createOrder = async (orderData: CreateOrderRequest): Promise<OrderResponse> => {
   try {    
+    
     // Get authentication token
     const token = localStorage.getItem('token');
+    
     if (!token) {
       throw new Error('Authentication required. Please log in.');
     }
     
     // Validate required fields
+    
     if (!orderData.cart_id || orderData.cart_id <= 0) {
       throw new Error('Valid cart ID is required');
     }
@@ -130,12 +145,21 @@ export const createOrder = async (orderData: CreateOrderRequest): Promise<OrderR
     }
     
     // Ensure coordinates are valid numbers
-    if (typeof orderData.delivery_info.latitude !== 'number' || orderData.delivery_info.latitude === 0) {
-      throw new Error('Valid latitude is required');
+    
+    if (typeof orderData.delivery_info.latitude !== 'number') {
+      throw new Error('Latitude must be a number');
     }
     
-    if (typeof orderData.delivery_info.longitude !== 'number' || orderData.delivery_info.longitude === 0) {
-      throw new Error('Valid longitude is required');
+    if (typeof orderData.delivery_info.longitude !== 'number') {
+      throw new Error('Longitude must be a number');
+    }
+    
+    if (isNaN(orderData.delivery_info.latitude) || isNaN(orderData.delivery_info.longitude)) {
+      throw new Error('Coordinates must be valid numbers');
+    }
+    
+    if (orderData.delivery_info.latitude === 0 || orderData.delivery_info.longitude === 0) {
+      throw new Error('Valid latitude and longitude are required (cannot be 0)');
     }
 
     const response = await axios.post<OrderResponse>(
@@ -151,7 +175,6 @@ export const createOrder = async (orderData: CreateOrderRequest): Promise<OrderR
 
     return response.data;
   } catch (error: any) {
-    console.error('❌ Order creation failed:', error);
     
     if (error.response?.data) {
       // Handle API validation errors
@@ -366,5 +389,144 @@ export const updateDeliveryStatus = async (
   } catch (error: any) {
     console.error('Failed to update delivery status:', error);
     throw new Error(error.response?.data?.detail || error.response?.data?.message || 'Failed to update delivery status');
+  }
+};
+
+// Verify Khalti payment (and create order)
+/**
+ * Minimal verification request - only payment verification params
+ * Backend verifies payment and updates Payment model status
+ */
+export interface VerifyPaymentRequest {
+  token: string; // Khalti token
+  amount: number; // Amount in paisa/cents
+  transaction_id: string; // Khalti transaction ID
+}
+
+export interface PaymentVerificationResponse {
+  success?: boolean;
+  message?: string;
+  payment_status?: string;
+  status?: string;
+  error?: string;
+}
+
+/**
+ * Verify Khalti payment only
+ * Backend endpoint: /api/v1/payments/khalti/verify/
+ * Only sends token, amount, transaction_id for verification
+ */
+export const verifyKhaltiPayment = async (
+  khaltiToken: string,
+  amount: number,
+  transactionId: string
+): Promise<PaymentVerificationResponse> => {
+  try {
+    const authToken = localStorage.getItem('token');
+    if (!authToken) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    const verificationData: VerifyPaymentRequest = {
+      token: khaltiToken,
+      amount,
+      transaction_id: transactionId,
+    };
+
+    const response = await axios.post<PaymentVerificationResponse>(
+      'https://appmulyabazzar.com/api/v1/payments/khalti/verify/',
+      verificationData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${authToken}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ [verifyKhaltiPayment] Payment verification failed:', error.message);
+    
+    if (error.response?.data) {
+      console.error('❌ [verifyKhaltiPayment] Backend error:', error.response.data);
+      const apiError = error.response.data;
+      
+      if (apiError.error) {
+        throw new Error(apiError.error);
+      } else if (typeof apiError === 'object') {
+        const errorMessages = [];
+        for (const [, messages] of Object.entries(apiError)) {
+          if (Array.isArray(messages)) {
+            errorMessages.push(...messages);
+          } else if (typeof messages === 'string') {
+            errorMessages.push(messages);
+          }
+        }
+        throw new Error(errorMessages.join('. ') || 'Payment verification failed');
+      } else if (typeof apiError === 'string') {
+        throw new Error(apiError);
+      }
+    }
+    
+    throw new Error(error.message || 'Failed to verify payment. Please try again.');
+  }
+};
+
+/**
+ * Generic payment verification for all non-COD payment gateways
+ * Endpoint: /api/v1/payments/khalti/verify/
+ * Only sends token, amount, transaction_id for verification
+ */
+export const verifyGatewayPayment = async (
+  khaltiToken: string,
+  amount: number,
+  transactionId: string
+): Promise<PaymentVerificationResponse> => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication required. Please log in.');
+    }
+
+    const verificationData: VerifyPaymentRequest = {
+      token: khaltiToken,
+      amount,
+      transaction_id: transactionId,
+    };
+
+    const response = await axios.post<PaymentVerificationResponse>(
+      'https://appmulyabazzar.com/api/v1/payments/khalti/verify/',
+      verificationData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    console.error('❌ Payment verification failed:', error);
+    
+    if (error.response?.data) {
+      const apiError = error.response.data;
+      if (typeof apiError === 'object') {
+        const errorMessages = [];
+        for (const [, messages] of Object.entries(apiError)) {
+          if (Array.isArray(messages)) {
+            errorMessages.push(...messages);
+          } else if (typeof messages === 'string') {
+            errorMessages.push(messages);
+          }
+        }
+        throw new Error(errorMessages.join('. ') || 'Payment verification failed');
+      } else if (typeof apiError === 'string') {
+        throw new Error(apiError);
+      }
+    }
+    
+    throw new Error(error.message || 'Failed to verify payment. Please try again.');
   }
 };

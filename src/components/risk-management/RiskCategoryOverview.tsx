@@ -17,7 +17,6 @@ const RiskCategoryOverview: React.FC = () => {
     try {
       setLoading(true);
       const data = await getCurrentRiskAssessment();
-      console.log('Risk assessment data:', data);
       setRiskAssessment(data);
       setError(null);
     } catch (err: any) {

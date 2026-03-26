@@ -67,9 +67,26 @@ const Payment: React.FC = () => {
   const { state: locState } = useLocation() as { state: LocationState };
   const delivery = locState?.delivery;
 
-  const { cart, state: cartState, clearCart, createCartOnBackend } = useCart();
+  const { cart, state: cartState, clearCart, createCartOnBackend, addItemToBackendCart } = useCart();
   // TC-017: support both `cart` (from CheckoutScreen Delivery) and `cartId` field names
   const cartId = cartState.cartId || (delivery as any)?.cart || delivery?.cartId;
+
+  // Initialize state FIRST before any useEffect
+  const [method, setMethod] = useState<string>('COD');
+  const [processing, setProcessing] = useState(false);
+  const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedGateway, setExpandedGateway] = useState<string | null>(null);
+  const [bankSearch, setBankSearch] = useState('');
+
+  // Guard — validate delivery data on mount
+  useEffect(() => {
+    // Component mounted
+  }, []);
+
+  useEffect(() => {
+    // Payment method or processing state changed
+  }, [method, processing]);
 
   // TC-017: guard — if no delivery info, redirect back
   useEffect(() => {
@@ -90,19 +107,10 @@ const Payment: React.FC = () => {
   const shipping = 0;
   const cartTotal = subTotal + shipping;
 
-  const [method, setMethod] = useState<string>('COD');
-  const [processing, setProcessing] = useState(false);
-  const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [expandedGateway, setExpandedGateway] = useState<string | null>(null);
-  const [bankSearch, setBankSearch] = useState('');
-
   useEffect(() => {
     const fetchPaymentGateways = async () => {
       try {
         setLoading(true);
-        setError(null);
         const response = await fetch('https://appmulyabazzar.com/api/v1/payments/gateways/');
         if (!response.ok) throw new Error('Failed to fetch gateways');
         const data: PaymentGatewayResponse = await response.json();
@@ -112,8 +120,6 @@ const Payment: React.FC = () => {
           throw new Error('Invalid response');
         }
       } catch (err: any) {
-        console.error('Error:', err);
-        setError(err.message);
         setPaymentGateways([{ slug: 'KHALTI', name: 'Khalti Wallet', logo: '', items: [] }]);
       } finally {
         setLoading(false);
@@ -135,6 +141,7 @@ const Payment: React.FC = () => {
 
       // TC-017: resolve cartId from multiple possible field names
       const orderCartId = cartState.cartId || (delivery as any).cart || delivery.cartId || cartId;
+
       if (!orderCartId) {
         toast.error('Cart not found. Please add items to your cart and try again.');
         return;
@@ -148,8 +155,8 @@ const Payment: React.FC = () => {
         city: delivery.city,
         state: delivery.state,
         zip_code: delivery.zip_code,
-        latitude: delivery.latitude || 0,
-        longitude: delivery.longitude || 0,
+        latitude: typeof delivery.latitude === 'string' ? parseFloat(delivery.latitude) : Number(delivery.latitude) || 0,
+        longitude: typeof delivery.longitude === 'string' ? parseFloat(delivery.longitude) : Number(delivery.longitude) || 0,
       };
 
       const orderRequest: CreateOrderRequest = {
@@ -158,12 +165,19 @@ const Payment: React.FC = () => {
         payment_method: paymentMethod,
         // Include coupon code if one was applied
         ...(locState?.couponCode && { coupon_code: locState.couponCode }),
+        // Include cart items from frontend
+        cart_items: cart.map((item: any) => ({
+          product_id: item.id || item.product_id,
+          quantity: item.quantity || 1,
+          price: item.price,
+        })),
       };
 
       const order: OrderResponse = await createOrder(orderRequest);
+      
       toast.success(`Order #${order.order_number} placed!`);
       clearCart();
-      navigate('/payment-success', { state: { order, paymentMethod }, replace: true });
+      navigate('/payment/success', { state: { order, paymentMethod, cartId: orderCartId }, replace: true });
     } catch (error: any) {
       toast.error(error.message || 'Order creation failed.');
     }
@@ -171,10 +185,41 @@ const Payment: React.FC = () => {
 
   const handleConfirm = async () => {
     setProcessing(true);
+    console.log('[Payment] handleConfirm triggered, method:', method, 'cartId:', cartId, 'cartState.cartId:', cartState.cartId);
+
     try {
+      // Validate delivery data exists
+      if (!delivery) {
+        throw new Error('Delivery information is missing. Please go back and fill delivery details.');
+      }
+
+      // Validate coordinates exist
+      if (!delivery.latitude || !delivery.longitude) {
+        throw new Error('Location information is missing. Please select a location on the map.');
+      }
+
       let backendCartId = cartId;
-      if (!backendCartId) {
+
+      // If we have frontend cart items, send them with the order
+      // Don't create an empty backend cart if we have items
+      if (!backendCartId && cart.length === 0) {
+        throw new Error('Your cart is empty. Please add items before proceeding.');
+      }
+
+      // Ensure we have a valid backend cart ID for order creation
+      if (!backendCartId && cart.length > 0) {
         backendCartId = await createCartOnBackend();
+        
+        // Add all items from frontend cart to backend cart
+        for (const item of cart) {
+          try {
+            const itemProductId = item.id; // CartItem has id as the product ID
+            const itemQuantity = item.quantity || 1;
+            await addItemToBackendCart(itemProductId, itemQuantity);
+          } catch (addError: any) {
+            // Continue anyway - the cart_items array will be sent with the order
+          }
+        }
       }
 
       if (method === 'COD') {
@@ -190,16 +235,46 @@ const Payment: React.FC = () => {
         gateway = parts[0];
         selectedBankIdx = parts[1];
       }
+
+      // STEP 1: Create order FIRST with payment_method (no localStorage needed)
+      // Convert frontend cart items to order format
+      const cartItemsPayload = cart.map((item: any) => ({
+        product_id: item.id || item.product_id,
+        quantity: item.quantity || 1,
+        price: item.price,
+      }));
       
-      const paymentData: any = {
+      const orderPayload: CreateOrderRequest = {
         cart_id: backendCartId,
-        gateway: method,
+        delivery_info: {
+          customer_name: delivery.customer_name,
+          customer_email: delivery.email,
+          phone_number: delivery.phone_number,
+          address: delivery.address,
+          city: delivery.city,
+          state: delivery.state,
+          zip_code: delivery.zip_code,
+          latitude: delivery.latitude,
+          longitude: delivery.longitude,
+        },
+        payment_method: gateway,
+        coupon_code: locState?.couponCode,
+        cart_items: cartItemsPayload,
+      };
+
+      const createdOrder = await createOrder(orderPayload);
+
+      // STEP 2: Initiate payment with order reference
+      const paymentData: any = {
+        order_id: createdOrder.id,
+        cart_id: backendCartId,
+        gateway: gateway,
         customer_name: delivery?.customer_name || "Customer",
         customer_email: delivery?.email || "customer@example.com",
         customer_phone: delivery?.phone_number || "9800000001",
         tax_amount: 0,
         shipping_cost: 0,
-        return_url: `${window.location.origin}/payment/success/`,
+        return_url: `${window.location.origin}/payment/success`,
       };
 
       if (selectedBankIdx) {
@@ -207,6 +282,7 @@ const Payment: React.FC = () => {
       }
 
       const token = localStorage.getItem('token');
+      
       const response = await fetch('https://appmulyabazzar.com/api/v1/payments/initiate/', {
         method: 'POST',
         headers: {
@@ -217,7 +293,12 @@ const Payment: React.FC = () => {
       });
 
       const result = await response.json();
+
       if (result.payment_url) {
+        // Store order info before redirecting to external payment
+        const pendingOrderData = { orderId: createdOrder.id, cartId: backendCartId, paymentMethod: gateway };
+        console.log('[Payment] Storing pendingOrder and redirecting:', pendingOrderData, '→', result.payment_url);
+        localStorage.setItem('pendingOrder', JSON.stringify(pendingOrderData));
         window.location.href = result.payment_url;
       } else if (result.success) {
         await onSuccess(gateway);
@@ -237,6 +318,8 @@ const Payment: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+  
+
           <div className="space-y-2">
             <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-400 hover:text-orange-500 font-bold text-xs uppercase tracking-widest transition-all">
               <ArrowLeft size={14} /> Back to details
@@ -367,7 +450,9 @@ const Payment: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={handleConfirm}
+                onClick={() => {
+                  handleConfirm();
+                }}
                 disabled={processing || !method}
                 className="w-full bg-orange-600 text-white py-8 rounded-[2.5rem] font-black uppercase tracking-[0.25em] text-xs shadow-2xl shadow-slate-300 hover:bg-orange-600 transition-all duration-500 flex items-center justify-center gap-4 disabled:opacity-50 disabled:grayscale"
               >

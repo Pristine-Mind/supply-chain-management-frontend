@@ -29,7 +29,6 @@ const SupplierScorecardDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('Route ID from params:', id);
     if (id && id !== 'comparison' && !isNaN(Number(id))) {
       loadScorecardData();
     } else if (!id || id === 'comparison' || isNaN(Number(id))) {
@@ -48,7 +47,6 @@ const SupplierScorecardDetail: React.FC = () => {
       }
       
       const scorecardId = Number(id);
-      console.log('Attempting to load scorecard ID:', scorecardId);
       
       if (isNaN(scorecardId)) {
         setError(`Invalid scorecard ID: ${id} cannot be converted to a number`);
@@ -60,7 +58,6 @@ const SupplierScorecardDetail: React.FC = () => {
         getSupplierScorecard(scorecardId),
         getScorecardHistory(scorecardId),
       ]);
-      console.log('Scorecard data loaded:', scorecardData);
       setScorecard(scorecardData);
       setHistory(historyData);
       setError(null);

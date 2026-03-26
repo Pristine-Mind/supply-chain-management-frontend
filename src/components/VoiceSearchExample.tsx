@@ -93,12 +93,10 @@ export const VoiceSearchExample: React.FC = () => {
 
   const handleProductClick = (product: any) => {
     // Navigate to product detail page
-    console.log('Product clicked:', product);
   };
 
   const handleAddToCart = (product: any) => {
     // Add to cart logic
-    console.log('Added to cart:', product);
   };
 
   return (

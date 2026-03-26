@@ -285,7 +285,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       const url = `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/carts/${backendCartId}/items/`;
-      console.debug('[Cart] addItemToBackendCart', { productId, quantity, url, token: token?.substring(0, 10) + '...' });
       const response = await fetch(url, {
         method: 'POST',
         headers: {

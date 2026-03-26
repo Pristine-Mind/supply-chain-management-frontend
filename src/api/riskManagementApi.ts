@@ -140,7 +140,6 @@ export const getCurrentKPI = async (): Promise<SupplyChainKPI> => {
   const response = await axios.get(`${API_BASE}api/v1/risk/kpis/current/`, {
     headers: getAuthHeader(),
   });
-  console.log('Current KPI response:', response);
   return response.data;
 };
 

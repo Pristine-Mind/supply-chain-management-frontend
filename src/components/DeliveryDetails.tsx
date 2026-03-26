@@ -19,6 +19,16 @@ import Footer from './Footer'
 import { useAuth } from '../context/AuthContext'
 import LoginModal from './auth/LoginModal'
 
+interface FormValues {
+  name: string
+  phone: string
+  email: string
+  address: string
+  city: string
+  region: string
+  zip: string
+}
+
 const DeliveryDetails: React.FC = () => {
   const navigate = useNavigate()
   const cartContext = useContext(CartContext)
@@ -27,7 +37,7 @@ const DeliveryDetails: React.FC = () => {
   const { isAuthenticated } = useAuth()
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormValues>({
-    defaultValues: { name: '', phone: '', address: '', city: '', region: '', zip: '' }
+    defaultValues: { name: '', phone: '', email: '', address: '', city: '', region: '', zip: '' }
   })
 
   const [latLng, setLatLng] = useState({ lat: 27.7172, lng: 85.3240 })
@@ -44,11 +54,33 @@ const DeliveryDetails: React.FC = () => {
     
     setLoading(true)
     try {
+      // Ensure coordinates are valid numbers
+      const latitude = parseFloat(String(latLng.lat));
+      const longitude = parseFloat(String(latLng.lng));
+      
+      
+      if (isNaN(latitude) || isNaN(longitude)) {
+        throw new Error('Please select a location on the map before proceeding');
+      }
+      
+      if (latitude === 0 || longitude === 0) {
+        throw new Error('Please select a valid location on the map (cannot be at 0,0)');
+      }
+      
       let cartId = cartState.cartId || await createCartOnBackend()
-      const delivery = { ...data, cartId, latitude: latLng.lat, longitude: latLng.lng }
+      const delivery = { 
+        ...data, 
+        cartId, 
+        latitude,
+        longitude,
+        customer_name: data.name,
+        phone_number: data.phone,
+        state: data.region,  // Map region to state
+        zip_code: data.zip,  // Map zip to zip_code
+      }
       navigate('/payment', { state: { delivery } })
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
+      alert(err.message || 'An error occurred');
     } finally {
       setLoading(false)
     }
@@ -109,6 +141,26 @@ const DeliveryDetails: React.FC = () => {
                         <div className="relative">
                           <input {...field} className="form-input-premium pl-11" placeholder="98XXXXXXXX" />
                           <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        </div>
+                      )}
+                    />
+                  </InputWrapper>
+
+                  <InputWrapper label="Email Address" error={errors.email?.message}>
+                    <Controller
+                      name="email"
+                      control={control}
+                      rules={{ 
+                        required: 'Required',
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: 'Invalid email address'
+                        }
+                      }}
+                      render={({ field }) => (
+                        <div className="relative">
+                          <input {...field} type="email" className="form-input-premium pl-11" placeholder="john@example.com" />
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         </div>
                       )}
                     />

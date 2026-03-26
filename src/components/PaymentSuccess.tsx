@@ -16,45 +16,140 @@ import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { OrderResponse } from '../api/orderApi';
+import { useCart } from '../context/CartContext';
 
 interface LocationState {
   order?: OrderResponse;
   paymentMethod?: string;
+  delivery?: any;
+  cartId?: number;
 }
 
 function useQuery() {
-  return new URLSearchParams(window.location.search);
+  const { search } = useLocation();
+  return new URLSearchParams(search);
 }
 
 const PaymentSuccess: React.FC = () => {
   const query = useQuery();
   const navigate = useNavigate();
   const { state: locState } = useLocation() as { state?: LocationState };
+  const { clearCart } = useCart();
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<'success' | 'error' | 'pending'>('pending');
   const [message, setMessage] = useState('');
+  const [orderData, setOrderData] = useState<OrderResponse | null>(null);
 
   const order = locState?.order;
   const paymentMethod = locState?.paymentMethod;
 
   useEffect(() => {
-    setLoading(false);
-    if (order) {
-      setStatus('success');
-      setMessage('Your order has been placed successfully!');
-      toast.success('Order placed successfully!');
-    } else {
-      setStatus('success');
-      let msg = 'Payment completed successfully!';
-      msg += `\nTransaction ID: ${query.get('transaction_id') || query.get('pidx') || '-'}`;
-      msg += `\nOrder ID: ${query.get('purchase_order_id') || '-'}`;
-      const amount = query.get('amount') || query.get('total_amount');
-      const formattedAmount = amount ? `Rs. ${(parseFloat(amount) / 100).toFixed(2)}` : '-';
-      msg += `\nAmount: ${formattedAmount}`;
-      setMessage(msg);
-      toast.success('Payment completed successfully!');
-    }
-  }, [order, query]);
+    const handlePaymentReturn = async () => {
+      try {
+        setLoading(true);
+        const authToken = localStorage.getItem('token');
+
+        // --- 1. Read Khalti callback params from return_url ---
+        const pidx         = query.get('pidx');
+        const khaltiStatus = query.get('status'); // Completed | Pending | User canceled | Expired | Failed
+        const amount       = query.get('amount'); // In paisa
+
+        console.log('[PaymentSuccess] URL params:', { pidx, khaltiStatus, amount });
+
+        // --- 2. Internal flow (COD / non-redirect): order comes via location state ---
+        if (order && !pidx && !khaltiStatus) {
+          console.log('[PaymentSuccess] Internal COD flow');
+          setStatus('success');
+          setOrderData(order);
+          setMessage('Your order has been placed successfully!');
+          toast.success('Order placed successfully!');
+          clearCart();
+          setLoading(false);
+          return;
+        }
+
+        // --- 3. Reject cancelled / failed payments immediately ---
+        if (khaltiStatus && khaltiStatus.toLowerCase() !== 'completed') {
+          const friendlyMsg =
+            khaltiStatus.toLowerCase() === 'user canceled'
+              ? 'Payment was cancelled. Please try again.'
+              : `Payment ${khaltiStatus}. Please try again or contact support.`;
+          console.warn('[PaymentSuccess] Payment not completed:', khaltiStatus);
+          setStatus('error');
+          setMessage(friendlyMsg);
+          toast.error(friendlyMsg);
+          setLoading(false);
+          return;
+        }
+
+        // --- 4. pidx (token) and amount are required ---
+        if (!pidx || !amount) {
+          console.error('[PaymentSuccess] Missing pidx or amount:', { pidx, amount });
+          setStatus('error');
+          setMessage('Missing payment parameters. Please contact support if the amount was deducted.');
+          setLoading(false);
+          return;
+        }
+
+        // --- 5. Retrieve pending order info saved before Khalti redirect ---
+        let pendingOrder: { orderId?: string | number; cartId?: string | number } | null = null;
+        try {
+          const raw = localStorage.getItem('pendingOrder');
+          if (raw) pendingOrder = JSON.parse(raw);
+        } catch { /* ignore */ }
+
+        const verifyPayload: Record<string, string | number> = {
+          token: pidx,
+          amount: parseInt(amount, 10), // backend expects paisa as int
+        };
+        if (pendingOrder?.orderId) {
+          verifyPayload.order_id = pendingOrder.orderId;
+        }
+
+        console.log('[PaymentSuccess] Calling /khalti/verify with:', verifyPayload);
+
+        // --- 6. Verify with backend ---
+        const verifyRes = await fetch(
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/khalti/verify/`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authToken && { 'Authorization': `Token ${authToken}` }),
+            },
+            body: JSON.stringify(verifyPayload),
+          }
+        );
+
+        console.log('[PaymentSuccess] /khalti/verify status:', verifyRes.status);
+
+        const resData = await verifyRes.json().catch(() => ({}));
+        console.log('[PaymentSuccess] /khalti/verify response:', resData);
+
+        if (!verifyRes.ok) {
+          throw new Error((resData as any).error || 'Payment verification failed. Please contact support.');
+        }
+
+        // --- 7. Cleanup and show success ---
+        localStorage.removeItem('pendingOrder');
+        setStatus('success');
+        setMessage(
+          `Payment verified! Order #${(resData as any).order_number || ''} confirmed.`
+        );
+        toast.success('Payment verified successfully!');
+        clearCart();
+        setLoading(false);
+      } catch (error: any) {
+        setStatus('error');
+        setMessage(error.message || 'An error occurred. Please contact support if the amount was deducted.');
+        toast.error(error.message || 'Error');
+        setLoading(false);
+      }
+    };
+
+    handlePaymentReturn();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -104,7 +199,7 @@ const PaymentSuccess: React.FC = () => {
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-orange-500 mb-2">Order Reference</p>
                   <h2 className="text-3xl font-black tracking-tighter uppercase italic">
-                    #{order?.order_number || query.get('purchase_order_id') || 'N/A'}
+                    #{orderData?.order_number || query.get('purchase_order_id') || 'N/A'}
                   </h2>
                 </div>
                 <div className="flex gap-3">
@@ -114,13 +209,13 @@ const PaymentSuccess: React.FC = () => {
                   <div className="h-12 w-px bg-white/20 hidden md:block" />
                   <div className="text-right">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-50">Transaction Date</p>
-                    <p className="font-bold text-sm">{order ? formatDate(order.created_at) : new Date().toLocaleDateString()}</p>
+                    <p className="font-bold text-sm">{orderData ? formatDate(orderData.created_at) : new Date().toLocaleDateString()}</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-8 md:p-12 space-y-10">
-                {order ? (
+                {orderData ? (
                   <>
                     <div className="grid md:grid-cols-2 gap-10">
                       <div className="space-y-4">
@@ -131,15 +226,15 @@ const PaymentSuccess: React.FC = () => {
                         <div className="space-y-3 bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
                            <div className="flex justify-between text-sm">
                              <span className="text-slate-400 font-bold">Status</span>
-                             <span className="text-emerald-600 font-black uppercase text-xs tracking-wider bg-emerald-50 px-3 py-1 rounded-full">{order.status}</span>
+                             <span className="text-emerald-600 font-black uppercase text-xs tracking-wider bg-emerald-50 px-3 py-1 rounded-full">{orderData.status}</span>
                            </div>
                            <div className="flex justify-between text-sm">
                              <span className="text-slate-400 font-bold">Payment</span>
-                             <span className="text-slate-900 font-black">{paymentMethod || 'Completed'}</span>
+                             <span className="text-slate-900 font-black">{orderData.payment_method || paymentMethod || 'Completed'}</span>
                            </div>
                            <div className="flex justify-between text-lg pt-2 border-t border-slate-200">
                              <span className="text-slate-900 font-black tracking-tight italic uppercase">Total</span>
-                             <span className="text-slate-900 font-black">Rs. {order.total_amount.toLocaleString()}</span>
+                             <span className="text-slate-900 font-black">Rs. {orderData.total_amount.toLocaleString()}</span>
                            </div>
                         </div>
                       </div>
@@ -150,14 +245,14 @@ const PaymentSuccess: React.FC = () => {
                           <h3 className="text-xs font-black uppercase tracking-widest">Delivery Address</h3>
                         </div>
                         <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                          <p className="font-black text-slate-900 uppercase text-xs tracking-tight mb-2">{order.delivery_info.customer_name}</p>
+                          <p className="font-black text-slate-900 uppercase text-xs tracking-tight mb-2">{orderData.delivery_info.customer_name}</p>
                           <p className="text-slate-500 font-bold text-xs leading-relaxed">
-                            {order.delivery_info.address}, {order.delivery_info.city}<br/>
-                            {order.delivery_info.state}, {order.delivery_info.zip_code}
+                            {orderData.delivery_info.address}, {orderData.delivery_info.city}<br/>
+                            {orderData.delivery_info.state}, {orderData.delivery_info.zip_code}
                           </p>
                           <div className="mt-4 flex items-center gap-2 text-slate-400">
                              <Smartphone size={14} />
-                             <span className="text-xs font-bold">{order.delivery_info.phone_number}</span>
+                             <span className="text-xs font-bold">{orderData.delivery_info.phone_number}</span>
                           </div>
                         </div>
                       </div>
@@ -166,7 +261,7 @@ const PaymentSuccess: React.FC = () => {
                     <div className="space-y-4">
                       <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-2">Shipment Contents</h3>
                       <div className="space-y-2">
-                        {order.items.map((item, idx) => (
+                        {orderData.items.map((item, idx) => (
                           <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl group hover:border-orange-200 transition-colors">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center font-black text-slate-400 text-xs">

@@ -16,14 +16,11 @@ const RiskDrillDownsPage: React.FC = () => {
   const loadDrillDowns = async () => {
     try {
       setLoading(true);
-      console.log('Loading current drill-downs...');
       
       const response = await getRiskDrillDowns();
-      console.log('Drill-downs loaded:', response);
       setDrillDowns(response.results);
       setError(null);
     } catch (err: any) {
-      console.error('Error loading drill-downs:', err);
       setError(err.response?.data?.detail || `Failed to load drill-down details: ${err.message}`);
     } finally {
       setLoading(false);

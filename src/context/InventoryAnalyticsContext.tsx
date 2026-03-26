@@ -204,9 +204,7 @@ export const InventoryAnalyticsProvider: React.FC<InventoryAnalyticsProviderProp
     try {
       setLoadingState('fullAnalytics', true);
       setErrorState('fullAnalytics', null);
-      console.log('[Analytics] Fetching for product:', productId);
       const data = await getFullProductAnalytics(productId);
-      console.log('[Analytics] Data received:', data);
       setFullAnalytics(data);
     } catch (err: any) {
       console.error('[Analytics] Error:', err.response?.status, err.response?.data || err.message);

@@ -24,12 +24,9 @@ const AlertDetailPage: React.FC = () => {
         return;
       }
 
-      console.log('Loading alert with alert_id:', id);
       const response = await listAlerts({ page_size: 1000 });
-      console.log('All alerts response:', response);
       const foundAlert = response.results.find((a) => a.alert_id === id);
       
-      console.log('Found alert:', foundAlert);
       
       if (!foundAlert) {
         setError('Alert not found');
@@ -49,17 +46,14 @@ const AlertDetailPage: React.FC = () => {
 
   const handleAcknowledge = async () => {
     if (!alert?.alert_id) {
-      console.error('No alert ID available for API call', alert);
       alert('Cannot process alert - missing ID');
       return;
     }
     try {
       setProcessing(true);
-      console.log('Acknowledging alert with ID:', alert.alert_id);
       const updated = await acknowledgeAlert(alert.alert_id);
       setAlert(updated);
     } catch (err: any) {
-      console.error('Acknowledge error:', err);
       alert(err.response?.data?.detail || 'Failed to acknowledge alert');
     } finally {
       setProcessing(false);
@@ -74,11 +68,9 @@ const AlertDetailPage: React.FC = () => {
     }
     try {
       setProcessing(true);
-      console.log('Resolving alert with ID:', alert.alert_id);
       const updated = await resolveAlert(alert.alert_id);
       setAlert(updated);
     } catch (err: any) {
-      console.error('Resolve error:', err);
       alert(err.response?.data?.detail || 'Failed to resolve alert');
     } finally {
       setProcessing(false);

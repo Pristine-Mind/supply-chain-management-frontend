@@ -201,6 +201,7 @@ const publicRoutes = [
   { path: '/terms', element: <TermsofService /> },
   { path: '/privacy', element: <Privacy /> },
   { path: '/payment/success', element: <PaymentSuccess /> },
+  { path: '/payment/success/', element: <PaymentSuccess /> },
   { path: '/my-orders', element: <MyOrders /> },
   { path: '/user-profile', element: <UserProfile /> },
   { path: '/user-admin-profile', element: <UserAdminProfile /> },
