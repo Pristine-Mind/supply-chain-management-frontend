@@ -434,7 +434,7 @@ export const verifyKhaltiPayment = async (
     };
 
     const response = await axios.post<PaymentVerificationResponse>(
-      'https://appmulyabazzar.com/api/v1/payments/khalti/verify/',
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/payments/verify/`,
       verificationData,
       {
         headers: {
@@ -475,7 +475,7 @@ export const verifyKhaltiPayment = async (
 
 /**
  * Generic payment verification for all non-COD payment gateways
- * Endpoint: /api/v1/payments/khalti/verify/
+ * Endpoint: /api/v1/payments/verify/
  * Only sends token, amount, transaction_id for verification
  */
 export const verifyGatewayPayment = async (
@@ -496,7 +496,7 @@ export const verifyGatewayPayment = async (
     };
 
     const response = await axios.post<PaymentVerificationResponse>(
-      'https://appmulyabazzar.com/api/v1/payments/khalti/verify/',
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/payments/verify/`,
       verificationData,
       {
         headers: {

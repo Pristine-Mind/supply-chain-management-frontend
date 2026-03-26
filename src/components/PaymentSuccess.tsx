@@ -10,13 +10,15 @@ import {
   ChevronRight, 
   Printer,
   Smartphone,
-  ExternalLink
+  ExternalLink,
+  CreditCard
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { OrderResponse } from '../api/orderApi';
 import { useCart } from '../context/CartContext';
+import { fetchMarketplaceOrderById, MarketplaceOrder } from '../api/marketplaceOrderApi';
 
 interface LocationState {
   order?: OrderResponse;
@@ -38,7 +40,8 @@ const PaymentSuccess: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<'success' | 'error' | 'pending'>('pending');
   const [message, setMessage] = useState('');
-  const [orderData, setOrderData] = useState<OrderResponse | null>(null);
+  const [orderData, setOrderData] = useState<OrderResponse | MarketplaceOrder | null>(null);
+  const [verifyResponse, setVerifyResponse] = useState<any>(null);
 
   const order = locState?.order;
   const paymentMethod = locState?.paymentMethod;
@@ -52,15 +55,14 @@ const PaymentSuccess: React.FC = () => {
         // --- 1. Read Khalti callback params from return_url ---
         const pidx         = query.get('pidx');
         const khaltiStatus = query.get('status'); // Completed | Pending | User canceled | Expired | Failed
-        const amount       = query.get('amount'); // In paisa
 
-        console.log('[PaymentSuccess] URL params:', { pidx, khaltiStatus, amount });
+        console.log('[PaymentSuccess] URL params:', { pidx, khaltiStatus });
 
-        // --- 2. Internal flow (COD / non-redirect): order comes via location state ---
-        if (order && !pidx && !khaltiStatus) {
-          console.log('[PaymentSuccess] Internal COD flow');
+        // --- 2. Internal flow (COD / non-redirect): no Khalti params means non-gateway payment ---
+        if (!pidx && !khaltiStatus) {
+          console.log('[PaymentSuccess] COD / internal flow');
           setStatus('success');
-          setOrderData(order);
+          if (order) setOrderData(order);
           setMessage('Your order has been placed successfully!');
           toast.success('Order placed successfully!');
           clearCart();
@@ -82,35 +84,33 @@ const PaymentSuccess: React.FC = () => {
           return;
         }
 
-        // --- 4. pidx (token) and amount are required ---
-        if (!pidx || !amount) {
-          console.error('[PaymentSuccess] Missing pidx or amount:', { pidx, amount });
+        // --- 4. pidx is required ---
+        if (!pidx) {
+          console.error('[PaymentSuccess] Missing pidx:', { pidx });
           setStatus('error');
-          setMessage('Missing payment parameters. Please contact support if the amount was deducted.');
+          setMessage('Missing payment identifier. Please contact support if the amount was deducted.');
           setLoading(false);
           return;
         }
 
         // --- 5. Retrieve pending order info saved before Khalti redirect ---
-        let pendingOrder: { orderId?: string | number; cartId?: string | number } | null = null;
+        let pendingOrder: { transactionId?: string; cartId?: string | number } | null = null;
         try {
           const raw = localStorage.getItem('pendingOrder');
           if (raw) pendingOrder = JSON.parse(raw);
         } catch { /* ignore */ }
 
-        const verifyPayload: Record<string, string | number> = {
-          token: pidx,
-          amount: parseInt(amount, 10), // backend expects paisa as int
-        };
-        if (pendingOrder?.orderId) {
-          verifyPayload.order_id = pendingOrder.orderId;
+        // Send pidx + our internal transaction_id (as reference) so backend can find the PaymentTransaction
+        const verifyPayload: Record<string, string> = { pidx };
+        if (pendingOrder?.transactionId) {
+          verifyPayload.reference = pendingOrder.transactionId;
         }
 
-        console.log('[PaymentSuccess] Calling /khalti/verify with:', verifyPayload);
+        console.log('[PaymentSuccess] Calling /api/v1/payments/verify with:', verifyPayload);
 
         // --- 6. Verify with backend ---
         const verifyRes = await fetch(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/khalti/verify/`,
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/payments/verify`,
           {
             method: 'POST',
             headers: {
@@ -121,21 +121,52 @@ const PaymentSuccess: React.FC = () => {
           }
         );
 
-        console.log('[PaymentSuccess] /khalti/verify status:', verifyRes.status);
+        console.log('[PaymentSuccess] /payments/verify/ status:', verifyRes.status);
 
-        const resData = await verifyRes.json().catch(() => ({}));
-        console.log('[PaymentSuccess] /khalti/verify response:', resData);
+        const resData = await verifyRes.json().catch(() => ({})) as any;
+        console.log('[PaymentSuccess] /payments/verify/ response:', resData);
 
-        if (!verifyRes.ok) {
-          throw new Error((resData as any).error || 'Payment verification failed. Please contact support.');
+        if (!verifyRes.ok || resData.status !== 'success') {
+          throw new Error(resData.message || 'Payment verification failed. Please contact support.');
         }
 
-        // --- 7. Cleanup and show success ---
+        const verifiedData = resData.data || {};
+        const marketplaceOrderId = verifiedData.marketplace_order?.id;
+
+        // Store complete verify response for display
+        setVerifyResponse({
+          ...verifiedData,
+          status: resData.payment_status,
+        });
+
+        // --- 7. Fetch full marketplace order to populate order details on screen ---
+        let fullOrderData: MarketplaceOrder | null = null;
+        if (marketplaceOrderId) {
+          console.log('[PaymentSuccess] Fetching full marketplace order:', marketplaceOrderId);
+          try {
+            fullOrderData = await fetchMarketplaceOrderById(marketplaceOrderId);
+            console.log('[PaymentSuccess] Full marketplace order:', fullOrderData);
+          } catch (err: any) {
+            console.warn('[PaymentSuccess] Failed to fetch full marketplace order:', err.message);
+            // Non-critical — we already have basic order info from verify response
+          }
+        } else if (verifiedData.order_number) {
+          // Fallback: verify endpoint should ideally return marketplace_order.id
+          console.warn('[PaymentSuccess] marketplace_order.id not found, verify response may be incomplete');
+        }
+
+        // --- 8. Cleanup and show success ---
         localStorage.removeItem('pendingOrder');
         setStatus('success');
         setMessage(
-          `Payment verified! Order #${(resData as any).order_number || ''} confirmed.`
+          `Payment verified! Order #${fullOrderData?.order_number || verifiedData.order_number || ''} confirmed.`
         );
+        // Set full order data if available, otherwise use location state order
+        if (fullOrderData) {
+          setOrderData(fullOrderData);
+        } else if (order) {
+          setOrderData(order);
+        }
         toast.success('Payment verified successfully!');
         clearCart();
         setLoading(false);
@@ -217,6 +248,123 @@ const PaymentSuccess: React.FC = () => {
               <div className="p-8 md:p-12 space-y-10">
                 {orderData ? (
                   <>
+                    {/* Payment Transaction Details */}
+                    {verifyResponse && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-orange-500">
+                          <CreditCard size={18} />
+                          <h3 className="text-xs font-black uppercase tracking-widest">Payment Details</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-3">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-400 font-bold">Payment ID</span>
+                              <span className="text-slate-900 font-black text-[10px] font-mono break-all">{verifyResponse.transaction_id || verifyResponse.payment_transaction_id}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-400 font-bold">Gateway</span>
+                              <span className="text-slate-900 font-black uppercase text-[10px] bg-orange-50 px-3 py-1 rounded-full">
+                                {verifyResponse.gateway || 'N/A'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-400 font-bold">Amount</span>
+                              <span className="text-slate-900 font-black">Rs. {verifyResponse.amount ? parseFloat(verifyResponse.amount).toLocaleString() : '0'}</span>
+                            </div>
+                          </div>
+
+                          <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 space-y-3">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-400 font-bold">Transaction Date</span>
+                              <span className="text-slate-900 font-black text-[10px]">
+                                {verifyResponse.created_at ? new Date(verifyResponse.created_at).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }) : 'N/A'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-400 font-bold">Status</span>
+                              <span className="text-emerald-600 font-black uppercase text-[10px] bg-emerald-50 px-3 py-1 rounded-full">
+                                {verifyResponse.status || 'Completed'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-slate-400 font-bold">Confirmed At</span>
+                              <span className="text-slate-900 font-black text-[10px]">
+                                {verifyResponse.completed_at ? new Date(verifyResponse.completed_at).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }) : 'Pending'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Marketplace Order Information */}
+                    {verifyResponse?.marketplace_order && (
+                      <div className="bg-orange-50 border border-orange-200 rounded-[2rem] p-6 space-y-4">
+                        <div className="flex items-center gap-3 text-orange-600">
+                          <ShoppingBag size={18} />
+                          <h3 className="text-xs font-black uppercase tracking-widest">Marketplace Order</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Order #</p>
+                            <p className="text-sm font-black text-slate-900">{verifyResponse.marketplace_order.order_number}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Order Status</p>
+                            <span className="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                              {verifyResponse.marketplace_order.order_status}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Payment Status</p>
+                            <span className="inline-block bg-emerald-100 text-emerald-700 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                              {verifyResponse.marketplace_order.payment_status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Marketplace Order Information */}
+                    {verifyResponse?.marketplace_order && (
+                      <div className="bg-orange-50 border border-orange-200 rounded-[2rem] p-6 space-y-4">
+                        <div className="flex items-center gap-3 text-orange-600">
+                          <ShoppingBag size={18} />
+                          <h3 className="text-xs font-black uppercase tracking-widest">Marketplace Order</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Order #</p>
+                            <p className="text-sm font-black text-slate-900">{verifyResponse.marketplace_order.order_number}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Order Status</p>
+                            <span className="inline-block bg-blue-100 text-blue-700 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                              {verifyResponse.marketplace_order.order_status}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Payment Status</p>
+                            <span className="inline-block bg-emerald-100 text-emerald-700 text-[10px] font-black px-3 py-1 rounded-full uppercase">
+                              {verifyResponse.marketplace_order.payment_status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid md:grid-cols-2 gap-10">
                       <div className="space-y-4">
                         <div className="flex items-center gap-3 text-orange-500">
@@ -226,15 +374,23 @@ const PaymentSuccess: React.FC = () => {
                         <div className="space-y-3 bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
                            <div className="flex justify-between text-sm">
                              <span className="text-slate-400 font-bold">Status</span>
-                             <span className="text-emerald-600 font-black uppercase text-xs tracking-wider bg-emerald-50 px-3 py-1 rounded-full">{orderData.status}</span>
+                             <span className="text-emerald-600 font-black uppercase text-xs tracking-wider bg-emerald-50 px-3 py-1 rounded-full">
+                               {(orderData as any).status || (orderData as any).order_status_display || (orderData as any).order_status || 'Confirmed'}
+                             </span>
                            </div>
                            <div className="flex justify-between text-sm">
                              <span className="text-slate-400 font-bold">Payment</span>
-                             <span className="text-slate-900 font-black">{orderData.payment_method || paymentMethod || 'Completed'}</span>
+                             <span className="text-slate-900 font-black">
+                               {(orderData as any).payment_method || (orderData as any).payment_status_display || paymentMethod || 'Completed'}
+                             </span>
                            </div>
                            <div className="flex justify-between text-lg pt-2 border-t border-slate-200">
                              <span className="text-slate-900 font-black tracking-tight italic uppercase">Total</span>
-                             <span className="text-slate-900 font-black">Rs. {orderData.total_amount.toLocaleString()}</span>
+                             <span className="text-slate-900 font-black">
+                               Rs. {typeof (orderData as any).total_amount === 'string' 
+                                 ? parseFloat((orderData as any).total_amount).toLocaleString()
+                                 : (orderData as any).total_amount.toLocaleString()}
+                             </span>
                            </div>
                         </div>
                       </div>
@@ -245,15 +401,25 @@ const PaymentSuccess: React.FC = () => {
                           <h3 className="text-xs font-black uppercase tracking-widest">Delivery Address</h3>
                         </div>
                         <div className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                          <p className="font-black text-slate-900 uppercase text-xs tracking-tight mb-2">{orderData.delivery_info.customer_name}</p>
-                          <p className="text-slate-500 font-bold text-xs leading-relaxed">
-                            {orderData.delivery_info.address}, {orderData.delivery_info.city}<br/>
-                            {orderData.delivery_info.state}, {orderData.delivery_info.zip_code}
-                          </p>
-                          <div className="mt-4 flex items-center gap-2 text-slate-400">
-                             <Smartphone size={14} />
-                             <span className="text-xs font-bold">{orderData.delivery_info.phone_number}</span>
-                          </div>
+                          {(() => {
+                            const delivery = (orderData as any).delivery_info || (orderData as any).delivery;
+                            if (!delivery) return <p className="text-slate-400">No delivery info available</p>;
+                            return (
+                              <>
+                                <p className="font-black text-slate-900 uppercase text-xs tracking-tight mb-2">
+                                  {delivery.customer_name || delivery.recipient_name || 'N/A'}
+                                </p>
+                                <p className="text-slate-500 font-bold text-xs leading-relaxed">
+                                  {delivery.address}, {delivery.city}<br/>
+                                  {delivery.state}, {delivery.zip_code || delivery.postal_code}
+                                </p>
+                                <div className="mt-4 flex items-center gap-2 text-slate-400">
+                                   <Smartphone size={14} />
+                                   <span className="text-xs font-bold">{delivery.phone_number}</span>
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>
@@ -261,22 +427,59 @@ const PaymentSuccess: React.FC = () => {
                     <div className="space-y-4">
                       <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-2">Shipment Contents</h3>
                       <div className="space-y-2">
-                        {orderData.items.map((item, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl group hover:border-orange-200 transition-colors">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center font-black text-slate-400 text-xs">
-                                {item.quantity}x
+                        {((orderData as any).items || []).map((item: any, idx: number) => {
+                          // Handle both OrderResponse and MarketplaceOrder item structures
+                          const productName = item.product_name || item.product?.product_details?.name || 'Unknown Product';
+                          const quantity = item.quantity || 1;
+                          const unitPrice = item.price || item.unit_price || '0';
+                          const totalPrice = item.total || item.total_price || '0';
+                          
+                          const unitPriceNum = typeof unitPrice === 'string' ? parseFloat(unitPrice) : unitPrice;
+                          const totalPriceNum = typeof totalPrice === 'string' ? parseFloat(totalPrice) : totalPrice;
+
+                          return (
+                            <div key={idx} className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl group hover:border-orange-200 transition-colors">
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center font-black text-slate-400 text-xs">
+                                  {quantity}x
+                                </div>
+                                <div>
+                                  <p className="text-sm font-black text-slate-900 tracking-tight uppercase">{productName}</p>
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Rs. {unitPriceNum.toLocaleString()} per unit</p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-black text-slate-900 tracking-tight uppercase">{item.product_name}</p>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Rs. {item.price} per unit</p>
-                              </div>
+                              <p className="font-black text-slate-900 text-sm italic">Rs. {totalPriceNum.toLocaleString()}</p>
                             </div>
-                            <p className="font-black text-slate-900 text-sm italic">Rs. {item.total}</p>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
+
+                    {/* Marketplace Sales (Legacy) */}
+                    {verifyResponse?.marketplace_sales && verifyResponse.marketplace_sales.length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-2">Seller Breakdown</h3>
+                        <div className="space-y-3">
+                          {verifyResponse.marketplace_sales.map((sale: any, idx: number) => (
+                            <div key={idx} className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 rounded-[2rem]">
+                              <div className="flex justify-between items-start mb-3">
+                                <div>
+                                  <p className="text-xs font-black text-slate-900 uppercase tracking-tight">Order #{sale.order_number}</p>
+                                  <p className="text-[10px] text-slate-500 font-bold mt-1">Seller: {sale.seller}</p>
+                                </div>
+                                <span className="bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full">
+                                  {sale.quantity} item{sale.quantity !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <p className="text-[10px] text-slate-600 font-bold">{sale.product_name}</p>
+                                <p className="font-black text-slate-900 italic">Rs. {parseFloat(sale.total_amount).toLocaleString()}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="bg-slate-50 p-8 rounded-[2rem] border-2 border-dashed border-slate-200">

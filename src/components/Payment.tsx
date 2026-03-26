@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import Navbar from './Navbar';
 import Footer from './Footer';
-import { createOrder, CreateOrderRequest, DeliveryInfoRequest, OrderResponse } from '../api/orderApi';
+
 
 export interface Delivery {
   id?: number;
@@ -128,61 +128,6 @@ const Payment: React.FC = () => {
     fetchPaymentGateways();
   }, []);
 
-  const onSuccess = async (paymentMethod: string) => {
-    try {
-      if (!delivery) {
-        toast.error('Delivery information not found');
-        return;
-      }
-      if (!cart || cart.length === 0) {
-        toast.error('Your cart is empty.');
-        return;
-      }
-
-      // TC-017: resolve cartId from multiple possible field names
-      const orderCartId = cartState.cartId || (delivery as any).cart || delivery.cartId || cartId;
-
-      if (!orderCartId) {
-        toast.error('Cart not found. Please add items to your cart and try again.');
-        return;
-      }
-
-      const deliveryInfo: DeliveryInfoRequest = {
-        customer_name: delivery.customer_name,
-        customer_email: delivery.email || '',
-        phone_number: delivery.phone_number,
-        address: delivery.address,
-        city: delivery.city,
-        state: delivery.state,
-        zip_code: delivery.zip_code,
-        latitude: typeof delivery.latitude === 'string' ? parseFloat(delivery.latitude) : Number(delivery.latitude) || 0,
-        longitude: typeof delivery.longitude === 'string' ? parseFloat(delivery.longitude) : Number(delivery.longitude) || 0,
-      };
-
-      const orderRequest: CreateOrderRequest = {
-        cart_id: orderCartId,
-        delivery_info: deliveryInfo,
-        payment_method: paymentMethod,
-        // Include coupon code if one was applied
-        ...(locState?.couponCode && { coupon_code: locState.couponCode }),
-        // Include cart items from frontend
-        cart_items: cart.map((item: any) => ({
-          product_id: item.id || item.product_id,
-          quantity: item.quantity || 1,
-          price: item.price,
-        })),
-      };
-
-      const order: OrderResponse = await createOrder(orderRequest);
-      
-      toast.success(`Order #${order.order_number} placed!`);
-      clearCart();
-      navigate('/payment/success', { state: { order, paymentMethod, cartId: orderCartId }, replace: true });
-    } catch (error: any) {
-      toast.error(error.message || 'Order creation failed.');
-    }
-  };
-
   const handleConfirm = async () => {
     setProcessing(true);
     console.log('[Payment] handleConfirm triggered, method:', method, 'cartId:', cartId, 'cartState.cartId:', cartState.cartId);
@@ -222,88 +167,75 @@ const Payment: React.FC = () => {
         }
       }
 
+      // COD: no payment gateway redirect needed
       if (method === 'COD') {
-        await onSuccess('Cash on Delivery');
+        clearCart();
+        navigate('/payment/success', { state: { paymentMethod: 'COD', cartId: backendCartId }, replace: true });
         setProcessing(false);
         return;
       }
 
       let gateway = method;
-      let selectedBankIdx = "";
+      let selectedBankIdx = '';
       if (method.includes('_')) {
         const parts = method.split('_');
         gateway = parts[0];
         selectedBankIdx = parts[1];
       }
 
-      // STEP 1: Create order FIRST with payment_method (no localStorage needed)
-      // Convert frontend cart items to order format
-      const cartItemsPayload = cart.map((item: any) => ({
-        product_id: item.id || item.product_id,
-        quantity: item.quantity || 1,
-        price: item.price,
-      }));
-      
-      const orderPayload: CreateOrderRequest = {
+      // Call initiate/ directly — backend creates PaymentTransaction from the active cart.
+      // Do NOT create a MarketplaceOrder here; verify/ handles that after Khalti redirects back.
+      const initiatePayload: Record<string, any> = {
         cart_id: backendCartId,
-        delivery_info: {
-          customer_name: delivery.customer_name,
-          customer_email: delivery.email,
-          phone_number: delivery.phone_number,
-          address: delivery.address,
-          city: delivery.city,
-          state: delivery.state,
-          zip_code: delivery.zip_code,
-          latitude: delivery.latitude,
-          longitude: delivery.longitude,
-        },
-        payment_method: gateway,
-        coupon_code: locState?.couponCode,
-        cart_items: cartItemsPayload,
-      };
-
-      const createdOrder = await createOrder(orderPayload);
-
-      // STEP 2: Initiate payment with order reference
-      const paymentData: any = {
-        order_id: createdOrder.id,
-        cart_id: backendCartId,
-        gateway: gateway,
-        customer_name: delivery?.customer_name || "Customer",
-        customer_email: delivery?.email || "customer@example.com",
-        customer_phone: delivery?.phone_number || "9800000001",
+        gateway,
+        customer_name: delivery.customer_name || 'Customer',
+        customer_email: delivery.email || 'customer@example.com',
+        customer_phone: delivery.phone_number || '9800000001',
+        address: delivery.address || '',
+        city: delivery.city || '',
+        state: delivery.state || '',
+        zip_code: delivery.zip_code || '',
         tax_amount: 0,
         shipping_cost: 0,
-        return_url: `${window.location.origin}/payment/success`,
       };
-
-      if (selectedBankIdx) {
-        paymentData.bank = selectedBankIdx;
-      }
+      if (selectedBankIdx) initiatePayload.bank = selectedBankIdx;
 
       const token = localStorage.getItem('token');
-      
-      const response = await fetch('https://appmulyabazzar.com/api/v1/payments/initiate/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Token ${token}`
-        },
-        body: JSON.stringify(paymentData)
-      });
+
+      console.log('[Payment] Calling /api/v1/payments/initiate/ with:', initiatePayload);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/payments/initiate/`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`,
+          },
+          body: JSON.stringify(initiatePayload),
+        }
+      );
 
       const result = await response.json();
+      console.log('[Payment] initiate/ response:', result);
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Payment initiation failed');
+      }
 
       if (result.payment_url) {
-        // Store order info before redirecting to external payment
-        const pendingOrderData = { orderId: createdOrder.id, cartId: backendCartId, paymentMethod: gateway };
+        // Store our internal transaction_id and pidx so verify can use them
+        const pendingOrderData = {
+          transactionId: result.transaction_id,
+          pidx: result.pidx,
+          cartId: backendCartId,
+          paymentMethod: gateway,
+        };
         console.log('[Payment] Storing pendingOrder and redirecting:', pendingOrderData, '→', result.payment_url);
         localStorage.setItem('pendingOrder', JSON.stringify(pendingOrderData));
         window.location.href = result.payment_url;
-      } else if (result.success) {
-        await onSuccess(gateway);
       } else {
-        throw new Error(result.message || 'Payment initiation failed');
+        throw new Error(result.message || 'Payment initiation failed — no payment URL returned');
       }
     } catch (err: any) {
       toast.error(err.message || 'Payment failed');
