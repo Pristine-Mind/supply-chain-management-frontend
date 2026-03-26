@@ -110,7 +110,7 @@ const PaymentSuccess: React.FC = () => {
 
         // --- 6. Verify with backend ---
         const verifyRes = await fetch(
-          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/payments/verify`,
+          `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/payments/verify/`,
           {
             method: 'POST',
             headers: {
