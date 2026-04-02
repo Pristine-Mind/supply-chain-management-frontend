@@ -488,6 +488,9 @@ const ProductSearchBar: React.FC = () => {
     );
   }, [query, recommendations, history, trendingSearches, isLoading, handleSearch, handleProductSelect, clearHistory]);
 
+  // Hide search bar on cart page - fix for bug where search doesn't work after adding to cart
+  const isCartPage = location.pathname === '/cart';
+
   return (
     <header className="w-full bg-white px-4 py-3 shadow-sm border-b sticky top-0 z-20">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -498,6 +501,8 @@ const ProductSearchBar: React.FC = () => {
           </span>
         </Link>
 
+        {/* Search bar - hidden on cart page to prevent functionality issues */}
+        {!isCartPage && (
         <div className="flex-1 max-w-2xl mx-4 hidden md:block">
           <div className={`relative transition-all duration-300 ${isListening ? 'ring-4 ring-red-100 rounded-xl scale-[1.02]' : ''}`}>
             <div className="relative">
@@ -547,6 +552,7 @@ const ProductSearchBar: React.FC = () => {
             )}
           </div>
         </div>
+        )}
 
         <div className="flex items-center gap-2 lg:gap-4">
           <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg">
