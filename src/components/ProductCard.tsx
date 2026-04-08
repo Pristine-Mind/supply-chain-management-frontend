@@ -181,22 +181,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* Stock Status */}
-        <div className="flex items-center gap-2 text-xs">
-          <div
-            className={`w-2.5 h-2.5 rounded-full ${
-              product.stock > 10
-                ? 'bg-green-500'
-                : product.stock > 0
-                ? 'bg-amber-500'
-                : 'bg-red-500'
-            }`}
-          />
-          <span className="text-neutral-600">
-            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-          </span>
-        </div>
-
         {/* Action Buttons */}
         <div className="flex gap-3 pt-3">
           <button
