@@ -135,22 +135,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
             />
           </button>
         )}
-
-        {/* Out of Stock Overlay */}
-        {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center backdrop-blur-sm">
-            <div className="bg-white text-neutral-900 font-semibold px-6 py-3 rounded-2xl">
-              Out of Stock
-            </div>
-          </div>
-        )}
-
-        {/* Low Stock Indicator */}
-        {product.stock > 0 && product.stock <= 5 && (
-          <div className="absolute bottom-4 left-4 bg-amber-500 text-white text-xs font-medium px-3 py-1 rounded-2xl shadow">
-            Only {product.stock} left
-          </div>
-        )}
       </div>
 
       {/* Content */}
