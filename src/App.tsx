@@ -15,6 +15,7 @@ import Deals from './components/Deals';
 import FlashSale from './components/FlashSale';
 import CategoryProducts from './components/CategoryProducts';
 import BrandProducts from './components/BrandProducts';
+import NewYearSale from './components/NewYearSale';
 
 import Home from './components/Home';
 import AddProducer from './components/AddProducer';
@@ -168,6 +169,7 @@ const publicRoutes = [
   { path: '/', element: <Marketplace /> },
   { path: '/marketplace', element: <Navigate to="/" replace /> },
   { path: '/flash-sale', element: <FlashSale /> },
+  { path: '/new-year-sale', element: <NewYearSale /> },
   { path: '/deals', element: <Deals /> },
   { path: '/marketplace/categories/:categorySlug', element: <CategoryProducts /> },
   { path: '/marketplace/categories/:categorySlug/:subcategorySlug', element: <CategoryProducts /> },

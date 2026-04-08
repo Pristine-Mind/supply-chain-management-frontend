@@ -24,6 +24,8 @@ interface Product {
   view_count?: number;
   discounted_price?: number;
   percent_off?: number;
+  original_price?: number;
+  listed_price?: number;
 }
 
 interface ProductCardProps {
@@ -34,15 +36,17 @@ interface ProductCardProps {
   isInWishlist?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  product, 
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
   onAddToCart,
   onViewProduct,
   onToggleWishlist,
-  isInWishlist = false
+  isInWishlist = false,
 }) => {
-  const hasDiscount = product.discounted_price && product.discounted_price < product.price;
-  const displayPrice = hasDiscount ? product.discounted_price : product.price;
+  const originalPrice = product.product_details?.listed_price || product.listed_price;
+  const mainPrice = product.product_details?.discounted_price || product.price;
+  const hasDiscount = originalPrice && mainPrice && mainPrice < originalPrice;
+  const displayPrice = hasDiscount ? mainPrice : (product.price || 0);
   const rating = product.average_rating || 0;
   const reviewCount = product.total_reviews || 0;
 
@@ -51,30 +55,42 @@ const ProductCard: React.FC<ProductCardProps> = ({
     e.stopPropagation();
   };
 
+  const handleAddToCartClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCart?.();
+  };
+
+  const handleViewDetailsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onViewProduct?.();
+  };
+
   const buildStars = (rating: number) => (
     <div className="flex gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
-        <Star 
-          key={i} 
-          className={`w-3.5 h-3.5 ${
-            i < Math.floor(rating) 
-              ? 'fill-accent-warning-400 text-accent-warning-400' 
-              : i < rating 
-                ? 'fill-accent-warning-200 text-accent-warning-400' 
-                : 'fill-neutral-200 text-neutral-200'
-          }`} 
+        <Star
+          key={i}
+          className={`w-4 h-4 transition-colors ${
+            i < Math.floor(rating)
+              ? 'fill-amber-500 text-amber-500'
+              : i < rating
+              ? 'fill-amber-200 text-amber-400'
+              : 'fill-neutral-200 text-neutral-200'
+          }`}
         />
       ))}
     </div>
   );
 
   return (
-    <a 
+    <a
       href={`/marketplace/${product.marketplace_id || product.id}`}
-      className="block bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1 no-underline"
-      aria-label={`View ${product.name}, Rs. ${displayPrice?.toLocaleString()}`}
+      className="group block bg-white rounded-3xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:border-amber-200 transition-all duration-300 hover:-translate-y-2 no-underline"
+      aria-label={`View ${product.name}`}
     >
-      {/* Image Section — TC-005: consistent 4:3 aspect ratio with object-contain to prevent distortion */}
+      {/* Image Container */}
       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-50">
         {product.images && product.images.length > 0 ? (
           <img
@@ -83,139 +99,136 @@ const ProductCard: React.FC<ProductCardProps> = ({
             draggable={false}
             onContextMenu={handleImageContextMenu}
             onError={(e) => {
-              // TC-011: fallback when CDN image fails to load
-              (e.currentTarget as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23f3f4f6%22/%3E%3Ctext x=%22100%22 y=%2280%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2212%22%3ENo Image%3C/text%3E%3C/svg%3E';
+              (e.currentTarget as HTMLImageElement).src =
+                'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22150%22%3E%3Crect width=%22200%22 height=%22150%22 fill=%22%23f3f4f6%22/%3E%3Ctext x=%22100%22 y=%2280%22 text-anchor=%22middle%22 fill=%22%239ca3af%22 font-size=%2212%22%3ENo Image%3C/text%3E%3C/svg%3E';
             }}
-            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 cursor-pointer pointer-events-none select-none"
-            onClick={onViewProduct}
+            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-neutral-100">
-            <span className="text-neutral-400 text-sm">No Image</span>
+            <span className="text-neutral-400 text-sm">No Image Available</span>
           </div>
         )}
-        
+
         {/* Discount Badge */}
         {hasDiscount && product.percent_off && (
-          <div className="absolute top-3 left-3 bg-accent-error-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm">
+          <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-2xl shadow-md">
             {product.percent_off}% OFF
           </div>
         )}
-        
-        {/* Stock Status Overlay */}
+
+        {/* Wishlist Button */}
+        {onToggleWishlist && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleWishlist();
+            }}
+            aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+            className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur-md rounded-2xl shadow-sm hover:bg-white transition-all hover:scale-110 active:scale-95"
+          >
+            <Heart
+              className={`w-5 h-5 transition-colors ${
+                isInWishlist ? 'fill-red-500 text-red-500' : 'text-neutral-600 hover:text-red-500'
+              }`}
+            />
+          </button>
+        )}
+
+        {/* Out of Stock Overlay */}
         {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-            <span className="text-white font-semibold bg-black/80 px-4 py-2 rounded-lg">
+          <div className="absolute inset-0 bg-black/70 flex items-center justify-center backdrop-blur-sm">
+            <div className="bg-white text-neutral-900 font-semibold px-6 py-3 rounded-2xl">
               Out of Stock
-            </span>
+            </div>
           </div>
         )}
-        
-        {/* Quick Actions — TC-006/007: keyboard accessible with aria-labels */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200">
-          <button
-            onClick={onToggleWishlist}
-            aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-            className={`p-2 rounded-full shadow-lg transition-all duration-200 ${
-              isInWishlist 
-                ? 'bg-accent-error-500 text-white hover:bg-accent-error-600' 
-                : 'bg-white/90 text-neutral-600 hover:text-accent-error-500 hover:bg-white'
-            }`}
-          >
-            <Heart className="w-4 h-4" fill={isInWishlist ? 'currentColor' : 'none'} />
-          </button>
-        </div>
 
-        {/* Stock indicator */}
+        {/* Low Stock Indicator */}
         {product.stock > 0 && product.stock <= 5 && (
-          <div className="absolute bottom-3 left-3 bg-accent-warning-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+          <div className="absolute bottom-4 left-4 bg-amber-500 text-white text-xs font-medium px-3 py-1 rounded-2xl shadow">
             Only {product.stock} left
           </div>
         )}
       </div>
 
-      {/* Content Section */}
-      <div className="p-4 space-y-3">
+      {/* Content */}
+      <div className="p-5 space-y-4">
         {/* Category & Views */}
         <div className="flex items-center justify-between">
-          <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
+          <span className="inline-block bg-amber-100 text-amber-700 text-xs font-medium px-3 py-1 rounded-2xl uppercase tracking-wider">
             {product.category_details}
           </span>
+
           {product.view_count && (
-            <div className="flex items-center text-xs text-neutral-500">
-              <Eye className="w-3 h-3 mr-1" />
+            <div className="flex items-center text-xs text-neutral-500 gap-1">
+              <Eye className="w-3.5 h-3.5" />
               {product.view_count}
             </div>
           )}
         </div>
 
         {/* Product Name */}
-        <h3 className="font-semibold text-neutral-900 leading-tight line-clamp-2 cursor-pointer hover:text-primary-600 transition-colors" onClick={onViewProduct}>
+        <h3
+          className="font-semibold text-lg leading-tight text-neutral-900 line-clamp-2 group-hover:text-amber-700 transition-colors cursor-pointer min-h-[3.2rem]"
+          onClick={onViewProduct}
+        >
           {product.name}
         </h3>
 
-        {/* Rating & Reviews */}
+        {/* Rating */}
         {rating > 0 && (
           <div className="flex items-center gap-2">
             {buildStars(rating)}
-            <span className="text-xs text-neutral-600">
-              ({reviewCount})
-            </span>
+            <span className="text-sm text-neutral-500">({reviewCount})</span>
           </div>
         )}
 
-        {/* Price Section */}
-        <div className="space-y-1">
-          {hasDiscount ? (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-lg font-bold text-accent-error-600">
-                Rs. {displayPrice?.toLocaleString()}
-              </span>
-              <span className="text-sm text-neutral-500 line-through">
-                Rs. {product.price?.toLocaleString()}
-              </span>
-            </div>
-          ) : (
-            <span className="text-lg font-bold text-neutral-900">
-              Rs. {product.price?.toLocaleString()}
+        {/* Price */}
+        <div className="flex items-baseline gap-2">
+          <span className="text-2xl font-bold text-neutral-900">
+            Rs. {displayPrice?.toLocaleString()}
+          </span>
+          {hasDiscount && originalPrice && (
+            <span className="text-sm text-neutral-400 line-through">
+              Rs. {originalPrice?.toLocaleString()}
             </span>
           )}
         </div>
 
-        {/* Stock Info */}
-        <div className="flex items-center gap-1">
-          <div className={`w-2 h-2 rounded-full ${
-            product.stock > 10 
-              ? 'bg-accent-success-500' 
-              : product.stock > 0 
-                ? 'bg-accent-warning-500' 
-                : 'bg-accent-error-500'
-          }`}></div>
-          <span className="text-xs text-neutral-600">
-            {product.stock > 0 
-              ? `${product.stock} in stock` 
-              : 'Out of stock'
-            }
+        {/* Stock Status */}
+        <div className="flex items-center gap-2 text-xs">
+          <div
+            className={`w-2.5 h-2.5 rounded-full ${
+              product.stock > 10
+                ? 'bg-green-500'
+                : product.stock > 0
+                ? 'bg-amber-500'
+                : 'bg-red-500'
+            }`}
+          />
+          <span className="text-neutral-600">
+            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
           </span>
         </div>
 
-        {/* Action Buttons — TC-006: Tab+Enter keyboard navigation, TC-007: aria-labels */}
-        <div className="flex gap-2 pt-2">
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-3">
           <button
-            onClick={onViewProduct}
-            aria-label={`View details for ${product.name}`}
-            className="flex-1 py-2.5 px-4 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 hover:border-neutral-300 transition-all duration-200 text-neutral-700 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            onClick={handleViewDetailsClick}
+            className="flex-1 py-3.5 border border-neutral-300 hover:border-neutral-400 text-neutral-700 font-medium rounded-2xl text-sm transition-all active:bg-neutral-50"
           >
             View Details
           </button>
+
           <button
-            onClick={onAddToCart}
+            onClick={handleAddToCartClick}
             disabled={product.stock <= 0}
-            aria-label={product.stock <= 0 ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-lg font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-              product.stock === 0
-                ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
-                : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm transition-all ${
+              product.stock <= 0
+                ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                : 'bg-amber-600 hover:bg-amber-700 text-white shadow-sm active:scale-[0.985]'
             }`}
           >
             <ShoppingCart className="w-4 h-4" />

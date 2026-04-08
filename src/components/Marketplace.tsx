@@ -26,6 +26,7 @@ const DiaperSection = React.lazy(() => import('./DiaperSection'));
 const TopBrands = React.lazy(() => import('./TopBrands'));
 const NearbyProducts = React.lazy(() => import('./NearbyProducts'));
 const ShoppableVideoFeed = React.lazy(() => import('./ShoppableVideoFeed'));
+const NayaBarshaBanner = React.lazy(() => import('./NayaBarshaBanner'));
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
@@ -684,6 +685,10 @@ const Marketplace: React.FC = () => {
         <HeroBanner/>
         {/* Trending strip + Promo/Top picks layout */}
         <div className="container mx-auto px-4 py-8">
+          <LazySection>
+            <NayaBarshaBanner />
+          </LazySection>
+
           <LazySection>
             <FlashSale /> 
           </LazySection>
