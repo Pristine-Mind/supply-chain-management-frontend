@@ -380,6 +380,148 @@ export const getProductDiscountInfo = async (
   }
 };
 
+// ─── Seller Profile Types ────────────────────────────────────────────────────
+
+export interface SellerRole {
+  id: number;
+  name: string;
+}
+
+export interface SellerLocation {
+  id: number;
+  name: string;
+}
+
+export interface SellerMarketplaceProduct {
+  id: number;
+  product: number;
+  product_details: { [key: string]: any };
+  listed_price: number;
+  discounted_price: number | null;
+  is_available: boolean;
+  variants: any[];
+  reviews: any[];
+  bulk_price_tiers: any[];
+  b2b_price_tiers: any[];
+  [key: string]: any;
+}
+
+export interface SellerProfile {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string | null;
+  profile_image: string | null;
+  registered_business_name: string | null;
+  business_type: string | null;
+  b2b_verified: boolean;
+  shop_id: string | null;
+  role: SellerRole | null;
+  location: SellerLocation | null;
+  bio: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  has_access_to_marketplace: boolean;
+  total_products: number;
+  marketplace_products: SellerMarketplaceProduct[];
+  products_pagination?: SellerProductsPagination;
+}
+
+export interface SellerProductsPagination {
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+export interface SellerProfileListParams {
+  search?: string;
+  business_type?: 'distributor' | 'retailer';
+  b2b_verified?: boolean;
+  page?: number;
+  page_size?: number;
+}
+
+export interface SellerProfileListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: SellerProfile[];
+}
+
+/**
+ * Fetch paginated list of sellers who have at least one available marketplace product.
+ */
+export const getSellerProfiles = async (
+  params?: SellerProfileListParams
+): Promise<SellerProfileListResponse> => {
+  try {
+    const queryParams: Record<string, string> = {};
+    if (params?.search) queryParams.search = params.search;
+    if (params?.business_type) queryParams.business_type = params.business_type;
+    if (params?.b2b_verified !== undefined) queryParams.b2b_verified = String(params.b2b_verified);
+    if (params?.page) queryParams.page = String(params.page);
+    if (params?.page_size) queryParams.page_size = String(params.page_size);
+
+    const response = await axios.get<SellerProfileListResponse>(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/seller-profiles/`,
+      { params: queryParams }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.detail || 'Failed to fetch seller profiles');
+    }
+    throw new Error('Network error while fetching seller profiles');
+  }
+};
+
+export interface GetSellerProfileParams {
+  products_page?: number;
+  products_page_size?: number;
+}
+
+/**
+ * Fetch a single seller's profile with paginated marketplace products.
+ * products_page (default 1) and products_page_size (default 50, max 200)
+ * control which page of the seller's products is returned.
+ */
+export const getSellerProfileById = async (
+  userId: number,
+  params?: GetSellerProfileParams
+): Promise<SellerProfile> => {
+  try {
+    const queryParams: Record<string, string> = {};
+    if (params?.products_page && params.products_page > 1) {
+      queryParams.products_page = String(params.products_page);
+    }
+    if (params?.products_page_size) {
+      queryParams.products_page_size = String(params.products_page_size);
+    }
+
+    const response = await axios.get<SellerProfile>(
+      `${import.meta.env.VITE_REACT_APP_API_URL}/api/v1/seller-profiles/${userId}/`,
+      { params: queryParams }
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new Error('Seller not found');
+      }
+      throw new Error(error.response?.data?.detail || 'Failed to fetch seller profile');
+    }
+    throw new Error('Network error while fetching seller profile');
+  }
+};
+
 /**
  * Marketplace API object for unified access
  */
@@ -393,5 +535,7 @@ export const marketplaceApi = {
   getFilterOptions,
   createMarketplaceProductFromProduct,
   setProductDiscount,
-  getProductDiscountInfo
+  getProductDiscountInfo,
+  getSellerProfiles,
+  getSellerProfileById,
 };

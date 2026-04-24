@@ -53,6 +53,7 @@ import CreatorProfilePage from './components/CreatorProfilePage';
 import ForYouPage from './components/ForYouPage';
 import MyFollowing from './components/MyFollowing';
 import BuyerRegister from './components/BuyerRegister';
+import SellerProfilePage from './components/SellerProfilePage';
 import BackButton from './components/BackButton';
 import PaymentSuccess from './components/PaymentSuccess';
 import AccountDialog from './components/AccountDialog';
@@ -176,6 +177,7 @@ const publicRoutes = [
   { path: '/marketplace/categories/:categorySlug/:subcategorySlug/:subSubcategorySlug', element: <CategoryProducts /> },
   { path: '/marketplace/all-products', element: <MarketplaceAllProducts /> },
   { path: '/brand-products/:brandId', element: <BrandProducts /> },
+  { path: '/marketplace/seller/:sellerSlug', element: <SellerProfilePage /> },
   { path: '/marketplace/:productId', element: <ProductPage /> },
   { path: '/about', element: <AboutUs /> },
   { path: '/contact', element: <Contact /> },
