@@ -9,6 +9,7 @@ import ProductSearchBar from './ProductSearchBar';
 import ProductInstanceView from './ProductInstanceView';
 import RelatedProductsSection from './RelatedProductsSection';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 interface ProductDetails {
   name: string;
@@ -133,6 +134,29 @@ const ProductPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEOHead
+        title={product.product_details?.name}
+        description={`Buy ${product.product_details?.name} on Mulya Bazzar. Price: Rs.${product.discounted_price ?? product.listed_price}. Fast delivery across Nepal.`}
+        image={product.product_details?.images?.[0]?.image}
+        url={`/marketplace/${product.id}`}
+        type="product"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: product.product_details?.name,
+          image: product.product_details?.images?.map(img => img.image) ?? [],
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'NPR',
+            price: product.discounted_price ?? product.listed_price,
+            availability: 'https://schema.org/InStock',
+            seller: {
+              '@type': 'Organization',
+              name: 'Mulya Bazzar',
+            },
+          },
+        }}
+      />
       <div className="sticky top-0 z-10 bg-white shadow-sm border-b border-neutral-200">
         <ProductSearchBar />
       </div>

@@ -20,6 +20,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
 
 import logo from '../assets/logo.png';
@@ -647,6 +648,20 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEOHead
+        title={subcategoryName ? `${subcategoryName} in ${categoryName}` : categoryName || 'Browse Products'}
+        description={`Shop ${subcategoryName || categoryName || 'products'} on Mulya Bazzar. ${totalProducts > 0 ? `${totalProducts} products available.` : ''} Fast delivery across Nepal.`}
+        url={`/marketplace/categories/${categorySlug}${subcategorySlug ? `/${subcategorySlug}` : ''}`}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://appmulyabazzar.com' },
+            { '@type': 'ListItem', position: 2, name: categoryName || 'Category', item: `https://appmulyabazzar.com/marketplace/categories/${categorySlug}` },
+            ...(subcategoryName ? [{ '@type': 'ListItem', position: 3, name: subcategoryName, item: `https://appmulyabazzar.com/marketplace/categories/${categorySlug}/${subcategorySlug}` }] : []),
+          ],
+        }}
+      />
       <div className="bg-primary-500 text-white py-2 px-4">
         <div className="max-w-7xl mx-auto text-center text-caption">
           Welcome to MulyaBazzar - Your Premium Marketplace

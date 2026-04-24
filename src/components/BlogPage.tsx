@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 import banner from '../assets/banner2.png';
 
 interface Post {
@@ -60,6 +61,12 @@ export const BlogPage: React.FC = () => {
 
   return (
     <div className="bg-[#fcfcfd] min-h-screen">
+      <SEOHead
+        title="Blog — Tips, Stories & Insights"
+        description="Read the Mulya Bazzar blog for seller tips, farming guides, marketplace updates, and stories from Nepal's growing commerce community."
+        url="/blog"
+        type="website"
+      />
       <Navbar />
 
       <div className="relative h-[45vh] flex items-center justify-center overflow-hidden">

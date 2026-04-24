@@ -1,9 +1,15 @@
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 const AboutUs = () => {
   return (
     <div className="min-h-screen bg-white text-neutral-800">
+      <SEOHead
+        title="About Us — Nepal's Marketplace for Local Sellers"
+        description="Mulya Bazzar connects Nepal's local producers, artisans, and entrepreneurs with buyers. Learn our mission to bring fair value (Mulya) to every seller."
+        url="/about"
+      />
       <Navbar />
 
       <section className="relative bg-primary-600 py-20 text-white overflow-hidden">

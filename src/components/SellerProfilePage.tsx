@@ -26,6 +26,7 @@ import { useAuth } from '../context/AuthContext';
 import LoginModal from './auth/LoginModal';
 import ProductSearchBar from './ProductSearchBar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 import { getSellerProfiles } from '../api/marketplaceApi';
 
 /** Build the seller URL segment from their username */
@@ -199,6 +200,22 @@ const SellerProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEOHead
+        title={`${displayName} — Seller on Mulya Bazzar`}
+        description={`Shop from ${displayName} on Mulya Bazzar. ${totalProducts} products available${locationLabel ? ` · Based in ${locationLabel}` : ''}. Fast delivery across Nepal.`}
+        image={seller.profile_image ?? undefined}
+        url={`/marketplace/seller/${sellerSlug}`}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'Store',
+          name: displayName,
+          image: seller.profile_image ?? undefined,
+          url: `https://appmulyabazzar.com/marketplace/seller/${sellerSlug}`,
+          address: locationLabel
+            ? { '@type': 'PostalAddress', addressLocality: seller.city ?? '', addressRegion: seller.state ?? '', addressCountry: seller.country ?? 'NP' }
+            : undefined,
+        }}
+      />
       <div className="sticky top-0 z-10 bg-white shadow-sm border-b border-neutral-200">
         <ProductSearchBar />
       </div>

@@ -4,6 +4,7 @@ import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaPaperPlane, FaCheckCircle, FaExc
 import banner from "../assets/banner2.png";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
+import SEOHead from "./SEOHead";
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -62,6 +63,11 @@ const Contact: React.FC = () => {
 
   return (
     <div className="w-full bg-soft-gradient">
+      <SEOHead
+        title="Contact Us"
+        description="Get in touch with Mulya Bazzar. Reach us for support, partnerships, or any inquiries. We're here to help buyers and sellers across Nepal."
+        url="/contact"
+      />
       <Navbar />
       
       <div className="relative section-spacing bg-brand-gradient overflow-hidden">

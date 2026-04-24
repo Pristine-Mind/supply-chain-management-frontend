@@ -30,6 +30,7 @@ const NayaBarshaBanner = React.lazy(() => import('./NayaBarshaBanner'));
 
 import logo from '../assets/logo.png';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 import HeroBanner from './HeroBanner';
 import PromoBanner from './PromoBanner';
 import FreeDeliveryBanner from './FreeDeliveryBanner';
@@ -356,6 +357,26 @@ const Marketplace: React.FC = () => {
 
   return (
     <div className="marketplace-root">
+      <SEOHead
+        title="Shop Online in Nepal — Fresh Produce, Handmade Goods & More"
+        description="Mulya Bazzar is Nepal's marketplace for fresh produce, handmade goods, electronics, and more. Shop from local sellers with fast delivery across Nepal."
+        url="/"
+        type="website"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Mulya Bazzar',
+          url: 'https://appmulyabazzar.com',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: {
+              '@type': 'EntryPoint',
+              urlTemplate: 'https://appmulyabazzar.com/?q={search_term_string}',
+            },
+            'query-input': 'required name=search_term_string',
+          },
+        }}
+      />
       <CommandPalette />
       <div className="min-h-screen bg-neutral-50">
         {showLoginModal && (

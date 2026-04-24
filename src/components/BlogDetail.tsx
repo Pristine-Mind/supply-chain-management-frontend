@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Calendar, User, ArrowLeft, MessageCircle, Share2 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 export const BlogDetail: React.FC = () => {
   const { id } = useParams();
@@ -33,6 +34,22 @@ export const BlogDetail: React.FC = () => {
   return (
     <div className="bg-white min-h-screen">
       <Navbar />
+      <SEOHead
+        title={post.title}
+        description={post.excerpt ?? post.title}
+        image={post.image}
+        url={`/blog/${id}`}
+        type="article"
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: post.title,
+          image: post.image,
+          author: { '@type': 'Person', name: post.author },
+          datePublished: post.date,
+          publisher: { '@type': 'Organization', name: 'Mulya Bazzar', url: 'https://appmulyabazzar.com' },
+        }}
+      />
       
       <article className="pt-12 pb-24">
         <header className="max-w-4xl mx-auto px-4 text-center mb-12">

@@ -1,10 +1,17 @@
 import React from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 const Privacy: React.FC = () => {
   return (
     <>
+      <SEOHead
+        title="Privacy Policy"
+        description="Mulya Bazzar's Privacy Policy. Learn how we collect, use, and protect your personal information."
+        url="/privacy"
+        noIndex
+      />
       <Navbar />
       <div className="bg-white py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">

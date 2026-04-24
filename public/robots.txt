@@ -1,0 +1,51 @@
+User-agent: *
+Allow: /
+
+# Public marketplace pages
+Allow: /marketplace
+Allow: /marketplace/
+Allow: /marketplace/categories/
+Allow: /brand-products/
+Allow: /deals
+Allow: /flash-sale
+Allow: /featured
+Allow: /creators
+Allow: /blog
+Allow: /about
+Allow: /contact
+Allow: /faq
+Allow: /shipping
+Allow: /returns
+Allow: /terms
+Allow: /privacy
+Allow: /sell
+Allow: /transporters
+
+# Disallow private/authenticated routes
+Disallow: /home
+Disallow: /cart
+Disallow: /checkout
+Disallow: /payment
+Disallow: /my-orders
+Disallow: /profile
+Disallow: /deliveries/
+Disallow: /earnings
+Disallow: /documents
+Disallow: /products
+Disallow: /customers
+Disallow: /orders
+Disallow: /sales
+Disallow: /stocks
+Disallow: /stats
+Disallow: /audit-logs
+Disallow: /purchase-orders
+Disallow: /direct-sales
+Disallow: /reports/
+Disallow: /loyalty
+Disallow: /risk-management/
+Disallow: /inventory-analytics/
+Disallow: /marketplace-dashboard/
+Disallow: /user-admin-profile
+Disallow: /user-profile
+
+Sitemap: https://appmulyabazzar.com/sitemap.xml

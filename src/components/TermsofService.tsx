@@ -3,6 +3,7 @@ import { motion, useScroll, useSpring } from 'framer-motion';
 import { ShieldCheck, Scale, AlertCircle, RefreshCw, Mail, ScrollText, CheckCircle2 } from 'lucide-react';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 const sections = [
   { id: 'acceptance', title: 'Acceptance', icon: CheckCircle2 },
@@ -40,6 +41,12 @@ const TermsOfService: React.FC = () => {
 
   return (
     <div className="bg-[#f8fafc] min-h-screen font-sans selection:bg-orange-100 selection:text-orange-900">
+      <SEOHead
+        title="Terms of Service"
+        description="Read Mulya Bazzar's Terms of Service. Understand your rights and responsibilities as a buyer or seller on Nepal's marketplace."
+        url="/terms"
+        noIndex
+      />
       <Navbar />
 
       <motion.div

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 interface FAQItem {
   question: string;
@@ -44,6 +45,11 @@ const FAQ: React.FC = () => {
 
   return (
     <>
+    <SEOHead
+      title="Frequently Asked Questions"
+      description="Find answers to common questions about buying, selling, shipping, returns, and payments on Mulya Bazzar Nepal's marketplace."
+      url="/faq"
+    />
     <Navbar />
     <div className="bg-white section-spacing">
       <div className="max-w-4xl mx-auto container-padding">

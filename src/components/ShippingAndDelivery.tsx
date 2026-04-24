@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 interface InfoItem {
   title: string;
@@ -67,6 +68,11 @@ const ShippingAndDelivery: React.FC = () => {
 
   return (
     <>
+      <SEOHead
+        title="Shipping & Delivery"
+        description="Learn about Mulya Bazzar's shipping options, delivery timelines, and charges for orders across Nepal."
+        url="/shipping"
+      />
       <Navbar />
       <div className="p-8 bg-white rounded-xl shadow-sm mb-8 w-full max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold text-primary-700 mb-6">Shipping & Delivery</h1>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FiChevronDown, FiChevronUp, FiRefreshCw, FiDollarSign, FiPackage, FiX, FiClock } from 'react-icons/fi';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import SEOHead from './SEOHead';
 
 interface PolicyItem {
   title: string;
@@ -73,6 +74,11 @@ const ReturnsAndRefunds: React.FC = () => {
 
   return (
     <>
+      <SEOHead
+        title="Returns & Refunds Policy"
+        description="Mulya Bazzar's hassle-free returns and refunds policy. Learn how to return products and get refunds for purchases on our marketplace."
+        url="/returns"
+      />
       <Navbar />
       <div className="bg-white py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
