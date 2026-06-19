@@ -33,11 +33,37 @@ module.exports = {
         '28': '112px',  // 112px
         '32': '128px',  // 128px
       },
-      
-      // 60:30:10 Color System
+
+      // 60:30:10 Color System + CSS-variable semantic tokens for shadcn/ui primitives.
+      // Existing numbered scales are kept; DEFAULT/foreground keys are added where needed.
       colors: {
+        // Semantic surface / text tokens
+        background: 'rgb(var(--background) / <alpha-value>)',
+        foreground: 'rgb(var(--foreground) / <alpha-value>)',
+        card: {
+          DEFAULT: 'rgb(var(--card) / <alpha-value>)',
+          foreground: 'rgb(var(--card-foreground) / <alpha-value>)',
+        },
+        popover: {
+          DEFAULT: 'rgb(var(--popover) / <alpha-value>)',
+          foreground: 'rgb(var(--popover-foreground) / <alpha-value>)',
+        },
+        muted: {
+          DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
+          foreground: 'rgb(var(--muted-foreground) / <alpha-value>)',
+        },
+        destructive: {
+          DEFAULT: 'rgb(var(--destructive) / <alpha-value>)',
+          foreground: 'rgb(var(--destructive-foreground) / <alpha-value>)',
+        },
+        border: 'rgb(var(--border) / <alpha-value>)',
+        input: 'rgb(var(--input) / <alpha-value>)',
+        ring: 'rgb(var(--ring) / <alpha-value>)',
+
         // Primary (60%) - Orange brand colors
         primary: {
+          DEFAULT: 'rgb(var(--primary) / <alpha-value>)',
+          foreground: 'rgb(var(--primary-foreground) / <alpha-value>)',
           50: '#fff7ed',
           100: '#ffedd5',
           200: '#fed7aa',
@@ -50,9 +76,11 @@ module.exports = {
           900: '#7c2d12',
           950: '#431407',
         },
-        
+
         // Secondary (30%) - Complementary blues and grays
         secondary: {
+          DEFAULT: 'rgb(var(--secondary) / <alpha-value>)',
+          foreground: 'rgb(var(--secondary-foreground) / <alpha-value>)',
           50: '#f8fafc',
           100: '#f1f5f9',
           200: '#e2e8f0',
@@ -64,7 +92,7 @@ module.exports = {
           800: '#1e293b',
           900: '#0f172a',
         },
-        
+
         // Accent (10%) - Success, warning, error states
         'accent-success': {
           50: '#f0fdf4',
@@ -102,7 +130,11 @@ module.exports = {
           800: '#991b1b',
           900: '#7f1d1d',
         },
-        
+        accent: {
+          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+          foreground: 'rgb(var(--accent-foreground) / <alpha-value>)',
+        },
+
         // Neutral grays
         neutral: {
           50: '#fafafa',
@@ -117,31 +149,31 @@ module.exports = {
           900: '#171717',
         },
       },
-      
+
       // Typography hierarchy
       fontSize: {
         // H1 - Hero titles
         'h1': ['2.5rem', { lineHeight: '3rem', letterSpacing: '-0.025em', fontWeight: '700' }],
         'h1-mobile': ['2rem', { lineHeight: '2.5rem', letterSpacing: '-0.025em', fontWeight: '700' }],
-        
+
         // H2 - Section headers
         'h2': ['2rem', { lineHeight: '2.5rem', letterSpacing: '-0.025em', fontWeight: '600' }],
         'h2-mobile': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.025em', fontWeight: '600' }],
-        
+
         // H3 - Subsection headers
         'h3': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.025em', fontWeight: '600' }],
         'h3-mobile': ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '-0.025em', fontWeight: '600' }],
-        
+
         // Body text
         'body': ['1rem', { lineHeight: '1.75rem', letterSpacing: '0em', fontWeight: '400' }],
         'body-lg': ['1.125rem', { lineHeight: '1.875rem', letterSpacing: '0em', fontWeight: '400' }],
         'body-sm': ['0.875rem', { lineHeight: '1.5rem', letterSpacing: '0em', fontWeight: '400' }],
-        
+
         // Caption text
         'caption': ['0.75rem', { lineHeight: '1.25rem', letterSpacing: '0.025em', fontWeight: '400' }],
         'caption-bold': ['0.75rem', { lineHeight: '1.25rem', letterSpacing: '0.025em', fontWeight: '600' }],
       },
-      
+
       // Border radius consistency
       borderRadius: {
         'none': '0px',
@@ -154,7 +186,7 @@ module.exports = {
         '3xl': '32px',
         'full': '9999px',
       },
-      
+
       // Shadow system
       boxShadow: {
         'soft': '0 2px 8px 0 rgba(0, 0, 0, 0.08)',
@@ -162,7 +194,7 @@ module.exports = {
         'hard': '0 8px 32px 0 rgba(0, 0, 0, 0.16)',
         'colored': '0 4px 16px 0 rgba(249, 115, 22, 0.2)',
       },
-      
+
       keyframes: {
         'fade-in': {
           '0%': { opacity: '0' },
@@ -190,5 +222,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
 };

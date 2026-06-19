@@ -5,15 +5,15 @@ import { Phone, Mail, Shield, Car, Award, AlertCircle } from 'lucide-react';
 import { getTransporterProfile, updateTransporterProfile, type TransporterProfile, type UpdateTransporterProfileData, type DocumentPreview } from '../api/transporterApi';
 
 const Skeleton = ({ className = '' }) => (
-  <div className={`bg-gray-200 animate-pulse rounded ${className}`} />
+  <div className={`bg-neutral-200 animate-pulse rounded ${className}`} />
 );
 
 const Badge = ({ variant = 'default', className = '', children }) => {
   const baseStyles = 'inline-flex items-center rounded-full border px-2 py-1 text-xs font-semibold';
   const variantStyles = {
-    default: 'bg-orange-500 text-white',
-    secondary: 'bg-gray-500 text-white',
-    outline: 'text-gray-600 border-gray-300',
+    default: 'bg-primary-500 text-white',
+    secondary: 'bg-neutral-500 text-white',
+    outline: 'text-neutral-600 border-neutral-300',
   };
 
   return (
@@ -24,9 +24,9 @@ const Badge = ({ variant = 'default', className = '', children }) => {
 };
 
 const StatCard = ({ label, value }) => (
-  <div className="text-center p-2 bg-gray-50 rounded-lg">
-    <p className="text-xs text-gray-500">{label}</p>
-    <p className="text-lg font-semibold text-gray-800">{value}</p>
+  <div className="text-center p-2 bg-neutral-50 rounded-lg">
+    <p className="text-xs text-neutral-500">{label}</p>
+    <p className="text-lg font-semibold text-neutral-800">{value}</p>
   </div>
 );
 
@@ -182,7 +182,7 @@ const TransporterProfile = () => {
   if ((error && !isEditing) || (!transporter && !isEditing)) {
     return (
       <div className="container mx-auto p-4 text-center">
-        <div className="text-red-500 mb-4">{error || 'Transporter not found'}</div>
+        <div className="text-accent-error-500 mb-4">{error || 'Transporter not found'}</div>
         <Button onClick={() => window.location.reload()}>Retry</Button>
       </div>
     );
@@ -201,13 +201,13 @@ const TransporterProfile = () => {
     <div className="container mx-auto px-4 py-6">
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-orange-500">Edit Profile</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary-500">Edit Profile</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">First Name</label>
+                <label className="block text-sm font-medium text-neutral-700">First Name</label>
                 <input
                   type="text"
                   name="first_name"
@@ -218,7 +218,7 @@ const TransporterProfile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                <label className="block text-sm font-medium text-neutral-700">Last Name</label>
                 <input
                   type="text"
                   name="last_name"
@@ -229,7 +229,7 @@ const TransporterProfile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <label className="block text-sm font-medium text-neutral-700">Email</label>
                 <input
                   type="email"
                   name="email"
@@ -240,7 +240,7 @@ const TransporterProfile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Phone</label>
+                <label className="block text-sm font-medium text-neutral-700">Phone</label>
                 <input
                   type="tel"
                   name="phone"
@@ -251,7 +251,7 @@ const TransporterProfile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
+                <label className="block text-sm font-medium text-neutral-700">Emergency Contact</label>
                 <input
                   type="tel"
                   name="emergency_contact"
@@ -261,7 +261,7 @@ const TransporterProfile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Vehicle Number</label>
+                <label className="block text-sm font-medium text-neutral-700">Vehicle Number</label>
                 <input
                   type="text"
                   name="vehicle_number"
@@ -272,7 +272,7 @@ const TransporterProfile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Vehicle Capacity (kg)</label>
+                <label className="block text-sm font-medium text-neutral-700">Vehicle Capacity (kg)</label>
                 <input
                   type="text"
                   name="vehicle_capacity"
@@ -283,7 +283,7 @@ const TransporterProfile = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Service Radius (km)</label>
+                <label className="block text-sm font-medium text-neutral-700">Service Radius (km)</label>
                 <input
                   type="number"
                   name="service_radius"
@@ -297,10 +297,10 @@ const TransporterProfile = () => {
             </div>
             
             <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Image</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">Vehicle Image</label>
               <div className="flex items-center space-x-4">
                 <div className="relative">
-                  <div className="h-32 w-32 rounded-md overflow-hidden border-2 border-dashed border-gray-300 flex items-center justify-center">
+                  <div className="h-32 w-32 rounded-md overflow-hidden border-2 border-dashed border-neutral-300 flex items-center justify-center">
                     {vehicleImagePreview ? (
                       <img 
                         src={vehicleImagePreview} 
@@ -309,10 +309,10 @@ const TransporterProfile = () => {
                       />
                     ) : (
                       <div className="text-center p-4">
-                        <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                        <svg className="mx-auto h-12 w-12 text-neutral-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                           <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <div className="mt-1 text-sm text-gray-600">
+                        <div className="mt-1 text-sm text-neutral-600">
                           Click to upload
                         </div>
                       </div>
@@ -331,7 +331,7 @@ const TransporterProfile = () => {
                     className="absolute inset-0 cursor-pointer"
                   />
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-neutral-500">
                   <p>Upload a clear photo of your vehicle</p>
                   <p className="text-xs mt-1">Max size: 5MB</p>
                 </div>
@@ -340,12 +340,12 @@ const TransporterProfile = () => {
 
             {/* Documents Upload */}
             <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Documents</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">Documents</label>
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-4">
                   {documentPreviews.map((preview, index) => (
                     <div key={index} className="relative group">
-                      <div className="h-24 w-24 rounded-md overflow-hidden border border-gray-200">
+                      <div className="h-24 w-24 rounded-md overflow-hidden border border-neutral-200">
                         <img 
                           src={preview.preview} 
                           alt={`Document ${index + 1}`}
@@ -355,13 +355,13 @@ const TransporterProfile = () => {
                       <button
                         type="button"
                         onClick={() => removeDocument(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                        className="absolute -top-2 -right-2 bg-accent-error-500 text-white rounded-full p-1 hover:bg-accent-error-600 transition-colors"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       </button>
-                      <p className="text-xs text-gray-500 mt-1 truncate w-24">
+                      <p className="text-xs text-neutral-500 mt-1 truncate w-24">
                         {preview.file.name}
                       </p>
                     </div>
@@ -371,9 +371,9 @@ const TransporterProfile = () => {
                 <div>
                   <label
                     htmlFor="document-upload"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                    className="inline-flex items-center px-4 py-2 border border-neutral-300 shadow-sm text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                   >
-                    <svg className="-ml-1 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <svg className="-ml-1 mr-2 h-5 w-5 text-neutral-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
                     Upload Documents
@@ -386,14 +386,14 @@ const TransporterProfile = () => {
                     multiple
                     onChange={handleFileChange}
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-neutral-500">
                     Upload vehicle documents, license, etc. (PDF, JPG, PNG up to 10MB)
                   </p>
                 </div>
               </div>
             </div>
             
-            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+            {error && <p className="text-accent-error-500 text-sm mt-2">{error}</p>}
             <div className="flex justify-end space-x-3 mt-6">
               <Button
                 type="button"
@@ -423,14 +423,14 @@ const TransporterProfile = () => {
     <div className="container mx-auto px-4 py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-1">
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-neutral-200">
             <CardHeader className="items-center text-center p-4">
-              <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center mb-3">
-                <span className="text-3xl text-orange-500">
+              <div className="h-24 w-24 rounded-full bg-neutral-200 flex items-center justify-center mb-3">
+                <span className="text-3xl text-primary-500">
                   {transporter.user.first_name[0]}{transporter.user.last_name[0]}
                 </span>
               </div>
-              <CardTitle className="text-xl text-orange-500">
+              <CardTitle className="text-xl text-primary-500">
                 {transporter.user.first_name} {transporter.user.last_name}
               </CardTitle>
               <div className="flex flex-wrap justify-center gap-2 mt-2">
@@ -445,22 +445,22 @@ const TransporterProfile = () => {
             <CardContent className="p-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600 truncate">{transporter.user.email}</span>
+                  <Mail className="h-4 w-4 text-neutral-500" />
+                  <span className="text-sm text-neutral-600 truncate">{transporter.user.email}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">{transporter.phone}</span>
+                  <Phone className="h-4 w-4 text-neutral-500" />
+                  <span className="text-sm text-neutral-600">{transporter.phone}</span>
                 </div>
                 {transporter.emergency_contact && (
                   <div className="flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">{transporter.emergency_contact}</span>
+                    <AlertCircle className="h-4 w-4 text-neutral-500" />
+                    <span className="text-sm text-neutral-600">{transporter.emergency_contact}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">License: {transporter.license_number}</span>
+                  <Shield className="h-4 w-4 text-neutral-500" />
+                  <span className="text-sm text-neutral-600">License: {transporter.license_number}</span>
                 </div>
               </div>
             </CardContent>
@@ -469,26 +469,26 @@ const TransporterProfile = () => {
         <div className="lg:col-span-2 space-y-4">
           <Card>
             <CardHeader className="p-4">
-              <CardTitle className="flex items-center gap-2 text-orange-500 text-lg">
-                <Car className="h-4 w-4 text-orange-500" /> Vehicle Information
+              <CardTitle className="flex items-center gap-2 text-primary-500 text-lg">
+                <Car className="h-4 w-4 text-primary-500" /> Vehicle Information
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <p className="text-sm text-gray-500">Vehicle Type</p>
+                  <p className="text-sm text-neutral-500">Vehicle Type</p>
                   <p className="font-medium">{transporter.vehicle_type_display}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Vehicle Number</p>
+                  <p className="text-sm text-neutral-500">Vehicle Number</p>
                   <p className="font-medium">{transporter.vehicle_number}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Capacity (kg)</p>
+                  <p className="text-sm text-neutral-500">Capacity (kg)</p>
                   <p className="font-medium">{transporter.vehicle_capacity}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Service Radius</p>
+                  <p className="text-sm text-neutral-500">Service Radius</p>
                   <p className="font-medium">{transporter.service_radius} km</p>
                 </div>
               </div>
@@ -496,8 +496,8 @@ const TransporterProfile = () => {
           </Card>
           <Card>
             <CardHeader className="p-4">
-              <CardTitle className="flex items-center gap-2 text-orange-500 text-lg">
-                <Award className="h-4 w-4 text-orange-500" /> Performance
+              <CardTitle className="flex items-center gap-2 text-primary-500 text-lg">
+                <Award className="h-4 w-4 text-primary-500" /> Performance
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
@@ -507,17 +507,17 @@ const TransporterProfile = () => {
                 ))}
               </div>
               <div className="mt-3">
-                <div className="flex justify-between text-sm text-gray-500 mb-1">
+                <div className="flex justify-between text-sm text-neutral-500 mb-1">
                   <span>Success Rate</span>
                   <span>{transporter.success_rate}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-neutral-200 rounded-full h-2">
                   <div
-                    className="bg-green-500 h-2 rounded-full"
+                    className="bg-accent-success-500 h-2 rounded-full"
                     style={{ width: `${transporter.success_rate}%` }}
                   ></div>
                 </div>
-                <div className="flex justify-between text-sm text-gray-500 mt-1">
+                <div className="flex justify-between text-sm text-neutral-500 mt-1">
                   <span>Cancellation Rate</span>
                   <span>{transporter.cancellation_rate}%</span>
                 </div>

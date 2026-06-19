@@ -291,14 +291,14 @@ const UserProfile: React.FC = () => {
         />
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-500 flex items-center justify-center">
           <div className="text-center max-w-md">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-6">
-              <User className="h-8 w-8 text-orange-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 mb-6">
+              <User className="h-8 w-8 text-primary-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">Please Log In</h1>
-            <p className="text-gray-600 mb-8">You need to be logged in to view your profile.</p>
+            <h1 className="text-2xl font-bold text-neutral-900 mb-3">Please Log In</h1>
+            <p className="text-neutral-600 mb-8">You need to be logged in to view your profile.</p>
             <button
               onClick={() => navigate('/login')}
-              className="inline-flex items-center px-5 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors shadow-md hover:shadow-lg"
+              className="inline-flex items-center px-5 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-md hover:shadow-lg"
             >
               Login to Continue
               <User className="ml-2 h-4 w-4" />
@@ -317,12 +317,12 @@ const UserProfile: React.FC = () => {
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-50 flex items-center justify-center">
           <div className="text-center">
             <div className="relative">
-              <div className="w-20 h-20 rounded-full border-4 border-orange-200 animate-pulse"></div>
+              <div className="w-20 h-20 rounded-full border-4 border-primary-200 animate-pulse"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
               </div>
             </div>
-            <p className="text-lg text-orange-700 mt-6 font-medium">Loading your profile...</p>
+            <p className="text-lg text-primary-700 mt-6 font-medium">Loading your profile...</p>
           </div>
         </div>
         <Footer />
@@ -336,14 +336,14 @@ const UserProfile: React.FC = () => {
         <Navbar />
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-50 flex items-center justify-center">
           <div className="text-center max-w-md">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-6">
-              <AlertCircle className="h-8 w-8 text-red-500" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent-error-100 mb-6">
+              <AlertCircle className="h-8 w-8 text-accent-error-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-3">Profile Not Found</h1>
-            <p className="text-gray-600 mb-8">We couldn't load your profile information.</p>
+            <h1 className="text-2xl font-bold text-neutral-900 mb-3">Profile Not Found</h1>
+            <p className="text-neutral-600 mb-8">We couldn't load your profile information.</p>
             <button
               onClick={loadProfile}
-              className="inline-flex items-center px-5 py-3 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition-colors shadow-md hover:shadow-lg"
+              className="inline-flex items-center px-5 py-3 bg-accent-error-500 text-white font-medium rounded-lg hover:bg-accent-error-600 transition-colors shadow-md hover:shadow-lg"
             >
               Retry
               <RefreshCw className="ml-2 h-4 w-4" />
@@ -361,24 +361,24 @@ const UserProfile: React.FC = () => {
       <div className="min-h-screen py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-10 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">My Profile</h1>
-            <p className="mt-2 text-lg text-gray-600">Manage your account settings and preferences</p>
+            <h1 className="text-3xl font-bold text-neutral-900 sm:text-4xl">My Profile</h1>
+            <p className="mt-2 text-lg text-neutral-600">Manage your account settings and preferences</p>
           </div>
 
           {successMessage && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-8 shadow-sm">
+            <div className="bg-accent-success-50 border border-accent-success-200 rounded-xl p-4 mb-8 shadow-sm">
               <div className="flex items-center">
-                <CheckCircle className="h-6 w-6 text-green-500 mr-3 flex-shrink-0" />
-                <p className="text-green-700 font-medium">{successMessage}</p>
+                <CheckCircle className="h-6 w-6 text-accent-success-500 mr-3 flex-shrink-0" />
+                <p className="text-accent-success-700 font-medium">{successMessage}</p>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-8 shadow-sm">
+            <div className="bg-accent-error-50 border border-accent-error-200 rounded-xl p-4 mb-8 shadow-sm">
               <div className="flex items-center">
-                <AlertCircle className="h-6 w-6 text-red-500 mr-3 flex-shrink-0" />
-                <p className="text-red-700 font-medium">{error}</p>
+                <AlertCircle className="h-6 w-6 text-accent-error-500 mr-3 flex-shrink-0" />
+                <p className="text-accent-error-700 font-medium">{error}</p>
               </div>
             </div>
           )}
@@ -402,10 +402,10 @@ const UserProfile: React.FC = () => {
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadLoading}
-                      className="absolute bottom-2 right-2 bg-white text-orange-600 p-2 rounded-full shadow-md hover:bg-orange-50 transition-colors disabled:opacity-50"
+                      className="absolute bottom-2 right-2 bg-white text-primary-600 p-2 rounded-full shadow-md hover:bg-primary-50 transition-colors disabled:opacity-50"
                     >
                       {uploadLoading ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-orange-600"></div>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-600"></div>
                       ) : (
                         <Camera className="h-5 w-5" />
                       )}
@@ -419,15 +419,15 @@ const UserProfile: React.FC = () => {
                     />
                   </div>
                   <div className="text-center sm:text-left">
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-2xl font-bold text-neutral-900">
                       {profile.first_name} {profile.last_name}
                     </h2>
-                    <p className="text-lg text-orange-600 mt-1">@{profile.username}</p>
-                    <p className="text-gray-500 mt-1">
+                    <p className="text-lg text-primary-600 mt-1">@{profile.username}</p>
+                    <p className="text-neutral-500 mt-1">
                       Member since {formatDate(profile.date_joined)}
                     </p>
                     {profile.business_type && (
-                      <span className="inline-block px-3 py-1 bg-orange-100 text-orange-800 text-sm font-medium rounded-full mt-3">
+                      <span className="inline-block px-3 py-1 bg-primary-100 text-primary-800 text-sm font-medium rounded-full mt-3">
                         {profile.business_type}
                       </span>
                     )}
@@ -439,18 +439,18 @@ const UserProfile: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                    <User className="h-6 w-6 mr-2 text-orange-600" />
+                  <h3 className="text-xl font-semibold text-neutral-900 flex items-center">
+                    <User className="h-6 w-6 mr-2 text-primary-600" />
                     Personal Information
                   </h3>
                   <button
                     onClick={() => handleEditToggle('personal')}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
                   >
                     {editMode.personal ? (
-                      <X className="h-5 w-5 text-gray-600" />
+                      <X className="h-5 w-5 text-neutral-600" />
                     ) : (
-                      <Edit3 className="h-5 w-5 text-orange-600" />
+                      <Edit3 className="h-5 w-5 text-primary-600" />
                     )}
                   </button>
                 </div>
@@ -459,60 +459,60 @@ const UserProfile: React.FC = () => {
                   <div className="space-y-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           First Name
                         </label>
                         <input
                           type="text"
                           value={personalForm.first_name}
                           onChange={(e) => setPersonalForm(prev => ({ ...prev, first_name: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           Last Name
                         </label>
                         <input
                           type="text"
                           value={personalForm.last_name}
                           onChange={(e) => setPersonalForm(prev => ({ ...prev, last_name: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
                         Bio
                       </label>
                       <textarea
                         value={personalForm.bio}
                         onChange={(e) => setPersonalForm(prev => ({ ...prev, bio: e.target.value }))}
                         rows={3}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         placeholder="Tell us about yourself..."
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           Date of Birth
                         </label>
                         <input
                           type="date"
                           value={personalForm.date_of_birth}
                           onChange={(e) => setPersonalForm(prev => ({ ...prev, date_of_birth: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           Gender
                         </label>
                         <select
                           value={personalForm.gender}
                           onChange={(e) => setPersonalForm(prev => ({ ...prev, gender: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         >
                           <option value="">Select Gender</option>
                           <option value="male">Male</option>
@@ -526,7 +526,7 @@ const UserProfile: React.FC = () => {
                       <button
                         onClick={handleSavePersonal}
                         disabled={saveLoading}
-                        className="inline-flex items-center px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors shadow-sm disabled:opacity-50"
+                        className="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
                       >
                         {saveLoading ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -537,33 +537,33 @@ const UserProfile: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleEditToggle('personal')}
-                        className="inline-flex items-center px-5 py-2.5 text-gray-700 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                        className="inline-flex items-center px-5 py-2.5 text-neutral-700 bg-neutral-100 font-medium rounded-lg hover:bg-neutral-200 transition-colors"
                       >
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-neutral-600">
                     <div>
-                      <p className="text-sm font-medium text-gray-500">First Name</p>
-                      <p className="text-gray-900 mt-1">{profile.first_name || 'Not provided'}</p>
+                      <p className="text-sm font-medium text-neutral-500">First Name</p>
+                      <p className="text-neutral-900 mt-1">{profile.first_name || 'Not provided'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Last Name</p>
-                      <p className="text-gray-900 mt-1">{profile.last_name || 'Not provided'}</p>
+                      <p className="text-sm font-medium text-neutral-500">Last Name</p>
+                      <p className="text-neutral-900 mt-1">{profile.last_name || 'Not provided'}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <p className="text-sm font-medium text-gray-500">Bio</p>
-                      <p className="text-gray-900 mt-1">{profile.bio || 'No bio provided'}</p>
+                      <p className="text-sm font-medium text-neutral-500">Bio</p>
+                      <p className="text-neutral-900 mt-1">{profile.bio || 'No bio provided'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Date of Birth</p>
-                      <p className="text-gray-900 mt-1">{profile.date_of_birth ? formatDate(profile.date_of_birth) : 'Not provided'}</p>
+                      <p className="text-sm font-medium text-neutral-500">Date of Birth</p>
+                      <p className="text-neutral-900 mt-1">{profile.date_of_birth ? formatDate(profile.date_of_birth) : 'Not provided'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Gender</p>
-                      <p className="text-gray-900 mt-1 capitalize">{profile.gender || 'Not specified'}</p>
+                      <p className="text-sm font-medium text-neutral-500">Gender</p>
+                      <p className="text-neutral-900 mt-1 capitalize">{profile.gender || 'Not specified'}</p>
                     </div>
                   </div>
                 )}
@@ -573,18 +573,18 @@ const UserProfile: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                    <Mail className="h-6 w-6 mr-2 text-orange-600" />
+                  <h3 className="text-xl font-semibold text-neutral-900 flex items-center">
+                    <Mail className="h-6 w-6 mr-2 text-primary-600" />
                     Contact Information
                   </h3>
                   <button
                     onClick={() => handleEditToggle('contact')}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
                   >
                     {editMode.contact ? (
-                      <X className="h-5 w-5 text-gray-600" />
+                      <X className="h-5 w-5 text-neutral-600" />
                     ) : (
-                      <Edit3 className="h-5 w-5 text-orange-600" />
+                      <Edit3 className="h-5 w-5 text-primary-600" />
                     )}
                   </button>
                 </div>
@@ -592,84 +592,84 @@ const UserProfile: React.FC = () => {
                 {editMode.contact ? (
                   <div className="space-y-5">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
                         Email Address
                       </label>
                       <input
                         type="email"
                         value={profile.email}
                         disabled
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-500 cursor-not-allowed"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                      <p className="text-xs text-neutral-500 mt-1">Email cannot be changed</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
                         Phone Number
                       </label>
                       <input
                         type="tel"
                         value={contactForm.phone}
                         onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
                         Address
                       </label>
                       <input
                         type="text"
                         value={contactForm.address}
                         onChange={(e) => setContactForm(prev => ({ ...prev, address: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           City
                         </label>
                         <input
                           type="text"
                           value={contactForm.city}
                           onChange={(e) => setContactForm(prev => ({ ...prev, city: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           State/Province
                         </label>
                         <input
                           type="text"
                           value={contactForm.state}
                           onChange={(e) => setContactForm(prev => ({ ...prev, state: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           ZIP Code
                         </label>
                         <input
                           type="text"
                           value={contactForm.zip_code}
                           onChange={(e) => setContactForm(prev => ({ ...prev, zip_code: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           Country
                         </label>
                         <input
                           type="text"
                           value={contactForm.country}
                           onChange={(e) => setContactForm(prev => ({ ...prev, country: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                          className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                         />
                       </div>
                     </div>
@@ -677,7 +677,7 @@ const UserProfile: React.FC = () => {
                       <button
                         onClick={handleSaveContact}
                         disabled={saveLoading}
-                        className="inline-flex items-center px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors shadow-sm disabled:opacity-50"
+                        className="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
                       >
                         {saveLoading ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -688,25 +688,25 @@ const UserProfile: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleEditToggle('contact')}
-                        className="inline-flex items-center px-5 py-2.5 text-gray-700 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                        className="inline-flex items-center px-5 py-2.5 text-neutral-700 bg-neutral-100 font-medium rounded-lg hover:bg-neutral-200 transition-colors"
                       >
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4 text-gray-600">
+                  <div className="space-y-4 text-neutral-600">
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Email</p>
-                      <p className="text-gray-900 mt-1">{profile.email}</p>
+                      <p className="text-sm font-medium text-neutral-500">Email</p>
+                      <p className="text-neutral-900 mt-1">{profile.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Phone</p>
-                      <p className="text-gray-900 mt-1">{profile.phone || 'Not provided'}</p>
+                      <p className="text-sm font-medium text-neutral-500">Phone</p>
+                      <p className="text-neutral-900 mt-1">{profile.phone || 'Not provided'}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-gray-500">Address</p>
-                      <p className="text-gray-900 mt-1">
+                      <p className="text-sm font-medium text-neutral-500">Address</p>
+                      <p className="text-neutral-900 mt-1">
                         {[profile.address, profile.city, profile.state, profile.zip_code, profile.country]
                           .filter(Boolean)
                           .join(', ') || 'Not provided'}
@@ -720,18 +720,18 @@ const UserProfile: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                    <Bell className="h-6 w-6 mr-2 text-orange-600" />
+                  <h3 className="text-xl font-semibold text-neutral-900 flex items-center">
+                    <Bell className="h-6 w-6 mr-2 text-primary-600" />
                     Notification Preferences
                   </h3>
                   <button
                     onClick={() => handleEditToggle('notifications')}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
                   >
                     {editMode.notifications ? (
-                      <X className="h-5 w-5 text-gray-600" />
+                      <X className="h-5 w-5 text-neutral-600" />
                     ) : (
-                      <Edit3 className="h-5 w-5 text-orange-600" />
+                      <Edit3 className="h-5 w-5 text-primary-600" />
                     )}
                   </button>
                 </div>
@@ -744,10 +744,10 @@ const UserProfile: React.FC = () => {
                       { key: 'marketing_emails', label: 'Marketing Emails', description: 'Receive promotional offers and updates' },
                       { key: 'order_updates', label: 'Order Updates', description: 'Receive notifications about your orders' }
                     ].map((item) => (
-                      <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div key={item.key} className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
                         <div>
-                          <p className="font-medium text-gray-900">{item.label}</p>
-                          <p className="text-sm text-gray-500 mt-1">{item.description}</p>
+                          <p className="font-medium text-neutral-900">{item.label}</p>
+                          <p className="text-sm text-neutral-500 mt-1">{item.description}</p>
                         </div>
                         <input
                           type="checkbox"
@@ -756,7 +756,7 @@ const UserProfile: React.FC = () => {
                             ...prev, 
                             [item.key]: e.target.checked 
                           }))}
-                          className="h-5 w-5 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                          className="h-5 w-5 text-primary-600 focus:ring-orange-500 border-neutral-300 rounded"
                         />
                       </div>
                     ))}
@@ -764,7 +764,7 @@ const UserProfile: React.FC = () => {
                       <button
                         onClick={handleSaveNotifications}
                         disabled={saveLoading}
-                        className="inline-flex items-center px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors shadow-sm disabled:opacity-50"
+                        className="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
                       >
                         {saveLoading ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -775,7 +775,7 @@ const UserProfile: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleEditToggle('notifications')}
-                        className="inline-flex items-center px-5 py-2.5 text-gray-700 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                        className="inline-flex items-center px-5 py-2.5 text-neutral-700 bg-neutral-100 font-medium rounded-lg hover:bg-neutral-200 transition-colors"
                       >
                         Cancel
                       </button>
@@ -789,12 +789,12 @@ const UserProfile: React.FC = () => {
                       { key: 'marketing_emails', label: 'Marketing Emails' },
                       { key: 'order_updates', label: 'Order Updates' }
                     ].map((item) => (
-                      <div key={item.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                        <p className="text-gray-900 font-medium">{item.label}</p>
+                      <div key={item.key} className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg">
+                        <p className="text-neutral-900 font-medium">{item.label}</p>
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                           profile.notification_preferences?.[item.key as keyof typeof profile.notification_preferences] 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-accent-success-100 text-accent-success-800' 
+                            : 'bg-accent-error-100 text-accent-error-800'
                         }`}>
                           {profile.notification_preferences?.[item.key as keyof typeof profile.notification_preferences] ? 'Enabled' : 'Disabled'}
                         </span>
@@ -808,18 +808,18 @@ const UserProfile: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-xl font-semibold text-gray-900 flex items-center">
-                    <Shield className="h-6 w-6 mr-2 text-orange-600" />
+                  <h3 className="text-xl font-semibold text-neutral-900 flex items-center">
+                    <Shield className="h-6 w-6 mr-2 text-primary-600" />
                     Change Password
                   </h3>
                   <button
                     onClick={() => handleEditToggle('password')}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg hover:bg-neutral-100 transition-colors"
                   >
                     {editMode.password ? (
-                      <X className="h-5 w-5 text-gray-600" />
+                      <X className="h-5 w-5 text-neutral-600" />
                     ) : (
-                      <Edit3 className="h-5 w-5 text-orange-600" />
+                      <Edit3 className="h-5 w-5 text-primary-600" />
                     )}
                   </button>
                 </div>
@@ -832,7 +832,7 @@ const UserProfile: React.FC = () => {
                       { key: 'confirm', label: 'Confirm New Password' }
                     ].map((field) => (
                       <div key={field.key}>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">
                           {field.label}
                         </label>
                         <div className="relative">
@@ -843,7 +843,7 @@ const UserProfile: React.FC = () => {
                               ...prev, 
                               [`${field.key}_password`]: e.target.value 
                             }))}
-                            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition"
+                            className="w-full px-4 py-3 pr-12 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500 transition"
                           />
                           <button
                             type="button"
@@ -854,8 +854,8 @@ const UserProfile: React.FC = () => {
                             className="absolute inset-y-0 right-0 pr-3 flex items-center"
                           >
                             {showPasswords[field.key as keyof typeof showPasswords] ? 
-                              <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                              <Eye className="h-5 w-5 text-gray-400" />}
+                              <EyeOff className="h-5 w-5 text-neutral-400" /> : 
+                              <Eye className="h-5 w-5 text-neutral-400" />}
                           </button>
                         </div>
                       </div>
@@ -864,7 +864,7 @@ const UserProfile: React.FC = () => {
                       <button
                         onClick={handleChangePassword}
                         disabled={saveLoading || !passwordForm.current_password || !passwordForm.new_password || !passwordForm.confirm_password}
-                        className="inline-flex items-center px-5 py-2.5 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors shadow-sm disabled:opacity-50"
+                        className="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
                       >
                         {saveLoading ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -882,15 +882,15 @@ const UserProfile: React.FC = () => {
                             confirm_password: ''
                           });
                         }}
-                        className="inline-flex items-center px-5 py-2.5 text-gray-700 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                        className="inline-flex items-center px-5 py-2.5 text-neutral-700 bg-neutral-100 font-medium rounded-lg hover:bg-neutral-200 transition-colors"
                       >
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 text-center">
+                  <div className="p-4 bg-neutral-50 rounded-lg">
+                    <p className="text-neutral-600 text-center">
                       Click the edit button to change your password. Make sure to use a strong password with at least 8 characters.
                     </p>
                   </div>
@@ -900,8 +900,8 @@ const UserProfile: React.FC = () => {
 
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:shadow-xl">
               <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-5 flex items-center">
-                  <Settings className="h-6 w-6 mr-2 text-orange-600" />
+                <h3 className="text-xl font-semibold text-neutral-900 mb-5 flex items-center">
+                  <Settings className="h-6 w-6 mr-2 text-primary-600" />
                   Quick Actions
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -934,13 +934,13 @@ const UserProfile: React.FC = () => {
                     <button
                       key={index}
                       onClick={() => navigate(action.path)}
-                      className="flex flex-col items-center justify-center p-5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-all group"
+                      className="flex flex-col items-center justify-center p-5 border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-all group"
                     >
-                      <div className="text-orange-600 group-hover:text-orange-700 transition-colors">
+                      <div className="text-primary-600 group-hover:text-primary-700 transition-colors">
                         <action.icon className="h-8 w-8" />
                       </div>
-                      <p className="mt-3 text-gray-900 font-medium">{action.label}</p>
-                      <p className="mt-1 text-gray-500 text-sm">{action.description}</p>
+                      <p className="mt-3 text-neutral-900 font-medium">{action.label}</p>
+                      <p className="mt-1 text-neutral-500 text-sm">{action.description}</p>
                     </button>
                   ))}
                 </div>

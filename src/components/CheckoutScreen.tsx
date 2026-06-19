@@ -8,6 +8,7 @@ import CouponInput from './CouponInput';
 import ProductDeliverabilityCard from './ProductDeliverabilityCard';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { EmptyState } from './ui/empty-state';
 
 export interface Delivery {
   cart: number;
@@ -95,17 +96,19 @@ const Checkout: React.FC = () => {
       <>
         <Navbar />
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-6">
-          <div className="text-center space-y-4 max-w-sm">
-            <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto" />
-            <h2 className="text-xl font-semibold text-gray-900">Your cart is empty</h2>
-            <p className="text-neutral-600">Add items to your cart before proceeding to checkout.</p>
-            <button
-              onClick={() => navigate('/marketplace')}
-              className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-medium"
-            >
-              Continue Shopping
-            </button>
-          </div>
+          <EmptyState
+            icon={ShoppingBag}
+            title="Your cart is empty"
+            description="Add items to your cart before proceeding to checkout."
+            action={
+              <button
+                onClick={() => navigate('/marketplace')}
+                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-medium"
+              >
+                Continue Shopping
+              </button>
+            }
+          />
         </div>
         <Footer />
       </>

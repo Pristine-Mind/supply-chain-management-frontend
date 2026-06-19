@@ -680,7 +680,7 @@ const Products: React.FC = () => {
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
           <div className="flex items-center gap-4">
-            <h2 className="text-3xl font-bold text-gray-900">{t('products_list')}</h2>
+            <h2 className="text-3xl font-bold text-neutral-900">{t('products_list')}</h2>
             {hasActiveFilters && (
               <button
                 onClick={clearAllFilters}
@@ -705,7 +705,7 @@ const Products: React.FC = () => {
             </button>
             <button
               onClick={handleExport}
-              className="flex items-center bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors shadow-sm text-sm font-medium"
+              className="flex items-center bg-accent-success-600 text-white px-6 py-3 rounded-xl hover:bg-accent-success-700 transition-colors shadow-sm text-sm font-medium"
             >
               <FaDownload className="mr-2" size={14} /> {t('export')}
             </button>
@@ -771,7 +771,7 @@ const Products: React.FC = () => {
         </div>
         
         {/* Items per page selector */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-neutral-600">
           <span>Items per page:</span>
           <select
             value={itemsPerPage}
@@ -792,7 +792,7 @@ const Products: React.FC = () => {
       {loading && (
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
-          <span className="ml-2 text-gray-600">Loading products...</span>
+          <span className="ml-2 text-neutral-600">Loading products...</span>
         </div>
       )}
 
@@ -800,8 +800,8 @@ const Products: React.FC = () => {
         {products.map((product) => (
           <div key={product.id} className="group bg-white rounded-xl border border-neutral-200 p-6 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
             <div className="flex items-start justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 pr-2">{product.name}</h3>
-              <div className={`px-2 py-1 rounded-full text-xs font-medium ${product.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              <h3 className="text-lg font-semibold text-neutral-900 line-clamp-2 pr-2">{product.name}</h3>
+              <div className={`px-2 py-1 rounded-full text-xs font-medium ${product.is_active ? 'bg-accent-success-100 text-accent-success-700' : 'bg-accent-error-100 text-accent-error-700'}`}>
                 {product.is_active ? t('active') : t('inactive')}
               </div>
             </div>
@@ -812,21 +812,21 @@ const Products: React.FC = () => {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <span className="text-neutral-500">{t('price')}:</span>
-                  <span className="ml-2 font-semibold text-gray-900">Rs. {product.price.toLocaleString()}</span>
+                  <span className="ml-2 font-semibold text-neutral-900">Rs. {product.price.toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="text-neutral-500">{t('stock')}:</span>
-                  <span className={`ml-2 font-semibold ${product.stock <= product.reorder_level ? 'text-red-600' : 'text-green-600'}`}>
+                  <span className={`ml-2 font-semibold ${product.stock <= product.reorder_level ? 'text-accent-error-600' : 'text-accent-success-600'}`}>
                     {product.stock}
                   </span>
                 </div>
                 <div>
                   <span className="text-neutral-500">{t('sku')}:</span>
-                  <span className="ml-2 font-medium text-gray-700">{product.sku}</span>
+                  <span className="ml-2 font-medium text-neutral-700">{product.sku}</span>
                 </div>
                 <div>
                   <span className="text-neutral-500">{t('category')}:</span>
-                  <span className="ml-2 font-medium text-gray-700">{product.category}</span>
+                  <span className="ml-2 font-medium text-neutral-700">{product.category}</span>
                 </div>
               </div>
             </div>
@@ -835,7 +835,7 @@ const Products: React.FC = () => {
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleView(product)}
-                  className="flex-1 bg-blue-50 text-blue-700 font-medium py-2 px-4 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                  className="flex-1 bg-secondary-50 text-secondary-700 font-medium py-2 px-4 rounded-lg hover:bg-secondary-100 transition-colors text-sm"
                 >
                   {t('view')}
                 </button>
@@ -863,7 +863,7 @@ const Products: React.FC = () => {
                         setQuickUpdateStock({ id: null, value: '' });
                       }}
                       disabled={isUpdatingStock}
-                      className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors"
+                      className="p-2 bg-accent-success-600 text-white rounded-lg hover:bg-accent-success-700 text-sm transition-colors"
                     >
                       {isUpdatingStock ? '...' : <FaCheck size={12} />}
                     </button>
@@ -878,14 +878,14 @@ const Products: React.FC = () => {
                   <>
                     <button
                       onClick={() => handleQuickUpdateStock(product)}
-                      className="flex-1 bg-orange-50 text-orange-700 font-medium py-2 px-3 rounded-lg hover:bg-orange-100 transition-colors text-sm"
+                      className="flex-1 bg-primary-50 text-primary-700 font-medium py-2 px-3 rounded-lg hover:bg-primary-100 transition-colors text-sm"
                     >
                       {t('update_stock')}
                     </button>
                     <button
                       onClick={() => handleExportStats(product.id)}
                       disabled={exportingProductId === product.id}
-                      className="flex-1 bg-green-50 text-green-700 font-medium py-2 px-3 rounded-lg hover:bg-green-100 transition-colors text-sm flex items-center justify-center"
+                      className="flex-1 bg-accent-success-50 text-accent-success-700 font-medium py-2 px-3 rounded-lg hover:bg-accent-success-100 transition-colors text-sm flex items-center justify-center"
                     >
                       {exportingProductId === product.id ? (
                         <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -909,8 +909,8 @@ const Products: React.FC = () => {
                   disabled={creatingMarketplaceProduct === product.id || !product.is_active}
                   className={`flex-1 font-medium py-2 px-3 rounded-lg transition-colors text-sm flex items-center justify-center ${
                     !product.is_active 
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                      ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                      : 'bg-secondary-50 text-secondary-700 hover:bg-secondary-100'
                   }`}
                 >
                   {creatingMarketplaceProduct === product.id ? (
@@ -927,14 +927,14 @@ const Products: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleOpenDiscountDialog(product)}
-                  className="flex-1 bg-yellow-50 text-yellow-700 font-medium py-2 px-3 rounded-lg hover:bg-yellow-100 transition-colors text-sm flex items-center justify-center"
+                  className="flex-1 bg-accent-warning-50 text-accent-warning-700 font-medium py-2 px-3 rounded-lg hover:bg-accent-warning-100 transition-colors text-sm flex items-center justify-center"
                 >
                   <Tag className="mr-1" size={14} />
                   Discount
                 </button>
                 <Link
                   to={`/inventory-analytics/products/${product.id}`}
-                  className="flex-1 bg-indigo-50 text-indigo-700 font-medium py-2 px-3 rounded-lg hover:bg-indigo-100 transition-colors text-sm flex items-center justify-center"
+                  className="flex-1 bg-secondary-50 text-secondary-700 font-medium py-2 px-3 rounded-lg hover:bg-secondary-100 transition-colors text-sm flex items-center justify-center"
                 >
                   📊 Analytics
                 </Link>
@@ -947,7 +947,7 @@ const Products: React.FC = () => {
       {/* Pagination Controls */}
       {!loading && totalPages > 1 && (
         <div className="mt-8 flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-700">
+          <div className="flex items-center text-sm text-neutral-700">
             <span>
               Showing {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)} to{' '}
               {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} products
@@ -958,7 +958,7 @@ const Products: React.FC = () => {
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 border border-neutral-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-50"
             >
               Previous
             </button>
@@ -983,7 +983,7 @@ const Products: React.FC = () => {
                     className={`px-3 py-1 border text-sm ${
                       currentPage === pageNum
                         ? 'bg-primary-600 text-white border-primary-600'
-                        : 'border-gray-300 hover:bg-gray-50'
+                        : 'border-neutral-300 hover:bg-neutral-50'
                     }`}
                   >
                     {pageNum}
@@ -995,7 +995,7 @@ const Products: React.FC = () => {
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 border border-neutral-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-50"
             >
               Next
             </button>
@@ -1166,8 +1166,8 @@ const Products: React.FC = () => {
                   disabled={creatingMarketplaceProduct === viewingProductId.id || !viewingProductId.is_active}
                   className={`w-full font-medium py-3 px-4 rounded-lg transition-colors text-sm flex items-center justify-center ${
                     !viewingProductId.is_active 
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                      ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+                      : 'bg-secondary-600 text-white hover:bg-secondary-700'
                   }`}
                 >
                   {creatingMarketplaceProduct === viewingProductId.id ? (
@@ -1183,7 +1183,7 @@ const Products: React.FC = () => {
                   )}
                 </button>
                 {!viewingProductId.is_active && (
-                  <p className="text-sm text-gray-500 mt-2 text-center">Product must be active to create marketplace listing</p>
+                  <p className="text-sm text-neutral-500 mt-2 text-center">Product must be active to create marketplace listing</p>
                 )}
               </div>
             </div>
@@ -1510,27 +1510,27 @@ const Products: React.FC = () => {
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
           <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] bg-white rounded-xl shadow-lg p-6 max-w-md w-full z-50">
-            <Dialog.Title className="text-xl font-semibold text-gray-900 mb-4">
+            <Dialog.Title className="text-xl font-semibold text-neutral-900 mb-4">
               {t('manage_discount')} - {selectedProductForDiscount?.name}
             </Dialog.Title>
 
             {discountLoading && (
               <div className="flex items-center justify-center py-8">
                 <Loader className="animate-spin mr-2" size={20} />
-                <span className="text-gray-600">Loading discount info...</span>
+                <span className="text-neutral-600">Loading discount info...</span>
               </div>
             )}
 
             {!discountLoading && (
               <div className="space-y-4">
                 {discountInfo && discountInfo.discount_percentage > 0 && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-green-800">
+                  <div className="bg-accent-success-50 border border-accent-success-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-accent-success-800">
                       <CheckCircle className="inline mr-2" size={16} />
                       Current discount: <strong>{discountInfo.discount_percentage}%</strong>
                     </p>
                     {discountInfo.listed_price && (
-                      <p className="text-xs text-green-700 mt-2">
+                      <p className="text-xs text-accent-success-700 mt-2">
                         Price after discount: <strong>Rs. {discountInfo.discounted_price.toLocaleString()}</strong>
                       </p>
                     )}
@@ -1538,8 +1538,8 @@ const Products: React.FC = () => {
                 )}
 
                 {discountError && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p className="text-sm text-red-800">
+                  <div className="bg-accent-error-50 border border-accent-error-200 rounded-lg p-4">
+                    <p className="text-sm text-accent-error-800">
                       <AlertCircle className="inline mr-2" size={16} />
                       {discountError}
                     </p>
@@ -1547,8 +1547,8 @@ const Products: React.FC = () => {
                 )}
 
                 {discountSuccess && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p className="text-sm text-green-800">
+                  <div className="bg-accent-success-50 border border-accent-success-200 rounded-lg p-4">
+                    <p className="text-sm text-accent-success-800">
                       <CheckCircle className="inline mr-2" size={16} />
                       {discountSuccess}
                     </p>
@@ -1556,7 +1556,7 @@ const Products: React.FC = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Discount Percentage (%)
                   </label>
                   <input
@@ -1570,8 +1570,8 @@ const Products: React.FC = () => {
                     placeholder="Enter discount percentage"
                   />
                   {discountPercentage && !isNaN(parseFloat(discountPercentage)) && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded-lg text-sm">
-                      <p className="text-gray-600">
+                    <div className="mt-3 p-3 bg-neutral-50 rounded-lg text-sm">
+                      <p className="text-neutral-600">
                         {selectedProductForDiscount && (
                           <>
                             Original price: <strong>Rs. {selectedProductForDiscount.price.toLocaleString()}</strong>
@@ -1586,13 +1586,13 @@ const Products: React.FC = () => {
                   )}
                   
                   {discountPercentage && parseFloat(discountPercentage) > 50 && parseFloat(discountPercentage) < 100 && (
-                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                    <div className="mt-2 p-2 bg-accent-warning-50 border border-accent-warning-200 rounded text-xs text-accent-warning-800">
                       ⚠️ High discount ({parseFloat(discountPercentage).toFixed(2)}%). Verify before applying.
                     </div>
                   )}
                   
                   {discountPercentage && parseFloat(discountPercentage) >= 80 && parseFloat(discountPercentage) < 100 && (
-                    <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800">
+                    <div className="mt-2 p-2 bg-primary-50 border border-primary-200 rounded text-xs text-primary-800">
                       ⚠️ Very high discount! Confirm you want to proceed.
                     </div>
                   )}
@@ -1608,14 +1608,14 @@ const Products: React.FC = () => {
                       setDiscountError('');
                       setDiscountSuccess('');
                     }}
-                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleApplyDiscount}
                     disabled={discountLoading || !discountPercentage}
-                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 rounded-lg transition-colors flex items-center justify-center"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-300 rounded-lg transition-colors flex items-center justify-center"
                   >
                     {discountLoading ? (
                       <>
@@ -1630,7 +1630,7 @@ const Products: React.FC = () => {
               </div>
             )}
 
-            <Dialog.Close className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+            <Dialog.Close className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600">
               <X size={20} />
             </Dialog.Close>
           </Dialog.Content>

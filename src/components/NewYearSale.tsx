@@ -14,6 +14,8 @@ import NayaBarshaBanner from './NayaBarshaBanner';
 import ProductCard from './ProductCard';
 import Footer from './Footer';
 import LazySection from './ui/LazySection';
+import { EmptyState } from './ui/empty-state';
+import { Spinner } from './ui/spinner';
 
 import logo from '../assets/logo.png';
 
@@ -230,14 +232,14 @@ export default function NewYearSale() {
             <img src={logo} alt="Logo" className="h-14 w-auto" />
             <div>
               <span className="text-2xl font-bold text-neutral-900 tracking-tight">Naya Barsha</span>
-              <p className="text-xs text-amber-600 -mt-1">2083 Sale</p>
+              <p className="text-xs text-accent-warning-600 -mt-1">2083 Sale</p>
             </div>
           </button>
 
           {/* Search Bar */}
           <div className="hidden md:flex flex-1 max-w-xl mx-12">
             <div className="relative w-full">
-              <div className="flex items-center bg-neutral-100 border border-neutral-300 rounded-3xl px-6 py-3.5 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all">
+              <div className="flex items-center bg-neutral-100 border border-neutral-300 rounded-3xl px-6 py-3.5 focus-within:border-accent-warning-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all">
                 <MagnifyingGlassIcon className="w-5 h-5 text-neutral-500 mr-3" />
                 <input
                   type="text"
@@ -249,7 +251,7 @@ export default function NewYearSale() {
                 <button
                   onClick={startVoiceSearch}
                   className={`ml-2 p-2.5 rounded-2xl transition-all ${
-                    isListening ? 'text-red-500 animate-pulse' : 'hover:bg-neutral-200 text-neutral-500'
+                    isListening ? 'text-accent-error-500 animate-pulse' : 'hover:bg-neutral-200 text-neutral-500'
                   }`}
                 >
                   <Mic className="w-5 h-5" />
@@ -267,7 +269,7 @@ export default function NewYearSale() {
             ) : (
               <button
                 onClick={() => navigate('/login')}
-                className="font-medium text-neutral-700 hover:text-amber-600 transition-colors"
+                className="font-medium text-neutral-700 hover:text-accent-warning-600 transition-colors"
               >
                 Sign In
               </button>
@@ -290,22 +292,22 @@ export default function NewYearSale() {
       {/* Hero Section - Festive White Theme */}
       <div className="relative bg-gradient-to-br from-amber-50 via-white to-orange-50 py-24 overflow-hidden">
         <div className="container mx-auto px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white shadow-sm border border-amber-200 px-6 py-2.5 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-white shadow-sm border border-accent-warning-200 px-6 py-2.5 rounded-full mb-6">
             <span className="text-2xl">🎊</span>
-            <span className="uppercase tracking-widest text-sm font-semibold text-amber-700">Naya Barsha 2083</span>
+            <span className="uppercase tracking-widest text-sm font-semibold text-accent-warning-700">Naya Barsha 2083</span>
           </div>
 
           <h1 className="text-6xl md:text-7xl font-bold text-neutral-900 leading-none tracking-tighter mb-6">
-            Grand New Year <span className="text-amber-600">Sale</span>
+            Grand New Year <span className="text-accent-warning-600">Sale</span>
           </h1>
 
           <p className="max-w-2xl mx-auto text-xl text-neutral-600 mb-10">
-            Celebrate with unbeatable discounts. Up to <span className="font-semibold text-amber-600">40% OFF</span> on selected items.
+            Celebrate with unbeatable discounts. Up to <span className="font-semibold text-accent-warning-600">40% OFF</span> on selected items.
           </p>
 
           <button
             onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-12 py-4 rounded-3xl text-lg transition-all active:scale-95 shadow-lg shadow-amber-200"
+            className="bg-accent-warning-600 hover:bg-accent-warning-700 text-white font-semibold px-12 py-4 rounded-3xl text-lg transition-all active:scale-95 shadow-lg shadow-amber-200"
           >
             Explore Deals Now
           </button>
@@ -327,7 +329,7 @@ export default function NewYearSale() {
                 onClick={() => setSelectedSale(sale)}
                 className={`px-8 py-4 rounded-3xl font-medium whitespace-nowrap transition-all flex-shrink-0 text-lg ${
                   selectedSale?.id === sale.id
-                    ? 'bg-amber-600 text-white shadow-md'
+                    ? 'bg-accent-warning-600 text-white shadow-md'
                     : 'bg-white border border-neutral-200 hover:border-neutral-300 text-neutral-700'
                 }`}
               >
@@ -349,7 +351,7 @@ export default function NewYearSale() {
                 {(minDiscount || maxDiscount || saleStatus) && (
                   <button
                     onClick={clearFilters}
-                    className="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center gap-1"
+                    className="text-accent-warning-600 hover:text-accent-warning-700 text-sm font-medium flex items-center gap-1"
                   >
                     <X className="w-4 h-4" /> Clear
                   </button>
@@ -365,14 +367,14 @@ export default function NewYearSale() {
                     placeholder="Min"
                     value={minDiscount}
                     onChange={(e) => setMinDiscount(e.target.value)}
-                    className="w-full px-5 py-4 border border-neutral-300 rounded-2xl focus:outline-none focus:border-amber-500"
+                    className="w-full px-5 py-4 border border-neutral-300 rounded-2xl focus:outline-none focus:border-accent-warning-500"
                   />
                   <input
                     type="number"
                     placeholder="Max"
                     value={maxDiscount}
                     onChange={(e) => setMaxDiscount(e.target.value)}
-                    className="w-full px-5 py-4 border border-neutral-300 rounded-2xl focus:outline-none focus:border-amber-500"
+                    className="w-full px-5 py-4 border border-neutral-300 rounded-2xl focus:outline-none focus:border-accent-warning-500"
                   />
                 </div>
               </div>
@@ -406,7 +408,7 @@ export default function NewYearSale() {
             {/* Loading State */}
             {loading && products.length === 0 && (
               <div className="flex flex-col items-center justify-center py-28">
-                <div className="animate-spin rounded-full h-14 w-14 border-4 border-amber-600 border-t-transparent"></div>
+                <Spinner size="lg" color="primary" />
                 <p className="mt-6 text-neutral-600">Finding the best deals for you...</p>
               </div>
             )}
@@ -426,17 +428,18 @@ export default function NewYearSale() {
 
             {/* Empty State */}
             {!loading && products.length === 0 && (
-              <div className="text-center py-28">
-                <div className="text-7xl mb-6">🪔</div>
-                <h3 className="text-2xl font-medium text-neutral-700 mb-3">No products found</h3>
-                <p className="text-neutral-500 mb-8">Try adjusting your filters</p>
-                <button
-                  onClick={clearFilters}
-                  className="px-10 py-3.5 bg-amber-600 text-white rounded-3xl hover:bg-amber-700 transition-colors"
-                >
-                  Clear Filters
-                </button>
-              </div>
+              <EmptyState
+                title="No products found"
+                description="Try adjusting your filters"
+                action={
+                  <button
+                    onClick={clearFilters}
+                    className="px-10 py-3.5 bg-accent-warning-600 text-white rounded-3xl hover:bg-accent-warning-700 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                }
+              />
             )}
           </div>
         </div>

@@ -22,6 +22,8 @@ import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
 import SEOHead from './SEOHead';
 import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
+import { EmptyState } from './ui/empty-state';
+import { Badge } from './ui/badge';
 
 import logo from '../assets/logo.png';
 
@@ -488,19 +490,19 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
           
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {hasOffer && (
-              <div className="bg-accent-error-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+              <Badge variant="discount" size="sm" className="shadow-sm">
                 {product.percent_off}% OFF
-              </div>
+              </Badge>
             )}
             {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
-              <div className="bg-accent-warning-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm">
+              <Badge variant="warning" size="sm" className="shadow-sm">
                 Only {product.product_details.stock} left
-              </div>
+              </Badge>
             )}
             {product.is_delivery_free && (
-              <div className="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
-                <span>🚚</span> Free Delivery
-              </div>
+              <Badge variant="success" size="sm" className="shadow-sm">
+                🚚 Free Delivery
+              </Badge>
             )}
           </div>
 
@@ -551,7 +553,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                       </span>
                     )}
                     {pricing.isB2BPrice && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                      <span className="text-xs bg-secondary-100 text-secondary-800 px-2 py-1 rounded-full font-medium">
                         B2B
                       </span>
                     )}
@@ -616,12 +618,12 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
               key={index}
               className="bg-white rounded-xl shadow-sm overflow-hidden animate-pulse"
             >
-              <div className="h-48 bg-gray-200" />
+              <div className="h-48 bg-neutral-200" />
               <div className="p-4 space-y-3">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
-                <div className="h-6 bg-gray-200 rounded w-1/3" />
-                <div className="h-10 bg-gray-200 rounded" />
+                <div className="h-4 bg-neutral-200 rounded w-3/4" />
+                <div className="h-4 bg-neutral-200 rounded w-1/2" />
+                <div className="h-6 bg-neutral-200 rounded w-1/3" />
+                <div className="h-10 bg-neutral-200 rounded" />
               </div>
             </div>
           ))}
@@ -634,8 +636,8 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <div className="text-6xl mb-4">🔍</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Category Not Found</h1>
-        <p className="text-gray-600 mb-6">The category you're looking for doesn't exist.</p>
+        <h1 className="text-2xl font-bold text-neutral-900 mb-2">Category Not Found</h1>
+        <p className="text-neutral-600 mb-6">The category you're looking for doesn't exist.</p>
         <button
           onClick={() => navigate('/marketplace/all-products')}
           className="px-6 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
@@ -788,17 +790,17 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
 
           <div className="flex-1">
             {(selectedPriceRange !== 'all' || selectedRating !== 'all' || searchTerm || minPrice || maxPrice || minOrder || selectedCity || selectedBusinessType) && (
-              <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-lg">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium text-orange-800">Active Filters:</span>
+                  <span className="text-sm font-medium text-primary-800">Active Filters:</span>
                   
                   {searchTerm && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-100 text-primary-800 text-sm rounded-full">
                       <Search className="w-3 h-3" />
                       Search: "{searchTerm}"
                       <button
                         onClick={() => {setSearchTerm(''); setCurrentPage(1);}}
-                        className="ml-1 hover:text-orange-900"
+                        className="ml-1 hover:text-primary-900"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -806,12 +808,12 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                   )}
 
                   {minPrice && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent-success-100 text-accent-success-800 text-sm rounded-full">
                       <DollarSign className="w-3 h-3" />
                       Min: ₹{minPrice}
                       <button
                         onClick={() => {setMinPrice(''); setCurrentPage(1);}}
-                        className="ml-1 hover:text-green-900"
+                        className="ml-1 hover:text-accent-success-900"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -819,12 +821,12 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                   )}
 
                   {maxPrice && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-accent-success-100 text-accent-success-800 text-sm rounded-full">
                       <DollarSign className="w-3 h-3" />
                       Max: ₹{maxPrice}
                       <button
                         onClick={() => {setMaxPrice(''); setCurrentPage(1);}}
-                        className="ml-1 hover:text-green-900"
+                        className="ml-1 hover:text-accent-success-900"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -833,7 +835,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                   
                   <button
                     onClick={clearAllFilters}
-                    className="px-3 py-1 bg-orange-600 text-white text-sm rounded-full hover:bg-orange-700 transition-colors"
+                    className="px-3 py-1 bg-primary-600 text-white text-sm rounded-full hover:bg-primary-700 transition-colors"
                   >
                     Clear All
                   </button>
@@ -842,11 +844,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             )}
 
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600">{error}</p>
+              <div className="mb-6 p-4 bg-accent-error-50 border border-accent-error-200 rounded-lg">
+                <p className="text-accent-error-600">{error}</p>
                 <button
                   onClick={fetchProducts}
-                  className="mt-2 text-red-600 hover:text-red-800 underline"
+                  className="mt-2 text-accent-error-600 hover:text-accent-error-800 underline"
                 >
                   Try again
                 </button>
@@ -854,23 +856,19 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
             )}
 
             {products.length === 0 && !loading ? (
-              <div className="text-center py-12">
-                <div className="max-w-md mx-auto">
-                  <div className="bg-gray-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-                  <p className="text-gray-600 mb-4">
-                    Try adjusting your search criteria or browse different categories.
-                  </p>
+              <EmptyState
+                icon={Search}
+                title="No products found"
+                description="Try adjusting your search criteria or browse different categories."
+                action={
                   <button
                     onClick={clearAllFilters}
-                    className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"
+                    className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition-colors"
                   >
                     Clear Filters
                   </button>
-                </div>
-              </div>
+                }
+              />
             ) : (
               <>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
@@ -893,14 +891,14 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                     <div className="flex items-center gap-2 ml-2">
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-orange-600 text-white' : 'bg-white border'}`}
+                        className={`p-2 rounded-md ${viewMode === 'grid' ? 'bg-primary-600 text-white' : 'bg-white border'}`}
                         aria-label="Grid view"
                       >
                         <Grid3X3 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-orange-600 text-white' : 'bg-white border'}`}
+                        className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-primary-600 text-white' : 'bg-white border'}`}
                         aria-label="List view"
                       >
                         <List className="w-4 h-4" />
@@ -943,7 +941,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                           disabled={currentPage === 1}
                           aria-label="Previous page"
-                          className="p-2 rounded-lg border border-gray-300 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="p-2 rounded-lg border border-neutral-300 hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <ChevronLeft className="w-5 h-5" />
                         </button>
@@ -964,8 +962,8 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                               aria-current={currentPage === pageNumber}
                               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                                 currentPage === pageNumber
-                                  ? 'bg-orange-600 text-white'
-                                  : 'border border-gray-300 hover:bg-orange-50'
+                                  ? 'bg-primary-600 text-white'
+                                  : 'border border-neutral-300 hover:bg-primary-50'
                               }`}
                             >
                               {pageNumber}
@@ -977,7 +975,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                           onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                           disabled={currentPage === totalPages}
                           aria-label="Next page"
-                          className="p-2 rounded-lg border border-gray-300 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="p-2 rounded-lg border border-neutral-300 hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <ChevronRight className="w-5 h-5" />
                         </button>
@@ -997,7 +995,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
           <Dialog.Content className="fixed top-0 left-0 right-0 bg-white p-4 z-50">
             <div className="flex items-center gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -1009,7 +1007,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                       setShowMobileSearch(false);
                     }
                   }}
-                  className="pl-10 pr-4 py-3 w-full border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="pl-10 pr-4 py-3 w-full border-2 border-neutral-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-primary-500"
                   autoFocus
                 />
               </div>
@@ -1018,13 +1016,13 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                   handleSearch();
                   setShowMobileSearch(false);
                 }}
-                className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors"
+                className="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors"
               >
                 Search
               </button>
               <button
                 onClick={() => setShowMobileSearch(false)}
-                className="p-2 text-gray-600 hover:text-orange-600"
+                className="p-2 text-neutral-600 hover:text-primary-600"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -1043,16 +1041,16 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
       />
 
       {message && (
-        <div className="fixed top-4 right-4 z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-4 flex items-center gap-3">
-          <div className="text-green-600">
+        <div className="fixed top-4 right-4 z-50 bg-white border border-neutral-200 rounded-lg shadow-lg p-4 flex items-center gap-3">
+          <div className="text-accent-success-600">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
           </div>
-          <p className="text-gray-900">{message.text}</p>
+          <p className="text-neutral-900">{message.text}</p>
           <button
             onClick={() => setMessage(null)}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-neutral-400 hover:text-neutral-600"
           >
             <X className="w-4 h-4" />
           </button>

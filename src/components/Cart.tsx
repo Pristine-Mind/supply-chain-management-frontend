@@ -18,6 +18,8 @@ import LoginModal from './auth/LoginModal';
 import ProductDeliverabilityCard from './ProductDeliverabilityCard';
 import Footer from './Footer';
 import logo from '../assets/logo.png';
+import { EmptyState } from './ui/empty-state';
+import { Spinner } from './ui/spinner';
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
@@ -164,31 +166,28 @@ const Cart: React.FC = () => {
         {/* Empty Cart Content */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center space-y-6">
-            <div className="flex justify-center mb-8">
-              <div className="bg-neutral-100 rounded-2xl p-12">
-                <ShoppingBag className="w-20 h-20 text-neutral-400" />
-              </div>
-            </div>
-            
-            <h2 className="text-3xl font-bold text-neutral-900 mb-4">Your cart is empty</h2>
-            <p className="text-neutral-600 mb-8 max-w-md mx-auto">
-              Discover amazing products from trusted sellers across Nepal. Start your shopping journey today!
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-              <button
-                onClick={() => navigate('/marketplace')}
-                className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
-              >
-                Browse Products
-              </button>
-              <button
-                onClick={() => navigate('/marketplace/all-products')}
-                className="flex-1 bg-white border border-neutral-200 text-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-50 hover:border-neutral-300 transition-colors font-medium"
-              >
-                View All Products
-              </button>
-            </div>
+            <EmptyState
+              icon={ShoppingBag}
+              title="Your cart is empty"
+              description="Discover amazing products from trusted sellers across Nepal. Start your shopping journey today!"
+              action={
+                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+                  <button
+                    onClick={() => navigate('/marketplace')}
+                    className="flex-1 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                  >
+                    Browse Products
+                  </button>
+                  <button
+                    onClick={() => navigate('/marketplace/all-products')}
+                    className="flex-1 bg-white border border-neutral-200 text-neutral-700 px-6 py-3 rounded-lg hover:bg-neutral-50 hover:border-neutral-300 transition-colors font-medium"
+                  >
+                    View All Products
+                  </button>
+                </div>
+              }
+              className="py-0"
+            />
             
             {/* Trust Indicators */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 max-w-2xl mx-auto">
@@ -201,16 +200,16 @@ const Cart: React.FC = () => {
               </div>
               
               <div className="text-center">
-                <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-                  <CreditCard className="w-8 h-8 text-green-600" />
+                <div className="bg-accent-success-100 rounded-full p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                  <CreditCard className="w-8 h-8 text-accent-success-600" />
                 </div>
                 <h4 className="font-semibold text-neutral-900 mb-2">Secure Payment</h4>
                 <p className="text-sm text-neutral-600">Multiple payment options</p>
               </div>
               
               <div className="text-center">
-                <div className="bg-orange-100 rounded-full p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
-                  <Truck className="w-8 h-8 text-orange-600" />
+                <div className="bg-primary-100 rounded-full p-4 w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                  <Truck className="w-8 h-8 text-primary-600" />
                 </div>
                 <h4 className="font-semibold text-neutral-900 mb-2">Fast Delivery</h4>
                 <p className="text-sm text-neutral-600">Same day delivery available</p>
@@ -305,7 +304,7 @@ const Cart: React.FC = () => {
         {cartLoading && (
           <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+              <Spinner size="sm" />
               <p className="text-primary-800">Updating cart...</p>
             </div>
           </div>
@@ -427,7 +426,7 @@ const Cart: React.FC = () => {
                         {/* Loading State */}
                         {loading[item.id] && (
                           <div className="mt-2 flex items-center gap-2 text-sm text-primary-600">
-                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary-600"></div>
+                            <Spinner size="sm" />
                             <span>Updating...</span>
                           </div>
                         )}

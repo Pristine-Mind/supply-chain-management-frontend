@@ -202,29 +202,29 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+    <div className="bg-white rounded-lg border border-neutral-200 p-6 space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <Tag className="w-5 h-5 text-orange-600" />
-        <h3 className="text-lg font-semibold text-gray-900">Discount Manager</h3>
+        <Tag className="w-5 h-5 text-primary-600" />
+        <h3 className="text-lg font-semibold text-neutral-900">Discount Manager</h3>
       </div>
 
       {/* Product Info */}
-      <div className="p-3 bg-gray-50 rounded-lg">
-        <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">
+      <div className="p-3 bg-neutral-50 rounded-lg">
+        <h4 className="text-sm font-semibold text-neutral-900 line-clamp-2 mb-2">
           {productName}
         </h4>
-        <div className="text-sm text-gray-600 space-y-1">
+        <div className="text-sm text-neutral-600 space-y-1">
           <div>
-            Listed Price: <span className="font-bold text-orange-600">Rs. {formatCurrency(listedPrice)}</span>
+            Listed Price: <span className="font-bold text-primary-600">Rs. {formatCurrency(listedPrice)}</span>
           </div>
           {minPrice > 0 && (
             <div>
-              Min Price: <span className="font-bold text-blue-600">Rs. {formatCurrency(minPrice)}</span>
+              Min Price: <span className="font-bold text-secondary-600">Rs. {formatCurrency(minPrice)}</span>
             </div>
           )}
           {maxDiscount < 100 && (
             <div>
-              Max Discount: <span className="font-bold text-purple-600">{maxDiscount}%</span>
+              Max Discount: <span className="font-bold text-secondary-600">{maxDiscount}%</span>
             </div>
           )}
         </div>
@@ -232,26 +232,26 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
 
       {/* Price Validation Error */}
       {!hasValidPrice && (
-        <div className="p-3 bg-red-50 rounded-lg border border-red-200 flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-red-700">{priceValidation.error}</div>
+        <div className="p-3 bg-accent-error-50 rounded-lg border border-accent-error-200 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-accent-error-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-accent-error-700">{priceValidation.error}</div>
         </div>
       )}
 
       {/* Current Discount Info */}
       {discountInfo && (
-        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="p-3 bg-secondary-50 rounded-lg border border-secondary-200">
           <button
             onClick={() => setShowInfo(!showInfo)}
-            className="w-full text-left text-xs font-bold text-blue-900 mb-1 hover:text-blue-700"
+            className="w-full text-left text-xs font-bold text-secondary-900 mb-1 hover:text-secondary-700"
           >
             {showInfo ? '▼' : '▶'} Current Discount Information
           </button>
           {showInfo && (
-            <div className="space-y-1 text-xs text-blue-800 mt-2">
+            <div className="space-y-1 text-xs text-secondary-800 mt-2">
               <div>Discount: {discountInfo.discount_percentage}%</div>
               <div>Discounted Price: Rs. {formatCurrency(discountInfo.discounted_price)}</div>
-              <div className="text-green-600 font-medium">Savings: Rs. {formatCurrency(discountInfo.savings_amount)}</div>
+              <div className="text-accent-success-600 font-medium">Savings: Rs. {formatCurrency(discountInfo.savings_amount)}</div>
             </div>
           )}
         </div>
@@ -259,9 +259,9 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
 
       {/* Discount Input */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-neutral-700">
           Discount Percentage (%)
-          {maxDiscount < 100 && <span className="text-gray-500 text-xs ml-1">(Max: {maxDiscount}%)</span>}
+          {maxDiscount < 100 && <span className="text-neutral-500 text-xs ml-1">(Max: {maxDiscount}%)</span>}
         </label>
         <div className="relative">
           <input
@@ -277,35 +277,35 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
             }}
             placeholder={`0 to ${maxDiscount}`}
             disabled={loading || !hasValidPrice}
-            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="w-full px-4 py-2 pr-10 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-neutral-100 disabled:cursor-not-allowed"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">%</span>
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">%</span>
         </div>
       </div>
 
       {/* Price Preview */}
       {discountPercentage && hasValidPrice && (
         <div className={`p-3 rounded-lg border-2 ${
-          warning ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'
+          warning ? 'bg-accent-warning-50 border-accent-warning-200' : 'bg-accent-success-50 border-accent-success-200'
         }`}>
           <h5 className={`text-xs font-bold ${
-            warning ? 'text-yellow-900' : 'text-green-900'
+            warning ? 'text-accent-warning-900' : 'text-accent-success-900'
           } mb-2`}>
             {warning ? '⚠️ Preview with Warning' : '✓ Price Preview'}
           </h5>
           <div className={`space-y-1 text-xs ${
-            warning ? 'text-yellow-800' : 'text-green-800'
+            warning ? 'text-accent-warning-800' : 'text-accent-success-800'
           }`}>
             <div>Discount: {discountValue}%</div>
             <div>New Price: Rs. {formatCurrency(newPrice)}</div>
             <div className={`font-medium ${
-              warning ? 'text-yellow-600' : 'text-green-600'
+              warning ? 'text-accent-warning-600' : 'text-accent-success-600'
             }`}>
               Customer Saves: Rs. {formatCurrency(savings)}
             </div>
             {minPrice > 0 && (
               <div className={`text-[10px] font-semibold ${
-                newPrice >= minPrice ? 'text-green-600' : 'text-red-600'
+                newPrice >= minPrice ? 'text-accent-success-600' : 'text-accent-error-600'
               }`}>
                 {newPrice >= minPrice ? '✓' : '✗'} Min Floor Check: Rs. {formatCurrency(minPrice)}
               </div>
@@ -316,33 +316,33 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
 
       {/* Warning Message */}
       {warning && (
-        <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200 flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-yellow-700">{warning}</div>
+        <div className="p-3 bg-accent-warning-50 rounded-lg border border-accent-warning-200 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-accent-warning-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-accent-warning-700">{warning}</div>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 rounded-lg border border-red-200 flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-red-700">{error}</div>
+        <div className="p-3 bg-accent-error-50 rounded-lg border border-accent-error-200 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-accent-error-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-accent-error-700">{error}</div>
         </div>
       )}
 
       {/* Success Message */}
       {success && (
-        <div className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-start gap-2">
-          <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-green-700">Discount applied successfully!</div>
+        <div className="p-3 bg-accent-success-50 rounded-lg border border-accent-success-200 flex items-start gap-2">
+          <CheckCircle className="w-4 h-4 text-accent-success-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-accent-success-700">Discount applied successfully!</div>
         </div>
       )}
 
       {/* Info Box */}
       {discountValue > 0 && (
-        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 flex items-start gap-2">
-          <Info className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-700">
+        <div className="p-3 bg-secondary-50 rounded-lg border border-secondary-200 flex items-start gap-2">
+          <Info className="w-4 h-4 text-secondary-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-secondary-700">
             Customers will see a discount badge and save <strong>Rs. {formatCurrency(savings)}</strong> per unit
           </div>
         </div>
@@ -352,7 +352,7 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
       <div className="flex gap-3 pt-2">
         <button
           onClick={handleReset}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+          className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 font-medium hover:bg-neutral-50 transition-colors disabled:opacity-50"
           disabled={loading || !hasValidPrice}
         >
           Reset
@@ -360,7 +360,7 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
         <button
           onClick={handleApplyDiscount}
           disabled={loading || !discountPercentage || !hasValidPrice || !discountValidation.valid || !minFloorValidation.valid}
-          className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
         >
           {loading && <Loader className="w-4 h-4 animate-spin" />}
           {loading ? 'Applying...' : 'Apply Discount'}
@@ -368,7 +368,7 @@ const DiscountManager: React.FC<DiscountManagerProps> = ({
       </div>
 
       {/* Help Text */}
-      <div className="text-xs text-gray-500 border-t pt-3 space-y-1">
+      <div className="text-xs text-neutral-500 border-t pt-3 space-y-1">
         <p>💡 Tips:</p>
         <ul className="list-disc list-inside space-y-0.5">
           <li>Discount must be between 0 and {maxDiscount}%</li>

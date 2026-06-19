@@ -136,10 +136,10 @@ const SellerProfilePage: React.FC = () => {
         key={i}
         className={`w-3 h-3 ${
           i < Math.floor(rating)
-            ? 'text-orange-500 fill-orange-500'
+            ? 'text-primary-500 fill-orange-500'
             : i < rating
-            ? 'text-orange-300 fill-orange-300'
-            : 'text-gray-300'
+            ? 'text-primary-300 fill-orange-300'
+            : 'text-neutral-300'
         }`}
       />
     ));
@@ -150,10 +150,10 @@ const SellerProfilePage: React.FC = () => {
       <div className="min-h-screen bg-neutral-50">
         <ProductSearchBar />
         <div className="max-w-7xl mx-auto px-4 py-10 space-y-6 animate-pulse">
-          <div className="h-40 bg-gray-200 rounded-xl" />
+          <div className="h-40 bg-neutral-200 rounded-xl" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-64 bg-gray-200 rounded-xl" />
+              <div key={i} className="h-64 bg-neutral-200 rounded-xl" />
             ))}
           </div>
         </div>
@@ -168,12 +168,12 @@ const SellerProfilePage: React.FC = () => {
       <div className="min-h-screen bg-neutral-50">
         <ProductSearchBar />
         <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Seller Not Found</h2>
+          <AlertCircle className="w-12 h-12 text-accent-error-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-neutral-800 mb-2">Seller Not Found</h2>
           <p className="text-neutral-600 mb-6">{error || 'This seller profile does not exist.'}</p>
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition-colors font-medium"
+            className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Go Back
@@ -222,59 +222,59 @@ const SellerProfilePage: React.FC = () => {
         {/* Back button */}
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-orange-600 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-primary-600 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back
         </button>
 
         {/* ─── Seller Hero Card ─── */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
           <div className="flex flex-col sm:flex-row gap-5 items-start">
             <div className="flex-shrink-0">
               {seller.profile_image ? (
                 <img
                   src={seller.profile_image}
                   alt={displayName}
-                  className="w-20 h-20 rounded-full object-cover border-2 border-orange-200"
+                  className="w-20 h-20 rounded-full object-cover border-2 border-primary-200"
                   onError={(e) => (e.currentTarget.src = AVATAR_PLACEHOLDER)}
                 />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-orange-100 border-2 border-orange-200 flex items-center justify-center">
-                  <User className="w-10 h-10 text-orange-400" />
+                <div className="w-20 h-20 rounded-full bg-primary-100 border-2 border-primary-200 flex items-center justify-center">
+                  <User className="w-10 h-10 text-primary-400" />
                 </div>
               )}
             </div>
 
             <div className="flex-1 space-y-2 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-bold text-gray-900 truncate">{displayName}</h1>
+                <h1 className="text-xl font-bold text-neutral-900 truncate">{displayName}</h1>
                 {seller.b2b_verified && (
-                  <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1 bg-secondary-100 text-secondary-700 text-xs font-semibold px-2 py-0.5 rounded-full">
                     <BadgeCheck className="w-3.5 h-3.5" />
                     B2B Verified
                   </span>
                 )}
                 {seller.business_type && (
-                  <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full capitalize">
+                  <span className="inline-flex items-center gap-1 bg-accent-success-100 text-accent-success-700 text-xs font-medium px-2 py-0.5 rounded-full capitalize">
                     <Store className="w-3 h-3" />
                     {seller.business_type}
                   </span>
                 )}
               </div>
               {seller.bio && (
-                <p className="text-sm text-gray-700 leading-relaxed">{seller.bio}</p>
+                <p className="text-sm text-neutral-700 leading-relaxed">{seller.bio}</p>
               )}
 
-              <div className="flex flex-wrap gap-4 text-sm text-gray-600 pt-1">
+              <div className="flex flex-wrap gap-4 text-sm text-neutral-600 pt-1">
                 {locationLabel && (
                   <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4 text-gray-400" />
+                    <MapPin className="w-4 h-4 text-neutral-400" />
                     {locationLabel}
                   </span>
                 )}
                 <span className="flex items-center gap-1">
-                  <Package className="w-4 h-4 text-gray-400" />
+                  <Package className="w-4 h-4 text-neutral-400" />
                   {seller.total_products.toLocaleString()} product{seller.total_products !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -285,11 +285,11 @@ const SellerProfilePage: React.FC = () => {
         {/* ─── Products Grid ─── */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-lg font-bold text-neutral-900">
               Products by {displayName}
             </h2>
             {pagination && totalProducts > 0 && (
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-neutral-500">
                 {startItem}–{endItem} of {totalProducts.toLocaleString()}
               </span>
             )}
@@ -298,13 +298,13 @@ const SellerProfilePage: React.FC = () => {
           {productsLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 animate-pulse">
               {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <div key={i} className="h-64 bg-gray-200 rounded-lg" />
+                <div key={i} className="h-64 bg-neutral-200 rounded-lg" />
               ))}
             </div>
           ) : products.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-              <Package className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500">No products currently listed.</p>
+            <div className="bg-white rounded-xl border border-neutral-200 p-12 text-center">
+              <Package className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+              <p className="text-neutral-500">No products currently listed.</p>
             </div>
           ) : (
             <>
@@ -334,11 +334,11 @@ const SellerProfilePage: React.FC = () => {
                   return (
                     <div
                       key={mp.id}
-                      className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col"
+                      className="bg-white border border-neutral-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col"
                     >
                       <a
                         href={`/marketplace/${mp.id}`}
-                        className="block relative h-44 bg-gray-50 overflow-hidden"
+                        className="block relative h-44 bg-neutral-50 overflow-hidden"
                       >
                         <img
                           src={mainImage}
@@ -348,7 +348,7 @@ const SellerProfilePage: React.FC = () => {
                           draggable={false}
                         />
                         {hasDiscount && (
-                          <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                          <div className="absolute top-2 left-2 bg-accent-error-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                             {percentOff}% OFF
                           </div>
                         )}
@@ -364,7 +364,7 @@ const SellerProfilePage: React.FC = () => {
                       <div className="p-3 flex flex-col flex-1">
                         <a
                           href={`/marketplace/${mp.id}`}
-                          className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1 hover:text-orange-600 transition-colors"
+                          className="text-sm font-semibold text-neutral-900 line-clamp-2 mb-1 hover:text-primary-600 transition-colors"
                         >
                           {productName}
                         </a>
@@ -372,17 +372,17 @@ const SellerProfilePage: React.FC = () => {
                         {avgRating > 0 && (
                           <div className="flex items-center gap-1 mb-1">
                             <div className="flex gap-0.5">{renderStars(avgRating)}</div>
-                            <span className="text-[10px] text-gray-500">({totalReviews})</span>
+                            <span className="text-[10px] text-neutral-500">({totalReviews})</span>
                           </div>
                         )}
 
                         <div className="mt-auto space-y-1">
                           <div className="flex items-center gap-1">
-                            <span className="text-sm font-bold text-orange-600">
+                            <span className="text-sm font-bold text-primary-600">
                               Rs. {displayPrice.toLocaleString()}
                             </span>
                             {hasDiscount && (
-                              <span className="text-[10px] text-gray-400 line-through">
+                              <span className="text-[10px] text-neutral-400 line-through">
                                 Rs. {mp.listed_price.toLocaleString()}
                               </span>
                             )}
@@ -392,10 +392,10 @@ const SellerProfilePage: React.FC = () => {
                             <div
                               className={`w-1.5 h-1.5 rounded-full ${
                                 stock > 10
-                                  ? 'bg-green-500'
+                                  ? 'bg-accent-success-500'
                                   : stock > 0
-                                  ? 'bg-yellow-500'
-                                  : 'bg-red-500'
+                                  ? 'bg-accent-warning-500'
+                                  : 'bg-accent-error-500'
                               }`}
                             />
                             <span>{stock > 0 ? `${stock} in stock` : 'Out of stock'}</span>
@@ -406,10 +406,10 @@ const SellerProfilePage: React.FC = () => {
                             disabled={!mp.is_available || stock === 0}
                             className={`w-full flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium rounded transition-colors ${
                               !mp.is_available || stock === 0
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
                                 : addedIds.has(mp.id)
-                                ? 'bg-green-600 text-white'
-                                : 'bg-orange-600 text-white hover:bg-orange-700'
+                                ? 'bg-accent-success-600 text-white'
+                                : 'bg-primary-600 text-white hover:bg-primary-700'
                             }`}
                           >
                             <ShoppingCart className="w-3.5 h-3.5" />
@@ -432,7 +432,7 @@ const SellerProfilePage: React.FC = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={!pagination.has_previous}
-                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -454,7 +454,7 @@ const SellerProfilePage: React.FC = () => {
                     }, [])
                     .map((item, idx) =>
                       item === 'ellipsis' ? (
-                        <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 text-sm">
+                        <span key={`ellipsis-${idx}`} className="px-2 text-neutral-400 text-sm">
                           …
                         </span>
                       ) : (
@@ -463,8 +463,8 @@ const SellerProfilePage: React.FC = () => {
                           onClick={() => handlePageChange(item as number)}
                           className={`min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition-colors ${
                             item === currentPage
-                              ? 'bg-orange-600 text-white'
-                              : 'border border-gray-200 text-gray-700 hover:bg-gray-50'
+                              ? 'bg-primary-600 text-white'
+                              : 'border border-neutral-200 text-neutral-700 hover:bg-neutral-50'
                           }`}
                         >
                           {item}
@@ -475,7 +475,7 @@ const SellerProfilePage: React.FC = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={!pagination.has_next}
-                    className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     aria-label="Next page"
                   >
                     <ChevronRight className="w-4 h-4" />

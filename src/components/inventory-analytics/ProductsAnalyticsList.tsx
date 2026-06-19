@@ -119,8 +119,8 @@ const ProductsAnalyticsList: React.FC = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-secondary-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading products...</p>
         </div>
       </div>
     );
@@ -130,7 +130,7 @@ const ProductsAnalyticsList: React.FC = () => {
     return (
       <div className="bg-white shadow-md rounded-lg p-6">
         <BackButton />
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-700 mt-4">
+        <div className="p-4 bg-accent-error-50 border border-accent-error-200 rounded-md text-accent-error-700 mt-4">
           {errors.portfolioAnalytics}
         </div>
       </div>
@@ -146,7 +146,7 @@ const ProductsAnalyticsList: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold">📦 Products with Analytics</h1>
-            <p className="text-indigo-100 mt-2">
+            <p className="text-secondary-100 mt-2">
               View forecast and stockout predictions for all products
             </p>
           </div>
@@ -164,7 +164,7 @@ const ProductsAnalyticsList: React.FC = () => {
       <div className="bg-white shadow-md rounded-lg p-4">
         <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Risk Level:</span>
+            <span className="text-sm font-medium text-neutral-700">Risk Level:</span>
             <div className="flex gap-2">
               {(['all', 'critical', 'high', 'medium', 'low'] as const).map((level) => (
                 <button
@@ -172,8 +172,8 @@ const ProductsAnalyticsList: React.FC = () => {
                   onClick={() => setFilter(level)}
                   className={`px-3 py-1.5 text-sm rounded-lg transition ${
                     filter === level
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-secondary-600 text-white'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                   }`}
                 >
                   {level === 'all' ? 'All' : level.charAt(0).toUpperCase() + level.slice(1)}
@@ -188,12 +188,12 @@ const ProductsAnalyticsList: React.FC = () => {
               placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              className="px-3 py-2 border border-neutral-300 rounded-lg text-sm"
             >
               <option value="risk">Sort by Risk</option>
               <option value="stock">Sort by Stock</option>
@@ -210,27 +210,27 @@ const ProductsAnalyticsList: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Product</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Stock</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Risk Level</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Days Left</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Est. Daily Demand</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Action</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Details</th>
+                <tr className="border-b border-neutral-200">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-neutral-500">Product</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Stock</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Risk Level</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Days Left</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Est. Daily Demand</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Action</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-neutral-500">Details</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProducts.map((product) => (
-                  <tr key={product.product_id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={product.product_id} className="border-b border-neutral-100 hover:bg-neutral-50">
                     <td className="py-3 px-4">
-                      <span className="font-medium text-gray-900">{product.name}</span>
+                      <span className="font-medium text-neutral-900">{product.name}</span>
                       {product.sku && (
-                        <p className="text-xs text-gray-500">SKU: {product.sku}</p>
+                        <p className="text-xs text-neutral-500">SKU: {product.sku}</p>
                       )}
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className={`font-semibold ${product.current_stock <= 10 ? 'text-red-600' : 'text-gray-900'}`}>
+                      <span className={`font-semibold ${product.current_stock <= 10 ? 'text-accent-error-600' : 'text-neutral-900'}`}>
                         {product.current_stock}
                       </span>
                     </td>
@@ -240,16 +240,16 @@ const ProductsAnalyticsList: React.FC = () => {
                       </span>
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className={`font-medium ${product.days_until_stockout <= 3 ? 'text-red-600' : 'text-gray-900'}`}>
+                      <span className={`font-medium ${product.days_until_stockout <= 3 ? 'text-accent-error-600' : 'text-neutral-900'}`}>
                         {formatDaysUntilStockout(product.days_until_stockout)}
                       </span>
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className="font-semibold text-indigo-600">
+                      <span className="font-semibold text-secondary-600">
                         {product.daily_forecast > 0 ? product.daily_forecast.toFixed(1) : 'N/A'}
                       </span>
                       {product.daily_forecast > 0 && (
-                        <p className="text-xs text-gray-500">units/day</p>
+                        <p className="text-xs text-neutral-500">units/day</p>
                       )}
                     </td>
                     <td className="text-center py-3 px-4">
@@ -260,7 +260,7 @@ const ProductsAnalyticsList: React.FC = () => {
                     <td className="text-right py-3 px-4">
                       <Link
                         to={`/inventory-analytics/products/${product.product_id}`}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium"
+                        className="px-4 py-2 bg-secondary-600 text-white rounded-lg hover:bg-secondary-700 transition text-sm font-medium"
                       >
                         View Forecast
                       </Link>
@@ -273,8 +273,8 @@ const ProductsAnalyticsList: React.FC = () => {
         ) : (
           <div className="text-center py-12">
             <p className="text-6xl mb-4">📊</p>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">No Products Found</h3>
-            <p className="text-gray-600">
+            <h3 className="text-xl font-bold text-neutral-800 mb-2">No Products Found</h3>
+            <p className="text-neutral-600">
               {searchTerm 
                 ? 'No products match your search criteria.' 
                 : 'No products with analytics data available.'}
@@ -286,29 +286,29 @@ const ProductsAnalyticsList: React.FC = () => {
       {/* Summary */}
       {filteredProducts.length > 0 && (
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Summary</h3>
+          <h3 className="text-lg font-bold text-neutral-800 mb-4">Summary</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-bold text-gray-900">{filteredProducts.length}</p>
-              <p className="text-sm text-gray-600">Products Shown</p>
+            <div className="text-center p-4 bg-neutral-50 rounded-lg">
+              <p className="text-2xl font-bold text-neutral-900">{filteredProducts.length}</p>
+              <p className="text-sm text-neutral-600">Products Shown</p>
             </div>
-            <div className="text-center p-4 bg-red-50 rounded-lg">
-              <p className="text-2xl font-bold text-red-600">
+            <div className="text-center p-4 bg-accent-error-50 rounded-lg">
+              <p className="text-2xl font-bold text-accent-error-600">
                 {filteredProducts.filter(p => p.risk_level === 'critical').length}
               </p>
-              <p className="text-sm text-gray-600">Critical Risk</p>
+              <p className="text-sm text-neutral-600">Critical Risk</p>
             </div>
-            <div className="text-center p-4 bg-orange-50 rounded-lg">
-              <p className="text-2xl font-bold text-orange-600">
+            <div className="text-center p-4 bg-primary-50 rounded-lg">
+              <p className="text-2xl font-bold text-primary-600">
                 {filteredProducts.filter(p => p.risk_level === 'high').length}
               </p>
-              <p className="text-sm text-gray-600">High Risk</p>
+              <p className="text-sm text-neutral-600">High Risk</p>
             </div>
-            <div className="text-center p-4 bg-indigo-50 rounded-lg">
-              <p className="text-2xl font-bold text-indigo-600">
+            <div className="text-center p-4 bg-secondary-50 rounded-lg">
+              <p className="text-2xl font-bold text-secondary-600">
                 {filteredProducts.reduce((sum, p) => sum + p.current_stock, 0)}
               </p>
-              <p className="text-sm text-gray-600">Total Stock</p>
+              <p className="text-sm text-neutral-600">Total Stock</p>
             </div>
           </div>
         </div>

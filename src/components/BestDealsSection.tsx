@@ -52,8 +52,8 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
 
   if (loading) return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-12 animate-pulse">
-      <div className="lg:col-span-4 h-[500px] bg-gray-200 rounded-[2.5rem]" />
-      <div className="lg:col-span-8 h-[500px] bg-gray-100 rounded-[2.5rem]" />
+      <div className="lg:col-span-4 h-[500px] bg-neutral-200 rounded-[2.5rem]" />
+      <div className="lg:col-span-8 h-[500px] bg-neutral-100 rounded-[2.5rem]" />
     </div>
   );
 
@@ -63,14 +63,14 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
       <div className="lg:col-span-4 relative group perspective-1000">
         <div className="relative h-full w-full transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(-5deg)_rotateX(2deg)]">
           
-          <div className="relative h-full overflow-hidden rounded-[2.5rem] bg-slate-950 p-1 border border-white/5 shadow-2xl">
+          <div className="relative h-full overflow-hidden rounded-[2.5rem] bg-secondary-900 p-1 border border-white/5 shadow-2xl">
             
             <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 via-rose-500/10 to-transparent group-hover:scale-110 transition-transform duration-700" />
-            <div className="absolute -top-24 -left-24 w-64 h-64 bg-orange-500/20 rounded-full blur-[100px] group-hover:bg-orange-500/40 transition-colors duration-500" />
+            <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary-500/20 rounded-full blur-[100px] group-hover:bg-primary-500/40 transition-colors duration-500" />
             
             <div className="relative h-full z-10 p-8 flex flex-col items-center justify-center text-center">
               
-              <div className="flex items-center gap-2 bg-orange-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 shadow-lg group-hover:scale-110 transition-transform">
+              <div className="flex items-center gap-2 bg-primary-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 shadow-lg group-hover:scale-110 transition-transform">
                 <Flame size={14} className="animate-pulse" /> Hot Deals
               </div>
               
@@ -81,13 +81,13 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
                 </span>
               </h3>
               
-              <p className="text-slate-400 mb-8 max-w-[220px] text-sm font-medium opacity-100 group-hover:opacity-0 transition-opacity duration-300">
+              <p className="text-secondary-400 mb-8 max-w-[220px] text-sm font-medium opacity-100 group-hover:opacity-0 transition-opacity duration-300">
                 Handpicked premium selections at prices that won't last.
               </p>
 
               <button 
                 onClick={() => navigate('/deals')} 
-                className="group/btn relative inline-flex items-center justify-center px-8 py-3.5 font-bold text-white transition-all duration-300 bg-orange-600 rounded-2xl hover:bg-orange-500 shadow-xl group-hover:translate-y-[-20px]"
+                className="group/btn relative inline-flex items-center justify-center px-8 py-3.5 font-bold text-white transition-all duration-300 bg-primary-600 rounded-2xl hover:bg-primary-500 shadow-xl group-hover:translate-y-[-20px]"
               >
                 Explore All
                 <ArrowRight size={18} className="ml-2 group-hover/btn:translate-x-1 transition-transform" />
@@ -99,26 +99,26 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
                       onClick={() => navigate('/flash-sales')}
                       className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 p-3 rounded-xl text-white text-xs font-bold transition-all"
                     >
-                      <Zap size={14} className="text-yellow-400" /> Flash Sales
+                      <Zap size={14} className="text-accent-warning-400" /> Flash Sales
                     </button>
                     <button 
                       onClick={() => navigate('/bulk-discounts')}
                       className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 p-3 rounded-xl text-white text-xs font-bold transition-all"
                     >
-                      <Package size={14} className="text-blue-400" /> Bulk Deals
+                      <Package size={14} className="text-secondary-400" /> Bulk Deals
                     </button>
                     <button 
                       onClick={() => navigate('/clearance')}
                       className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 p-3 rounded-xl text-white text-xs font-bold transition-all col-span-2"
                     >
-                      <Percent size={14} className="text-green-400" /> Clearance Outlet <ChevronRight size={14} />
+                      <Percent size={14} className="text-accent-success-400" /> Clearance Outlet <ChevronRight size={14} />
                     </button>
                 </div>
               </div>
 
               <div className="absolute bottom-6 flex gap-3 group-hover:opacity-0 transition-opacity">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === 2 ? 'w-8 bg-orange-500' : 'w-2 bg-white/20'}`} />
+                  <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === 2 ? 'w-8 bg-primary-500' : 'w-2 bg-white/20'}`} />
                 ))}
               </div>
             </div>
@@ -126,11 +126,11 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
         </div>
       </div>
 
-      <div className="lg:col-span-8 bg-gray-50/50 rounded-[2.5rem] p-4 md:p-8 border border-gray-200/60 shadow-inner flex flex-col">
+      <div className="lg:col-span-8 bg-neutral-50/50 rounded-[2.5rem] p-4 md:p-8 border border-neutral-200/60 shadow-inner flex flex-col">
         <div className="flex items-center justify-between mb-8 px-2">
             <div>
-              <h3 className="text-3xl font-black text-gray-900 tracking-tight">Top picks today</h3>
-              <div className="h-1 w-12 bg-orange-500 rounded-full mt-1" />
+              <h3 className="text-3xl font-black text-neutral-900 tracking-tight">Top picks today</h3>
+              <div className="h-1 w-12 bg-primary-500 rounded-full mt-1" />
             </div>
         </div>
         
@@ -142,7 +142,7 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
                   onClick={() => navigate(`/marketplace/${p.id}`)}
                   className="group relative bg-white rounded-3xl p-5 transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 flex flex-col h-full cursor-pointer"
                 >
-                  <div className="aspect-square w-full overflow-hidden bg-gray-50 rounded-2xl mb-6 relative flex items-center justify-center p-6 border border-gray-50 group-hover:border-orange-100 transition-colors">
+                  <div className="aspect-square w-full overflow-hidden bg-neutral-50 rounded-2xl mb-6 relative flex items-center justify-center p-6 border border-neutral-50 group-hover:border-primary-100 transition-colors">
                      <img 
                        src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER} 
                        alt={p.product_details?.name} 
@@ -150,28 +150,28 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
                      />
                      
                      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="p-2 bg-white rounded-xl shadow-lg text-orange-600">
+                        <div className="p-2 bg-white rounded-xl shadow-lg text-primary-600">
                           <ShoppingBag size={18} />
                         </div>
                      </div>
                   </div>
 
                   <div className="flex flex-col flex-grow">
-                      <h4 className="font-bold text-gray-900 text-sm mb-3 line-clamp-2 leading-tight group-hover:text-orange-600 transition-colors">
+                      <h4 className="font-bold text-neutral-900 text-sm mb-3 line-clamp-2 leading-tight group-hover:text-primary-600 transition-colors">
                           {p.product_details?.name}
                       </h4>
                       <div className="mt-auto flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                              <span className="text-base font-black text-gray-900">
+                              <span className="text-base font-black text-neutral-900">
                                   Rs. {getDisplayPrice(p, user).currentPrice?.toLocaleString()}
                               </span>
                               {getDisplayPrice(p, user).originalPrice && (
-                                <span className="text-xs text-gray-500 line-through">
+                                <span className="text-xs text-neutral-500 line-through">
                                   Rs. {getDisplayPrice(p, user).originalPrice?.toLocaleString()}
                                 </span>
                               )}
                           </div>
-                          <span className="text-[9px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-md whitespace-nowrap">
+                          <span className="text-[9px] font-bold text-accent-success-600 bg-accent-success-50 px-2 py-1 rounded-md whitespace-nowrap">
                             In Stock
                           </span>
                       </div>
@@ -179,7 +179,7 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
                 </div>
               ))
             ) : (
-                <div className="col-span-full h-full flex items-center justify-center text-gray-400 font-medium italic">
+                <div className="col-span-full h-full flex items-center justify-center text-neutral-400 font-medium italic">
                     Fresh selections arriving soon...
                 </div>
             )}

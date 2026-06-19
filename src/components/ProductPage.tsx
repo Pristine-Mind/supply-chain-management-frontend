@@ -10,6 +10,7 @@ import ProductInstanceView from './ProductInstanceView';
 import RelatedProductsSection from './RelatedProductsSection';
 import Footer from './Footer';
 import SEOHead from './SEOHead';
+import { EmptyState } from './ui/empty-state';
 
 interface ProductDetails {
   name: string;
@@ -110,21 +111,22 @@ const ProductPage: React.FC = () => {
       <div className="min-h-screen bg-neutral-50">
         <ProductSearchBar />
         <div className="container mx-auto px-4 py-16">
-          <div className="max-w-4xl mx-auto bg-white rounded-xl border border-neutral-200 p-8 text-center">
-            <div className="flex justify-center mb-4">
-              <AlertCircle className="text-accent-error-500 w-12 h-12" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h2>
-            <p className="text-neutral-600 mb-6">
-              {error || 'The product you are looking for does not exist or has been removed.'}
-            </p>
-            <Link 
-              to="/marketplace" 
-              className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Marketplace
-            </Link>
+          <div className="max-w-4xl mx-auto bg-white rounded-xl border border-neutral-200 p-8">
+            <EmptyState
+              icon={AlertCircle}
+              title="Product Not Found"
+              description={error || 'The product you are looking for does not exist or has been removed.'}
+              className="py-0"
+              action={
+                <Link
+                  to="/marketplace"
+                  className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Marketplace
+                </Link>
+              }
+            />
           </div>
         </div>
         <Footer />
@@ -180,20 +182,20 @@ const ProductPage: React.FC = () => {
             {/* Left Sidebar - Trust & Features */}
             <div className="hidden md:block md:col-span-2">
               <div className="sticky top-24 space-y-4">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                  <Truck className="mx-auto w-8 h-8 text-blue-600 mb-3" />
-                  <p className="text-sm font-medium text-blue-700">Free Shipping</p>
-                  <p className="text-xs text-blue-600">on orders over Rs.2500</p>
+                <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-4 text-center">
+                  <Truck className="mx-auto w-8 h-8 text-secondary-600 mb-3" />
+                  <p className="text-sm font-medium text-secondary-700">Free Shipping</p>
+                  <p className="text-xs text-secondary-600">on orders over Rs.2500</p>
                 </div>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                  <RotateCcw className="mx-auto w-8 h-8 text-green-600 mb-3" />
-                  <p className="text-sm font-medium text-green-700">30-Day Returns</p>
-                  <p className="text-xs text-green-600">Easy return policy</p>
+                <div className="bg-accent-success-50 border border-accent-success-200 rounded-lg p-4 text-center">
+                  <RotateCcw className="mx-auto w-8 h-8 text-accent-success-600 mb-3" />
+                  <p className="text-sm font-medium text-accent-success-700">30-Day Returns</p>
+                  <p className="text-xs text-accent-success-600">Easy return policy</p>
                 </div>
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-                  <Shield className="mx-auto w-8 h-8 text-purple-600 mb-3" />
-                  <p className="text-sm font-medium text-purple-700">Secure Payment</p>
-                  <p className="text-xs text-purple-600">100% secure checkout</p>
+                <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-4 text-center">
+                  <Shield className="mx-auto w-8 h-8 text-secondary-600 mb-3" />
+                  <p className="text-sm font-medium text-secondary-700">Secure Payment</p>
+                  <p className="text-xs text-secondary-600">100% secure checkout</p>
                 </div>
               </div>
             </div>
@@ -216,10 +218,10 @@ const ProductPage: React.FC = () => {
                   <p className="text-2xl font-bold text-neutral-900">{product.recent_purchases_count}</p>
                   <p className="text-sm text-neutral-600">Recent Purchases</p>
                 </div>
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
-                  <Heart className="mx-auto w-8 h-8 text-orange-600 mb-3" />
-                  <p className="text-sm font-medium text-orange-700">Wishlist Item</p>
-                  <p className="text-xs text-orange-600">Save for later</p>
+                <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 text-center">
+                  <Heart className="mx-auto w-8 h-8 text-primary-600 mb-3" />
+                  <p className="text-sm font-medium text-primary-700">Wishlist Item</p>
+                  <p className="text-xs text-primary-600">Save for later</p>
                 </div>
               </div>
             </div>

@@ -5,7 +5,7 @@ import { createSafeRecognitionInstance } from '../utils/voiceSearchBrowserPolyfi
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, User, ShoppingCart, Menu, Mic, Gift, ChevronRight, Search } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Menu, Mic, Gift, Search } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLoyalty } from '../context/LoyaltyContext';
@@ -36,6 +36,10 @@ import PromoBanner from './PromoBanner';
 import FreeDeliveryBanner from './FreeDeliveryBanner';
 import LazySection from './ui/LazySection';
 import CategoryCarousel from './CategoryCarousel';
+import { PageContainer } from './ui/page-container';
+import { SectionHeader } from './ui/section-header';
+import { EmptyState } from './ui/empty-state';
+import { Badge } from './ui/badge';
 
 interface ProductImage {
   id: number;
@@ -873,13 +877,13 @@ const Marketplace: React.FC = () => {
         </div>
       </div>
       
-      <div className="bg-neutral-50/50">
+      {/* <div className="bg-neutral-50/50">
         <div className="container mx-auto px-4 py-10">
           <LazySection>
             <NearbyProducts radiusKm={50} limit={8} />
           </LazySection>
         </div>
-      </div>
+      </div> */}
 
       <div className="bg-white">
         <div className="container mx-auto px-4 py-10">
@@ -924,20 +928,13 @@ const Marketplace: React.FC = () => {
       </div>
 
       <div className="bg-white">
-        <div className="container mx-auto px-4 py-10">
+        <PageContainer className="py-10">
           {/* Section title for personalized recommendations */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-h2 text-neutral-900">Just For You</h2>
-              <p className="text-body-sm text-neutral-500 mt-1">Handpicked recommendations based on your browsing</p>
-            </div>
-            <button 
-              onClick={() => navigate('/marketplace/all-products')}
-              className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1 transition-colors"
-            >
-              View All <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          <SectionHeader
+            title="Just For You"
+            subtitle="Handpicked recommendations based on your browsing"
+            action={{ label: 'View All', to: '/marketplace/all-products' }}
+          />
                 {/* Products Grid */}
                 {loading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -959,26 +956,26 @@ const Marketplace: React.FC = () => {
                     <p className="text-gray-600">{productsError}</p>
                   </div>
                 ) : products.length === 0 ? (
-                  <div className="text-center py-16 px-4">
-                    <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center">
-                      <Search className="w-10 h-10 text-neutral-400" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-neutral-900 mb-2">No Products Found</h3>
-                    <p className="text-neutral-500 mb-6 max-w-md mx-auto">Try adjusting your filters or search terms to find what you're looking for.</p>
-                    <button
-                      onClick={() => {
-                        setQuery('');
-                        setMinPrice('');
-                        setMaxPrice('');
-                        setMinOrder('');
-                        setSelectedCity('');
-                        setSelectedBusinessType('');
-                      }}
-                      className="btn-secondary px-6 py-2.5"
-                    >
-                      Clear All Filters
-                    </button>
-                  </div>
+                  <EmptyState
+                    icon={Search}
+                    title="No Products Found"
+                    description="Try adjusting your filters or search terms to find what you're looking for."
+                    action={
+                      <button
+                        onClick={() => {
+                          setQuery('');
+                          setMinPrice('');
+                          setMaxPrice('');
+                          setMinOrder('');
+                          setSelectedCity('');
+                          setSelectedBusinessType('');
+                        }}
+                        className="btn-secondary px-6 py-2.5"
+                      >
+                        Clear All Filters
+                      </button>
+                    }
+                  />
                 ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {products.map((item, index) => (
@@ -990,14 +987,14 @@ const Marketplace: React.FC = () => {
                     >
                       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-50">
                         {item.percent_off > 0 && (
-                          <div className="absolute top-3 left-3 bg-accent-error-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm z-10">
+                          <Badge variant="discount" size="sm" className="absolute top-3 left-3 shadow-sm z-10">
                             {Math.round(item.percent_off)}% OFF
-                          </div>
+                          </Badge>
                         )}
                         {item.is_delivery_free && (
-                          <div className="absolute top-3 right-3 bg-green-600 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm z-10 flex items-center gap-1">
-                            <span>🚚</span> Free Delivery
-                          </div>
+                          <Badge variant="success" size="sm" className="absolute top-3 right-3 shadow-sm z-10">
+                            🚚 Free Delivery
+                          </Badge>
                         )}
                         
                         {/* Stock Status Badge */}
@@ -1059,9 +1056,9 @@ const Marketplace: React.FC = () => {
                           {(() => {
                             const pricing = getDisplayPrice(item, user);
                             return pricing.savings > 0 ? (
-                              <div className="inline-flex items-center text-xs text-accent-success-700 font-medium bg-accent-success-50 px-2 py-0.5 rounded-full">
+                              <Badge variant="success" size="sm">
                                 Save Rs. {pricing.savings?.toLocaleString()}
-                              </div>
+                              </Badge>
                             ) : null;
                           })()}
                         </div>
@@ -1115,14 +1112,14 @@ const Marketplace: React.FC = () => {
                     </button>
                   </div>
                 )}
-        
-        </div>
+
+        </PageContainer>
       </div>
     <Footer />
     </div>
     {/* Closing tag for marketplace-root */}
       {showVideoFeed && (
-        <React.Suspense fallback={<div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent"></div></div>}>
+        <React.Suspense fallback={<div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center"><Spinner size="lg" color="white" /></div>}>
           <ShoppableVideoFeed 
             onClose={() => setShowVideoFeed(false)} 
             onRequireLogin={() => setShowLoginModal(true)}

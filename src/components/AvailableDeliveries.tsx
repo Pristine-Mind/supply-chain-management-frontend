@@ -9,40 +9,40 @@ import { useToast } from '../hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 const priorityColors = {
-  high: 'bg-red-100 text-red-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  low: 'bg-green-100 text-green-800',
+  high: 'bg-accent-error-100 text-accent-error-800',
+  medium: 'bg-accent-warning-100 text-accent-warning-800',
+  low: 'bg-accent-success-100 text-accent-success-800',
 };
 
 const statusIcons = {
-  pending: <Clock className="h-4 w-4 text-yellow-500" />,
-  in_transit: <Package className="h-4 w-4 text-blue-500" />,
-  delivered: <CheckCircle className="h-4 w-4 text-green-500" />,
-  cancelled: <Clock className="h-4 w-4 text-red-500" />,
+  pending: <Clock className="h-4 w-4 text-accent-warning-500" />,
+  in_transit: <Package className="h-4 w-4 text-secondary-500" />,
+  delivered: <CheckCircle className="h-4 w-4 text-accent-success-500" />,
+  cancelled: <Clock className="h-4 w-4 text-accent-error-500" />,
 };
 
 const DeliveryCard = ({ delivery, onClaim }) => (
-  <Card className="w-full hover:shadow-lg transition-shadow duration-300 border-l-4 border-yellow-500">
+  <Card className="w-full hover:shadow-lg transition-shadow duration-300 border-l-4 border-accent-warning-500">
     <CardHeader className="px-4 py-3 border-b">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
         <div className="mb-3 sm:mb-0">
           <div className="flex items-center space-x-2">
-            <Package className="h-5 w-5 text-blue-500" />
+            <Package className="h-5 w-5 text-secondary-500" />
             <CardTitle className="text-lg font-medium">
               Delivery #{delivery.delivery_id}
             </CardTitle>
           </div>
-          <div className="mt-1 text-sm text-gray-500">
+          <div className="mt-1 text-sm text-neutral-500">
             Order: {delivery.marketplace_sale.order_id}
           </div>
         </div>
         <div className="flex flex-wrap items-center space-x-2">
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-            priorityColors[delivery.priority as keyof typeof priorityColors] || 'bg-gray-100 text-gray-800'
+            priorityColors[delivery.priority as keyof typeof priorityColors] || 'bg-neutral-100 text-neutral-800'
           }`}>
             {delivery.priority_display}
           </span>
-          <span className="flex items-center text-sm text-gray-500">
+          <span className="flex items-center text-sm text-neutral-500">
             {statusIcons[delivery.status as keyof typeof statusIcons] || statusIcons.pending}
             <span className="ml-1">{delivery.status_display}</span>
           </span>
@@ -52,38 +52,38 @@ const DeliveryCard = ({ delivery, onClaim }) => (
     <CardContent className="p-4">
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <h3 className="text-sm font-medium text-gray-500 flex items-center">
+          <h3 className="text-sm font-medium text-neutral-500 flex items-center">
             <MapPin className="h-4 w-4 mr-2" /> Pickup
           </h3>
-          <p className="mt-1 text-sm text-gray-900">{delivery.pickup_address}</p>
+          <p className="mt-1 text-sm text-neutral-900">{delivery.pickup_address}</p>
         </div>
         <div>
-          <h3 className="text-sm font-medium text-gray-500 flex items-center">
+          <h3 className="text-sm font-medium text-neutral-500 flex items-center">
             <MapPin className="h-4 w-4 mr-2" /> Delivery
           </h3>
-          <p className="mt-1 text-sm text-gray-900">{delivery.delivery_address}</p>
+          <p className="mt-1 text-sm text-neutral-900">{delivery.delivery_address}</p>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
         <div className="flex items-center">
-          <Clock className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-gray-500">Pickup by:</span>
-          <span className="ml-1 font-medium text-gray-900">
+          <Clock className="h-4 w-4 text-neutral-400 mr-2" />
+          <span className="text-neutral-500">Pickup by:</span>
+          <span className="ml-1 font-medium text-neutral-900">
             {new Date(delivery.requested_pickup_date).toLocaleDateString()}
           </span>
         </div>
         <div className="flex items-center">
-          <Package className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-gray-500">Weight:</span>
-          <span className="ml-1 font-medium text-gray-900">
+          <Package className="h-4 w-4 text-neutral-400 mr-2" />
+          <span className="text-neutral-500">Weight:</span>
+          <span className="ml-1 font-medium text-neutral-900">
             {delivery.package_weight} kg
           </span>
         </div>
         <div className="flex items-center">
-          <DollarSign className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-gray-500">Earnings:</span>
-          <span className="ml-1 font-medium text-gray-900">
+          <DollarSign className="h-4 w-4 text-neutral-400 mr-2" />
+          <span className="text-neutral-500">Earnings:</span>
+          <span className="ml-1 font-medium text-neutral-900">
             Rs. {parseFloat(delivery.delivery_fee).toFixed(2)}
           </span>
         </div>
@@ -91,7 +91,7 @@ const DeliveryCard = ({ delivery, onClaim }) => (
       <div className="mt-4 flex justify-end">
         <Button
           onClick={() => onClaim(delivery.delivery_id)}
-          className="bg-yellow-600 hover:bg-yellow-700 text-sm"
+          className="bg-accent-warning-600 hover:bg-accent-warning-700 text-sm"
         >
           <CheckCircle className="h-4 w-4 mr-2" />
           Claim Delivery
@@ -165,7 +165,7 @@ const AvailableDeliveries = () => {
       <div className="space-y-4 p-4">
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="w-full">
-            <CardHeader className="bg-gray-50 px-4 py-3 border-b">
+            <CardHeader className="bg-neutral-50 px-4 py-3 border-b">
               <Skeleton className="h-6 w-1/3" />
             </CardHeader>
             <CardContent className="p-4">
@@ -190,7 +190,7 @@ const AvailableDeliveries = () => {
   if (error) {
     return (
       <div className="text-center py-8 px-4">
-        <p className="text-red-500">{error}</p>
+        <p className="text-accent-error-500">{error}</p>
         <Button variant="outline" className="mt-4" onClick={() => loadDeliveries(true)}>
           Retry
         </Button>
@@ -201,9 +201,9 @@ const AvailableDeliveries = () => {
   if (deliveries.length === 0) {
     return (
       <div className="text-center py-12 px-4">
-        <Package className="mx-auto h-12 w-12 text-gray-400" />
-        <h3 className="mt-2 text-lg font-medium text-gray-900">No deliveries available</h3>
-        <p className="mt-1 text-gray-500">There are currently no deliveries available. Please check back later.</p>
+        <Package className="mx-auto h-12 w-12 text-neutral-400" />
+        <h3 className="mt-2 text-lg font-medium text-neutral-900">No deliveries available</h3>
+        <p className="mt-1 text-neutral-500">There are currently no deliveries available. Please check back later.</p>
       </div>
     );
   }

@@ -502,7 +502,7 @@ const SaleList: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-neutral-100 p-8">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">{t('sale_list')}</h2>
         <div className="flex space-x-3">
@@ -522,8 +522,8 @@ const SaleList: React.FC = () => {
       </div>
 
       <div className="overflow-x-auto relative shadow-md sm:rounded-lg mb-8">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+        <table className="w-full text-sm text-left text-neutral-500">
+          <thead className="text-xs text-neutral-700 uppercase bg-neutral-50">
             <tr>
               <th className="py-3 px-6">{t('order')}</th>
               <th className="py-3 px-6">{t('quantity')}</th>
@@ -536,23 +536,23 @@ const SaleList: React.FC = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {sales.length > 0 ? (
               sales.map((sale) => (
-                <tr key={sale.id} className="hover:bg-gray-50 transition duration-150">
+                <tr key={sale.id} className="hover:bg-neutral-50 transition duration-150">
                   <td className="py-4 px-6">{sale.order}</td>
                   <td className="py-4 px-6">{sale.quantity}</td>
                   <td className="py-4 px-6">NPR {sale.sale_price?.toFixed(2)}</td>
                   <td className="py-4 px-6">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       sale.payment_status === 'delivered'
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-accent-success-100 text-accent-success-700'
                         : sale.payment_status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-700'
+                        ? 'bg-accent-warning-100 text-accent-warning-700'
                         : sale.payment_status === 'cancelled'
-                        ? 'bg-red-100 text-red-700'
+                        ? 'bg-accent-error-100 text-accent-error-700'
                         : sale.payment_status === 'approved'
-                        ? 'bg-blue-100 text-blue-700'
+                        ? 'bg-secondary-100 text-secondary-700'
                         : sale.payment_status === 'shipped'
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-secondary-100 text-secondary-700'
+                        : 'bg-neutral-100 text-neutral-600'
                     }`}>
                       {sale.payment_status_display}
                     </span>
@@ -562,7 +562,7 @@ const SaleList: React.FC = () => {
                     <div className="flex flex-col space-y-2">
                       <button
                         onClick={() => handlePrintSale(sale)}
-                        className="px-2 py-1 text-xs rounded bg-gray-500 hover:bg-gray-600 text-white flex items-center"
+                        className="px-2 py-1 text-xs rounded bg-neutral-500 hover:bg-neutral-600 text-white flex items-center"
                         aria-label={t('print')}
                       >
                         <FaPrint className="mr-1" size={12} />
@@ -572,7 +572,7 @@ const SaleList: React.FC = () => {
                         <button
                           onClick={() => handleTrackDelivery(sale)}
                           disabled={trackingLoading}
-                          className="px-2 py-1 text-xs rounded bg-green-500 hover:bg-green-600 text-white flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-2 py-1 text-xs rounded bg-accent-success-500 hover:bg-accent-success-600 text-white flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                           aria-label={t('track_delivery')}
                         >
                           <FaMapMarkerAlt className="mr-1" size={12} />
@@ -581,7 +581,7 @@ const SaleList: React.FC = () => {
                       ) : (
                         <button
                           onClick={() => handlePlaceForDelivery(sale)}
-                          className="px-2 py-1 text-xs rounded bg-blue-500 hover:bg-blue-600 text-white flex items-center"
+                          className="px-2 py-1 text-xs rounded bg-secondary-500 hover:bg-secondary-600 text-white flex items-center"
                           aria-label={t('place_for_delivery')}
                         >
                           <FaTruck className="mr-1" size={12} />
@@ -607,7 +607,7 @@ const SaleList: React.FC = () => {
         <button
           onClick={() => setOffset(offset - limit)}
           disabled={offset === 0}
-          className={`px-4 py-2 rounded-lg ${offset === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'}`}
+          className={`px-4 py-2 rounded-lg ${offset === 0 ? 'bg-neutral-300 cursor-not-allowed' : 'bg-secondary-500 text-white hover:bg-secondary-600 transition duration-300'}`}
         >
           {t('previous')}
         </button>
@@ -617,27 +617,27 @@ const SaleList: React.FC = () => {
         <button
           onClick={() => setOffset(offset + limit)}
           disabled={offset + limit >= totalCount}
-          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 transition duration-300'}`}
+          className={`px-4 py-2 rounded-lg ${offset + limit >= totalCount ? 'bg-neutral-300 cursor-not-allowed' : 'bg-secondary-500 text-white hover:bg-secondary-600 transition duration-300'}`}
         >
           {t('next')}
         </button>
       </div>
 
       {formVisible && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div className="fixed inset-0 bg-neutral-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
           <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-lg">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">{t('add_new_sale')}</h3>
-              <button onClick={() => setFormVisible(false)} className="text-gray-500 hover:text-gray-700">
+              <h3 className="text-lg font-medium text-neutral-900">{t('add_new_sale')}</h3>
+              <button onClick={() => setFormVisible(false)} className="text-neutral-500 hover:text-neutral-700">
                 <FaTimes size={20} />
               </button>
             </div>
             <form onSubmit={handleSubmit}>
-              {error && <p className="text-red-500 mb-4">{error}</p>}
-              {success && <p className="text-green-500 mb-4">{success}</p>}
+              {error && <p className="text-accent-error-500 mb-4">{error}</p>}
+              {success && <p className="text-accent-success-500 mb-4">{success}</p>}
               <div className="mb-4">
-                <label htmlFor="order" className="block text-gray-700">
-                  {t('order')} <span className="text-red-500">*</span>
+                <label htmlFor="order" className="block text-neutral-700">
+                  {t('order')} <span className="text-accent-error-500">*</span>
                 </label>
                 <select
                   id="order"
@@ -656,8 +656,8 @@ const SaleList: React.FC = () => {
                 </select>
               </div>
               <div className="mb-4">
-                <label htmlFor="quantity" className="block text-gray-700">
-                  {t('quantity')} <span className="text-red-500">*</span>
+                <label htmlFor="quantity" className="block text-neutral-700">
+                  {t('quantity')} <span className="text-accent-error-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -670,8 +670,8 @@ const SaleList: React.FC = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="sale_price" className="block text-gray-700">
-                  {t('sale_price')} <span className="text-red-500">*</span>
+                <label htmlFor="sale_price" className="block text-neutral-700">
+                  {t('sale_price')} <span className="text-accent-error-500">*</span>
                 </label>
                 <input
                   type="number"
@@ -686,8 +686,8 @@ const SaleList: React.FC = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="payment_status" className="block text-gray-700">
-                  {t('payment_status')} <span className="text-red-500">*</span>
+                <label htmlFor="payment_status" className="block text-neutral-700">
+                  {t('payment_status')} <span className="text-accent-error-500">*</span>
                 </label>
                 <select
                   id="payment_status"
@@ -705,8 +705,8 @@ const SaleList: React.FC = () => {
                 </select>
               </div>
               <div className="mb-4">
-                <label htmlFor="payment_due_date" className="block text-gray-700">
-                  {t('payment_due_date')} <span className="text-red-500">*</span>
+                <label htmlFor="payment_due_date" className="block text-neutral-700">
+                  {t('payment_due_date')} <span className="text-accent-error-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -721,14 +721,14 @@ const SaleList: React.FC = () => {
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-300"
+                  className="px-4 py-2 bg-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-400 transition duration-300"
                   onClick={() => setFormVisible(false)}
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg bg-primary-600 hover:bg-primary-700 transition duration-300"
+                  className="px-4 py-2 bg-accent-success-500 text-white rounded-lg bg-primary-600 hover:bg-primary-700 transition duration-300"
                 >
                   {t('add_sale')}
                 </button>
@@ -740,30 +740,30 @@ const SaleList: React.FC = () => {
 
       {/* Delivery Form Modal */}
       {deliveryFormVisible && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-neutral-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
           <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className="text-xl font-semibold text-neutral-900">
                 {t('create_delivery_order') || 'Create Delivery Order'} 
                 {selectedSaleForDelivery && (
-                  <span className="text-sm text-gray-500 ml-2">
+                  <span className="text-sm text-neutral-500 ml-2">
                     ({t('sale')} #{selectedSaleForDelivery.id})
                   </span>
                 )}
               </h3>
-              <button onClick={closeDeliveryForm} className="text-gray-500 hover:text-gray-700">
+              <button onClick={closeDeliveryForm} className="text-neutral-500 hover:text-neutral-700">
                 <FaTimes size={20} />
               </button>
             </div>
             
             <form onSubmit={handleDeliverySubmit} className="space-y-6">
               {deliveryError && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
+                <div className="bg-accent-error-50 border border-accent-error-200 rounded-xl p-4 text-accent-error-700">
                   {deliveryError}
                 </div>
               )}
               {deliverySuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-green-700">
+                <div className="bg-accent-success-50 border border-accent-success-200 rounded-xl p-4 text-accent-success-700">
                   {deliverySuccess}
                 </div>
               )}
@@ -771,42 +771,42 @@ const SaleList: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Personal Information */}
                 <div className="space-y-4">
-                  <h4 className="text-lg font-medium text-gray-900 uppercase tracking-wide">
+                  <h4 className="text-lg font-medium text-neutral-900 uppercase tracking-wide">
                     {t('personal_information') || 'Personal Information'}
                   </h4>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('customer_name') || 'Full Name'} <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      {t('customer_name') || 'Full Name'} <span className="text-accent-error-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="customer_name"
                       value={deliveryFormData.customer_name}
                       onChange={handleDeliveryChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-all"
                       placeholder="Enter customer full name"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('phone_number') || 'Phone Number'} <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      {t('phone_number') || 'Phone Number'} <span className="text-accent-error-500">*</span>
                     </label>
                     <input
                       type="tel"
                       name="phone_number"
                       value={deliveryFormData.phone_number}
                       onChange={handleDeliveryChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-all"
                       placeholder="Customer phone number"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
                       {t('email') || 'Email'}
                     </label>
                     <input
@@ -814,7 +814,7 @@ const SaleList: React.FC = () => {
                       name="customer_email"
                       value={deliveryFormData.customer_email}
                       onChange={handleDeliveryChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-all"
                       placeholder="Customer email address"
                     />
                   </div>
@@ -822,20 +822,20 @@ const SaleList: React.FC = () => {
 
                 {/* Address Information */}
                 <div className="space-y-4">
-                  <h4 className="text-lg font-medium text-gray-900 uppercase tracking-wide">
+                  <h4 className="text-lg font-medium text-neutral-900 uppercase tracking-wide">
                     {t('address_information') || 'Address Information'}
                   </h4>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('street_address') || 'Street Address'} <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      {t('street_address') || 'Street Address'} <span className="text-accent-error-500">*</span>
                     </label>
                     <textarea
                       name="address"
                       value={deliveryFormData.address}
                       onChange={handleDeliveryChange}
                       rows={2}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-all resize-none"
                       placeholder="Enter delivery address"
                       required
                     />
@@ -843,30 +843,30 @@ const SaleList: React.FC = () => {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('city') || 'City'} <span className="text-red-500">*</span>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                        {t('city') || 'City'} <span className="text-accent-error-500">*</span>
                       </label>
                       <input
                         type="text"
                         name="city"
                         value={deliveryFormData.city}
                         onChange={handleDeliveryChange}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-colors"
                         placeholder="City"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('state') || 'State'} <span className="text-red-500">*</span>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                        {t('state') || 'State'} <span className="text-accent-error-500">*</span>
                       </label>
                       <input
                         type="text"
                         name="state"
                         value={deliveryFormData.state}
                         onChange={handleDeliveryChange}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-colors"
                         placeholder="State"
                         required
                       />
@@ -874,15 +874,15 @@ const SaleList: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t('zip_code') || 'ZIP Code'} <span className="text-red-500">*</span>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      {t('zip_code') || 'ZIP Code'} <span className="text-accent-error-500">*</span>
                     </label>
                     <input
                       type="text"
                       name="zip_code"
                       value={deliveryFormData.zip_code}
                       onChange={handleDeliveryChange}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-3 py-2.5 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-colors"
                       placeholder="ZIP code"
                       required
                     />
@@ -892,7 +892,7 @@ const SaleList: React.FC = () => {
 
               {/* Additional Instructions */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-700 mb-1">
                   {t('additional_instructions') || 'Additional Instructions'}
                 </label>
                 <textarea
@@ -900,18 +900,18 @@ const SaleList: React.FC = () => {
                   value={deliveryFormData.delivery_instructions}
                   onChange={handleDeliveryChange}
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-secondary-500 transition-all resize-none"
                   placeholder="Special delivery instructions (optional)"
                 />
               </div>
 
               {/* Location Picker */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                <h4 className="text-sm font-semibold text-neutral-700 uppercase tracking-wide">
                   {t('delivery_location') || 'Delivery Location'}
                 </h4>
                 
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="border border-neutral-200 rounded-lg overflow-hidden">
                   <div className="h-72 w-full">
                     <LocationPicker
                       initialCenter={{ lat: deliveryFormData.latitude, lng: deliveryFormData.longitude }}
@@ -929,7 +929,7 @@ const SaleList: React.FC = () => {
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-xs font-medium text-neutral-500 mb-1">
                       {t('latitude') || 'Latitude'}
                     </label>
                     <input
@@ -937,11 +937,11 @@ const SaleList: React.FC = () => {
                       step="any"
                       value={deliveryFormData.latitude}
                       readOnly
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg bg-neutral-50 text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">
+                    <label className="block text-xs font-medium text-neutral-500 mb-1">
                       {t('longitude') || 'Longitude'}
                     </label>
                     <input
@@ -949,7 +949,7 @@ const SaleList: React.FC = () => {
                       step="any"
                       value={deliveryFormData.longitude}
                       readOnly
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg bg-neutral-50 text-sm"
                     />
                   </div>
                 </div>
@@ -960,7 +960,7 @@ const SaleList: React.FC = () => {
                 <button
                   type="button"
                   onClick={closeDeliveryForm}
-                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
                 >
                   {t('cancel') || 'Cancel'}
                 </button>
@@ -969,8 +969,8 @@ const SaleList: React.FC = () => {
                   disabled={deliveryLoading}
                   className={`px-6 py-2 rounded-lg text-white transition-colors ${
                     deliveryLoading
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-500 hover:bg-blue-600'
+                      ? 'bg-neutral-400 cursor-not-allowed'
+                      : 'bg-secondary-500 hover:bg-secondary-600'
                   }`}
                 >
                   {deliveryLoading ? t('creating') || 'Creating...' : t('create_delivery_order') || 'Create Delivery Order'}
@@ -983,56 +983,56 @@ const SaleList: React.FC = () => {
 
       {/* Delivery Tracking Modal */}
       {trackingModalVisible && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-neutral-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
           <div className="relative bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">
+              <h3 className="text-xl font-semibold text-neutral-900">
                 {t('delivery_tracking') || 'Delivery Tracking'}
                 {trackingData && (
-                  <span className="text-sm text-gray-500 ml-2">
+                  <span className="text-sm text-neutral-500 ml-2">
                     (#{trackingData.tracking_number || trackingData.id})
                   </span>
                 )}
               </h3>
-              <button onClick={closeTrackingModal} className="text-gray-500 hover:text-gray-700">
+              <button onClick={closeTrackingModal} className="text-neutral-500 hover:text-neutral-700">
                 <FaTimes size={20} />
               </button>
             </div>
 
             {trackingError && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 mb-6">
+              <div className="bg-accent-error-50 border border-accent-error-200 rounded-xl p-4 text-accent-error-700 mb-6">
                 {trackingError}
               </div>
             )}
 
             {trackingLoading && (
               <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <span className="ml-2 text-gray-600">{t('loading') || 'Loading...'}</span>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary-500"></div>
+                <span className="ml-2 text-neutral-600">{t('loading') || 'Loading...'}</span>
               </div>
             )}
 
             {trackingData && (
               <div className="space-y-6">
                 {/* Delivery Status */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="bg-secondary-50 border border-secondary-200 rounded-xl p-4">
                   <div className="flex items-center mb-2">
-                    <FaTruck className="text-blue-600 mr-3" size={20} />
-                    <h4 className="text-lg font-medium text-gray-900">
+                    <FaTruck className="text-secondary-600 mr-3" size={20} />
+                    <h4 className="text-lg font-medium text-neutral-900">
                       {t('delivery_status') || 'Delivery Status'}
                     </h4>
                   </div>
                   <div className="flex items-center">
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
                       trackingData.delivery_status === 'delivered'
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-accent-success-100 text-accent-success-700'
                         : trackingData.delivery_status === 'in_transit'
-                        ? 'bg-blue-100 text-blue-700'
+                        ? 'bg-secondary-100 text-secondary-700'
                         : trackingData.delivery_status === 'picked_up'
-                        ? 'bg-yellow-100 text-yellow-700'
+                        ? 'bg-accent-warning-100 text-accent-warning-700'
                         : trackingData.delivery_status === 'pending'
-                        ? 'bg-orange-100 text-orange-700'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-primary-100 text-primary-700'
+                        : 'bg-neutral-100 text-neutral-600'
                     }`}>
                       {trackingData.delivery_status.charAt(0).toUpperCase() + trackingData.delivery_status.slice(1).replace('_', ' ')}
                     </span>
@@ -1041,44 +1041,44 @@ const SaleList: React.FC = () => {
                 {/* Customer Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <h4 className="text-lg font-medium text-gray-900 flex items-center">
-                      <FaMapMarkerAlt className="mr-2 text-gray-600" />
+                    <h4 className="text-lg font-medium text-neutral-900 flex items-center">
+                      <FaMapMarkerAlt className="mr-2 text-neutral-600" />
                       {t('customer_information') || 'Customer Information'}
                     </h4>
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
                       <div>
-                        <span className="font-medium text-gray-700">{t('customer_name') || 'Name'}:</span>
-                        <span className="ml-2 text-gray-900">{trackingData.customer_name}</span>
+                        <span className="font-medium text-neutral-700">{t('customer_name') || 'Name'}:</span>
+                        <span className="ml-2 text-neutral-900">{trackingData.customer_name}</span>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">{t('phone_number') || 'Phone'}:</span>
-                        <span className="ml-2 text-gray-900">{trackingData.phone_number}</span>
+                        <span className="font-medium text-neutral-700">{t('phone_number') || 'Phone'}:</span>
+                        <span className="ml-2 text-neutral-900">{trackingData.phone_number}</span>
                       </div>
                       {trackingData.email && trackingData.email.trim() !== '' && (
                         <div>
-                          <span className="font-medium text-gray-700">{t('email') || 'Email'}:</span>
-                          <span className="ml-2 text-gray-900">{trackingData.email}</span>
+                          <span className="font-medium text-neutral-700">{t('email') || 'Email'}:</span>
+                          <span className="ml-2 text-neutral-900">{trackingData.email}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <h4 className="text-lg font-medium text-gray-900">
+                    <h4 className="text-lg font-medium text-neutral-900">
                       {t('delivery_information') || 'Delivery Information'}
                     </h4>
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
                       <div>
-                        <span className="font-medium text-gray-700">{t('address') || 'Address'}:</span>
-                        <div className="mt-1 text-gray-900">
+                        <span className="font-medium text-neutral-700">{t('address') || 'Address'}:</span>
+                        <div className="mt-1 text-neutral-900">
                           {trackingData.address}<br />
                           {trackingData.city}, {trackingData.state} {trackingData.zip_code}
                         </div>
                       </div>
                       {trackingData.additional_instructions && trackingData.additional_instructions.trim() !== '' && (
                         <div>
-                          <span className="font-medium text-gray-700">{t('instructions') || 'Instructions'}:</span>
-                          <div className="mt-1 text-gray-900">{trackingData.additional_instructions}</div>
+                          <span className="font-medium text-neutral-700">{t('instructions') || 'Instructions'}:</span>
+                          <div className="mt-1 text-neutral-900">{trackingData.additional_instructions}</div>
                         </div>
                       )}
                     </div>
@@ -1086,60 +1086,60 @@ const SaleList: React.FC = () => {
                 </div>
 
                 {/* Delivery Dates */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-lg font-medium text-gray-900 mb-4">
+                <div className="bg-neutral-50 rounded-lg p-4">
+                  <h4 className="text-lg font-medium text-neutral-900 mb-4">
                     {t('timeline') || 'Timeline'}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <span className="font-medium text-gray-700">{t('order_created') || 'Order Created'}:</span>
-                      <div className="text-gray-900">{new Date(trackingData.created_at).toLocaleDateString()}</div>
-                      <div className="text-sm text-gray-500">{new Date(trackingData.created_at).toLocaleTimeString()}</div>
+                      <span className="font-medium text-neutral-700">{t('order_created') || 'Order Created'}:</span>
+                      <div className="text-neutral-900">{new Date(trackingData.created_at).toLocaleDateString()}</div>
+                      <div className="text-sm text-neutral-500">{new Date(trackingData.created_at).toLocaleTimeString()}</div>
                     </div>
                     {trackingData.estimated_delivery_date && (
                       <div>
-                        <span className="font-medium text-gray-700">{t('estimated_delivery') || 'Estimated Delivery'}:</span>
-                        <div className="text-gray-900">{new Date(trackingData.estimated_delivery_date).toLocaleDateString()}</div>
+                        <span className="font-medium text-neutral-700">{t('estimated_delivery') || 'Estimated Delivery'}:</span>
+                        <div className="text-neutral-900">{new Date(trackingData.estimated_delivery_date).toLocaleDateString()}</div>
                       </div>
                     )}
                     {trackingData.actual_delivery_date && (
                       <div>
-                        <span className="font-medium text-gray-700">{t('delivered_on') || 'Delivered On'}:</span>
-                        <div className="text-green-700 font-medium">{new Date(trackingData.actual_delivery_date).toLocaleDateString()}</div>
-                        <div className="text-sm text-gray-500">{new Date(trackingData.actual_delivery_date).toLocaleTimeString()}</div>
+                        <span className="font-medium text-neutral-700">{t('delivered_on') || 'Delivered On'}:</span>
+                        <div className="text-accent-success-700 font-medium">{new Date(trackingData.actual_delivery_date).toLocaleDateString()}</div>
+                        <div className="text-sm text-neutral-500">{new Date(trackingData.actual_delivery_date).toLocaleTimeString()}</div>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Order Details */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="text-lg font-medium text-gray-900 mb-4">
+                <div className="bg-secondary-50 border border-secondary-200 rounded-lg p-4">
+                  <h4 className="text-lg font-medium text-neutral-900 mb-4">
                     {t('order_details') || 'Order Details'}
                   </h4>
                   <div className="space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <span className="font-medium text-gray-700">{t('delivery_source') || 'Source'}:</span>
-                        <div className="text-gray-900 text-sm">{trackingData.delivery_source}</div>
+                        <span className="font-medium text-neutral-700">{t('delivery_source') || 'Source'}:</span>
+                        <div className="text-neutral-900 text-sm">{trackingData.delivery_source}</div>
                       </div>
                       <div>
-                        <span className="font-medium text-gray-700">{t('total_items') || 'Total Items'}:</span>
-                        <span className="ml-2 text-gray-900">{trackingData.total_items}</span>
+                        <span className="font-medium text-neutral-700">{t('total_items') || 'Total Items'}:</span>
+                        <span className="ml-2 text-neutral-900">{trackingData.total_items}</span>
                       </div>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-700">{t('total_value') || 'Total Value'}:</span>
-                      <span className="ml-2 text-gray-900 font-semibold">NPR {trackingData.total_value.toFixed(2)}</span>
+                      <span className="font-medium text-neutral-700">{t('total_value') || 'Total Value'}:</span>
+                      <span className="ml-2 text-neutral-900 font-semibold">NPR {trackingData.total_value.toFixed(2)}</span>
                     </div>
                     {trackingData.product_details && trackingData.product_details.length > 0 && (
                       <div>
-                        <span className="font-medium text-gray-700 block mb-2">{t('products') || 'Products'}:</span>
+                        <span className="font-medium text-neutral-700 block mb-2">{t('products') || 'Products'}:</span>
                         <div className="bg-white rounded-lg p-3 space-y-1">
                           {trackingData.product_details.map((product, index) => (
                             <div key={index} className="flex justify-between text-sm">
                               <span>{product.name}</span>
-                              <span className="text-gray-600">Qty: {product.quantity}</span>
+                              <span className="text-neutral-600">Qty: {product.quantity}</span>
                             </div>
                           ))}
                         </div>
@@ -1147,8 +1147,8 @@ const SaleList: React.FC = () => {
                     )}
                     {trackingData.tracking_number && (
                       <div>
-                        <span className="font-medium text-gray-700">{t('tracking_number') || 'Tracking Number'}:</span>
-                        <span className="ml-2 text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded text-sm">{trackingData.tracking_number}</span>
+                        <span className="font-medium text-neutral-700">{t('tracking_number') || 'Tracking Number'}:</span>
+                        <span className="ml-2 text-neutral-900 font-mono bg-neutral-100 px-2 py-1 rounded text-sm">{trackingData.tracking_number}</span>
                       </div>
                     )}
                   </div>
@@ -1156,27 +1156,27 @@ const SaleList: React.FC = () => {
 
                 {/* Delivery Person Information */}
                 {(trackingData.delivery_person_name || trackingData.delivery_person_phone) && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                  <div className="bg-accent-warning-50 border border-accent-warning-200 rounded-lg p-4">
+                    <h4 className="text-lg font-medium text-neutral-900 mb-2">
                       {t('delivery_person_information') || 'Delivery Person Information'}
                     </h4>
                     <div className="space-y-2">
                       {trackingData.delivery_person_name && (
                         <div>
-                          <span className="font-medium text-gray-700">{t('delivery_person_name') || 'Delivery Person'}:</span>
-                          <span className="ml-2 text-gray-900">{trackingData.delivery_person_name}</span>
+                          <span className="font-medium text-neutral-700">{t('delivery_person_name') || 'Delivery Person'}:</span>
+                          <span className="ml-2 text-neutral-900">{trackingData.delivery_person_name}</span>
                         </div>
                       )}
                       {trackingData.delivery_person_phone && (
                         <div>
-                          <span className="font-medium text-gray-700">{t('contact_number') || 'Contact'}:</span>
-                          <span className="ml-2 text-gray-900">{trackingData.delivery_person_phone}</span>
+                          <span className="font-medium text-neutral-700">{t('contact_number') || 'Contact'}:</span>
+                          <span className="ml-2 text-neutral-900">{trackingData.delivery_person_phone}</span>
                         </div>
                       )}
                       {trackingData.delivery_service && (
                         <div>
-                          <span className="font-medium text-gray-700">{t('delivery_service') || 'Delivery Service'}:</span>
-                          <span className="ml-2 text-gray-900">{trackingData.delivery_service}</span>
+                          <span className="font-medium text-neutral-700">{t('delivery_service') || 'Delivery Service'}:</span>
+                          <span className="ml-2 text-neutral-900">{trackingData.delivery_service}</span>
                         </div>
                       )}
                     </div>
@@ -1186,29 +1186,29 @@ const SaleList: React.FC = () => {
                 {/* Delivery Location Map */}
                 {trackingData.latitude && trackingData.longitude && (
                   <div className="space-y-3">
-                    <h4 className="text-lg font-medium text-gray-900">
+                    <h4 className="text-lg font-medium text-neutral-900">
                       {t('delivery_location') || 'Delivery Location'}
                     </h4>
                     
                     {/* Location Coordinates Info */}
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                    <div className="bg-accent-success-50 border border-accent-success-200 rounded-lg p-3 mb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
-                          <FaMapMarkerAlt className="text-green-600 mr-2" size={16} />
-                          <span className="text-sm font-medium text-green-800">
+                          <FaMapMarkerAlt className="text-accent-success-600 mr-2" size={16} />
+                          <span className="text-sm font-medium text-accent-success-800">
                             {t('exact_delivery_location') || 'Exact Delivery Location'}
                           </span>
                         </div>
-                        <div className="text-xs text-green-700 font-mono">
+                        <div className="text-xs text-accent-success-700 font-mono">
                           {trackingData.latitude.toFixed(6)}, {trackingData.longitude.toFixed(6)}
                         </div>
                       </div>
-                      <div className="mt-2 text-sm text-green-700">
+                      <div className="mt-2 text-sm text-accent-success-700">
                         {trackingData.address}, {trackingData.city}, {trackingData.state}
                       </div>
                     </div>
 
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="border border-neutral-200 rounded-lg overflow-hidden">
                       <div className="h-64 w-full">
                         <LocationPicker
                           initialCenter={{ 
@@ -1226,19 +1226,19 @@ const SaleList: React.FC = () => {
                     
                     {/* Coordinates Display */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                      <div className="bg-neutral-50 rounded-lg p-3">
+                        <label className="block text-xs font-medium text-neutral-500 mb-1">
                           {t('latitude') || 'Latitude'}
                         </label>
-                        <div className="text-sm font-mono text-gray-900 bg-white px-2 py-1 rounded border">
+                        <div className="text-sm font-mono text-neutral-900 bg-white px-2 py-1 rounded border">
                           {trackingData.latitude.toFixed(8)}
                         </div>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <label className="block text-xs font-medium text-gray-500 mb-1">
+                      <div className="bg-neutral-50 rounded-lg p-3">
+                        <label className="block text-xs font-medium text-neutral-500 mb-1">
                           {t('longitude') || 'Longitude'}
                         </label>
-                        <div className="text-sm font-mono text-gray-900 bg-white px-2 py-1 rounded border">
+                        <div className="text-sm font-mono text-neutral-900 bg-white px-2 py-1 rounded border">
                           {trackingData.longitude.toFixed(8)}
                         </div>
                       </div>
@@ -1252,7 +1252,7 @@ const SaleList: React.FC = () => {
             <div className="flex justify-end pt-6">
               <button
                 onClick={closeTrackingModal}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors"
               >
                 {t('close') || 'Close'}
               </button>

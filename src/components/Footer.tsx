@@ -125,12 +125,12 @@ const NewsletterForm: React.FC = () => {
     <div className="bg-gradient-to-r from-primary-50 to-primary-100 p-6 rounded-2xl border border-primary-200">
       <div className="flex items-center mb-4">
         <NewsletterIcon className="w-6 h-6 text-primary-600 mr-2" />
-        <h4 className="text-lg font-semibold text-gray-900">Stay Updated</h4>
+        <h4 className="text-lg font-semibold text-neutral-900">Stay Updated</h4>
       </div>
-      <p className="text-gray-600 mb-4 text-sm">Get the latest deals and updates delivered to your inbox.</p>
+      <p className="text-neutral-600 mb-4 text-sm">Get the latest deals and updates delivered to your inbox.</p>
       
       {isSubscribed ? (
-        <div className="flex items-center text-green-600 animate-in fade-in duration-300">
+        <div className="flex items-center text-accent-success-600 animate-in fade-in duration-300">
           <CheckIcon className="w-5 h-5 mr-2" />
           <span className="font-medium">Thanks for subscribing!</span>
         </div>
@@ -211,7 +211,7 @@ const Footer: React.FC = () => {
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-900 mb-3">Download Our App</p>
+              <p className="text-sm font-semibold text-neutral-900 mb-3">Download Our App</p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a 
                   href="https://play.google.com/store/apps/details?id=com.pristineminds.supply_chain_mobile&pcampaignid=web_share" 
@@ -242,7 +242,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="lg:col-span-2">
-            <h4 className="text-lg font-semibold text-gray-900 mb-6">Quick Links</h4>
+            <h4 className="text-lg font-semibold text-neutral-900 mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li><FooterLink to="/about">About Us</FooterLink></li>
               <li><FooterLink to="/marketplace">Products</FooterLink></li>
@@ -254,7 +254,7 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="lg:col-span-2">
-            <h4 className="text-lg font-semibold text-gray-900 mb-6">Support</h4>
+            <h4 className="text-lg font-semibold text-neutral-900 mb-6">Support</h4>
             <ul className="space-y-3">
               <li><FooterLink to="/faq">FAQ</FooterLink></li>
               <li><FooterLink to="/shipping">Shipping & Delivery</FooterLink></li>
@@ -270,52 +270,52 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="mb-12">
-          <h4 className="text-lg font-semibold text-gray-900 mb-6">Contact Information</h4>
+          <h4 className="text-lg font-semibold text-neutral-900 mb-6">Contact Information</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200">
+            <div className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200">
               <MapPinIcon className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium text-gray-900 text-sm">Address</p>
-                <p className="text-gray-600 text-sm">Panipokhari, Kathmandu, Nepal</p>
+                <p className="font-medium text-neutral-900 text-sm">Address</p>
+                <p className="text-neutral-600 text-sm">Panipokhari, Kathmandu, Nepal</p>
               </div>
             </div>
             
             <a 
               href="tel:+9779767474645" 
-              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200 group"
+              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200 group"
             >
               <PhoneIcon className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0 group-hover:animate-pulse" />
               <div>
-                <p className="font-medium text-gray-900 text-sm">Phone</p>
-                <p className="text-gray-600 group-hover:text-primary-600 text-sm transition-colors">+977 9767474645</p>
+                <p className="font-medium text-neutral-900 text-sm">Phone</p>
+                <p className="text-neutral-600 group-hover:text-primary-600 text-sm transition-colors">+977 9767474645</p>
               </div>
             </a>
             
             <a 
               href="mailto:mulyabazzar@gmail.com" 
-              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200 group"
+              className="flex items-start space-x-3 p-4 bg-white rounded-xl border border-neutral-200 hover:border-primary-300 hover:shadow-medium transition-all duration-200 group"
             >
               <MailIcon className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium text-gray-900 text-sm">Email</p>
-                <p className="text-gray-600 group-hover:text-primary-600 text-sm transition-colors">mulyabazzar@gmail.com</p>
+                <p className="font-medium text-neutral-900 text-sm">Email</p>
+                <p className="text-neutral-600 group-hover:text-primary-600 text-sm transition-colors">mulyabazzar@gmail.com</p>
               </div>
             </a>
           </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-8">
+        <div className="border-t border-neutral-200 pt-8">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0">
-            <p className="text-gray-500 text-sm text-center lg:text-left">
+            <p className="text-neutral-500 text-sm text-center lg:text-left">
               &copy; {currentYear} MulyaBazzar. All rights reserved. Made by Pristine Minds Nepal Pvt Ltd
             </p>
             
             <div className="flex flex-wrap justify-center lg:justify-end items-center gap-3">
-              <p className="text-sm font-medium text-gray-700 mr-2">We Accept:</p>
+              <p className="text-sm font-medium text-neutral-700 mr-2">We Accept:</p>
               
               <PaymentBadge>
-                <CheckIcon className="w-5 h-5 text-green-600 mr-2" />
-                <span className="text-sm font-medium text-gray-700">Cash on Delivery</span>
+                <CheckIcon className="w-5 h-5 text-accent-success-600 mr-2" />
+                <span className="text-sm font-medium text-neutral-700">Cash on Delivery</span>
               </PaymentBadge>
               
               <PaymentBadge>

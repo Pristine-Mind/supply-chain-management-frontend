@@ -192,7 +192,7 @@ const TransporterRegistration: React.FC = () => {
   const renderError = (field: string) => {
     if (errors[field] && errors[field].length > 0) {
       return (
-        <div className="flex items-center gap-1 text-red-600 text-sm mt-1">
+        <div className="flex items-center gap-1 text-accent-error-600 text-sm mt-1">
           <AlertCircle className="w-4 h-4" />
           {errors[field][0]}
         </div>
@@ -205,44 +205,44 @@ const TransporterRegistration: React.FC = () => {
     return (
       <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
         <div className="text-center">
-          <CheckCircle2 className="w-12 h-12 text-green-600 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
-          <p className="text-gray-600">Your transporter account has been created successfully.</p>
+          <CheckCircle2 className="w-12 h-12 text-accent-success-600 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-neutral-900 mb-2">Registration Successful!</h2>
+          <p className="text-neutral-600">Your transporter account has been created successfully.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-neutral-50">
       <div className="hidden md:flex flex-col w-1/4 bg-gradient-to-b from-yellow-600 to-yellow-800 text-white p-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold mb-4">Become a Transporter</h2>
-          <p className="text-blue-100">Join our network of trusted transporters and start earning today!</p>
+          <p className="text-secondary-100">Join our network of trusted transporters and start earning today!</p>
         </div>
         
         <div className="mt-auto space-y-6">
           <div className="flex items-start space-x-3">
-            <Truck className="w-6 h-6 mt-1 text-blue-200 flex-shrink-0" />
+            <Truck className="w-6 h-6 mt-1 text-secondary-200 flex-shrink-0" />
             <div>
               <h3 className="font-semibold">Flexible Schedule</h3>
-              <p className="text-sm text-blue-100">Work when you want, where you want</p>   
+              <p className="text-sm text-secondary-100">Work when you want, where you want</p>   
             </div>
           </div>
           
           <div className="flex items-start space-x-3">
-            <Shield className="w-6 h-6 mt-1 text-blue-200 flex-shrink-0" />
+            <Shield className="w-6 h-6 mt-1 text-secondary-200 flex-shrink-0" />
             <div>
               <h3 className="font-semibold">Secure Payments</h3>
-              <p className="text-sm text-blue-100">Get paid directly to your account</p>
+              <p className="text-sm text-secondary-100">Get paid directly to your account</p>
             </div>
           </div>
           
           <div className="flex items-start space-x-3">
-            <Clock className="w-6 h-6 mt-1 text-blue-200 flex-shrink-0" />
+            <Clock className="w-6 h-6 mt-1 text-secondary-200 flex-shrink-0" />
             <div>
               <h3 className="font-semibold">24/7 Support</h3>
-              <p className="text-sm text-blue-100">We're here to help you anytime</p>
+              <p className="text-sm text-secondary-100">We're here to help you anytime</p>
             </div>
           </div>
         </div>
@@ -250,7 +250,7 @@ const TransporterRegistration: React.FC = () => {
       
       <div className="w-full md:w-2/4 p-6 bg-white">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          <h1 className="text-2xl font-bold text-neutral-900 mb-6 text-center">
             Transporter Registration
           </h1>
 
@@ -258,19 +258,19 @@ const TransporterRegistration: React.FC = () => {
         <Tabs.List className="grid w-full grid-cols-3 mb-6">
           <Tabs.Trigger
             value="personal"
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-l-md hover:bg-gray-200 data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:border-orange-600"
+            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 border border-neutral-300 rounded-l-md hover:bg-neutral-200 data-[state=active]:bg-primary-600 data-[state=active]:text-white data-[state=active]:border-primary-600"
           >
             Personal Info
           </Tabs.Trigger>
           <Tabs.Trigger
             value="vehicle"
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border-t border-b border-gray-300 hover:bg-gray-200 data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:border-orange-600"
+            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 border-t border-b border-neutral-300 hover:bg-neutral-200 data-[state=active]:bg-primary-600 data-[state=active]:text-white data-[state=active]:border-primary-600"
           >
             Vehicle Details
           </Tabs.Trigger>
           <Tabs.Trigger
             value="documents"
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-r-md hover:bg-gray-200 data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:border-orange-600"
+            className="px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 border border-neutral-300 rounded-r-md hover:bg-neutral-200 data-[state=active]:bg-primary-600 data-[state=active]:text-white data-[state=active]:border-primary-600"
           >
             Documents
           </Tabs.Trigger>
@@ -280,7 +280,7 @@ const TransporterRegistration: React.FC = () => {
           <Tabs.Content value="personal" className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Form.Field name="first_name">
-                <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                   First Name *
                 </Form.Label>
                 <Form.Control asChild>
@@ -288,7 +288,7 @@ const TransporterRegistration: React.FC = () => {
                     type="text"
                     value={formData.first_name}
                     onChange={(e) => handleInputChange('first_name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </Form.Control>
@@ -296,7 +296,7 @@ const TransporterRegistration: React.FC = () => {
               </Form.Field>
 
               <Form.Field name="last_name">
-                <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                   Last Name *
                 </Form.Label>
                 <Form.Control asChild>
@@ -304,7 +304,7 @@ const TransporterRegistration: React.FC = () => {
                     type="text"
                     value={formData.last_name}
                     onChange={(e) => handleInputChange('last_name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </Form.Control>
@@ -313,7 +313,7 @@ const TransporterRegistration: React.FC = () => {
             </div>
 
             <Form.Field name="username">
-              <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+              <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                 Username *
               </Form.Label>
               <Form.Control asChild>
@@ -321,7 +321,7 @@ const TransporterRegistration: React.FC = () => {
                   type="text"
                   value={formData.username}
                   onChange={(e) => handleInputChange('username', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </Form.Control>
@@ -329,7 +329,7 @@ const TransporterRegistration: React.FC = () => {
             </Form.Field>
 
             <Form.Field name="email">
-              <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+              <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                 Email *
               </Form.Label>
               <Form.Control asChild>
@@ -337,7 +337,7 @@ const TransporterRegistration: React.FC = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </Form.Control>
@@ -345,7 +345,7 @@ const TransporterRegistration: React.FC = () => {
             </Form.Field>
 
             <Form.Field name="phone">
-              <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+              <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                 Phone Number *
               </Form.Label>
               <Form.Control asChild>
@@ -353,7 +353,7 @@ const TransporterRegistration: React.FC = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </Form.Control>
@@ -362,7 +362,7 @@ const TransporterRegistration: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <Form.Field name="password">
-                <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                   Password *
                 </Form.Label>
                 <Form.Control asChild>
@@ -370,7 +370,7 @@ const TransporterRegistration: React.FC = () => {
                     type="password"
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </Form.Control>
@@ -378,7 +378,7 @@ const TransporterRegistration: React.FC = () => {
               </Form.Field>
 
               <Form.Field name="password2">
-                <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                   Confirm Password *
                 </Form.Label>
                 <Form.Control asChild>
@@ -386,7 +386,7 @@ const TransporterRegistration: React.FC = () => {
                     type="password"
                     value={formData.password2}
                     onChange={(e) => handleInputChange('password2', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </Form.Control>
@@ -397,7 +397,7 @@ const TransporterRegistration: React.FC = () => {
 
           <Tabs.Content value="vehicle" className="space-y-4">
             <Form.Field name="license_number">
-              <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+              <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                 License Number *
               </Form.Label>
               <Form.Control asChild>
@@ -405,7 +405,7 @@ const TransporterRegistration: React.FC = () => {
                   type="text"
                   value={formData.license_number}
                   onChange={(e) => handleInputChange('license_number', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </Form.Control>
@@ -414,14 +414,14 @@ const TransporterRegistration: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <Form.Field name="vehicle_type">
-                <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                   Vehicle Type *
                 </Form.Label>
                 <Form.Control asChild>
                   <select
                     value={formData.vehicle_type}
                     onChange={(e) => handleInputChange('vehicle_type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
                     <option value="">Select vehicle type</option>
@@ -434,7 +434,7 @@ const TransporterRegistration: React.FC = () => {
               </Form.Field>
 
               <Form.Field name="vehicle_number">
-                <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+                <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                   Vehicle Number *
                 </Form.Label>
                 <Form.Control asChild>
@@ -442,7 +442,7 @@ const TransporterRegistration: React.FC = () => {
                     type="text"
                     value={formData.vehicle_number}
                     onChange={(e) => handleInputChange('vehicle_number', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
                 </Form.Control>
@@ -451,7 +451,7 @@ const TransporterRegistration: React.FC = () => {
             </div>
 
             <Form.Field name="vehicle_capacity">
-              <Form.Label className="block text-sm font-medium text-gray-700 mb-1">
+              <Form.Label className="block text-sm font-medium text-neutral-700 mb-1">
                 Vehicle Capacity (kg) *
               </Form.Label>
               <Form.Control asChild>
@@ -460,7 +460,7 @@ const TransporterRegistration: React.FC = () => {
                   min="1"
                   value={formData.vehicle_capacity}
                   onChange={(e) => handleInputChange('vehicle_capacity', parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
               </Form.Control>
@@ -469,35 +469,35 @@ const TransporterRegistration: React.FC = () => {
 
             <div className="border-t pt-4">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-medium text-gray-700">Current Location</label>
+                <label className="text-sm font-medium text-neutral-700">Current Location</label>
                 <button
                   type="button"
                   onClick={getCurrentLocation}
-                  className="text-sm text-blue-600 hover:text-blue-800"
+                  className="text-sm text-secondary-600 hover:text-secondary-800"
                 >
                   Get Current Location
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Latitude</label>
+                  <label className="block text-xs text-neutral-500 mb-1">Latitude</label>
                   <input
                     type="number"
                     step="any"
                     value={formData.current_latitude || ''}
                     onChange={(e) => handleInputChange('current_latitude', parseFloat(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Auto-detect"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Longitude</label>
+                  <label className="block text-xs text-neutral-500 mb-1">Longitude</label>
                   <input
                     type="number"
                     step="any"
                     value={formData.current_longitude || ''}
                     onChange={(e) => handleInputChange('current_longitude', parseFloat(e.target.value))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     placeholder="Auto-detect"
                   />
                 </div>
@@ -507,11 +507,11 @@ const TransporterRegistration: React.FC = () => {
 
           <Tabs.Content value="documents" className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Vehicle Image
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-4 text-center hover:border-neutral-400">
+                <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
                 <input
                   type="file"
                   accept="image/*"
@@ -521,23 +521,23 @@ const TransporterRegistration: React.FC = () => {
                 />
                 <label
                   htmlFor="vehicle-image"
-                  className="cursor-pointer text-blue-600 hover:text-blue-800"
+                  className="cursor-pointer text-secondary-600 hover:text-secondary-800"
                 >
                   Choose vehicle image
                 </label>
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+                <p className="text-xs text-neutral-500 mt-1">PNG, JPG up to 10MB</p>
                 {formData.vehicle_image && (
-                  <p className="text-sm text-green-600 mt-2">✓ {formData.vehicle_image.name}</p>
+                  <p className="text-sm text-accent-success-600 mt-2">✓ {formData.vehicle_image.name}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Vehicle Documents
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-4 text-center hover:border-neutral-400">
+                <Upload className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
@@ -547,20 +547,20 @@ const TransporterRegistration: React.FC = () => {
                 />
                 <label
                   htmlFor="vehicle-documents"
-                  className="cursor-pointer text-blue-600 hover:text-blue-800"
+                  className="cursor-pointer text-secondary-600 hover:text-secondary-800"
                 >
                   Choose vehicle documents
                 </label>
-                <p className="text-xs text-gray-500 mt-1">PDF, DOC, or image files up to 10MB</p>
+                <p className="text-xs text-neutral-500 mt-1">PDF, DOC, or image files up to 10MB</p>
                 {formData.vehicle_documents && (
-                  <p className="text-sm text-green-600 mt-2">✓ {formData.vehicle_documents.name}</p>
+                  <p className="text-sm text-accent-success-600 mt-2">✓ {formData.vehicle_documents.name}</p>
                 )}
               </div>
             </div>
 
             {errors.general && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <div className="flex items-center gap-2 text-red-800">
+              <div className="bg-accent-error-50 border border-accent-error-200 rounded-md p-3">
+                <div className="flex items-center gap-2 text-accent-error-800">
                   <AlertCircle className="w-4 h-4" />
                   <span className="text-sm">{errors.general[0]}</span>
                 </div>
@@ -579,7 +579,7 @@ const TransporterRegistration: React.FC = () => {
                 }
               }}
               disabled={currentTab === 'personal'}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-neutral-700 bg-neutral-100 border border-neutral-300 rounded-md hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
@@ -589,7 +589,7 @@ const TransporterRegistration: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-6 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Registering...' : 'Register'}
                 </button>
@@ -604,7 +604,7 @@ const TransporterRegistration: React.FC = () => {
                     setCurrentTab(tabs[currentIndex + 1]);
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Next
               </button>
@@ -616,10 +616,10 @@ const TransporterRegistration: React.FC = () => {
       
       </div>
       
-      <div className="hidden md:flex flex-col w-1/4 bg-gray-100 p-8 border-l border-gray-200">
+      <div className="hidden md:flex flex-col w-1/4 bg-neutral-100 p-8 border-l border-neutral-200">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Why Join Us?</h2>
-          <p className="text-gray-600">Top reasons to become a transporter with us</p>
+          <h2 className="text-2xl font-bold text-neutral-800 mb-4">Why Join Us?</h2>
+          <p className="text-neutral-600">Top reasons to become a transporter with us</p>
         </div>
         
         <div className="space-y-4">
@@ -631,16 +631,16 @@ const TransporterRegistration: React.FC = () => {
             'Dedicated account manager'
           ].map((benefit, index) => (
             <div key={index} className="flex items-start space-x-2">
-              <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-              <span className="text-gray-700">{benefit}</span>
+              <CheckCircle className="w-5 h-5 text-accent-success-500 mt-0.5 flex-shrink-0" />
+              <span className="text-neutral-700">{benefit}</span>
             </div>
           ))}
         </div>
         
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-semibold text-blue-800 mb-2">Need Help?</h3>
-          <p className="text-sm text-gray-600 mb-3">Our support team is available 24/7 to assist you with the registration process.</p>
-          <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+        <div className="mt-8 p-4 bg-secondary-50 rounded-lg">
+          <h3 className="font-semibold text-secondary-800 mb-2">Need Help?</h3>
+          <p className="text-sm text-neutral-600 mb-3">Our support team is available 24/7 to assist you with the registration process.</p>
+          <button className="text-sm text-secondary-600 hover:text-secondary-800 font-medium">
             Contact Support →
           </button>
         </div>

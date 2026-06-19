@@ -1,14 +1,59 @@
+@import 'leaflet/dist/leaflet.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import '~leaflet/dist/leaflet.css';
 
 @layer base {
+  :root {
+    --background: 250 250 250;
+    --foreground: 38 38 38;
+    --card: 255 255 255;
+    --card-foreground: 38 38 38;
+    --popover: 255 255 255;
+    --popover-foreground: 38 38 38;
+    --primary: 234 88 12;
+    --primary-foreground: 255 255 255;
+    --secondary: 241 245 249;
+    --secondary-foreground: 51 65 85;
+    --muted: 245 245 245;
+    --muted-foreground: 115 115 115;
+    --accent: 255 237 213;
+    --accent-foreground: 194 65 12;
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
+    --border: 229 229 229;
+    --input: 229 229 229;
+    --ring: 254 215 170;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 23 23 23;
+    --foreground: 250 250 250;
+    --card: 38 38 38;
+    --card-foreground: 250 250 250;
+    --popover: 38 38 38;
+    --popover-foreground: 250 250 250;
+    --primary: 249 115 22;
+    --primary-foreground: 255 255 255;
+    --secondary: 51 65 85;
+    --secondary-foreground: 241 245 249;
+    --muted: 64 64 64;
+    --muted-foreground: 163 163 163;
+    --accent: 124 45 12;
+    --accent-foreground: 255 237 213;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 64 64 64;
+    --input: 64 64 64;
+    --ring: 194 65 12;
+  }
+
   html {
     font-family: 'Helvetica Neue', Helvetica, Arial, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply text-body text-neutral-800 bg-neutral-50;
     line-height: 1.75;

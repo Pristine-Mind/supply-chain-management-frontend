@@ -4,6 +4,91 @@
 
 ---
 
+## Progress Log
+
+### 2026-06-19 — Foundation Milestone (Completed)
+- ✅ Installed `tailwindcss-animate`.
+- ✅ Added `:root` / `.dark` CSS variables to `src/index.css` for shadcn semantic tokens.
+- ✅ Updated `tailwind.config.cjs` with `background`, `foreground`, `card`, `muted`, `destructive`, `border`, `input`, `ring` tokens while preserving the existing 60:30:10 color scales.
+- ✅ Fixed `components.json` to point to `tailwind.config.cjs`.
+- ✅ Fixed `src/components/ui/skeleton.tsx` (`bg-primary/10` → `bg-neutral-200`).
+- ✅ Fixed `src/index.css` `@import` order and removed the webpack-only `~` prefix for Leaflet CSS.
+- ✅ Removed unused deps: `@radix-ui/themes`, `@stitches/react`, `react-modal`.
+- ✅ Added missing direct Radix deps that were previously transitive: `@radix-ui/react-radio-group`, `@radix-ui/react-form`, `@radix-ui/react-tabs`, `@radix-ui/react-tooltip`.
+- ✅ Verified production build (`npx vite build`) passes.
+- ✅ Verified lint on changed files passes.
+
+### 2026-06-19 — Shared Components + Marketplace Polish (Completed)
+- ✅ Created `src/components/ui/page-container.tsx` — consistent max-width + padding wrapper.
+- ✅ Created `src/components/ui/spinner.tsx` — size + color variants.
+- ✅ Created `src/components/ui/empty-state.tsx` — icon + title + description + action.
+- ✅ Created `src/components/ui/badge.tsx` — discount, status, category, success/error/neutral variants via CVA.
+- ✅ Created `src/components/ui/section-header.tsx` — title + subtitle + optional "View All" action.
+- ✅ Refactored `src/components/Marketplace.tsx`:
+  - Replaced the "Just For You" inline section header with `<SectionHeader>`.
+  - Wrapped the "Just For You" section with `<PageContainer>`.
+  - Replaced the "No Products Found" block with `<EmptyState>`.
+  - Replaced discount / free-delivery / savings badges with `<Badge>`.
+  - Replaced the video-feed loading spinner with `<Spinner>`.
+- ✅ Verified `npx vite build` passes.
+- ✅ Verified changed UI files have no new lint errors/warnings.
+
+### 2026-06-19 — Color-Token Sweep on Top 15 Files (Completed)
+- ✅ Replaced arbitrary Tailwind colors with design-system tokens across the 15 files with the most occurrences:
+  - `src/components/UserProfile.tsx`
+  - `src/components/SalesList.tsx`
+  - `src/components/MyOrders.tsx`
+  - `src/components/TransporterRegistration.tsx`
+  - `src/components/inventory-analytics/OptimizationCard.tsx`
+  - `src/components/TransporterProfile.tsx`
+  - `src/components/inventory-analytics/InventoryAnalyticsDashboard.tsx`
+  - `src/components/inventory-analytics/ProductsAnalyticsList.tsx`
+  - `src/components/Products.tsx`
+  - `src/components/SellerProfilePage.tsx`
+  - `src/components/DiscountManager.tsx`
+  - `src/components/MarketplaceUserProduct.tsx`
+  - `src/components/inventory-analytics/BatchForecast.tsx`
+  - `src/components/AvailableDeliveries.tsx`
+  - `src/components/inventory-analytics/PortfolioView.tsx`
+- ✅ Mapping applied: orange → primary, green → accent-success, red → accent-error, blue/slate/indigo/purple → secondary, gray → neutral, amber/yellow → accent-warning.
+- ✅ Verified `npx vite build` passes.
+- ✅ Confirmed remaining lint errors in changed files are pre-existing.
+
+### 2026-06-19 — Color Sweep on Marketplace/Customer Pages (Completed)
+- ✅ Replaced arbitrary Tailwind colors across the main marketplace/customer-facing surfaces:
+  - `src/components/MarketplaceAllProducts.tsx`
+  - `src/components/ProductPage.tsx`
+  - `src/components/CategoryProducts.tsx`
+  - `src/components/BrandProducts.tsx`
+  - `src/components/NewYearSale.tsx`
+  - `src/components/FlashSale.tsx`
+  - `src/components/Deals.tsx`
+  - `src/components/FeaturedProducts.tsx`
+  - `src/components/BestDealsSection.tsx`
+  - `src/components/Navbar.tsx`
+  - `src/components/Footer.tsx`
+- ✅ Verified zero remaining arbitrary Tailwind color classes in these files.
+- ✅ Verified `npx vite build` passes.
+- ✅ Confirmed lint errors in changed files are pre-existing.
+
+### 2026-06-19 — Shared Components on Customer-Facing Pages (Completed)
+- ✅ Applied shared components across customer-facing pages:
+  - `src/components/MarketplaceAllProducts.tsx` — `<EmptyState>`, `<Badge>` for discount/stock/delivery badges
+  - `src/components/ProductPage.tsx` — `<EmptyState>` for "Product Not Found"
+  - `src/components/Cart.tsx` — `<EmptyState>` for empty cart, `<Spinner>` for loading states
+  - `src/components/CheckoutScreen.tsx` — `<EmptyState>` for empty cart
+  - `src/components/CategoryProducts.tsx` — `<EmptyState>`, `<Badge>` for discount/stock/delivery badges
+  - `src/components/BrandProducts.tsx` — `<EmptyState>` for no matches
+  - `src/components/NewYearSale.tsx` — `<EmptyState>`, `<Spinner>`
+  - `src/components/FlashSale.tsx` — `<Badge>` for "Hot" badge
+- ✅ Fixed remaining arbitrary colors in Cart.tsx trust indicators.
+- ✅ Verified `npx vite build` passes.
+- ✅ Confirmed remaining lint errors in changed files are pre-existing.
+
+**Next recommended milestone:** create a reusable `ProductCard` component with size variants (`sm | md | lg`) and replace inline product cards in `MarketplaceAllProducts.tsx`, `CategoryProducts.tsx`, `BrandProducts.tsx`, and `SellerProfilePage.tsx`.
+
+---
+
 ## 1. Executive Summary
 
 The codebase already has a solid foundation: React 18 + Vite + Tailwind CSS, a shadcn/ui-inspired primitive layer (`src/components/ui`), a documented 60:30:10 orange/gray/accent color system, an 8-pt grid, and nice micro-interactions via Framer Motion. However, the design execution is fragmented. Many components ignore the existing primitives, CSS tokens are missing, and several UI patterns are rebuilt page-by-page instead of being shared.

@@ -45,8 +45,8 @@ const PortfolioView: React.FC = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading portfolio analytics...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-secondary-600 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Loading portfolio analytics...</p>
         </div>
       </div>
     );
@@ -56,7 +56,7 @@ const PortfolioView: React.FC = () => {
     return (
       <div className="bg-white shadow-md rounded-lg p-6">
         <BackButton />
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-700 mt-4">
+        <div className="p-4 bg-accent-error-50 border border-accent-error-200 rounded-md text-accent-error-700 mt-4">
           {errors.portfolioAnalytics || 'Unable to load portfolio'}
         </div>
       </div>
@@ -136,10 +136,10 @@ const PortfolioView: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold">📊 Portfolio Overview</h1>
-            <p className="text-purple-100 mt-2">
+            <p className="text-secondary-100 mt-2">
               Complete inventory health analysis across all products
             </p>
-            <p className="text-purple-200 text-sm mt-1">
+            <p className="text-secondary-200 text-sm mt-1">
               Last updated: {new Date(generated_at).toLocaleString()}
             </p>
           </div>
@@ -155,30 +155,30 @@ const PortfolioView: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-blue-500">
-          <p className="text-sm text-gray-500">Total Products</p>
-          <p className="text-3xl font-bold text-gray-900">{portfolio_analytics.total_products}</p>
+        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-secondary-500">
+          <p className="text-sm text-neutral-500">Total Products</p>
+          <p className="text-3xl font-bold text-neutral-900">{portfolio_analytics.total_products}</p>
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-green-500">
-          <p className="text-sm text-gray-500">Healthy</p>
-          <p className="text-3xl font-bold text-green-600">
+        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-accent-success-500">
+          <p className="text-sm text-neutral-500">Healthy</p>
+          <p className="text-3xl font-bold text-accent-success-600">
             {portfolio_analytics.healthy_stock_percentage.toFixed(0)}%
           </p>
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-yellow-500">
-          <p className="text-sm text-gray-500">Low Stock</p>
-          <p className="text-3xl font-bold text-yellow-600">{portfolio_analytics.low_stock_count}</p>
+        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-accent-warning-500">
+          <p className="text-sm text-neutral-500">Low Stock</p>
+          <p className="text-3xl font-bold text-accent-warning-600">{portfolio_analytics.low_stock_count}</p>
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-red-500">
-          <p className="text-sm text-gray-500">Critical Risk</p>
-          <p className="text-3xl font-bold text-red-600">{portfolio_analytics.stockout_risk_count}</p>
+        <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-accent-error-500">
+          <p className="text-sm text-neutral-500">Critical Risk</p>
+          <p className="text-3xl font-bold text-accent-error-600">{portfolio_analytics.stockout_risk_count}</p>
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Risk Distribution</h3>
+          <h3 className="text-lg font-bold text-neutral-800 mb-4">Risk Distribution</h3>
           <div className="flex justify-center">
             <div className="w-64 h-64">
               <Doughnut data={riskDistributionData} />
@@ -186,7 +186,7 @@ const PortfolioView: React.FC = () => {
           </div>
         </div>
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Stock Level Distribution</h3>
+          <h3 className="text-lg font-bold text-neutral-800 mb-4">Stock Level Distribution</h3>
           <div className="h-64">
             <Bar
               data={stockDistribution}
@@ -204,7 +204,7 @@ const PortfolioView: React.FC = () => {
       {/* At-Risk Products Table */}
       <div className="bg-white shadow-md rounded-lg p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <h3 className="text-xl font-bold text-gray-800">
+          <h3 className="text-xl font-bold text-neutral-800">
             At-Risk Products ({filteredProducts.length})
           </h3>
           
@@ -216,7 +216,7 @@ const PortfolioView: React.FC = () => {
                 size="sm"
                 variant={selectedRiskLevel === level ? 'default' : 'outline'}
                 onClick={() => handleFilterChange(level)}
-                className={level === 'critical' ? 'hover:bg-red-600' : ''}
+                className={level === 'critical' ? 'hover:bg-accent-error-600' : ''}
               >
                 {level === 'all' ? 'All' : level.charAt(0).toUpperCase() + level.slice(1)}
                 {level !== 'all' && (
@@ -233,22 +233,22 @@ const PortfolioView: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Product</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Stock</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Risk Level</th>
-                  <th className="text-center py-3 px-4 text-sm font-medium text-gray-500">Days Left</th>
-                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+                <tr className="border-b border-neutral-200">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-neutral-500">Product</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Stock</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Risk Level</th>
+                  <th className="text-center py-3 px-4 text-sm font-medium text-neutral-500">Days Left</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-neutral-500">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProducts.map((product) => (
-                  <tr key={product.product_id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={product.product_id} className="border-b border-neutral-100 hover:bg-neutral-50">
                     <td className="py-3 px-4">
-                      <span className="font-medium text-gray-900">{product.name}</span>
+                      <span className="font-medium text-neutral-900">{product.name}</span>
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className={`font-semibold ${product.stock <= 10 ? 'text-red-600' : 'text-gray-900'}`}>
+                      <span className={`font-semibold ${product.stock <= 10 ? 'text-accent-error-600' : 'text-neutral-900'}`}>
                         {product.stock}
                       </span>
                     </td>
@@ -258,14 +258,14 @@ const PortfolioView: React.FC = () => {
                       </span>
                     </td>
                     <td className="text-center py-3 px-4">
-                      <span className={`font-medium ${product.days_until_stockout <= 3 ? 'text-red-600' : 'text-gray-900'}`}>
+                      <span className={`font-medium ${product.days_until_stockout <= 3 ? 'text-accent-error-600' : 'text-neutral-900'}`}>
                         {formatDaysUntilStockout(product.days_until_stockout)}
                       </span>
                     </td>
                     <td className="text-right py-3 px-4">
                       <Link
                         to={`/inventory-analytics/products/${product.product_id}`}
-                        className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        className="text-secondary-600 hover:text-secondary-800 text-sm font-medium"
                       >
                         View →
                       </Link>
@@ -276,7 +276,7 @@ const PortfolioView: React.FC = () => {
             </table>
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-neutral-500">
             <p className="text-4xl mb-2">✅</p>
             <p>No products match the selected filter.</p>
           </div>
@@ -285,7 +285,7 @@ const PortfolioView: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="bg-white shadow-md rounded-lg p-6">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h3>
+        <h3 className="text-xl font-bold text-neutral-800 mb-4">Quick Actions</h3>
         <div className="flex flex-wrap gap-4">
           <Link to="/inventory-analytics/reorder-recommendations">
             <Button variant="destructive">🚨 View Reorder Recommendations</Button>
