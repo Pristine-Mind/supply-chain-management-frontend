@@ -87,7 +87,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <a
       href={`/marketplace/${product.marketplace_id || product.id}`}
-      className="group block bg-white rounded-3xl border border-neutral-200 overflow-hidden hover:shadow-xl hover:border-amber-200 transition-all duration-300 hover:-translate-y-2 no-underline"
+      className="group block bg-white rounded-3xl border border-neutral-200 overflow-hidden shadow-soft hover:shadow-xl hover:border-primary-200 transition-all duration-300 hover:-translate-y-2 no-underline"
       aria-label={`View ${product.name}`}
     >
       {/* Image Container */}
@@ -112,7 +112,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Discount Badge */}
         {hasDiscount && product.percent_off && (
-          <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-2xl shadow-md">
+          <div className="absolute top-4 left-4 bg-accent-error-500 text-white text-xs font-bold px-3 py-1.5 rounded-2xl shadow-md">
             {product.percent_off}% OFF
           </div>
         )}
@@ -135,13 +135,27 @@ const ProductCard: React.FC<ProductCardProps> = ({
             />
           </button>
         )}
+
+        {/* Quick View Overlay */}
+        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onViewProduct?.();
+            }}
+            className="bg-white text-neutral-900 px-5 py-2 rounded-xl font-medium hover:bg-neutral-50 transition-all shadow-md transform translate-y-3 group-hover:translate-y-0 duration-300 text-sm"
+          >
+            Quick View
+          </button>
+        </div>
       </div>
 
       {/* Content */}
       <div className="p-5 space-y-4">
         {/* Category & Views */}
         <div className="flex items-center justify-between">
-          <span className="inline-block bg-amber-100 text-amber-700 text-xs font-medium px-3 py-1 rounded-2xl uppercase tracking-wider">
+          <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-3 py-1 rounded-2xl uppercase tracking-wider">
             {product.category_details}
           </span>
 
@@ -155,7 +169,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Product Name */}
         <h3
-          className="font-semibold text-lg leading-tight text-neutral-900 line-clamp-2 group-hover:text-amber-700 transition-colors cursor-pointer min-h-[3.2rem]"
+          className="font-semibold text-lg leading-tight text-neutral-900 line-clamp-2 group-hover:text-primary-700 transition-colors cursor-pointer min-h-[3.2rem]"
           onClick={onViewProduct}
         >
           {product.name}
@@ -196,7 +210,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-sm transition-all ${
               product.stock <= 0
                 ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                : 'bg-amber-600 hover:bg-amber-700 text-white shadow-sm active:scale-[0.985]'
+                : 'bg-primary-600 hover:bg-primary-700 text-white shadow-soft active:scale-[0.985]'
             }`}
           >
             <ShoppingCart className="w-4 h-4" />

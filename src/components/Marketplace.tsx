@@ -5,7 +5,7 @@ import { createSafeRecognitionInstance } from '../utils/voiceSearchBrowserPolyfi
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, User, ShoppingCart, Menu, Mic, Gift } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Menu, Mic, Gift, ChevronRight, Search } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLoyalty } from '../context/LoyaltyContext';
@@ -198,6 +198,13 @@ const Marketplace: React.FC = () => {
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const firstMenuItemRef = useRef<HTMLButtonElement | null>(null);
   const [pendingProduct, setPendingProduct] = useState<MarketplaceProduct | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Close user menu on outside click or ESC
   useEffect(() => {
@@ -401,7 +408,7 @@ const Marketplace: React.FC = () => {
         )}
 
         {/* Top Navigation Bar - Responsive: search moves to its own line on mobile, sign/register hidden on mobile */}
-        <div className="bg-white shadow-elevation-sm border-b border-neutral-200">
+        <div className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-medium border-b border-neutral-200/80' : 'bg-white shadow-elevation-sm border-b border-neutral-200'}`}>
           <div className="container mx-auto container-padding py-3">
             <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-3">
               {/* Logo / Brand */}
@@ -412,7 +419,7 @@ const Marketplace: React.FC = () => {
 
               {/* Centered large search on desktop */}
               <div className="hidden md:flex justify-center">
-                <div className={`relative w-full max-w-xl transition-all duration-300 bg-white border border-neutral-200 rounded-full px-4 py-2 flex items-center ${isListening ? 'scale-[1.02]' : ''}`}>
+                <div className={`relative w-full max-w-xl transition-all duration-300 bg-neutral-50 border border-neutral-200 rounded-full px-4 py-2.5 flex items-center shadow-soft hover:shadow-medium focus-within:shadow-medium focus-within:border-primary-300 focus-within:ring-4 focus-within:ring-primary-100 ${isListening ? 'scale-[1.02]' : ''}`}>
                   <MagnifyingGlassIcon className={`text-neutral-400 w-5 h-5 mr-3 ${isListening ? 'text-red-500 animate-bounce' : ''}`} />
                   <div className="flex-1 relative">
                     <input
@@ -446,7 +453,7 @@ const Marketplace: React.FC = () => {
 
                   <button
                     onClick={() => navigate(`/marketplace/all-products?search=${encodeURIComponent(query)}`)}
-                    className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md"
+                    className="ml-3 bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-soft hover:shadow-medium transition-all active:scale-[0.985]"
                   >
                     Search
                   </button>
@@ -560,7 +567,7 @@ const Marketplace: React.FC = () => {
                   </button>
                 </div>
                 <div className="relative flex-1 mx-2">
-                  <div className="relative bg-white border border-neutral-200 rounded-full px-3 py-2 flex items-center">
+                  <div className="relative bg-neutral-50 border border-neutral-200 rounded-full px-3 py-2 flex items-center shadow-soft focus-within:shadow-medium focus-within:border-primary-300 transition-all">
                     <MagnifyingGlassIcon className={`text-neutral-400 w-4 h-4 mr-3 ${isListening ? 'text-red-500 animate-bounce' : ''}`} />
                     <input
                       type="text"
@@ -705,30 +712,52 @@ const Marketplace: React.FC = () => {
         {/* CTA banner with categories overlapping */}
         <HeroBanner/>
         {/* Trending strip + Promo/Top picks layout */}
-        <div className="container mx-auto px-4 py-8">
-          <LazySection>
-            <NayaBarshaBanner />
-          </LazySection>
+        <div className="bg-white">
+          <div className="container mx-auto px-4 py-10">
+            <LazySection>
+              <NayaBarshaBanner />
+            </LazySection>
+          </div>
+        </div>
 
-          <LazySection>
-            <FlashSale /> 
-          </LazySection>
-          
-          <LazySection>
-            <MadeForYou />
-          </LazySection>
+        <div className="bg-gradient-to-r from-primary-50/50 to-orange-50/30 border-y border-primary-100/50">
+          <div className="container mx-auto px-4 py-10">
+            <LazySection>
+              <FlashSale /> 
+            </LazySection>
+          </div>
+        </div>
+        
+        <div className="bg-neutral-50/50">
+          <div className="container mx-auto px-4 py-10">
+            <LazySection>
+              <MadeForYou />
+            </LazySection>
+          </div>
+        </div>
 
-          <LazySection>
-            <ProductHubSections />
-          </LazySection>
+        <div className="bg-white">
+          <div className="container mx-auto px-4 py-10">
+            <LazySection>
+              <ProductHubSections />
+            </LazySection>
 
-          <PromoBanner />
-          
-          <LazySection>
-            <BestDealsSection user={user} />          
-          </LazySection>
+            <PromoBanner />
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-r from-primary-50/50 to-orange-50/30 border-y border-primary-100/50">
+          <div className="container mx-auto px-4 py-10">
+            <LazySection>
+              <BestDealsSection user={user} />          
+            </LazySection>
+          </div>
+        </div>
 
-          <FreeDeliveryBanner />
+        <div className="bg-white">
+          <div className="container mx-auto px-4 py-10">
+            <FreeDeliveryBanner />
+          </div>
         </div>
 
         {isMobileMenuOpen && (
@@ -838,48 +867,91 @@ const Marketplace: React.FC = () => {
           </div>
         )}
 
-      <CategoryCarousel />
+      <div className="bg-white border-y border-neutral-100">
+        <div className="container mx-auto px-4 py-10">
+          <CategoryCarousel />
+        </div>
+      </div>
       
-      <LazySection>
-        <NearbyProducts radiusKm={50} limit={8} />
-      </LazySection>
+      <div className="bg-neutral-50/50">
+        <div className="container mx-auto px-4 py-10">
+          <LazySection>
+            <NearbyProducts radiusKm={50} limit={8} />
+          </LazySection>
+        </div>
+      </div>
 
-      <LazySection>
-        <FeaturedProducts/>
-      </LazySection>
+      <div className="bg-white">
+        <div className="container mx-auto px-4 py-10">
+          <LazySection>
+            <FeaturedProducts/>
+          </LazySection>
+        </div>
+      </div>
 
-      <LazySection>
-        <BrandsSection />
-      </LazySection>
+      <div className="bg-neutral-50/50 border-y border-neutral-100">
+        <div className="container mx-auto px-4 py-10">
+          <LazySection>
+            <BrandsSection />
+          </LazySection>
+        </div>
+      </div>
 
       {/* Made in Nepal Section - Revamped */}
-      <LazySection>
-        <MadeInNepal />
-      </LazySection>
+      <div className="bg-gradient-to-r from-red-50/40 via-white to-blue-50/40">
+        <div className="container mx-auto px-4 py-10">
+          <LazySection>
+            <MadeInNepal />
+          </LazySection>
+        </div>
+      </div>
       
       {/* Diaper Section */}
-      <LazySection>
-        <DiaperSection /> 
-      </LazySection>
-
-      {/* Brands Section moved to LazySection below DiaperSection if desired, 
-          but TopBrands was here in original code */}
-      <LazySection>
-        <TopBrands />
-      </LazySection>
-
-      <div className="container mx-auto px-4 py-3 sm:py-4">
-        {/* Filters removed as requested */}
-
-        {/* Section title for personalized recommendations */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-bold text-neutral-900">Just For You</h3>
+      <div className="bg-white border-y border-neutral-100">
+        <div className="container mx-auto px-4 py-10">
+          <LazySection>
+            <DiaperSection /> 
+          </LazySection>
         </div>
+      </div>
+
+      <div className="bg-neutral-50/50">
+        <div className="container mx-auto px-4 py-10">
+          <LazySection>
+            <TopBrands />
+          </LazySection>
+        </div>
+      </div>
+
+      <div className="bg-white">
+        <div className="container mx-auto px-4 py-10">
+          {/* Section title for personalized recommendations */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-h2 text-neutral-900">Just For You</h2>
+              <p className="text-body-sm text-neutral-500 mt-1">Handpicked recommendations based on your browsing</p>
+            </div>
+            <button 
+              onClick={() => navigate('/marketplace/all-products')}
+              className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1 transition-colors"
+            >
+              View All <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
                 {/* Products Grid */}
                 {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                    <span className="ml-3 text-gray-600">Loading products...</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={i} className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                        <div className="aspect-[4/3] bg-neutral-100 animate-pulse" />
+                        <div className="p-5 space-y-3">
+                          <div className="h-4 bg-neutral-100 rounded animate-pulse w-1/3" />
+                          <div className="h-5 bg-neutral-100 rounded animate-pulse" />
+                          <div className="h-4 bg-neutral-100 rounded animate-pulse w-3/4" />
+                          <div className="h-10 bg-neutral-100 rounded animate-pulse mt-4" />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : productsError ? (
                   <div className="text-center py-8">
@@ -887,10 +959,12 @@ const Marketplace: React.FC = () => {
                     <p className="text-gray-600">{productsError}</p>
                   </div>
                 ) : products.length === 0 ? (
-                  <div className="text-center py-8">
-                    <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                    <h3 className="text-xl font-medium text-gray-900 mb-2">No Products Found</h3>
-                    <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
+                  <div className="text-center py-16 px-4">
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center">
+                      <Search className="w-10 h-10 text-neutral-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-neutral-900 mb-2">No Products Found</h3>
+                    <p className="text-neutral-500 mb-6 max-w-md mx-auto">Try adjusting your filters or search terms to find what you're looking for.</p>
                     <button
                       onClick={() => {
                         setQuery('');
@@ -900,20 +974,21 @@ const Marketplace: React.FC = () => {
                         setSelectedCity('');
                         setSelectedBusinessType('');
                       }}
-                      className="px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
+                      className="btn-secondary px-6 py-2.5"
                     >
                       Clear All Filters
                     </button>
                   </div>
                 ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {products.map(item => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {products.map((item, index) => (
                     <div
                       key={item.id}
                       onClick={() => navigate(`/marketplace/${item.id}`)}
-                      className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                      className="bg-white rounded-2xl border border-neutral-200 overflow-hidden group hover:shadow-xl hover:border-primary-200 transition-all duration-500 hover:-translate-y-1.5 cursor-pointer animate-slide-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className="relative aspect-square overflow-hidden bg-neutral-50">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-50">
                         {item.percent_off > 0 && (
                           <div className="absolute top-3 left-3 bg-accent-error-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm z-10">
                             {Math.round(item.percent_off)}% OFF
@@ -939,8 +1014,8 @@ const Marketplace: React.FC = () => {
                         />
                         
                         {/* Quick View Overlay */}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <button className="bg-white text-neutral-900 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors shadow-sm">
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                          <button className="bg-white text-neutral-900 px-6 py-2.5 rounded-xl font-medium hover:bg-neutral-50 transition-all shadow-md transform translate-y-3 group-hover:translate-y-0 duration-300">
                             Quick View
                           </button>
                         </div>
@@ -955,7 +1030,7 @@ const Marketplace: React.FC = () => {
                         </div>
                         
                         {/* Product Title */}
-                        <h6 className="font-semibold text-neutral-500 leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors">
+                        <h6 className="font-semibold text-neutral-900 leading-tight line-clamp-2 group-hover:text-primary-700 transition-colors">
                           {item.product_details.name}
                         </h6>
                         
@@ -965,7 +1040,7 @@ const Marketplace: React.FC = () => {
                             const pricing = getDisplayPrice(item, user);
                             return (
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-lg font-bold text-accent-error-600">
+                                <span className="text-lg font-bold text-primary-700">
                                   Rs. {pricing.currentPrice?.toLocaleString()}
                                 </span>
                                 {pricing.originalPrice && (
@@ -984,7 +1059,7 @@ const Marketplace: React.FC = () => {
                           {(() => {
                             const pricing = getDisplayPrice(item, user);
                             return pricing.savings > 0 ? (
-                              <div className="text-xs text-accent-success-600 font-medium">
+                              <div className="inline-flex items-center text-xs text-accent-success-700 font-medium bg-accent-success-50 px-2 py-0.5 rounded-full">
                                 Save Rs. {pricing.savings?.toLocaleString()}
                               </div>
                             ) : null;
@@ -1015,10 +1090,10 @@ const Marketplace: React.FC = () => {
                             handleAddToCart(item, e);
                           }}
                           disabled={item.product_details.stock === 0}
-                          className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                          className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
                             item.product_details.stock === 0
-                              ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
-                              : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
+                              ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
+                              : 'bg-primary-600 text-white hover:bg-primary-700 shadow-soft hover:shadow-medium active:scale-[0.985]'
                           }`}
                         >
                           <ShoppingCart className="w-4 h-4" />
@@ -1031,16 +1106,17 @@ const Marketplace: React.FC = () => {
               )}
 
                 {totalCount > products.length && (
-                  <div className="mt-6 flex justify-center">
+                  <div className="mt-8 flex justify-center">
                     <button
                       onClick={() => navigate('/marketplace/all-products')}
-                      className="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors text-sm sm:text-base font-medium"
+                      className="btn-primary px-8 py-3"
                     >
                       View More Products
                     </button>
                   </div>
                 )}
         
+        </div>
       </div>
     <Footer />
     </div>

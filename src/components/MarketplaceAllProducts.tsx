@@ -19,7 +19,8 @@ import {
   Package,
   Building,
   Mic,
-  Home
+  Home,
+  CheckCircle
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -697,22 +698,20 @@ const MarketplaceAllProducts: React.FC = () => {
         key={index}
         className={`w-3 h-3 ${
           index < Math.floor(rating)
-            ? 'text-orange-500 fill-orange-500'
+            ? 'text-primary-500 fill-primary-500'
             : index < rating
-            ? 'text-orange-300 fill-orange-300'
-            : 'text-gray-300'
+            ? 'text-primary-300 fill-primary-300'
+            : 'text-neutral-300'
         }`}
       />
     ));
   };
 
   const ProductCard: React.FC<{ product: MarketplaceProduct }> = ({ product }) => {
-    // const isWishlisted = wishlist.has(product.id);
     const mainImage = product.product_details.images?.[0]?.image || '/api/placeholder/300/300';
     const hasOffer = product.is_offer_active && product.percent_off > 0;
     const pricing = getDisplayPrice(product, user);
     const categoryName = product.product_details.category_details || 'Uncategorized';
-    // const supplierName = product.producer?.business_name || 'Unknown Supplier';
 
     const handleImageContextMenu = (e: React.MouseEvent<HTMLImageElement>) => {
       e.preventDefault();
@@ -728,25 +727,25 @@ const MarketplaceAllProducts: React.FC = () => {
     return (
       <a
         href={`/marketplace/${product.id}`}
-        className="block bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-full no-underline text-inherit"
+        className="group block bg-white border border-neutral-200 rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary-200 transition-all duration-300 hover:-translate-y-1 flex flex-col h-full no-underline text-inherit"
       >
-        <div className="relative h-48 bg-gray-50 overflow-hidden">
+        <div className="relative aspect-[4/3] bg-neutral-50 overflow-hidden">
           <img
             src={mainImage}
             alt={product.product_details.name}
             draggable={false}
             onContextMenu={handleImageContextMenu}
-            className="w-full h-full object-contain p-2 pointer-events-none select-none"
+            className="w-full h-full object-contain p-2 pointer-events-none select-none group-hover:scale-105 transition-transform duration-300"
             onError={(e) => (e.currentTarget.src = '/api/placeholder/300/300')}
           />
           {hasOffer && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+            <div className="absolute top-3 left-3 bg-accent-error-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm z-10">
               {product.percent_off}% OFF
             </div>
           )}
           {product.percent_off > 0 && (
             <div 
-              className="absolute top-2 right-2 bg-green-600 text-white text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1 cursor-pointer hover:bg-green-700 transition-colors"
+              className="absolute top-3 right-3 bg-accent-success-600 text-white text-[9px] font-bold px-2 py-1 rounded-full flex items-center gap-1 cursor-pointer hover:bg-accent-success-700 transition-colors z-10"
               onClick={handleDiscountClick}
               title="Click to edit discount"
             >
@@ -755,65 +754,67 @@ const MarketplaceAllProducts: React.FC = () => {
             </div>
           )}
           {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
-            <div className="absolute bottom-2 right-2 bg-yellow-500 text-white text-[10px] font-medium px-1.5 py-0.5 rounded">
+            <div className="absolute bottom-3 right-3 bg-accent-warning-500 text-white text-[10px] font-medium px-2 py-1 rounded-full shadow-sm z-10">
               {product.product_details.stock} left
             </div>
           )}
           {product.is_delivery_free && (
-            <div className="absolute bottom-2 left-2 bg-green-600 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
+            <div className="absolute bottom-3 left-3 bg-accent-success-600 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-sm z-10">
               <span>🚚</span> Free Delivery
             </div>
           )}
+
+          {/* Quick View Overlay */}
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+            <button className="bg-white text-neutral-900 px-5 py-2 rounded-xl font-medium hover:bg-neutral-50 transition-all shadow-md transform translate-y-3 group-hover:translate-y-0 duration-300 text-sm">
+              Quick View
+            </button>
+          </div>
         </div>
 
-        <div className="p-3 flex-1 flex flex-col">
-          <div className="mb-1">
-            <span className="text-[10px] bg-blue-50 text-blue-600 font-medium px-1.5 py-0.5 rounded">
+        <div className="p-4 flex-1 flex flex-col">
+          <div className="mb-2">
+            <span className="inline-block bg-primary-100 text-primary-700 text-[10px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wide">
               {categoryName}
             </span>
           </div>
 
           <h3
-            className="text-sm font-semibold text-gray-900 line-clamp-2 mb-1 cursor-pointer hover:text-orange-600 transition-colors"
+            className="text-sm font-semibold text-neutral-900 leading-tight line-clamp-2 mb-2 cursor-pointer group-hover:text-primary-700 transition-colors"
             onClick={() => navigate(`/marketplace/${product.id}`)}
           >
             {product.product_details.name}
           </h3>
 
-          {/* <div className="text-[10px] text-gray-500 flex items-center gap-1 mb-2">
-            <MapPin className="w-3 h-3" />
-            <span>Delivers in {product.estimated_delivery_days || 'N/A'} days</span>
-          </div> */}
-
           {product.average_rating > 0 && (
             <div className="flex items-center gap-1 mb-2">
               <div className="flex gap-0.5">{renderStars(product.average_rating)}</div>
-              <span className="text-[10px] text-gray-600">({product.total_reviews})</span>
+              <span className="text-[10px] text-neutral-500">({product.total_reviews})</span>
             </div>
           )}
 
-          <div className="mt-auto space-y-1">
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-bold text-orange-600">
+          <div className="mt-auto space-y-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-sm font-bold text-primary-700">
                 Rs. {pricing.currentPrice?.toLocaleString()}
               </span>
               {pricing.originalPrice && (
-                <span className="text-[10px] text-gray-500 line-through">
+                <span className="text-[10px] text-neutral-500 line-through">
                   Rs. {pricing.originalPrice?.toLocaleString()}
                 </span>
               )}
               {pricing.isB2BPrice && (
-                <span className="text-[8px] bg-blue-100 text-blue-800 px-1 py-0.5 rounded font-bold ml-1">
+                <span className="text-[8px] bg-secondary-100 text-secondary-800 px-1.5 py-0.5 rounded-full font-bold">
                   B2B
                 </span>
               )}
             </div>
 
             {pricing.savings > 0 && (
-              <div className="text-[10px] text-green-600 font-medium flex items-center gap-1">
-                <span>💚 Save Rs. {pricing.savings?.toLocaleString()}</span>
+              <div className="inline-flex items-center text-[10px] text-accent-success-700 font-medium bg-accent-success-50 px-2 py-0.5 rounded-full">
+                Save Rs. {pricing.savings?.toLocaleString()}
                 {product.percent_off > 0 && (
-                  <span className="text-[9px] bg-green-100 text-green-700 px-1 py-0.5 rounded">
+                  <span className="ml-1 text-[9px]">
                     ({product.percent_off}% off)
                   </span>
                 )}
@@ -821,7 +822,7 @@ const MarketplaceAllProducts: React.FC = () => {
             )}
 
             {(pricing.minQuantity || product.min_order) && (
-              <div className="text-[10px] text-gray-600">
+              <div className="text-[10px] text-neutral-500">
                 Min. order: {pricing.minQuantity || product.min_order} units
               </div>
             )}
@@ -830,13 +831,13 @@ const MarketplaceAllProducts: React.FC = () => {
               <div
                 className={`w-1.5 h-1.5 rounded-full ${
                   product.product_details.stock > 10
-                    ? 'bg-green-500'
+                    ? 'bg-accent-success-500'
                     : product.product_details.stock > 0
-                    ? 'bg-yellow-500'
-                    : 'bg-red-500'
+                    ? 'bg-accent-warning-500'
+                    : 'bg-accent-error-500'
                 }`}
               />
-              <span>
+              <span className="text-neutral-500">
                 {product.product_details.stock > 0
                   ? `${product.product_details.stock} in stock`
                   : 'Out of stock'}
@@ -847,12 +848,13 @@ const MarketplaceAllProducts: React.FC = () => {
           <button
             onClick={() => handleAddToCart(product)}
             disabled={product.product_details.stock === 0}
-            className={`mt-2 w-full py-1.5 text-[11px] font-medium rounded transition-colors ${
+            className={`mt-3 w-full py-2 text-xs font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 ${
               product.product_details.stock === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-orange-600 text-white hover:bg-orange-700'
+                ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
+                : 'bg-primary-600 text-white hover:bg-primary-700 shadow-soft hover:shadow-medium active:scale-[0.985]'
             }`}
           >
+            <ShoppingCart className="w-3.5 h-3.5" />
             {product.product_details.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
           </button>
         </div>
@@ -867,7 +869,7 @@ const MarketplaceAllProducts: React.FC = () => {
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 max-w-md w-full z-50">
           <Dialog.Title className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Tag className="w-5 h-5 text-orange-600" />
+            <Tag className="w-5 h-5 text-primary-600" />
             Set Discount
           </Dialog.Title>
           
@@ -878,17 +880,17 @@ const MarketplaceAllProducts: React.FC = () => {
                   {selectedProductForDiscount.product_details.name}
                 </h4>
                 <div className="text-sm text-gray-600">
-                  Listed Price: <span className="font-bold text-orange-600">Rs. {selectedProductForDiscount.listed_price?.toLocaleString()}</span>
+                  Listed Price: <span className="font-bold text-primary-600">Rs. {selectedProductForDiscount.listed_price?.toLocaleString()}</span>
                 </div>
               </div>
 
               {discountInfo && (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <h5 className="text-xs font-bold text-blue-900 mb-2">Current Discount Info</h5>
-                  <div className="space-y-1 text-xs text-blue-800">
+                <div className="p-3 bg-secondary-50 rounded-lg border border-secondary-200">
+                  <h5 className="text-xs font-bold text-secondary-900 mb-2">Current Discount Info</h5>
+                  <div className="space-y-1 text-xs text-secondary-800">
                     <div>Discount: {discountInfo.discount_percentage}%</div>
                     <div>Discounted Price: Rs. {discountInfo.discounted_price?.toLocaleString()}</div>
-                    <div className="text-green-600 font-medium">Savings: Rs. {discountInfo.savings_amount?.toLocaleString()}</div>
+                    <div className="text-accent-success-600 font-medium">Savings: Rs. {discountInfo.savings_amount?.toLocaleString()}</div>
                   </div>
                 </div>
               )}
@@ -906,7 +908,7 @@ const MarketplaceAllProducts: React.FC = () => {
                     value={discountPercentage}
                     onChange={(e) => setDiscountPercentage(e.target.value)}
                     placeholder="Enter discount percentage"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                     disabled={discountLoading}
                   />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">%</span>
@@ -914,14 +916,14 @@ const MarketplaceAllProducts: React.FC = () => {
               </div>
 
               {discountPercentage && (
-                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                  <h5 className="text-xs font-bold text-green-900 mb-2">Preview</h5>
-                  <div className="space-y-1 text-xs text-green-800">
+                <div className="p-3 bg-accent-success-50 rounded-lg border border-accent-success-200">
+                  <h5 className="text-xs font-bold text-accent-success-900 mb-2">Preview</h5>
+                  <div className="space-y-1 text-xs text-accent-success-800">
                     <div>Discount: {parseFloat(discountPercentage)}%</div>
                     <div>
                       New Price: Rs. {(selectedProductForDiscount.listed_price * (1 - parseFloat(discountPercentage) / 100)).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </div>
-                    <div className="text-green-600 font-medium">
+                    <div className="text-accent-success-600 font-medium">
                       Customer Saves: Rs. {((selectedProductForDiscount.listed_price * parseFloat(discountPercentage)) / 100).toLocaleString('en-US', { maximumFractionDigits: 0 })}
                     </div>
                   </div>
@@ -931,7 +933,7 @@ const MarketplaceAllProducts: React.FC = () => {
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={() => setDiscountDialogOpen(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50"
+                  className="flex-1 px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 font-medium hover:bg-neutral-50"
                   disabled={discountLoading}
                 >
                   Cancel
@@ -939,7 +941,7 @@ const MarketplaceAllProducts: React.FC = () => {
                 <button
                   onClick={handleApplyDiscount}
                   disabled={!discountPercentage || discountLoading}
-                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:bg-neutral-400 disabled:cursor-not-allowed"
                 >
                   {discountLoading ? 'Applying...' : 'Apply Discount'}
                 </button>
@@ -959,7 +961,7 @@ const MarketplaceAllProducts: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Banner */}
-      <div className="bg-orange-600 text-white py-2 text-center text-sm">
+      <div className="bg-primary-600 text-white py-2 text-center text-sm">
         🚚 Free delivery on orders over Rs. 3,000
       </div>
 
@@ -969,13 +971,13 @@ const MarketplaceAllProducts: React.FC = () => {
           <div className="flex items-center justify-between py-3">
             {/* Logo & Title */}
             <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/')} className="text-gray-600 hover:text-orange-600">
+              <button onClick={() => navigate('/')} className="text-neutral-600 hover:text-primary-600">
                 <Home className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-2">
                 <img src={logo} alt="Logo" className="w-32 h-16" />
                 <div>
-                  <h1 className="text-lg font-bold text-orange-600">All Products</h1>
+                  <h1 className="text-lg font-bold text-primary-600">All Products</h1>
                   {selectedCategory !== 'All' && (
                     <span className="text-xs text-gray-600">
                       in {CATEGORY_OPTIONS.find(cat => cat.code === selectedCategory)?.label}
@@ -995,7 +997,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-10 pr-10 py-2 w-80 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="pl-10 pr-10 py-2 w-80 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-neutral-50"
                 />
                 <button
                   onClick={startVoiceSearch}
@@ -1004,10 +1006,10 @@ const MarketplaceAllProducts: React.FC = () => {
                   <Mic className="w-4 h-4" />
                 </button>
               </div>
-              <button onClick={handleSearch} className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 text-sm">
+              <button onClick={handleSearch} className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 text-sm font-medium transition-colors">
                 Search
               </button>
-              <button onClick={() => navigate('/cart')} className="relative p-2 text-gray-600 hover:text-orange-600">
+              <button onClick={() => navigate('/cart')} className="relative p-2 text-neutral-600 hover:text-primary-600">
                 <ShoppingCart className="w-5 h-5" />
                 {distinctItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
@@ -1019,7 +1021,7 @@ const MarketplaceAllProducts: React.FC = () => {
 
             {/* Mobile Icons */}
             <div className="md:hidden flex items-center gap-3">
-              <button onClick={() => navigate('/cart')} className="relative p-2">
+              <button onClick={() => navigate('/cart')} className="relative p-2 text-neutral-600">
                 <ShoppingCart className="w-5 h-5" />
                 {distinctItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
@@ -1036,7 +1038,7 @@ const MarketplaceAllProducts: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <div className="max-w-12xl mx-auto px-2 sm:px-6 lg:px-2 py-8">
+      <div className="max-w-12xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-6">
           {/* Sidebar */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
@@ -1121,7 +1123,7 @@ const MarketplaceAllProducts: React.FC = () => {
               nearMe) && (
               <div className="mb-6 flex flex-wrap gap-2">
                 {searchTerm && (
-                  <span className="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     <Search className="w-3 h-3" /> "{searchTerm}"
                     <button onClick={() => { setSearchTerm(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1129,7 +1131,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {selectedCategory !== 'All' && (
-                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-neutral-100 text-neutral-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     {CATEGORY_OPTIONS.find(cat => cat.code === selectedCategory)?.label}
                     <button onClick={() => { setSelectedCategory('All'); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1137,7 +1139,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {selectedCategoryId && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-secondary-100 text-secondary-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     {selectedCategoryName || `Cat #${selectedCategoryId}`}
                     {selectedSubcategoryName && ` > ${selectedSubcategoryName}`}
                     <button onClick={() => {
@@ -1158,7 +1160,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {selectedPriceRangeValue && (
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-accent-success-100 text-accent-success-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     {filterOptions?.price_ranges.find(r => r.value === selectedPriceRangeValue)?.label || 'Price Range'}
                     <button onClick={() => { setSelectedPriceRangeValue(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1166,7 +1168,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {minPrice && (
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-accent-success-100 text-accent-success-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     Min ₹{minPrice}
                     <button onClick={() => { setMinPrice(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1174,7 +1176,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {maxPrice && (
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-accent-success-100 text-accent-success-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     Max ₹{maxPrice}
                     <button onClick={() => { setMaxPrice(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1198,7 +1200,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {selectedStockStatus && (
-                  <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-accent-warning-100 text-accent-warning-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     {filterOptions?.stock_statuses.find(s => s.value === selectedStockStatus)?.label || 'Stock Status'}
                     <button onClick={() => { setSelectedStockStatus(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1206,7 +1208,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {selectedDeliveryTime && (
-                  <span className="bg-cyan-100 text-cyan-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-secondary-100 text-secondary-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     Delivery: {filterOptions?.delivery_times.find(d => d.value === selectedDeliveryTime)?.label || selectedDeliveryTime}
                     <button onClick={() => { setSelectedDeliveryTime(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1214,7 +1216,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {minOrder && (
-                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-neutral-100 text-neutral-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     Min Qty: {minOrder}
                     <button onClick={() => { setMinOrder(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1222,7 +1224,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {selectedCity && (
-                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-neutral-100 text-neutral-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     City: {selectedCity}
                     <button onClick={() => { setSelectedCity(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1230,7 +1232,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {hasDiscount && (
-                  <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-accent-error-100 text-accent-error-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     Has Discount
                     <button onClick={() => { setHasDiscount(false); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1238,7 +1240,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {onSale && (
-                  <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-accent-error-100 text-accent-error-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     On Sale
                     <button onClick={() => { setOnSale(false); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1254,7 +1256,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {inStockOnly && (
-                  <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-accent-success-100 text-accent-success-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     In Stock Only
                     <button onClick={() => { setInStockOnly(false); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1270,7 +1272,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   </span>
                 )}
                 {nearMe && (
-                  <span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <span className="bg-secondary-100 text-secondary-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     <MapPin className="w-3 h-3" /> Near Me
                     <button onClick={() => { setNearMe(''); setCurrentPage(1); }}>
                       <X className="w-3 h-3" />
@@ -1279,7 +1281,7 @@ const MarketplaceAllProducts: React.FC = () => {
                 )}
                 <button
                   onClick={clearAllFilters}
-                  className="text-orange-600 text-xs underline ml-2"
+                  className="text-primary-600 text-xs underline ml-2"
                 >
                   Clear all
                 </button>
@@ -1287,7 +1289,7 @@ const MarketplaceAllProducts: React.FC = () => {
             )}
 
             {error && (
-              <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg">
+              <div className="mb-6 p-4 bg-accent-error-50 text-accent-error-700 rounded-lg">
                 {error}{' '}
                 <button onClick={fetchProducts} className="underline">
                   Try again
@@ -1302,7 +1304,7 @@ const MarketplaceAllProducts: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1); }}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  className="border border-neutral-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-primary-200 focus:border-primary-500 outline-none"
                 >
                   {SORT_OPTIONS.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -1312,13 +1314,13 @@ const MarketplaceAllProducts: React.FC = () => {
                 <div className="flex items-center gap-1 ml-3">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-orange-600 text-white' : 'bg-white border'}`}
+                    className={`p-1.5 rounded transition-colors ${viewMode === 'grid' ? 'bg-primary-600 text-white' : 'bg-white border border-neutral-300 hover:border-neutral-400 text-neutral-600'}`}
                   >
                     <Grid3X3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-orange-600 text-white' : 'bg-white border'}`}
+                    className={`p-1.5 rounded transition-colors ${viewMode === 'list' ? 'bg-primary-600 text-white' : 'bg-white border border-neutral-300 hover:border-neutral-400 text-neutral-600'}`}
                   >
                     <List className="w-4 h-4" />
                   </button>
@@ -1327,7 +1329,7 @@ const MarketplaceAllProducts: React.FC = () => {
                 <select
                   value={productsPerPage}
                   onChange={(e) => { setProductsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm ml-2"
+                  className="border border-neutral-300 rounded-lg px-3 py-1.5 text-sm ml-2 bg-white focus:ring-2 focus:ring-primary-200 focus:border-primary-500 outline-none"
                 >
                   <option value={12}>12</option>
                   <option value={24}>24</option>
@@ -1343,29 +1345,39 @@ const MarketplaceAllProducts: React.FC = () => {
             {loading ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {Array.from({ length: 10 }).map((_, i) => (
-                  <div key={i} className="bg-white h-80 rounded-lg animate-pulse" />
+                  <div key={i} className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                    <div className="aspect-[4/3] bg-neutral-100 animate-pulse" />
+                    <div className="p-4 space-y-2">
+                      <div className="h-3 bg-neutral-100 rounded animate-pulse w-1/3" />
+                      <div className="h-4 bg-neutral-100 rounded animate-pulse" />
+                      <div className="h-3 bg-neutral-100 rounded animate-pulse w-3/4" />
+                      <div className="h-8 bg-neutral-100 rounded animate-pulse mt-3" />
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : !Array.isArray(products) || products.length === 0 ? (
               <div className="text-center py-16 px-4">
-                <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-neutral-100 flex items-center justify-center">
+                  <Search className="w-10 h-10 text-neutral-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-neutral-900 mb-2">No products found</h3>
                 {debouncedSearchTerm ? (
-                  <p className="text-gray-600 mb-2">
+                  <p className="text-neutral-600 mb-2">
                     No results for <span className="font-medium text-gray-800">&ldquo;{debouncedSearchTerm}&rdquo;</span>.
                   </p>
                 ) : null}
-                <p className="text-gray-500 mb-6 text-sm">Try a different keyword, check your spelling, or browse by category.</p>
+                <p className="text-neutral-500 mb-6 text-sm">Try a different keyword, check your spelling, or browse by category.</p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   {debouncedSearchTerm && (
                     <button
                       onClick={() => { setSearchTerm(''); setDebouncedSearchTerm(''); }}
-                      className="bg-orange-600 text-white px-5 py-2 rounded-lg hover:bg-orange-700"
+                      className="btn-primary px-5 py-2.5"
                     >
                       Clear Search
                     </button>
                   )}
-                  <button onClick={clearAllFilters} className="bg-white border border-gray-300 text-gray-700 px-5 py-2 rounded-lg hover:bg-gray-50">
+                  <button onClick={clearAllFilters} className="btn-secondary px-5 py-2.5">
                     Clear All Filters
                   </button>
                 </div>
@@ -1407,8 +1419,8 @@ const MarketplaceAllProducts: React.FC = () => {
                         onClick={() => setCurrentPage(pageNum)}
                         className={`px-3 py-1 rounded text-sm ${
                           currentPage === pageNum
-                            ? 'bg-orange-600 text-white'
-                            : 'border hover:bg-gray-100'
+                            ? 'bg-primary-600 text-white'
+                            : 'border border-neutral-300 hover:bg-neutral-100 text-neutral-700'
                         }`}
                       >
                         {pageNum}
@@ -1458,7 +1470,7 @@ const MarketplaceAllProducts: React.FC = () => {
                   handleSearch();
                   setShowMobileSearch(false);
                 }}
-                className="bg-orange-600 text-white px-4 py-3 rounded-lg"
+                className="bg-primary-600 text-white px-4 py-3 rounded-lg hover:bg-primary-700 transition-colors"
               >
                 Search
               </button>
@@ -1481,15 +1493,13 @@ const MarketplaceAllProducts: React.FC = () => {
       />
 
       {message && (
-        <div className="fixed top-4 right-4 z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-3 flex items-center gap-2">
-          <div className="text-green-600">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-            </svg>
+        <div className="fixed top-4 right-4 z-50 bg-white border border-neutral-200 rounded-lg shadow-lg p-3 flex items-center gap-2">
+          <div className="text-accent-success-600">
+            <CheckCircle className="w-5 h-5" />
           </div>
-          <span className="text-gray-900">{message.text}</span>
+          <span className="text-neutral-900">{message.text}</span>
           <button onClick={() => setMessage(null)}>
-            <X className="w-4 h-4 text-gray-400" />
+            <X className="w-4 h-4 text-neutral-400" />
           </button>
         </div>
       )}
