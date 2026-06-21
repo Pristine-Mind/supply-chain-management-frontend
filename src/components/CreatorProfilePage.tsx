@@ -1,22 +1,69 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { creatorsApi } from '../api/creatorsApi';
 import { CreatorProfile } from '../types/creator';
 import CreatorVideos from './CreatorVideos';
 import FollowButton from './FollowButton';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Pagination from './Pagination';
+import { ProductCard, type ProductCardData } from './product/ProductCard';
+import { EmptyState } from './ui/empty-state';
+import { Spinner } from './ui/spinner';
+import { User, ShoppingBag } from 'lucide-react';
+
+interface CreatorProduct {
+  id: number;
+  product_details?: {
+    name?: string;
+    title?: string;
+    image?: string;
+    images?: { image?: string }[];
+    category_details?: string;
+    stock?: number;
+    price?: number;
+  };
+  listed_price?: number;
+  discounted_price?: number | null;
+  percent_off?: number;
+  is_available?: boolean;
+  average_rating?: number;
+  total_reviews?: number;
+}
+
+const toProductCardData = (p: CreatorProduct): ProductCardData => {
+  const price = p.discounted_price ?? p.listed_price ?? (p.product_details?.price ?? 0);
+  const originalPrice = p.listed_price ?? (p.product_details?.price ?? null);
+  const hasDiscount =
+    p.discounted_price != null &&
+    originalPrice != null &&
+    p.discounted_price > 0 &&
+    p.discounted_price < originalPrice;
+
+  return {
+    id: p.id,
+    name: p.product_details?.name || p.product_details?.title || 'Product',
+    image: p.product_details?.images?.[0]?.image || p.product_details?.image || '/product-placeholder.png',
+    href: `/marketplace/${p.id}`,
+    price,
+    originalPrice: hasDiscount ? originalPrice : null,
+    percentOff: p.percent_off,
+    savings: hasDiscount ? originalPrice! - p.discounted_price! : 0,
+    stock: p.product_details?.stock ?? 0,
+    category: p.product_details?.category_details,
+    rating: p.average_rating,
+    reviewCount: p.total_reviews,
+    isAvailable: p.is_available ?? true,
+  };
+};
 
 const CreatorProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [profile, setProfile] = useState<CreatorProfile | null>(null);
   const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
-  const [savingFollow, setSavingFollow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'products'>('posts');
-  const [sellerProducts, setSellerProducts] = useState<any[]>([]);
+  const [sellerProducts, setSellerProducts] = useState<CreatorProduct[]>([]);
   const [sellerLoading, setSellerLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editBio, setEditBio] = useState('');
@@ -34,7 +81,6 @@ const CreatorProfilePage: React.FC = () => {
       setProfile(p);
       setEditBio(p.bio || '');
       setEditDisplayName(p.display_name || '');
-      // if authenticated, check whether current user follows this creator
       if (isAuthenticated) {
         creatorsApi.isFollowing(p.id).then((f) => setIsFollowing(f)).catch(() => setIsFollowing(false));
       } else {
@@ -44,7 +90,6 @@ const CreatorProfilePage: React.FC = () => {
   }, [id]);
 
   useEffect(() => {
-    // when products tab is active, fetch creator products with pagination
     const fetchSellerProducts = async (p = 1) => {
       if (!id) return;
       setSellerLoading(true);
@@ -53,7 +98,6 @@ const CreatorProfilePage: React.FC = () => {
         const results = data && Array.isArray(data.results) ? data.results : (Array.isArray(data) ? data : []);
         setSellerProducts(results);
         
-        // Handle pagination from the new API
         if (data && typeof data.count === 'number') {
           setTotalCount(data.count);
         } else {
@@ -82,7 +126,7 @@ const CreatorProfilePage: React.FC = () => {
       setProfile(updated);
       setIsEditing(false);
       toast.success('Profile updated');
-    } catch (err) {
+    } catch {
       toast.error('Failed to update profile');
     }
   };
@@ -90,29 +134,34 @@ const CreatorProfilePage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <Spinner size="lg" color="neutral" />
       </div>
     );
   }
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-2">Creator not found</h2>
-          <Link to="/creators" className="text-blue-600 hover:underline">
-            Back to Creators
-          </Link>
-        </div>
+      <div className="flex items-center justify-center min-h-screen px-4">
+        <EmptyState
+          icon={User}
+          title="Creator not found"
+          description="The creator you're looking for doesn't exist or has been removed."
+          action={
+            <Link
+              to="/creators"
+              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Back to Creators
+            </Link>
+          }
+        />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header Section */}
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Profile Header */}
         <div className="flex items-start gap-6 mb-6">
           <img
             src={profile.profile_image || profile.avatar || '/placeholder-avatar.png'}
@@ -149,7 +198,6 @@ const CreatorProfilePage: React.FC = () => {
                       if (typeof follower_count === 'number') {
                         setProfile((p) => (p ? { ...p, follower_count } : p));
                       } else {
-                        // best-effort local adjust
                         setProfile((p) => (p ? { ...p, follower_count: p.follower_count + (following ? 1 : -1) } : p));
                       }
                     }}
@@ -178,7 +226,6 @@ const CreatorProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="border-b border-gray-200 mb-6">
           <div className="flex gap-8">
             <button
@@ -210,7 +257,6 @@ const CreatorProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="mb-8">
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -226,54 +272,47 @@ const CreatorProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Collections Section */}
         {activeTab === 'posts' && (
-          <>
-
-            {/* Recent Posts Section */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent posts</h2>
-              <CreatorVideos creatorId={profile.id} />
-            </div>
-          </>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent posts</h2>
+            <CreatorVideos creatorId={profile.id} />
+          </div>
         )}
 
-        {/* Products Tab */}
         {activeTab === 'products' && (
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Products</h2>
 
             {sellerLoading ? (
-              <div className="p-6">Loading products...</div>
-            ) : sellerProducts.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No products available</p>
+              <div className="py-12 flex justify-center">
+                <Spinner size="lg" color="neutral" />
               </div>
+            ) : sellerProducts.length === 0 ? (
+              <EmptyState
+                icon={ShoppingBag}
+                title="No products available"
+                description="This creator hasn't listed any products yet."
+                action={
+                  <button
+                    onClick={() => navigate('/marketplace/all-products')}
+                    className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    Browse Marketplace
+                  </button>
+                }
+              />
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {sellerProducts.map((p) => {
-                  const img = p.product_details?.images?.[0]?.image || p.product_details?.image || '/product-placeholder.png';
-                  const name = p.product_details?.name || p.product_details?.title || 'Product';
-                  const price = p.discounted_price ?? p.listed_price ?? (p.product_details?.price ?? null);
-                  return (
-                    <div
-                      key={p.id}
-                      className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => navigate(`/marketplace/${p.id}`)}
-                    >
-                      <div className="w-full h-40 bg-gray-100">
-                        <img src={img} alt={name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="p-3">
-                        <div className="text-sm font-medium text-gray-800 line-clamp-2 mb-2">{name}</div>
-                        <div className="text-sm text-gray-600">Rs. {price}</div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {sellerProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={toProductCardData(p)}
+                    size="sm"
+                  />
+                ))}
               </div>
             )}
-            {/* Pagination controls */}
+
             <div className="mt-6">
               <Pagination
                 page={page}

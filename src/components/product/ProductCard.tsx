@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShoppingCart, Package } from 'lucide-react';
+import { Star, ShoppingCart, Truck } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Badge } from '../ui/badge';
 
@@ -20,6 +20,7 @@ export interface ProductCardData {
   reviewCount?: number;
   isB2B?: boolean;
   isAvailable?: boolean;
+  estimatedDeliveryDays?: number;
 }
 
 export interface ProductCardProps {
@@ -101,6 +102,7 @@ export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
       reviewCount,
       isB2B,
       isAvailable = true,
+      estimatedDeliveryDays,
     } = product;
 
     const hasDiscount = !!originalPrice && originalPrice > price;
@@ -161,6 +163,12 @@ export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
             {isDeliveryFree ? (
               <Badge variant="success" size="sm" className="shadow-sm">
                 🚚 Free Delivery
+              </Badge>
+            ) : null}
+            {estimatedDeliveryDays ? (
+              <Badge variant="primary" size="sm" className="shadow-sm gap-1">
+                <Truck className="w-3 h-3" />
+                {estimatedDeliveryDays} days
               </Badge>
             ) : null}
           </div>

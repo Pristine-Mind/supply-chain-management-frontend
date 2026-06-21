@@ -8,9 +8,7 @@ import {
   Search, 
   Grid3X3, 
   List, 
-  Star, 
   ShoppingCart, 
-  MapPin, 
   ChevronLeft,
   ChevronRight,
   X,
@@ -23,7 +21,7 @@ import Footer from './Footer';
 import SEOHead from './SEOHead';
 import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
 import { EmptyState } from './ui/empty-state';
-import { Badge } from './ui/badge';
+import { ProductCard, type ProductCardData } from './product/ProductCard';
 
 import logo from '../assets/logo.png';
 
@@ -457,156 +455,25 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
     }
   };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, index) => (
-      <Star
-        key={index}
-        className={`w-3.5 h-3.5 ${
-          index < Math.floor(rating)
-            ? 'fill-accent-warning-400 text-accent-warning-400'
-            : index < rating
-            ? 'fill-accent-warning-200 text-accent-warning-400'
-            : 'fill-neutral-200 text-neutral-200'
-        }`}
-      />
-    ));
-  };
-
-  const ProductCard: React.FC<{ product: MarketplaceProduct }> = ({ product }) => {
-    const mainImage = product.product_details.images?.[0]?.image || '/api/placeholder/300/300';
-    const hasOffer = product.is_offer_active && product.percent_off > 0;
-
-    return (
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden group hover:shadow-lg hover:border-neutral-300 transition-all duration-300 hover:-translate-y-1">
-        <div className="relative overflow-hidden bg-neutral-50 h-56 sm:h-64">
-          <img
-            src={mainImage}
-            alt={product.product_details.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={(e) => {
-              e.currentTarget.src = '/api/placeholder/300/300';
-            }}
-          />
-          
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {hasOffer && (
-              <Badge variant="discount" size="sm" className="shadow-sm">
-                {product.percent_off}% OFF
-              </Badge>
-            )}
-            {product.product_details.stock <= 5 && product.product_details.stock > 0 && (
-              <Badge variant="warning" size="sm" className="shadow-sm">
-                Only {product.product_details.stock} left
-              </Badge>
-            )}
-            {product.is_delivery_free && (
-              <Badge variant="success" size="sm" className="shadow-sm">
-                🚚 Free Delivery
-              </Badge>
-            )}
-          </div>
-
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <button
-              onClick={() => navigate(`/marketplace/${product.id}`)}
-              className="bg-white text-neutral-900 px-6 py-2 rounded-lg font-medium hover:bg-neutral-50 transition-colors shadow-sm"
-            >
-              Quick View
-            </button>
-          </div>
-        </div>
-
-        <div className="p-2 space-y-2 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
-              {product.product_details.category_details}
-            </span>
-            {product.average_rating > 0 && (
-              <div className="flex items-center gap-1">
-                <div className="flex gap-0.5">
-                  {renderStars(product.average_rating)}
-                </div>
-                <span className="text-xs text-neutral-600 ml-1">
-                  ({product.total_reviews})
-                </span>
-              </div>
-            )}
-          </div>
-
-          <h3 className="font-semibold text-neutral-900 text-sm leading-tight line-clamp-2 group-hover:text-primary-600 transition-colors cursor-pointer" onClick={() => navigate(`/marketplace/${product.id}`)}>
-            {product.product_details.name}
-          </h3>
-
-          <div className="space-y-1">
-            {(() => {
-              const pricing = getDisplayPrice(product, user);
-              
-              return (
-                <>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-bold text-accent-error-600">
-                      Rs. {pricing.currentPrice?.toLocaleString()}
-                    </span>
-                    {pricing.originalPrice && (
-                      <span className="text-sm text-neutral-500 line-through">
-                        Rs. {pricing.originalPrice?.toLocaleString()}
-                      </span>
-                    )}
-                    {pricing.isB2BPrice && (
-                      <span className="text-xs bg-secondary-100 text-secondary-800 px-2 py-1 rounded-full font-medium">
-                        B2B
-                      </span>
-                    )}
-                  </div>
-                  {pricing.savings > 0 && (
-                    <div className="text-xs text-accent-success-600 font-medium">
-                      Save Rs. {pricing.savings?.toLocaleString()}
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${
-                product.product_details.stock > 10 
-                  ? 'bg-accent-success-500' 
-                  : product.product_details.stock > 0 
-                    ? 'bg-accent-warning-500' 
-                    : 'bg-accent-error-500'
-              }`}></div>
-              <span className="text-xs text-neutral-600">
-                {product.product_details.stock > 0 
-                  ? `${product.product_details.stock} in stock` 
-                  : 'Out of stock'
-                }
-              </span>
-            </div>
-            {product.estimated_delivery_days && (
-              <div className="flex items-center gap-2 text-xs text-neutral-600">
-                <MapPin className="w-3 h-3" />
-                <span>{product.estimated_delivery_days} days delivery</span>
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={() => handleAddToCart(product)}
-            disabled={product.product_details.stock === 0}
-            className={`w-full py-1.5 px-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
-              product.product_details.stock === 0
-                ? 'bg-neutral-100 text-neutral-500 cursor-not-allowed'
-                : 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
-            }`}
-          >
-            <ShoppingCart className="w-4 h-4" />
-            {product.product_details.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-          </button>
-        </div>
-      </div>
-    );
+  const toProductCardData = (product: MarketplaceProduct): ProductCardData => {
+    const pricing = getDisplayPrice(product, user);
+    return {
+      id: product.id,
+      name: product.product_details.name,
+      image: product.product_details.images?.[0]?.image,
+      href: `/marketplace/${product.id}`,
+      price: pricing.currentPrice,
+      originalPrice: pricing.originalPrice,
+      percentOff: product.percent_off,
+      savings: pricing.savings,
+      stock: product.product_details.stock,
+      isDeliveryFree: product.is_delivery_free,
+      category: product.product_details.category_details,
+      rating: product.average_rating,
+      reviewCount: product.total_reviews,
+      isB2B: pricing.isB2BPrice,
+      isAvailable: product.is_available,
+    };
   };
 
   if (loading) {
@@ -927,7 +794,13 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                     : 'grid-cols-1'
                 }`}>
                   {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard
+                      key={product.id}
+                      product={toProductCardData(product)}
+                      size="md"
+                      showAddToCart
+                      onAddToCart={() => handleAddToCart(product)}
+                    />
                   ))}
                 </div>
 

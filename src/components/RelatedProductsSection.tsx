@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Tag, ChevronRight, ShoppingBag } from 'lucide-react';
+import { ProductCard, type ProductCardData } from './product/ProductCard';
+import { SectionHeader } from './ui/section-header';
 
 interface ProductImage {
   id: number;
@@ -11,20 +11,11 @@ interface ProductImage {
   created_at: string;
 }
 
-interface CategoryInfo {
-  id: number;
-  code: string;
-  name: string;
-  description: string;
-  is_active: boolean;
-}
-
 interface ProductDetails {
   id: number;
   name: string;
   images: ProductImage[];
   category_details: string;
-  category_info?: CategoryInfo;
   description?: string;
   sku?: string;
   price: number;
@@ -61,16 +52,19 @@ interface MarketplaceProduct {
   product_details?: ProductDetails;
   listed_price: number;
   discounted_price?: number | null;
+  percent_off?: number;
   is_b2b_eligible?: boolean;
   b2b_price?: number | null;
   b2b_discounted_price?: number | null;
   b2b_min_quantity?: number | null;
+  is_available?: boolean;
+  average_rating?: number;
+  total_reviews?: number;
 }
 
 const RelatedProductsSection: React.FC<{ productId: number; category?: string }> = ({ productId }) => {
   const [related, setRelated] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -87,7 +81,6 @@ const RelatedProductsSection: React.FC<{ productId: number; category?: string }>
           { headers }
         );
         
-        // Transform similar_products to match MarketplaceProduct interface
         const similarProducts = response.data?.similar_products || [];
         const transformedProducts: MarketplaceProduct[] = similarProducts
           .map((item: SimilarProductItem) => ({
@@ -95,10 +88,14 @@ const RelatedProductsSection: React.FC<{ productId: number; category?: string }>
             product_details: item.product.product_details,
             listed_price: item.product.listed_price,
             discounted_price: item.product.discounted_price,
+            percent_off: item.product.percent_off,
+            is_available: item.product.is_available,
             is_b2b_eligible: item.product.is_b2b_eligible,
             b2b_price: item.product.b2b_price,
             b2b_discounted_price: item.product.b2b_discounted_price,
             b2b_min_quantity: item.product.b2b_min_quantity,
+            average_rating: item.product.average_rating,
+            total_reviews: item.product.total_reviews,
           }))
           .slice(0, 4);
         
@@ -114,100 +111,67 @@ const RelatedProductsSection: React.FC<{ productId: number; category?: string }>
     fetchRelated();
   }, [productId]);
 
-  const renderPrice = (product: MarketplaceProduct) => {
+  const getDisplayPrice = (product: MarketplaceProduct) => {
     const isB2BUser = user?.b2b_verified === true;
     const isB2BEligible = product.is_b2b_eligible === true;
     
-    let currentPrice: number;
-    let originalPrice: number | undefined;
-
     if (isB2BUser && isB2BEligible) {
-      currentPrice = product.b2b_discounted_price || product.b2b_price || product.listed_price;
-      originalPrice = product.b2b_discounted_price ? (product.b2b_price || product.listed_price) : undefined;
+      return {
+        currentPrice: product.b2b_discounted_price || product.b2b_price || product.listed_price,
+        originalPrice: product.listed_price,
+        isB2BPrice: true,
+      };
     } else {
-      currentPrice = product.discounted_price || product.listed_price;
-      originalPrice = product.discounted_price ? product.listed_price : undefined;
+      return {
+        currentPrice: product.discounted_price || product.listed_price,
+        originalPrice: product.discounted_price ? product.listed_price : null,
+        isB2BPrice: false,
+      };
     }
+  };
 
-    return (
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold text-orange-600">
-            Rs. {currentPrice.toLocaleString()}
-          </span>
-          {originalPrice && originalPrice > currentPrice && (
-            <span className="text-sm text-gray-400 line-through font-normal">
-              Rs. {originalPrice.toLocaleString()}
-            </span>
-          )}
-        </div>
-        {isB2BUser && isB2BEligible && (
-          <span className="text-[10px] text-blue-600 font-bold uppercase tracking-tight flex items-center mt-1">
-            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-1 animate-pulse" />
-            B2B Pricing Applied
-          </span>
-        )}
-      </div>
-    );
+  const toProductCardData = (product: MarketplaceProduct): ProductCardData => {
+    const pricing = getDisplayPrice(product);
+    const hasDiscount = pricing.originalPrice != null && pricing.originalPrice > pricing.currentPrice;
+
+    return {
+      id: product.id,
+      name: product.product_details?.name || 'Product',
+      image: product.product_details?.images?.[0]?.image || 'https://via.placeholder.com/400x500?text=No+Image',
+      href: `/marketplace/${product.id}`,
+      price: pricing.currentPrice,
+      originalPrice: pricing.originalPrice,
+      percentOff: product.percent_off,
+      savings: hasDiscount ? pricing.originalPrice! - pricing.currentPrice : 0,
+      stock: product.product_details?.stock ?? 0,
+      category: product.product_details?.category_details,
+      rating: product.average_rating,
+      reviewCount: product.total_reviews,
+      isB2B: pricing.isB2BPrice,
+      isAvailable: product.is_available ?? true,
+    };
   };
 
   if (!loading && related.length === 0) return null;
 
   return (
     <div className="w-full mt-16 border-t border-gray-100 pt-12 mb-20">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">You May Also Like</h2>
-        </div>
-        <button 
-          onClick={() => navigate('/marketplace')}
-          className="hidden sm:flex items-center text-sm font-semibold text-orange-600 hover:text-orange-800 transition-colors group"
-        >
-          View All Marketplace <ChevronRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
-        </button>
-      </div>
+      <SectionHeader
+        title="You May Also Like"
+        action={{ label: 'View All Marketplace', to: '/marketplace' }}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {loading 
           ? [...Array(4)].map((_, i) => <ProductSkeleton key={i} />)
           : related.map(rel => (
-          <div
-            key={rel.id}
-            className="group relative bg-white rounded-2xl transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] cursor-pointer"
-            onClick={() => navigate(`/marketplace/${rel.id}`)}
-          >
-            <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gray-50 relative">
-              <img
-                src={rel.product_details?.images?.[0]?.image || 'https://via.placeholder.com/400x500?text=No+Image'}
-                alt={rel.product_details?.name}
-                className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-              />
-              
-              <div className="absolute top-3 left-3">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/90 backdrop-blur-md text-gray-800 shadow-sm border border-gray-100 uppercase tracking-wider">
-                  <Tag className="w-3 h-3 mr-1 text-orange-500" />
-                  {rel.product_details?.category_details || 'Marketplace'}
-                </span>
-              </div>
-
-              <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                 <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300 bg-white p-3 rounded-full shadow-xl">
-                    <ShoppingBag className="w-5 h-5 text-orange-600" />
-                 </div>
-              </div>
-            </div>
-
-            <div className="pt-5 px-1 pb-2">
-              <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 min-h-[40px] group-hover:text-orange-600 transition-colors leading-relaxed">
-                {rel.product_details?.name}
-              </h3>
-              
-              <div className="mt-4 flex items-end justify-between">
-                {renderPrice(rel)}
-              </div>
-            </div>
-          </div>
-        ))}
+            <ProductCard
+              key={rel.id}
+              product={toProductCardData(rel)}
+              size="md"
+            />
+          ))
+        }
       </div>
     </div>
   );

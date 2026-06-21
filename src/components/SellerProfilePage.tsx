@@ -6,8 +6,6 @@ import {
   Store,
   BadgeCheck,
   Package,
-  ShoppingCart,
-  Star,
   AlertCircle,
   User,
   ChevronLeft,
@@ -26,11 +24,11 @@ import ProductSearchBar from './ProductSearchBar';
 import Footer from './Footer';
 import SEOHead from './SEOHead';
 import { getSellerProfiles } from '../api/marketplaceApi';
+import { ProductCard, type ProductCardData } from './product/ProductCard';
 
 /** Build the seller URL segment from their username */
 export const buildSellerSlug = (_id: number, _name: string, username: string): string => username;
 
-const PLACEHOLDER_IMG = 'https://via.placeholder.com/300x300?text=No+Image';
 const AVATAR_PLACEHOLDER = 'https://via.placeholder.com/80x80?text=Seller';
 const PAGE_SIZE = 20;
 
@@ -130,19 +128,40 @@ const SellerProfilePage: React.FC = () => {
     }
   };
 
-  const renderStars = (rating: number) =>
-    Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-3 h-3 ${
-          i < Math.floor(rating)
-            ? 'text-primary-500 fill-orange-500'
-            : i < rating
-            ? 'text-primary-300 fill-orange-300'
-            : 'text-neutral-300'
-        }`}
-      />
-    ));
+  const toProductCardData = (mp: SellerMarketplaceProduct): ProductCardData => {
+    const details = mp.product_details as any;
+    const displayPrice =
+      mp.discounted_price && mp.discounted_price > 0 ? mp.discounted_price : mp.listed_price;
+    const percentOff =
+      (mp as any).percent_off ??
+      (mp.listed_price > 0 && mp.discounted_price != null && mp.discounted_price < mp.listed_price
+        ? Math.round(((mp.listed_price - mp.discounted_price) / mp.listed_price) * 100)
+        : 0);
+    const hasDiscount =
+      percentOff > 0 &&
+      mp.discounted_price !== null &&
+      mp.discounted_price !== undefined &&
+      mp.discounted_price > 0 &&
+      mp.discounted_price < mp.listed_price;
+
+    return {
+      id: mp.id,
+      name: details?.name || 'Unnamed Product',
+      image: details?.images?.[0]?.image,
+      href: `/marketplace/${mp.id}`,
+      price: displayPrice,
+      originalPrice: hasDiscount ? mp.listed_price : null,
+      percentOff,
+      savings: hasDiscount ? mp.listed_price - mp.discounted_price : 0,
+      stock: details?.stock ?? 0,
+      isDeliveryFree: false,
+      category: null,
+      rating: (mp as any).average_rating ?? 0,
+      reviewCount: (mp as any).total_reviews ?? mp.reviews?.length ?? 0,
+      isB2B: false,
+      isAvailable: mp.is_available,
+    };
+  };
 
   /* ─── Initial Loading ─── */
   if (loading) {
@@ -309,121 +328,16 @@ const SellerProfilePage: React.FC = () => {
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {products.map((mp) => {
-                  const details = mp.product_details as any;
-                  const mainImage = details?.images?.[0]?.image || PLACEHOLDER_IMG;
-                  const productName = details?.name || 'Unnamed Product';
-                  const stock = details?.stock ?? 0;
-                  const displayPrice = (mp.discounted_price && mp.discounted_price > 0)
-                    ? mp.discounted_price
-                    : mp.listed_price;
-                  const percentOff =
-                    (mp as any).percent_off ??
-                    (mp.listed_price > 0 && mp.discounted_price != null && mp.discounted_price < mp.listed_price
-                      ? Math.round(((mp.listed_price - mp.discounted_price) / mp.listed_price) * 100)
-                      : 0);
-                  const hasDiscount =
-                    percentOff > 0 &&
-                    mp.discounted_price !== null &&
-                    mp.discounted_price !== undefined &&
-                    mp.discounted_price > 0 &&
-                    mp.discounted_price < mp.listed_price;
-                  const avgRating = (mp as any).average_rating ?? 0;
-                  const totalReviews = (mp as any).total_reviews ?? mp.reviews?.length ?? 0;
-
-                  return (
-                    <div
-                      key={mp.id}
-                      className="bg-white border border-neutral-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col"
-                    >
-                      <a
-                        href={`/marketplace/${mp.id}`}
-                        className="block relative h-44 bg-neutral-50 overflow-hidden"
-                      >
-                        <img
-                          src={mainImage}
-                          alt={productName}
-                          className="w-full h-full object-contain p-2"
-                          onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
-                          draggable={false}
-                        />
-                        {hasDiscount && (
-                          <div className="absolute top-2 left-2 bg-accent-error-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                            {percentOff}% OFF
-                          </div>
-                        )}
-                        {!mp.is_available && (
-                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                            <span className="text-white text-xs font-semibold bg-black/60 px-2 py-1 rounded">
-                              Unavailable
-                            </span>
-                          </div>
-                        )}
-                      </a>
-
-                      <div className="p-3 flex flex-col flex-1">
-                        <a
-                          href={`/marketplace/${mp.id}`}
-                          className="text-sm font-semibold text-neutral-900 line-clamp-2 mb-1 hover:text-primary-600 transition-colors"
-                        >
-                          {productName}
-                        </a>
-
-                        {avgRating > 0 && (
-                          <div className="flex items-center gap-1 mb-1">
-                            <div className="flex gap-0.5">{renderStars(avgRating)}</div>
-                            <span className="text-[10px] text-neutral-500">({totalReviews})</span>
-                          </div>
-                        )}
-
-                        <div className="mt-auto space-y-1">
-                          <div className="flex items-center gap-1">
-                            <span className="text-sm font-bold text-primary-600">
-                              Rs. {displayPrice.toLocaleString()}
-                            </span>
-                            {hasDiscount && (
-                              <span className="text-[10px] text-neutral-400 line-through">
-                                Rs. {mp.listed_price.toLocaleString()}
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="flex items-center gap-1 text-[10px]">
-                            <div
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                stock > 10
-                                  ? 'bg-accent-success-500'
-                                  : stock > 0
-                                  ? 'bg-accent-warning-500'
-                                  : 'bg-accent-error-500'
-                              }`}
-                            />
-                            <span>{stock > 0 ? `${stock} in stock` : 'Out of stock'}</span>
-                          </div>
-
-                          <button
-                            onClick={() => handleAddToCart(mp)}
-                            disabled={!mp.is_available || stock === 0}
-                            className={`w-full flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium rounded transition-colors ${
-                              !mp.is_available || stock === 0
-                                ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
-                                : addedIds.has(mp.id)
-                                ? 'bg-accent-success-600 text-white'
-                                : 'bg-primary-600 text-white hover:bg-primary-700'
-                            }`}
-                          >
-                            <ShoppingCart className="w-3.5 h-3.5" />
-                            {addedIds.has(mp.id)
-                              ? 'Added!'
-                              : !mp.is_available || stock === 0
-                              ? 'Unavailable'
-                              : 'Add to Cart'}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {products.map((mp) => (
+                  <ProductCard
+                    key={mp.id}
+                    product={toProductCardData(mp)}
+                    size="sm"
+                    showAddToCart
+                    added={addedIds.has(mp.id)}
+                    onAddToCart={() => handleAddToCart(mp)}
+                  />
+                ))}
               </div>
 
               {/* ─── Pagination ─── */}

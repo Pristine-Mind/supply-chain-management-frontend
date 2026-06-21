@@ -1,17 +1,39 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { ArrowRight, Flame, ShoppingBag, Star, Zap, Percent, Package, ChevronRight } from 'lucide-react';
+import { ArrowRight, Flame, Zap, Percent, Package, ChevronRight, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ProductCard, type ProductCardData } from './product/ProductCard';
+import { SectionHeader } from './ui/section-header';
+import { EmptyState } from './ui/empty-state';
 
 const PLACEHOLDER = 'https://via.placeholder.com/150';
 
+interface BestDealsProduct {
+  id: number;
+  product_details?: {
+    name?: string;
+    images?: { image?: string }[];
+    category_details?: string;
+    stock?: number;
+  };
+  listed_price: number;
+  discounted_price?: number | null;
+  percent_off?: number;
+  is_b2b_eligible?: boolean;
+  b2b_price?: number | null;
+  b2b_discounted_price?: number | null;
+  is_available?: boolean;
+  average_rating?: number;
+  total_reviews?: number;
+}
+
 interface BestDealsSectionProps {
-  user?: any;
+  user?: { b2b_verified?: boolean };
 }
 
 const BestDealsSection = ({ user }: BestDealsSectionProps) => {
   const navigate = useNavigate();
-  const [todaysPickProducts, setTodaysPickProducts] = useState<any[]>([]);
+  const [todaysPickProducts, setTodaysPickProducts] = useState<BestDealsProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,7 +54,7 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
     fetchTodaysPick();
   }, []);
 
-  const getDisplayPrice = (product: any, user: any) => {
+  const getDisplayPrice = (product: BestDealsProduct) => {
     const isB2BUser = user?.b2b_verified === true;
     const isB2BEligible = product.is_b2b_eligible === true;
     
@@ -46,8 +68,31 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
       return {
         currentPrice: product.discounted_price || product.listed_price,
         originalPrice: product.discounted_price ? product.listed_price : null,
+        isB2BPrice: false,
       };
     }
+  };
+
+  const toProductCardData = (product: BestDealsProduct): ProductCardData => {
+    const pricing = getDisplayPrice(product);
+    const hasDiscount = pricing.originalPrice != null && pricing.originalPrice > pricing.currentPrice;
+
+    return {
+      id: product.id,
+      name: product.product_details?.name || 'Product',
+      image: product.product_details?.images?.[0]?.image || PLACEHOLDER,
+      href: `/marketplace/${product.id}`,
+      price: pricing.currentPrice,
+      originalPrice: pricing.originalPrice,
+      percentOff: product.percent_off,
+      savings: hasDiscount ? pricing.originalPrice! - pricing.currentPrice : 0,
+      stock: product.product_details?.stock ?? 0,
+      category: product.product_details?.category_details,
+      rating: product.average_rating,
+      reviewCount: product.total_reviews,
+      isB2B: pricing.isB2BPrice,
+      isAvailable: product.is_available ?? true,
+    };
   };
 
   if (loading) return (
@@ -127,61 +172,29 @@ const BestDealsSection = ({ user }: BestDealsSectionProps) => {
       </div>
 
       <div className="lg:col-span-8 bg-neutral-50/50 rounded-[2.5rem] p-4 md:p-8 border border-neutral-200/60 shadow-inner flex flex-col">
-        <div className="flex items-center justify-between mb-8 px-2">
-            <div>
-              <h3 className="text-3xl font-black text-neutral-900 tracking-tight">Top picks today</h3>
-              <div className="h-1 w-12 bg-primary-500 rounded-full mt-1" />
-            </div>
-        </div>
+        <SectionHeader
+          title="Top picks today"
+          className="mb-8 px-2"
+        />
         
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 flex-grow">
             {todaysPickProducts && todaysPickProducts.length > 0 ? (
               todaysPickProducts.slice(0, 3).map((p) => (
-                <div
+                <ProductCard
                   key={p.id}
-                  onClick={() => navigate(`/marketplace/${p.id}`)}
-                  className="group relative bg-white rounded-3xl p-5 transition-all duration-500 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 flex flex-col h-full cursor-pointer"
-                >
-                  <div className="aspect-square w-full overflow-hidden bg-neutral-50 rounded-2xl mb-6 relative flex items-center justify-center p-6 border border-neutral-50 group-hover:border-primary-100 transition-colors">
-                     <img 
-                       src={p.product_details?.images?.[0]?.image ?? PLACEHOLDER} 
-                       alt={p.product_details?.name} 
-                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-out" 
-                     />
-                     
-                     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="p-2 bg-white rounded-xl shadow-lg text-primary-600">
-                          <ShoppingBag size={18} />
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="flex flex-col flex-grow">
-                      <h4 className="font-bold text-neutral-900 text-sm mb-3 line-clamp-2 leading-tight group-hover:text-primary-600 transition-colors">
-                          {p.product_details?.name}
-                      </h4>
-                      <div className="mt-auto flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                              <span className="text-base font-black text-neutral-900">
-                                  Rs. {getDisplayPrice(p, user).currentPrice?.toLocaleString()}
-                              </span>
-                              {getDisplayPrice(p, user).originalPrice && (
-                                <span className="text-xs text-neutral-500 line-through">
-                                  Rs. {getDisplayPrice(p, user).originalPrice?.toLocaleString()}
-                                </span>
-                              )}
-                          </div>
-                          <span className="text-[9px] font-bold text-accent-success-600 bg-accent-success-50 px-2 py-1 rounded-md whitespace-nowrap">
-                            In Stock
-                          </span>
-                      </div>
-                  </div>
-                </div>
+                  product={toProductCardData(p)}
+                  size="lg"
+                />
               ))
             ) : (
-                <div className="col-span-full h-full flex items-center justify-center text-neutral-400 font-medium italic">
-                    Fresh selections arriving soon...
-                </div>
+              <div className="col-span-full h-full flex items-center justify-center">
+                <EmptyState
+                  icon={ShoppingBag}
+                  title="Fresh selections arriving soon"
+                  description="Check back later for today's top picks."
+                  className="py-8"
+                />
+              </div>
             )}
         </div>
       </div>
