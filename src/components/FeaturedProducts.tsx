@@ -21,7 +21,6 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { user, isAuthenticated } = useAuth();
-  
   const [products, setProducts] = useState<any[] | null>(initialProducts ?? null);
   const [loading, setLoading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -92,7 +91,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
                 {searchQuery ? 'Search Results' : 'The Collection'}
               </span>
             </div>
-            <h2 className="text-5xl md:text-6xl font-extrabold text-primary-900 tracking-tighter">
+            <h2 className="text-4xl md:text-6xl font-extrabold text-primary-900 tracking-tighter">
               {searchQuery ? 'Found' : 'Featured'} <br /> 
               <span className="text-primary-400">
                 {searchQuery ? 'Matches.' : 'Essentials.'}
@@ -117,7 +116,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 
         <motion.div 
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-8 md:gap-y-16"
         >
           <AnimatePresence mode='popLayout'>
             {filteredProducts.length > 0 ? (
@@ -174,8 +173,8 @@ const ProductItem = React.forwardRef<HTMLDivElement, any>(({ item, index, user, 
       className="group cursor-pointer"
       onClick={onNavigate}
     >
-      <div className="relative mb-6">
-        <div className="aspect-[3/4] rounded-[2.5rem] bg-primary-50 overflow-hidden relative">
+      <div className="relative mb-4 md:mb-6">
+        <div className="aspect-[3/4] rounded-[1.5rem] md:rounded-[2.5rem] bg-primary-50 overflow-hidden relative">
           <motion.img
             whileHover={{ scale: 1.1 }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
@@ -183,56 +182,55 @@ const ProductItem = React.forwardRef<HTMLDivElement, any>(({ item, index, user, 
             alt={item.product_details?.name}
             className="w-full h-full object-cover mix-blend-multiply transition-all duration-700"
           />
-          
-          <div className="absolute top-6 left-6 flex flex-col gap-2">
+          <div className="absolute top-3 left-3 md:top-6 md:left-6 flex flex-col gap-2">
             {isB2BVerified && (
-              <span className="bg-primary-900 text-accent-warning-400 text-[10px] font-black px-3 py-1 rounded-full tracking-widest border border-accent-warning-900/20 uppercase shadow-lg">
+              <span className="bg-primary-900 text-accent-warning-400 text-[9px] md:text-[10px] font-black px-2.5 py-1 md:px-3 rounded-full tracking-widest border border-accent-warning-900/20 uppercase shadow-lg">
                 Pro Member
               </span>
             )}
             {item.percent_off > 0 && (
-               <span className="bg-white text-accent-error-600 text-[10px] font-black px-3 py-1 rounded-full tracking-widest uppercase shadow-sm">
+              <span className="bg-white text-accent-error-600 text-[9px] md:text-[10px] font-black px-2.5 py-1 md:px-3 rounded-full tracking-widest uppercase shadow-sm">
                 -{Math.round(item.percent_off)}%
               </span>
             )}
           </div>
 
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-100">
-             <button 
-                onClick={(e) => onAdd(item, e)}
-                className="bg-white/90 backdrop-blur-xl text-primary-900 px-6 py-3 rounded-full font-bold shadow-xl flex items-center gap-2 hover:bg-primary-600 hover:text-white transition-colors"
-             >
-               <ShoppingBag size={16} />
-               Collect
-             </button>
+          <div className="absolute bottom-3 md:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-100">
+            <button 
+              onClick={(e) => onAdd(item, e)}
+              className="bg-white/90 backdrop-blur-xl text-primary-900 px-4 py-2 md:px-6 md:py-3 rounded-full font-bold shadow-xl flex items-center gap-2 hover:bg-primary-600 hover:text-white transition-colors text-xs md:text-base"
+            >
+              <ShoppingBag size={14} className="md:hidden" />
+              <ShoppingBag size={16} className="hidden md:block" />
+              Collect
+            </button>
           </div>
         </div>
-        <div className="absolute -z-10 inset-0 translate-x-3 translate-y-3 rounded-[2.5rem] bg-primary-50 border border-primary-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
+        <div className="absolute -z-10 inset-0 translate-x-2 translate-y-2 md:translate-x-3 md:translate-y-3 rounded-[1.5rem] md:rounded-[2.5rem] bg-primary-50 border border-primary-100 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform duration-500" />
       </div>
 
-      <div className="px-2">
-        <div className="flex justify-between items-start gap-4 mb-2">
-            <div>
-                <p className="text-[10px] font-bold text-primary-400 uppercase tracking-[0.2em] mb-1">
-                    {item.product_details?.category_details || "Exclusive"}
-                </p>
-                <h3 className="text-xl font-bold text-primary-800 leading-tight line-clamp-1 group-hover:text-primary-600 transition-colors">
-                    {item.product_details?.name}
-                </h3>
-            </div>
-            <div className="text-right">
-                <span className="text-xl font-black text-primary-900">
-                    Rs.{Number(displayPrice).toLocaleString()}
-                </span>
-            </div>
+      <div className="px-1 md:px-2">
+        <div className="flex justify-between items-start gap-2 md:gap-4 mb-2">
+          <div className="min-w-0">
+            <p className="text-[9px] md:text-[10px] font-bold text-primary-400 uppercase tracking-[0.2em] mb-1 truncate">
+              {item.product_details?.category_details || "Exclusive"}
+            </p>
+            <h3 className="text-sm md:text-xl font-bold text-primary-800 leading-tight line-clamp-1 group-hover:text-primary-600 transition-colors">
+              {item.product_details?.name}
+            </h3>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <span className="text-sm md:text-xl font-black text-primary-900">
+              Rs.{Number(displayPrice).toLocaleString()}
+            </span>
+          </div>
         </div>
-        
         <div className="flex items-center gap-2">
-           <span className="relative flex h-2 w-2">
-             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-success-400 opacity-75"></span>
-             <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-success-500"></span>
-           </span>
-           <span className="text-[11px] font-medium text-primary-500 uppercase tracking-wider">Available</span>
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-success-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-success-500"></span>
+          </span>
+          <span className="text-[10px] md:text-[11px] font-medium text-primary-500 uppercase tracking-wider">Available</span>
         </div>
       </div>
     </motion.div>
@@ -241,18 +239,18 @@ const ProductItem = React.forwardRef<HTMLDivElement, any>(({ item, index, user, 
 ProductItem.displayName = 'ProductItem';
 
 const FeaturedSkeleton = () => (
-    <div className="max-w-7xl mx-auto px-6 py-24">
-        <div className="h-16 w-1/3 bg-primary-50 rounded-2xl mb-16 animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[1,2,3,4].map(i => (
-                <div key={i} className="space-y-4">
-                    <div className="aspect-[3/4] bg-primary-50 rounded-[2.5rem] animate-pulse" />
-                    <div className="h-4 w-1/2 bg-primary-50 rounded animate-pulse" />
-                    <div className="h-6 w-3/4 bg-primary-50 rounded animate-pulse" />
-                </div>
-            ))}
+  <div className="max-w-7xl mx-auto px-6 py-24">
+    <div className="h-12 md:h-16 w-2/3 md:w-1/3 bg-primary-50 rounded-2xl mb-10 md:mb-16 animate-pulse" />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+      {[1,2,3,4].map(i => (
+        <div key={i} className="space-y-3 md:space-y-4">
+          <div className="aspect-[3/4] bg-primary-50 rounded-[1.5rem] md:rounded-[2.5rem] animate-pulse" />
+          <div className="h-3 md:h-4 w-1/2 bg-primary-50 rounded animate-pulse" />
+          <div className="h-5 md:h-6 w-3/4 bg-primary-50 rounded animate-pulse" />
         </div>
+      ))}
     </div>
+  </div>
 );
 
 export default FeaturedProducts;

@@ -108,7 +108,7 @@ const MadeForYou: React.FC = () => {
 const ProductCard = ({ product, index, isLarge, isWide, onAction, onNavigate }: any) => {
   const image = product.product_details?.images?.[0]?.image ?? product.image ?? product.thumbnail ?? '';
   const name = product.product_details?.name ?? product.name ?? 'Premium Product';
-  const price = product.discounted_price ?? product.listed_price ?? product.price;
+  const price = product.listed_price ?? product.price;
 
   const spanClass = isLarge 
     ? "md:col-span-2 md:row-span-2" 

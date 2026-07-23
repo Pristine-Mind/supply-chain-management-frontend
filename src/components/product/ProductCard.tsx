@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, ShoppingCart, Truck } from 'lucide-react';
+import { ShoppingCart, Truck } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Badge } from '../ui/badge';
 
@@ -16,8 +16,6 @@ export interface ProductCardData {
   stock?: number;
   isDeliveryFree?: boolean;
   category?: string | null;
-  rating?: number;
-  reviewCount?: number;
   isB2B?: boolean;
   isAvailable?: boolean;
   estimatedDeliveryDays?: number;
@@ -65,22 +63,6 @@ const sizeClasses = {
   },
 };
 
-function buildStars(rating: number) {
-  return Array.from({ length: 5 }).map((_, i) => (
-    <Star
-      key={i}
-      className={cn(
-        'w-3.5 h-3.5',
-        i < Math.floor(rating)
-          ? 'fill-accent-warning-400 text-accent-warning-400'
-          : i < rating
-          ? 'fill-accent-warning-200 text-accent-warning-400'
-          : 'fill-neutral-200 text-neutral-200'
-      )}
-    />
-  ));
-}
-
 export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
   ({ product, size = 'md', showAddToCart = false, added = false, onAddToCart, onNavigate, className }, ref) => {
     const navigate = useNavigate();
@@ -98,8 +80,6 @@ export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
       stock = 0,
       isDeliveryFree,
       category,
-      rating,
-      reviewCount,
       isB2B,
       isAvailable = true,
       estimatedDeliveryDays,
@@ -213,13 +193,6 @@ export const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
           >
             {name}
           </a>
-
-          {rating ? (
-            <div className="flex items-center gap-1 mt-2">
-              <div className="flex gap-0.5">{buildStars(rating)}</div>
-              {reviewCount ? <span className="text-xs text-neutral-500">({reviewCount})</span> : null}
-            </div>
-          ) : null}
 
           <div className="mt-auto pt-3 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">

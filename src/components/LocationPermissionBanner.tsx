@@ -5,24 +5,27 @@ import { useLocation } from '../context/LocationContext';
 const LocationPermissionBanner: React.FC = () => {
   const { permissionRequested, hasPermission, requestPermission, loading, error } = useLocation();
   const [dismissed, setDismissed] = useState(false);
+  const [show, setShow] = useState(false);
 
-  // Auto-dismiss after 5 minute if permission granted
+  useEffect(() => {
+    const showTimer = setTimeout(() => setShow(true), 20 * 1000);
+    return () => clearTimeout(showTimer);
+  }, []);
+
   useEffect(() => {
     if (hasPermission && !dismissed) {
-      const timer = setTimeout(() => setDismissed(true), 50000);
+      const timer = setTimeout(() => setDismissed(true), 100 * 60 * 1);
       return () => clearTimeout(timer);
     }
   }, [hasPermission, dismissed]);
 
-  // Don't show if already requested or dismissed
-  if (permissionRequested || dismissed) {
+  if (!show || permissionRequested || dismissed) {
     return null;
   }
 
   return (
     <div className="fixed bottom-4 right-4 z-50 max-w-sm animate-in slide-in-from-bottom-4">
       <div className="bg-white rounded-lg shadow-lg border border-orange-200 overflow-hidden">
-        {/* Permission Request Card */}
         <div className="p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-0.5">

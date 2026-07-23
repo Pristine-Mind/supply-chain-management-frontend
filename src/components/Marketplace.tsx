@@ -716,13 +716,13 @@ const Marketplace: React.FC = () => {
         {/* CTA banner with categories overlapping */}
         <HeroBanner/>
         {/* Trending strip + Promo/Top picks layout */}
-        <div className="bg-white">
+        {/* <div className="bg-white">
           <div className="container mx-auto px-4 py-10">
             <LazySection>
               <NayaBarshaBanner />
             </LazySection>
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-gradient-to-r from-primary-50/50 to-orange-50/30 border-y border-primary-100/50">
           <div className="container mx-auto px-4 py-10">
@@ -937,15 +937,15 @@ const Marketplace: React.FC = () => {
           />
                 {/* Products Grid */}
                 {loading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+                      <div key={i} className="bg-white rounded-xl md:rounded-2xl border border-neutral-200 overflow-hidden">
                         <div className="aspect-[4/3] bg-neutral-100 animate-pulse" />
-                        <div className="p-5 space-y-3">
-                          <div className="h-4 bg-neutral-100 rounded animate-pulse w-1/3" />
-                          <div className="h-5 bg-neutral-100 rounded animate-pulse" />
-                          <div className="h-4 bg-neutral-100 rounded animate-pulse w-3/4" />
-                          <div className="h-10 bg-neutral-100 rounded animate-pulse mt-4" />
+                        <div className="p-2.5 md:p-5 space-y-2 md:space-y-3">
+                          <div className="h-3 md:h-4 bg-neutral-100 rounded animate-pulse w-1/3" />
+                          <div className="h-4 md:h-5 bg-neutral-100 rounded animate-pulse" />
+                          <div className="h-3 md:h-4 bg-neutral-100 rounded animate-pulse w-3/4" />
+                          <div className="h-8 md:h-10 bg-neutral-100 rounded animate-pulse mt-3 md:mt-4" />
                         </div>
                       </div>
                     ))}
@@ -977,22 +977,22 @@ const Marketplace: React.FC = () => {
                     }
                   />
                 ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                   {products.map((item, index) => (
                     <div
                       key={item.id}
                       onClick={() => navigate(`/marketplace/${item.id}`)}
-                      className="bg-white rounded-2xl border border-neutral-200 overflow-hidden group hover:shadow-xl hover:border-primary-200 transition-all duration-500 hover:-translate-y-1.5 cursor-pointer animate-slide-in"
+                      className="bg-white rounded-xl md:rounded-2xl border border-neutral-200 overflow-hidden group hover:shadow-xl hover:border-primary-200 transition-all duration-500 hover:-translate-y-1.5 cursor-pointer animate-slide-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <div className="relative aspect-[4/3] overflow-hidden bg-neutral-50">
                         {item.percent_off > 0 && (
-                          <Badge variant="discount" size="sm" className="absolute top-3 left-3 shadow-sm z-10">
+                          <Badge variant="discount" size="sm" className="absolute top-2 left-2 md:top-3 md:left-3 shadow-sm z-10">
                             {Math.round(item.percent_off)}% OFF
                           </Badge>
                         )}
                         {item.is_delivery_free && (
-                          <Badge variant="success" size="sm" className="absolute top-3 right-3 shadow-sm z-10">
+                          <Badge variant="success" size="sm" className="absolute top-2 right-2 md:top-3 md:right-3 shadow-sm z-10">
                             🚚 Free Delivery
                           </Badge>
                         )}
@@ -1018,16 +1018,16 @@ const Marketplace: React.FC = () => {
                         </div>
                       </div>
                       
-                      <div className="p-4 space-y-3">
+                      <div className="p-2.5 md:p-4 space-y-2 md:space-y-3">
                         {/* Category and Rating */}
                         <div className="flex items-center justify-between">
-                          <span className="inline-block bg-primary-100 text-primary-700 text-xs font-medium px-2 py-1 rounded-full uppercase tracking-wide">
+                          <span className="inline-block bg-primary-100 text-primary-700 text-[9px] md:text-xs font-medium px-1.5 md:px-2 py-0.5 md:py-1 rounded-full uppercase tracking-wide truncate max-w-full">
                             {item.product_details.category_details}
                           </span>
                         </div>
                         
                         {/* Product Title */}
-                        <h6 className="font-semibold text-neutral-900 leading-tight line-clamp-2 group-hover:text-primary-700 transition-colors">
+                        <h6 className="text-sm md:text-base font-semibold text-neutral-900 leading-tight line-clamp-2 group-hover:text-primary-700 transition-colors">
                           {item.product_details.name}
                         </h6>
                         
@@ -1036,17 +1036,17 @@ const Marketplace: React.FC = () => {
                           {(() => {
                             const pricing = getDisplayPrice(item, user);
                             return (
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-lg font-bold text-primary-700">
+                              <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                                <span className="text-sm md:text-lg font-bold text-primary-700">
                                   Rs. {pricing.currentPrice?.toLocaleString()}
                                 </span>
                                 {pricing.originalPrice && (
-                                  <span className="text-sm text-neutral-500 line-through">
+                                  <span className="text-xs md:text-sm text-neutral-500 line-through">
                                     Rs. {pricing.originalPrice?.toLocaleString()}
                                   </span>
                                 )}
                                 {pricing.isB2BPrice && (
-                                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                                  <span className="text-[9px] md:text-xs bg-blue-100 text-blue-800 px-1.5 md:px-2 py-0.5 md:py-1 rounded-full font-medium">
                                     B2B
                                   </span>
                                 )}
@@ -1087,14 +1087,14 @@ const Marketplace: React.FC = () => {
                             handleAddToCart(item, e);
                           }}
                           disabled={item.product_details.stock === 0}
-                          className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                          className={`w-full py-2 md:py-3 px-2 md:px-4 rounded-lg md:rounded-xl text-xs md:text-base font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 md:gap-2 ${
                             item.product_details.stock === 0
                               ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed border border-neutral-200'
                               : 'bg-primary-600 text-white hover:bg-primary-700 shadow-soft hover:shadow-medium active:scale-[0.985]'
                           }`}
                         >
-                          <ShoppingCart className="w-4 h-4" />
-                          <span>{item.product_details.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+                          <ShoppingCart className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                          <span className="truncate">{item.product_details.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
                         </button>
                       </div>
                     </div>

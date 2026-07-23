@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import visaLogo from '../assets/visa.png';
 
 const FacebookIcon = ({ className = "" }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
@@ -320,7 +321,7 @@ const Footer: React.FC = () => {
               
               <PaymentBadge>
                 <img 
-                  src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
+                  src={visaLogo}
                   alt="VISA" 
                   className="h-6 w-auto" 
                 />
