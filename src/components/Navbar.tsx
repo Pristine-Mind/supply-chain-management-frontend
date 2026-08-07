@@ -80,7 +80,7 @@ export const Navbar: React.FC = () => {
             
             <Link to="/" className="flex items-center gap-3 group">
               <div className="relative p-1">
-                <img src={logo} alt="Logo" className="w-10 h-10 group-hover:rotate-12 transition-transform duration-300" />
+                <img src={logo} alt="Logo" className="w-30 h-20 group-hover:rotate-12 transition-transform duration-300" />
               </div>
             </Link>
 

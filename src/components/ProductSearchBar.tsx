@@ -77,7 +77,6 @@ const useDebounce = (value: string, delay: number) => {
   return debouncedValue;
 };
 
-/** TC-009: Strip HTML/script tags from search input to prevent XSS */
 function sanitizeSearchQuery(input: string): string {
   return input.replace(/<[^>]*>/g, '').replace(/[<>]/g, '').trim();
 }
@@ -127,7 +126,7 @@ const ProductSearchBar: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   
   const { isAuthenticated, user, logout } = useAuth();
-  const { distinctItemCount } = useCart();
+  const { itemCount } = useCart();
 
   const getDisplayPrice = (product: MarketplaceProduct) => {
     const isB2BUser = user?.b2b_verified === true;
@@ -495,10 +494,7 @@ const ProductSearchBar: React.FC = () => {
     <header className="w-full bg-white px-4 py-3 shadow-sm border-b sticky top-0 z-20">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <Link to="/" className="flex items-center gap-2 min-w-[180px] flex-shrink-0">
-          <img src={logo} alt="MulyaBazzar Logo" className="w-10 h-10 object-contain" />
-          <span className="font-extrabold text-xl lg:text-2xl text-orange-600 whitespace-nowrap">
-            MulyaBazzar
-          </span>
+          <img src={logo} alt="MulyaBazzar Logo" className="w-30 h-20 object-contain" />
         </Link>
 
         {/* Search bar - hidden on cart page to prevent functionality issues */}
@@ -555,14 +551,14 @@ const ProductSearchBar: React.FC = () => {
         )}
 
         <div className="flex items-center gap-2 lg:gap-4">
-          <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+          {/* <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg">
             <FiSearch className="w-5 h-5 text-gray-600" />
-          </button>
+          </button> */}
           <Link to="/cart" className="p-2 hover:bg-gray-100 rounded-lg relative">
             <FiShoppingCart className="w-5 h-5 text-gray-600" />
-            {distinctItemCount > 0 && (
+            {itemCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">
-                {distinctItemCount > 9 ? '9+' : distinctItemCount}
+                {itemCount}
               </span>
             )}
           </Link>
@@ -595,7 +591,7 @@ const ProductSearchBar: React.FC = () => {
                     
                     <div className="py-2">
                       <Link
-                        to="/profile"
+                        to="/user-profile"
                         className="flex items-center gap-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                         onClick={() => setShowUserDropdown(false)}
                       >
@@ -708,7 +704,7 @@ const ProductSearchBar: React.FC = () => {
       {showMobileMenu && (
         <div className="lg:hidden absolute left-0 right-0 top-full bg-white border-b shadow-lg z-30">
           <div className="px-4 py-2 space-y-2">
-            <Link to="/profile" className="flex items-center gap-3 py-2 text-gray-700">
+            <Link to="/user-profile" className="flex items-center gap-3 py-2 text-gray-700">
               <FiUser className="w-5 h-5" />
               Profile
             </Link>

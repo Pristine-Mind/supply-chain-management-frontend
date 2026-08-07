@@ -28,12 +28,15 @@ import { createSafeRecognitionInstance } from '../utils/voiceSearchBrowserPolyfi
 import LoginModal from './auth/LoginModal';
 import Footer from './Footer';
 import MarketplaceSidebarFilters from './MarketplaceSidebarFilters';
+import MobileBottomNavigation from './MobileBottomNavigation';
+import CategoryMenu from './CategoryMenu';
 import { EmptyState } from './ui/empty-state';
 import { Badge } from './ui/badge';
 import { categoryApi, subcategoryApi } from '../api/categoryApi';
 import { voiceSearchByText } from '../api/voiceSearchApi';
 import { parseSearchIntent, toSearchIntent } from '../services/intentParserService';
 import { getFilterOptions, setProductDiscount, getProductDiscountInfo, type FilterOptionsResponse } from '../api/marketplaceApi';
+import { createSlug } from '../utils/slugUtils';
 import logo from '../assets/logo.png';
 
 // --- Facet Types ---
@@ -198,7 +201,7 @@ const RATING_FILTERS = [
 const MarketplaceAllProducts: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { addToCart, distinctItemCount } = useCart();
+  const { addToCart, itemCount } = useCart();
   const { user } = useAuth();
 
   // --- Pricing Helper ---
@@ -245,6 +248,8 @@ const MarketplaceAllProducts: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'info' } | null>(null);
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
+  const [categoryHierarchy, setCategoryHierarchy] = useState<any[]>([]);
 
   // New hierarchy state
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
@@ -279,6 +284,11 @@ const MarketplaceAllProducts: React.FC = () => {
   const [minReviews, setMinReviews] = useState('');
   const [nearMe, setNearMe] = useState('');
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    categoryApi.getCategoryHierarchy().then(setCategoryHierarchy).catch(() => setCategoryHierarchy([]));
+  }, []);
 
   // Facets from search response
   const [facets, setFacets] = useState<SearchFacets | null>(null);
@@ -963,7 +973,7 @@ const MarketplaceAllProducts: React.FC = () => {
 
   // --- Render ---
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-screen bg-neutral-50 pb-16 md:pb-0">
       {/* Header Banner */}
       <div className="bg-primary-600 text-white py-2 text-center text-sm">
         🚚 Free delivery on orders over Rs. 3,000
@@ -1015,9 +1025,9 @@ const MarketplaceAllProducts: React.FC = () => {
               </button>
               <button onClick={() => navigate('/cart')} className="relative p-2 text-neutral-600 hover:text-primary-600">
                 <ShoppingCart className="w-5 h-5" />
-                {distinctItemCount > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                    {distinctItemCount}
+                    {itemCount}
                   </span>
                 )}
               </button>
@@ -1027,9 +1037,9 @@ const MarketplaceAllProducts: React.FC = () => {
             <div className="md:hidden flex items-center gap-3">
               <button onClick={() => navigate('/cart')} className="relative p-2 text-neutral-600">
                 <ShoppingCart className="w-5 h-5" />
-                {distinctItemCount > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                    {distinctItemCount}
+                    {itemCount}
                   </span>
                 )}
               </button>
@@ -1040,6 +1050,49 @@ const MarketplaceAllProducts: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {/* Category Menu - Mobile */}
+      {showCategoryMenu && (
+        <div className="md:hidden fixed inset-0 z-[60] bg-white overflow-y-auto">
+          <div className="p-4">
+            <button
+              onClick={() => setShowCategoryMenu(false)}
+              className="absolute top-4 right-4 text-neutral-600 hover:text-neutral-900"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <h2 className="text-lg font-bold text-neutral-900 mb-4 pr-8">Categories</h2>
+            <CategoryMenu
+              categories={categoryHierarchy}
+              onSelect={(categoryId?: any, subcategoryId?: any) => {
+                // close the menu
+                setShowCategoryMenu(false);
+
+                // Find category and subcategory names for URL
+                const category = categoryHierarchy.find(cat => cat.id === categoryId);
+                if (!category) return;
+                
+                const categorySlug = createSlug(category.name);
+                
+                if (subcategoryId) {
+                  // Find subcategory name
+                  const subcategory = category.subcategories?.find((sub: any) => sub.id === subcategoryId);
+                  if (subcategory) {
+                    const subcategorySlug = createSlug(subcategory.name);
+                    navigate(`/marketplace/categories/${categorySlug}/${subcategorySlug}`);
+                  } else {
+                    // Fallback to category only
+                    navigate(`/marketplace/categories/${categorySlug}`);
+                  }
+                } else {
+                  // Category only
+                  navigate(`/marketplace/categories/${categorySlug}`);
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-12xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1510,6 +1563,9 @@ const MarketplaceAllProducts: React.FC = () => {
       <DiscountDialog />
 
       <Footer />
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNavigation onCategoryClick={() => setShowCategoryMenu(true)} />
     </div>
   );
 };

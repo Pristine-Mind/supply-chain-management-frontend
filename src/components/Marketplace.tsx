@@ -5,7 +5,7 @@ import { createSafeRecognitionInstance } from '../utils/voiceSearchBrowserPolyfi
 import axios from 'axios';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { X, ChevronDown, User, ShoppingCart, Menu, Mic, Gift, Search } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Mic, Gift, Search } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useLoyalty } from '../context/LoyaltyContext';
@@ -36,6 +36,8 @@ import PromoBanner from './PromoBanner';
 import FreeDeliveryBanner from './FreeDeliveryBanner';
 import LazySection from './ui/LazySection';
 import CategoryCarousel from './CategoryCarousel';
+import MobileBottomNavigation from './MobileBottomNavigation';
+import { Spinner } from './ui/spinner';
 import { PageContainer } from './ui/page-container';
 import { SectionHeader } from './ui/section-header';
 import { EmptyState } from './ui/empty-state';
@@ -196,7 +198,7 @@ const Marketplace: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const { addToCart, distinctItemCount } = useCart();
+  const { addToCart, itemCount } = useCart();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
@@ -389,7 +391,7 @@ const Marketplace: React.FC = () => {
         }}
       />
       <CommandPalette />
-      <div className="min-h-screen bg-neutral-50">
+      <div className="min-h-screen bg-neutral-50 pb-16 md:pb-0">
         {showLoginModal && (
           <LoginModal
             isOpen={showLoginModal}
@@ -415,8 +417,48 @@ const Marketplace: React.FC = () => {
         <div className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-medium border-b border-neutral-200/80' : 'bg-white shadow-elevation-sm border-b border-neutral-200'}`}>
           <div className="container mx-auto container-padding py-3">
             <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-3">
-              {/* Logo / Brand */}
-              <div className="flex items-center justify-start">
+              {/* Mobile Layout: Logo, Search, Cart in one row */}
+              <div className="md:hidden flex items-center gap-2 w-full col-span-1">
+                {/* Logo */}
+                <img src={logo} alt="Logo" className="h-12 w-auto object-contain flex-shrink-0" />
+                
+                {/* Search Bar */}
+                <div className="relative flex-1">
+                  <div className="relative bg-neutral-50 border border-neutral-200 rounded-full px-3 py-2 flex items-center shadow-soft focus-within:shadow-medium focus-within:border-primary-300 transition-all">
+                    <MagnifyingGlassIcon className={`text-neutral-400 w-4 h-4 mr-2 flex-shrink-0 ${isListening ? 'text-red-500 animate-bounce' : ''}`} />
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      className="w-full bg-transparent text-sm placeholder:text-neutral-400 outline-none"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      onKeyDown={handleSearchEnter}
+                    />
+                    <button
+                      onClick={startVoiceSearch}
+                      className={`ml-2 p-1 rounded-full hover:bg-neutral-100 transition-colors flex-shrink-0 ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Cart Button */}
+                <button
+                  className="p-2 text-neutral-600 hover:text-primary-500 relative flex-shrink-0"
+                  onClick={() => navigate('/cart')}
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                      {itemCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              {/* Desktop Layout */}
+              <div className="hidden md:flex items-center justify-start">
                 <img src={logo} alt="Logo" className="h-16 w-auto sm:h-16 mr-3 object-contain" />
                 {/* <span className="font-bold text-h2 sm:text-h1 text-primary-500">MulyaBazzar</span> */}
               </div>
@@ -551,49 +593,11 @@ const Marketplace: React.FC = () => {
                   onClick={() => navigate('/cart')}
                 >
                   <ShoppingCart className="w-6 h-6" />
-                  {distinctItemCount > 0 && (
+                  {itemCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                      {distinctItemCount}
+                      {itemCount}
                     </span>
                   )}
-                </button>
-              </div>
-
-              {/* Mobile: stacked search and small cart icon */}
-              <div className="md:hidden col-span-1 w-full flex items-center justify-between mt-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    className="p-2 text-neutral-600"
-                    onClick={() => setIsMobileMenuOpen(true)}
-                    aria-label="Open menu"
-                  >
-                    <Menu className="w-6 h-6" />
-                  </button>
-                </div>
-                <div className="relative flex-1 mx-2">
-                  <div className="relative bg-neutral-50 border border-neutral-200 rounded-full px-3 py-2 flex items-center shadow-soft focus-within:shadow-medium focus-within:border-primary-300 transition-all">
-                    <MagnifyingGlassIcon className={`text-neutral-400 w-4 h-4 mr-3 ${isListening ? 'text-red-500 animate-bounce' : ''}`} />
-                    <input
-                      type="text"
-                      placeholder="Search products..."
-                      className="w-full bg-transparent text-base placeholder:text-neutral-400 outline-none"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      onKeyDown={handleSearchEnter}
-                    />
-                    <button
-                      onClick={startVoiceSearch}
-                      className={`ml-2 p-1.5 rounded-full hover:bg-neutral-100 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-neutral-400'}`}
-                    >
-                      <Mic className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                <button
-                  className="ml-3 p-2 text-neutral-600"
-                  onClick={() => navigate('/cart')}
-                >
-                  <ShoppingCart className="w-6 h-6" />
                 </button>
               </div>
             </div>
@@ -604,7 +608,7 @@ const Marketplace: React.FC = () => {
         <div className="bg-white border-b border-neutral-200">
           <div className="container mx-auto container-padding flex items-center justify-between py-3 relative">
             <div className="flex items-center gap-3 w-full">
-              <div className="flex-1 lg:flex-none lg:w-auto flex gap-2">
+              <div className="hidden md:flex flex-1 lg:flex-none lg:w-auto gap-2">
                 {/* Category Button triggers grouped menu */}
                 <button
                   className="flex items-center gap-2 px-3 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all text-sm font-medium shadow-sm w-full max-w-xs"
@@ -617,10 +621,10 @@ const Marketplace: React.FC = () => {
                 {showCategoryMenu && (
                   <>
                     <div
-                      className="fixed inset-0 bg-black/40 z-40"
+                      className="fixed inset-0 bg-black/40 z-50"
                       onClick={() => setShowCategoryMenu(false)}
                     />
-                    <div className="absolute left-0 top-full mt-2 z-50 w-full max-w-4xl">
+                    <div className="absolute left-0 top-full mt-2 z-[60] w-full max-w-4xl">
                       <CategoryMenu
                         categories={categoryHierarchy}
                         onSelect={(categoryId?: any, subcategoryId?: any) => {
@@ -692,6 +696,49 @@ const Marketplace: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Mobile Category Menu - Only visible on mobile */}
+        {showCategoryMenu && (
+          <div className="md:hidden fixed inset-0 z-[60] bg-white overflow-y-auto">
+            <div className="p-4">
+              <button
+                onClick={() => setShowCategoryMenu(false)}
+                className="absolute top-4 right-4 text-neutral-600 hover:text-neutral-900"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <h2 className="text-lg font-bold text-neutral-900 mb-4 pr-8">Categories</h2>
+              <CategoryMenu
+                categories={categoryHierarchy}
+                onSelect={(categoryId?: any, subcategoryId?: any) => {
+                  // close the menu
+                  setShowCategoryMenu(false);
+
+                  // Find category and subcategory names for URL
+                  const category = categoryHierarchy.find(cat => cat.id === categoryId);
+                  if (!category) return;
+                  
+                  const categorySlug = createSlug(category.name);
+                  
+                  if (subcategoryId) {
+                    // Find subcategory name
+                    const subcategory = category.subcategories?.find((sub: any) => sub.id === subcategoryId);
+                    if (subcategory) {
+                      const subcategorySlug = createSlug(subcategory.name);
+                      navigate(`/marketplace/categories/${categorySlug}/${subcategorySlug}`);
+                    } else {
+                      // Fallback to category only
+                      navigate(`/marketplace/categories/${categorySlug}`);
+                    }
+                  } else {
+                    // Category only
+                    navigate(`/marketplace/categories/${categorySlug}`);
+                  }
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Render main view depending on tab */}
         <div>
@@ -1126,6 +1173,9 @@ const Marketplace: React.FC = () => {
           />
         </React.Suspense>
       )}
+    
+    {/* Mobile Bottom Navigation */}
+    <MobileBottomNavigation onCategoryClick={() => setShowCategoryMenu(true)} />
     </div>
   );
 };

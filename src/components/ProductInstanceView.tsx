@@ -136,7 +136,7 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
   const navigate = useNavigate();
   const [currentImage, setCurrentImage] = useState(0);
   
-  const { addToCart, distinctItemCount, refreshCart } = useCart();
+  const { addToCart, itemCount, refreshCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   const { deliverability, loading: deliverabilityLoading, error: deliverabilityError, checkDeliverability } = useDeliverability({
     productId: product.id,
@@ -558,7 +558,6 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                       src={images[currentImage]?.image || ''}
                       alt={product.product_details?.name || 'Product image'}
                       onError={(e) => {
-                        // TC-011: fallback when CDN image fails to load
                         const target = e.currentTarget as HTMLImageElement;
                         if (!target.dataset.errorHandled) {
                           target.dataset.errorHandled = 'true';
@@ -949,9 +948,9 @@ const ProductInstanceView: React.FC<{ product: MarketplaceProductInstance }> = (
                   >
                     <ShoppingCart className="w-5 h-5" />
                     View Cart
-                    {distinctItemCount > 0 && (
+                    {itemCount > 0 && (
                       <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full w-7 h-7 flex items-center justify-center shadow-lg">
-                        {distinctItemCount}
+                        {itemCount}
                       </span>
                     )}
                   </button>

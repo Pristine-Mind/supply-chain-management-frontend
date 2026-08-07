@@ -119,7 +119,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
   
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { addToCart, distinctItemCount } = useCart();
+  const { addToCart, itemCount } = useCart();
   const { user } = useAuth();
 
   const [preFilledCategoryId, setPreFilledCategoryId] = useState<number | null>(locationState?.categoryId || null);
@@ -549,31 +549,48 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                 <span className="hidden sm:inline">Back to Home</span>
               </button>
               <div className="h-6 w-px bg-neutral-300 hidden sm:block" />
+              <div className="flex flex-col">
               <div className="flex items-center">
-                <img src={logo} alt="Logo" className="w-8 h-8 sm:w-10 sm:h-10 mr-2 sm:mr-3" />
-                <div className="flex flex-col">
-                  <h1 className="text-h2 sm:text-h1 font-bold text-primary-500">
-                    {subcategoryName || categoryName}
-                  </h1>
-                  <div className="flex items-center gap-2 text-sm text-neutral-600 mb-2">
-                    <button onClick={() => navigate('/')} className="hover:text-primary-600">
-                      Home
-                    </button>
-                    <span>/</span>
-                    <button onClick={() => navigate('/marketplace/all-products')} className="hover:text-primary-600">
-                      Products
-                    </button>
-                    <span>/</span>
-                    <span className="text-neutral-900 font-medium">{categoryName}</span>
-                    {subcategoryName && (
-                      <>
-                        <span>/</span>
-                        <span className="text-neutral-900 font-medium">{subcategoryName}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
+                <img
+                  src={logo}
+                  alt="Logo"
+                  className="w-30 h-20 sm:w-10 sm:h-10"
+                />
               </div>
+
+              <div className="flex items-center gap-2 text-sm text-neutral-600 mt-2">
+                <button
+                  onClick={() => navigate("/")}
+                  className="hover:text-primary-600"
+                >
+                  Home
+                </button>
+
+                <span>/</span>
+
+                <button
+                  onClick={() => navigate("/marketplace/all-products")}
+                  className="hover:text-primary-600"
+                >
+                  Products
+                </button>
+
+                <span>/</span>
+
+                <span className="text-neutral-900 font-normal">
+                  {categoryName}
+                </span>
+
+                {subcategoryName && (
+                  <>
+                    <span>/</span>
+                    <span className="text-neutral-900 font-medium">
+                      {subcategoryName}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
             </div>
 
             <div className="hidden md:flex items-center gap-4">
@@ -600,9 +617,9 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                 className="relative p-2 sm:p-3 text-neutral-600 hover:text-primary-500 transition-colors"
               >
                 <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />
-                {distinctItemCount > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-caption rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center font-medium">
-                    {distinctItemCount}
+                    {itemCount}
                   </span>
                 )}
               </button>
@@ -614,9 +631,9 @@ const CategoryProducts: React.FC<CategoryProductsProps> = () => {
                 className="relative p-2 text-neutral-600 hover:text-primary-500 transition-colors"
               >
                 <ShoppingCart className="w-6 h-6" />
-                {distinctItemCount > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-caption rounded-full w-4 h-4 flex items-center justify-center font-medium">
-                    {distinctItemCount}
+                    {itemCount}
                   </span>
                 )}
               </button>

@@ -11,7 +11,7 @@ import FeaturedProducts from './FeaturedProducts';
 
 const FeaturedSelectionPage: React.FC = () => {
   const navigate = useNavigate();
-  const { distinctItemCount } = useCart();
+  const { itemCount } = useCart();
   
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,7 +55,7 @@ const FeaturedSelectionPage: React.FC = () => {
 
           <div className="hidden md:flex items-center gap-6 shrink-0">
             <button onClick={() => navigate('/sell')} className="text-sm font-bold text-slate-600 hover:text-orange-600 uppercase tracking-widest transition-colors">Sell</button>
-            <CartButton count={distinctItemCount} />
+            <CartButton count={itemCount} />
           </div>
 
           <button className="md:hidden" onClick={() => setMobileMenuOpen(true)}>

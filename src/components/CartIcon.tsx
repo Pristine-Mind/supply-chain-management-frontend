@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 
 const CartIcon: React.FC = () => {
   const navigate = useNavigate();
-  const { distinctItemCount } = useCart();
+  const { itemCount } = useCart();
 
   return (
     <div className="relative group">
@@ -20,16 +20,16 @@ const CartIcon: React.FC = () => {
         <ShoppingCart strokeWidth={2.2} size={22} />
 
         <AnimatePresence>
-          {distinctItemCount > 0 && (
+          {itemCount > 0 && (
             <motion.span
               key="cart-badge"
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
-              key={distinctItemCount} 
+              key={itemCount} 
               className="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-orange-600 text-[10px] font-bold text-white ring-2 ring-white shadow-sm"
             >
-              {distinctItemCount > 9 ? '9+' : distinctItemCount}
+              {itemCount}
             </motion.span>
           )}
         </AnimatePresence>
