@@ -186,7 +186,9 @@ const Footer: React.FC = () => {
                 <img src={logo} alt="Logo" className="h-16 w-auto object-contain mr-3" />
               </div>
               <p className="text-body text-neutral-600 leading-relaxed">
-                Connecting you to quality products with trusted sellers across Nepal. Your satisfaction is our priority.
+                Mulybazzar is a B2B and B2C platform under Pristine Minds Nepal Pvt. Ltd., headquartered in Kathmandu, Nepal. Pristine Minds Nepal is committed to driving innovation and sustainable business growth across diverse industries.
+                <br />
+                <span className="font-bold ">VAT No: 621150481</span>
               </p>
             </div>
 

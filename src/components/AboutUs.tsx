@@ -64,6 +64,97 @@ const AboutUs = () => {
         </div>
       </section>
 
+      <section className="py-20 bg-neutral-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-16 text-neutral-900">Company Information</h2>
+          <p className="text-center text-neutral-600 mb-12 max-w-2xl mx-auto">
+            Here's a quick overview of our official registration and business details.
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Business Identity Card */}
+            <div className="bg-white rounded-2xl p-8 border border-neutral-200 hover:border-primary-300 hover:shadow-lg transition-all duration-200">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-xl">🏢</span>
+                </div>
+                <h3 className="text-xl font-bold text-neutral-900">Business Identity</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Business Name</p>
+                  <p className="text-neutral-900 font-medium">MulyaBazzar under (Pristine Minds Nepal Pvt. Ltd.)</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Type</p>
+                  <p className="text-neutral-900 font-medium">E-commerce Marketplace</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Registration No.</p>
+                  <p className="text-neutral-900 font-medium">337581/080/081</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">PAN</p>
+                  <p className="text-neutral-900 font-medium">621150481</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Office Locations Card */}
+            <div className="bg-white rounded-2xl p-8 border border-neutral-200 hover:border-primary-300 hover:shadow-lg transition-all duration-200">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-xl">📍</span>
+                </div>
+                <h3 className="text-xl font-bold text-neutral-900">Office Locations</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Registered Office</p>
+                  <p className="text-neutral-900 font-medium">Gairidhara-02, Kathmandu, Nepal</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Head Office</p>
+                  <p className="text-neutral-900 font-medium">Panipokhari, Kathmandu, Nepal</p>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Service Area</p>
+                  <p className="text-neutral-900 font-medium">Nationwide (Nepal)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact & Support Card */}
+            <div className="bg-white rounded-2xl p-8 border border-neutral-200 hover:border-primary-300 hover:shadow-lg transition-all duration-200">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mr-3">
+                  <span className="text-xl">📞</span>
+                </div>
+                <h3 className="text-xl font-bold text-neutral-900">Contact & Support</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Email</p>
+                  <a href="mailto:mulyabazzar@gmail.com" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                    mulyabazzar@gmail.com
+                  </a>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Support</p>
+                  <a href="tel:+9779767474645" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                    +977 9767474645
+                  </a>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-neutral-600">Grievance Officer</p>
+                  <p className="text-neutral-900 font-medium">Rishi Khatri</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 text-center container mx-auto px-4">
         <div className="bg-primary-900 rounded-3xl p-12 text-white">
           <h2 className="text-3xl font-bold mb-6">Ready to grow your business?</h2>
